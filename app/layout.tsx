@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import BottomNavBar from "@/components/BottomNavBar";
+import TopNavBar from "@/components/TopNavBar";
 import { Box } from "@mui/material";
 
 export const metadata: Metadata = {
@@ -15,13 +16,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ colorScheme: 'dark' }}>
       <body>
         <ThemeRegistry>
-          <Box component="main" sx={{ pb: 7 }}>
-            {children}
+          <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <TopNavBar />
+            <Box component="main" sx={{ flex: 1, overflowY: 'auto' }}>
+              {children}
+            </Box>
+            <BottomNavBar />
           </Box>
-          <BottomNavBar />
         </ThemeRegistry>
       </body>
     </html>

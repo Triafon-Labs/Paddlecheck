@@ -50,17 +50,9 @@ export default function HomePage() {
     <Container maxWidth="sm">
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '80vh',
+          py: 2,
         }}
       >
-        <KayakingIcon sx={{ fontSize: 60, mb: 2 }} color="primary" />
-        <Typography variant="h4" component="h1" gutterBottom>
-          Paddlecheck
-        </Typography>
         <StatusCard conditions={conditions} loading={loading} />
       </Box>
     </Container>

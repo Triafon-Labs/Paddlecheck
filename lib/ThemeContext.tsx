@@ -13,6 +13,7 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { lightTheme, darkTheme } from './themes';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import CssBaseline from '@mui/material/CssBaseline';
+import { GlobalStyles } from '@mui/material';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -64,6 +65,11 @@ export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
     <ThemeContext.Provider value={contextValue}>
       <MuiThemeProvider theme={activeTheme}>
         <CssBaseline />
+        <GlobalStyles
+          styles={{
+            body: { backgroundColor: activeTheme.palette.background.default },
+          }}
+        />
         {children}
       </MuiThemeProvider>
     </ThemeContext.Provider>

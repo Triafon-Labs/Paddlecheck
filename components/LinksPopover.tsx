@@ -2,21 +2,18 @@
 
 import React from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
+  Popover,
   List,
   ListItem,
   Link,
-  IconButton,
   Typography,
   Box,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
-interface LinksModalProps {
+interface LinksPopoverProps {
   open: boolean;
+  anchorEl: HTMLElement | null;
   onClose: () => void;
 }
 
@@ -27,20 +24,29 @@ const links = [
   },
 ];
 
-const LinksModal: React.FC<LinksModalProps> = ({ open, onClose }) => {
+const LinksPopover: React.FC<LinksPopoverProps> = ({
+  open,
+  anchorEl,
+  onClose,
+}) => {
   return (
-    <Dialog open={open} onClose={onClose} aria-labelledby="links-dialog-title">
-      <DialogTitle id="links-dialog-title">
-        <Box display="flex" alignItems="center">
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Useful Links
-          </Typography>
-          <IconButton aria-label="close" onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </DialogTitle>
-      <DialogContent dividers>
+    <Popover
+      open={open}
+      anchorEl={anchorEl}
+      onClose={onClose}
+      anchorOrigin={{
+        vertical: 'top',
+        horizontal: 'center',
+      }}
+      transformOrigin={{
+        vertical: 'bottom',
+        horizontal: 'center',
+      }}
+    >
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6" gutterBottom>
+          Useful Links
+        </Typography>
         <List>
           {links.map((link) => (
             <ListItem
@@ -49,15 +55,16 @@ const LinksModal: React.FC<LinksModalProps> = ({ open, onClose }) => {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
+              sx={{ pl: 0 }}
             >
               <Typography sx={{ flexGrow: 1 }}>{link.name}</Typography>
               <OpenInNewIcon fontSize="small" />
             </ListItem>
           ))}
         </List>
-      </DialogContent>
-    </Dialog>
+      </Box>
+    </Popover>
   );
 };
 
-export default LinksModal;
+export default LinksPopover;

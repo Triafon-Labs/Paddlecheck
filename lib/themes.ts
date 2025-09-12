@@ -13,8 +13,8 @@ export const darkTheme = createTheme({
       main: '#3f51b5', // A blue color for headers, etc.
     },
     background: {
-      default: '#121212',
-      paper: '#1e1e1e',
+      default: '#212121',
+      paper: '#424242',
     },
   },
 });

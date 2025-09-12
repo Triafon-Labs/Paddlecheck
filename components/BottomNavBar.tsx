@@ -10,30 +10,34 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LinkIcon from '@mui/icons-material/Link';
 import SettingsModal from './SettingsModal';
-import LinksModal from './LinksModal';
+import LinksPopover from './LinksPopover';
 
 const BottomNavBar = () => {
   const [value, setValue] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [linksOpen, setLinksOpen] = useState(false);
+  const [linksAnchorEl, setLinksAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleLinksClick = (event: React.MouseEvent<HTMLElement>) => {
+    setLinksAnchorEl(event.currentTarget);
+  };
+
+  const handleLinksClose = () => {
+    setLinksAnchorEl(null);
+  };
+
+  const linksOpen = Boolean(linksAnchorEl);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
     if (newValue === 1) {
       setSettingsOpen(true);
     }
-    if (newValue === 2) {
-      setLinksOpen(true);
-    }
-    // TODO: Add handler for refresh button
+    // Note: The Links popover is now handled by its own click handler
+    // on the BottomNavigationAction component
   };
 
   const handleSettingsClose = () => {
     setSettingsOpen(false);
-  };
-
-  const handleLinksClose = () => {
-    setLinksOpen(false);
   };
 
   return (
@@ -45,11 +49,19 @@ const BottomNavBar = () => {
         <BottomNavigation showLabels value={value} onChange={handleChange}>
           <BottomNavigationAction label="Refresh" icon={<RefreshIcon />} />
           <BottomNavigationAction label="Settings" icon={<SettingsIcon />} />
-          <BottomNavigationAction label="Links" icon={<LinkIcon />} />
+          <BottomNavigationAction
+            label="Links"
+            icon={<LinkIcon />}
+            onClick={handleLinksClick}
+          />
         </BottomNavigation>
       </Paper>
       <SettingsModal open={settingsOpen} onClose={handleSettingsClose} />
-      <LinksModal open={linksOpen} onClose={handleLinksClose} />
+      <LinksPopover
+        open={linksOpen}
+        anchorEl={linksAnchorEl}
+        onClose={handleLinksClose}
+      />
     </>
   );
 };

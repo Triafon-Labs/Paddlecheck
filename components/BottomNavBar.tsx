@@ -45,7 +45,14 @@ const BottomNavBar = () => {
   return (
     <>
       <Paper
-        sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, bgcolor: 'background.paper' }}
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          bgcolor: 'background.paper',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
         elevation={0}
       >
         <BottomNavigation showLabels value={value} onChange={handleChange}>

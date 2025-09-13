@@ -29,7 +29,9 @@ const BottomNavBar = () => {
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
-    if (newValue === 1) {
+    if (newValue === 0) {
+      window.location.reload();
+    } else if (newValue === 1) {
       setSettingsOpen(true);
     }
     // Note: The Links popover is now handled by its own click handler

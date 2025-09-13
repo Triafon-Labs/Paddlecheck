@@ -27,6 +27,7 @@ const statusEmojis: Record<Status, string> = {
   "Dark Green": "✅",
   Amber: "🔶",
   Red: "❌",
+  "No Paddling": "⛔",
 };
 
 const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
@@ -43,7 +44,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
           Detailed Stats
         </Typography>
         <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12}>
+          <Grid>
             <Typography variant="h6">
               River Level: {conditions.riverLevel?.toFixed(2)}m
               {conditions.levelChange && (
@@ -72,13 +73,13 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
             </Typography>
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid>
             <Typography variant="body1">
               Initial Status: {conditions.initialStatus} {initialStatusEmoji}
             </Typography>
           </Grid>
 
-          <Grid item xs={4}>
+          <Grid>
             <Tooltip title="Temperature">
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <WbSunny sx={{ mr: 1, color: "text.secondary" }} />
@@ -89,7 +90,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
             </Tooltip>
           </Grid>
 
-          <Grid item xs={4}>
+          <Grid>
             <Tooltip title="Wind Speed">
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Air sx={{ mr: 1, color: "text.secondary" }} />
@@ -100,7 +101,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
             </Tooltip>
           </Grid>
 
-          <Grid item xs={4}>
+          <Grid>
             <Tooltip title="Visibility">
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <Visibility sx={{ mr: 1, color: "text.secondary" }} />

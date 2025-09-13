@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import BottomNavBar from "@/components/BottomNavBar";
 import TopNavBar from "@/components/TopNavBar";
 import { Box } from "@mui/material";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Paddlecheck",
@@ -16,13 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={plusJakartaSans.className}>
       <head>
         <link rel="icon" href="/icons/favicon.ico" />
         <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
-      <body>
+      <body style={{ fontFamily: "inherit" }}>
         <ThemeRegistry>
           <Box
             sx={{

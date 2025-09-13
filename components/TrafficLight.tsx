@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { Status } from "@/types";
 import { ragStatus } from "@/lib/rag";
 
@@ -10,57 +10,69 @@ interface TrafficLightProps {
 }
 
 const TrafficLight: React.FC<TrafficLightProps> = ({ status }) => {
-  const lights = ["Red", "Amber", "Dark Green", "Light Green"];
+  const theme = useTheme();
+  const {
+    icon: Icon,
+    color,
+    backgroundColor,
+  } = ragStatus[status] || ragStatus.Unknown;
 
-  const getLightColor = (light: Status) => {
-    if (status === light) return ragStatus[light].color;
-    return "#bdbdbd"; // Default grey color
+  const getStatusColor = () => {
+    if (theme.palette.mode === 'dark') {
+      // In dark mode, we can use the primary color for the status text
+      // and a lighter version for the background.
+      switch (status) {
+        case 'Light Green':
+        case 'Dark Green':
+          return {
+            backgroundColor: 'rgba(129, 199, 132, 0.2)',
+            color: '#81C784',
+          };
+        case 'Amber':
+          return {
+            backgroundColor: 'rgba(255, 152, 0, 0.2)',
+            color: '#FF9800',
+          };
+        case 'Red':
+          return {
+            backgroundColor: 'rgba(244, 67, 54, 0.2)',
+            color: '#F44336',
+          };
+        default:
+          return {
+            backgroundColor: 'rgba(158, 158, 158, 0.2)',
+            color: '#9E9E9E',
+          };
+      }
+    }
+    // Light mode uses the predefined colors
+    return { backgroundColor, color };
   };
 
-  if (status === "No Paddling") {
-    return (
-      <Box sx={{ textAlign: "center", my: 2 }}>
-        <Typography variant="h1">⛔</Typography>
-        <Typography variant="h6">No Paddling</Typography>
-      </Box>
-    );
-  }
+  const { backgroundColor: finalBgColor, color: finalColor } = getStatusColor();
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center" }}>
-      <Box
-        sx={{
-          bgcolor: "black",
-          borderRadius: "10px",
-          p: 2,
-          display: "flex",
-          flexDirection: "row",
-          gap: 1,
-        }}
-      >
-        {lights.map((light) => (
-          <Box
-            key={light}
-            sx={{
-              width: 80,
-              height: 80,
-              borderRadius: "50%",
-              backgroundColor: getLightColor(light as Status),
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "2px solid #424242",
-            }}
-          >
-            <Typography
-              variant="caption"
-              sx={{ color: "white", fontWeight: "bold", textAlign: "center" }}
-            >
-              {light.replace(" ", "\n")}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 200,
+        height: 200,
+        borderRadius: "50%",
+        backgroundColor: finalBgColor,
+        border: `4px solid ${finalColor}`,
+        transition: "all 0.3s ease-in-out",
+        "&:hover": {
+          transform: "scale(1.05)",
+        },
+      }}
+    >
+      <Icon sx={{ fontSize: 72, color: finalColor }} />
+      <Typography variant="h6" sx={{ color: finalColor, mt: 1 }}>
+        {status}
+      </Typography>
     </Box>
   );
 };

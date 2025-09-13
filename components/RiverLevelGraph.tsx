@@ -1,6 +1,12 @@
 "use client";
 
-import { TrendingUp, TrendingDown, TrendingFlat } from "@mui/icons-material";
+import {
+  TrendingUp,
+  TrendingDown,
+  TrendingFlat,
+  Schedule,
+  Update,
+} from "@mui/icons-material";
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -8,7 +14,8 @@ import {
   Typography,
   Box,
   CircularProgress,
-  Grid,
+  useTheme,
+  Paper,
 } from "@mui/material";
 import {
   AreaChart,
@@ -40,9 +47,49 @@ interface RiverLevelGraphProps {
   stationId?: string;
 }
 
+const ChangeIndicator: React.FC<{
+  period: string;
+  change: number | null;
+  icon: React.ReactNode;
+}> = ({ period, change, icon }) => (
+  <Paper
+    variant="outlined"
+    sx={{
+      p: 2,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexDirection: "column",
+      height: "100%",
+    }}
+  >
+    <Box sx={{ display: "flex", alignItems: "center", color: "text.secondary" }}>
+      {icon}
+      <Typography variant="subtitle2" sx={{ ml: 0.5 }}>
+        {period}
+      </Typography>
+    </Box>
+    <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+      <Typography variant="h6" component="span">
+        {change !== null ? (
+          change > 0 ? (
+            <TrendingUp sx={{ color: "success.main", mr: 0.5 }} />
+          ) : change < 0 ? (
+            <TrendingDown sx={{ color: "error.main", mr: 0.5 }} />
+          ) : (
+            <TrendingFlat sx={{ mr: 0.5 }} />
+          )
+        ) : null}
+        {change !== null ? `${change.toFixed(2)}m` : "N/A"}
+      </Typography>
+    </Box>
+  </Paper>
+);
+
 const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   stationId = "2642",
 }) => {
+  const theme = useTheme();
   const [data, setData] = useState<ChartDataPoint[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [change24h, setChange24h] = useState<number | null>(null);
@@ -115,83 +162,60 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             <AreaChart data={data}>
               <defs>
                 <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2196f3" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#2196f3" stopOpacity={0} />
+                  <stop
+                    offset="5%"
+                    stopColor={theme.palette.primary.main}
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor={theme.palette.primary.main}
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" domain={["dataMin", "dataMax"]} />
-              <YAxis />
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+              <XAxis dataKey="time" stroke={theme.palette.text.secondary} />
+              <YAxis stroke={theme.palette.text.secondary} />
               <Tooltip
-                formatter={(value) => [
-                  Number(value).toFixed(2) + "m",
+                contentStyle={{
+                  backgroundColor: theme.palette.background.paper,
+                  borderColor: theme.palette.divider,
+                }}
+                formatter={(value: number) => [
+                  `${value.toFixed(2)}m`,
                   "River Level",
                 ]}
-                labelFormatter={(label) => `Time: ${label}`}
+                labelFormatter={(label: string) => `Time: ${label}`}
               />
               <Area
                 type="monotone"
                 dataKey="level"
-                stroke="#2196f3"
+                stroke={theme.palette.primary.main}
                 fillOpacity={1}
                 fill="url(#colorLevel)"
               />
             </AreaChart>
           </ResponsiveContainer>
-          <Grid container spacing={2} sx={{ mt: 2 }}>
-            <Grid>
-              <Box
-                sx={{
-                  textAlign: "center",
-                  p: 1,
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "4px",
-                }}
-              >
-                <Typography variant="subtitle2" color="text.secondary">
-                  24h Change
-                </Typography>
-                <Typography variant="h6">
-                  {change24h !== null ? (
-                    change24h > 0 ? (
-                      <TrendingUp sx={{ color: "success.main", mr: 0.5 }} />
-                    ) : change24h < 0 ? (
-                      <TrendingDown sx={{ color: "error.main", mr: 0.5 }} />
-                    ) : (
-                      <TrendingFlat sx={{ mr: 0.5 }} />
-                    )
-                  ) : null}
-                  {change24h !== null ? `${change24h.toFixed(2)}m` : "N/A"}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid>
-              <Box
-                sx={{
-                  textAlign: "center",
-                  p: 1,
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "4px",
-                }}
-              >
-                <Typography variant="subtitle2" color="text.secondary">
-                  8h Change
-                </Typography>
-                <Typography variant="h6">
-                  {change8h !== null ? (
-                    change8h > 0 ? (
-                      <TrendingUp sx={{ color: "success.main", mr: 0.5 }} />
-                    ) : change8h < 0 ? (
-                      <TrendingDown sx={{ color: "error.main", mr: 0.5 }} />
-                    ) : (
-                      <TrendingFlat sx={{ mr: 0.5 }} />
-                    )
-                  ) : null}
-                  {change8h !== null ? `${change8h.toFixed(2)}m` : "N/A"}
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: 2,
+              mt: 2,
+            }}
+          >
+            <ChangeIndicator
+              period="24h Change"
+              change={change24h}
+              icon={<Update />}
+            />
+            <ChangeIndicator
+              period="8h Change"
+              change={change8h}
+              icon={<Schedule />}
+            />
+          </Box>
         </>
       );
     }
@@ -203,9 +227,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   };
 
   return (
-    <Card sx={{ minWidth: 275, width: "100%", mt: 2 }}>
+    <Card variant="outlined" sx={{ width: "100%", mt: 2, p: 2 }}>
       <CardContent>
-        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+        <Typography variant="h5" component="div" gutterBottom>
           River Level (Last 24 Hours)
         </Typography>
         {renderContent()}

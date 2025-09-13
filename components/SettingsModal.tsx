@@ -2,7 +2,10 @@
 
 import React from 'react';
 import {
-  Popover,
+  Dialog,
+  AppBar,
+  Toolbar,
+  IconButton,
   Typography,
   List,
   ListItem,
@@ -10,23 +13,29 @@ import {
   ListSubheader,
   Switch,
   Divider,
-  Box,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import Slide from '@mui/material/Slide';
+import { TransitionProps } from '@mui/material/transitions';
 import { useAppTheme } from '@/lib/ThemeContext';
 import CheckIcon from '@mui/icons-material/Check';
 import { useEffect, useState } from 'react';
 
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement;
+  },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
 interface SettingsModalProps {
   open: boolean;
-  anchorEl: null | HTMLElement;
   onClose: () => void;
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({
-  open,
-  anchorEl,
-  onClose,
-}) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const { themeMode, setThemeMode } = useAppTheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
@@ -54,30 +63,34 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <Popover
+    <Dialog
       open={open}
-      anchorEl={anchorEl}
       onClose={onClose}
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'center',
-      }}
-      transformOrigin={{
-        vertical: 'bottom',
-        horizontal: 'center',
-      }}
+      TransitionComponent={Transition}
+      fullWidth
+      maxWidth="sm"
       PaperProps={{
         sx: {
           borderRadius: 4,
-          boxShadow: '0px 8px 24px rgba(0,0,0,0.12)',
-          backgroundColor: 'background.paper',
         },
       }}
     >
-      <Box sx={{ p: 2, backgroundColor: 'primary.main', color: 'primary.contrastText' }}>
-        <Typography variant="h6">Settings</Typography>
-      </Box>
-      <List sx={{ minWidth: 280 }}>
+      <AppBar sx={{ position: 'relative' }}>
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={onClose}
+            aria-label="close"
+          >
+            <CloseIcon />
+          </IconButton>
+          <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+            Settings
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <List>
         <ListSubheader>Theme</ListSubheader>
         <ListItem button onClick={() => setThemeMode('light')}>
           <ListItemText primary="Light" />
@@ -117,7 +130,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           <ListItemText primary="Paddlecheck Version" secondary="0.2.0" />
         </ListItem>
       </List>
-    </Popover>
+    </Dialog>
   );
 };
 

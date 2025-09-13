@@ -30,34 +30,39 @@ const StatusCard: React.FC<StatusCardProps> = ({
       );
     }
     if (conditions) {
-      if (conditions.overallStatus === 'No Paddling') {
-        const statusInfo = ragStatus['No Paddling'];
-        const Icon = statusInfo.icon;
-        return (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mt: 2,
-              p: 2,
-              borderRadius: 4,
-              backgroundColor: statusInfo.backgroundColor,
-              border: `2px solid ${statusInfo.color}`,
-            }}
-          >
-            <Icon sx={{ fontSize: 40, color: statusInfo.color, mb: 1 }} />
-            <Typography variant="h6" sx={{ color: statusInfo.color }}>
-              No Paddling
-            </Typography>
-          </Box>
-        );
-      }
+      const isNoPaddling = conditions.overallStatus === 'No Paddling';
+      const noPaddlingStatusInfo = isNoPaddling ? ragStatus['No Paddling'] : null;
+      const NoPaddlingIcon = noPaddlingStatusInfo?.icon;
+
       return (
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-          <TrafficLight status={conditions.overallStatus} />
-        </Box>
+        <>
+          {isNoPaddling && NoPaddlingIcon && (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 2,
+                p: 2,
+                borderRadius: 4,
+                backgroundColor: noPaddlingStatusInfo.backgroundColor,
+                border: `2px solid ${noPaddlingStatusInfo.color}`,
+              }}
+            >
+              <NoPaddlingIcon sx={{ fontSize: 40, color: noPaddlingStatusInfo.color, mb: 1 }} />
+              <Typography variant="h6" sx={{ color: noPaddlingStatusInfo.color }}>
+                No Paddling
+              </Typography>
+            </Box>
+          )}
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+            <TrafficLight
+              status={conditions.overallStatus}
+              disabled={isNoPaddling}
+            />
+          </Box>
+        </>
       );
     }
     return (

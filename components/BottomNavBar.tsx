@@ -14,8 +14,7 @@ import LinksPopover from './LinksPopover';
 
 const BottomNavBar = () => {
   const [value, setValue] = useState(0);
-  const [settingsAnchorEl, setSettingsAnchorEl] =
-    useState<null | HTMLElement>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [linksAnchorEl, setLinksAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleLinksClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -26,23 +25,21 @@ const BottomNavBar = () => {
     setLinksAnchorEl(null);
   };
 
-  const handleSettingsClick = (event: React.MouseEvent<HTMLElement>) => {
-    setSettingsAnchorEl(event.currentTarget);
-  };
-
-  const handleSettingsClose = () => {
-    setSettingsAnchorEl(null);
-  };
-
   const linksOpen = Boolean(linksAnchorEl);
-  const settingsOpen = Boolean(settingsAnchorEl);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
     if (newValue === 0) {
       window.location.reload();
+    } else if (newValue === 1) {
+      setSettingsOpen(true);
     }
-    // Note: Settings and Links popovers are now handled by their own click handlers
+    // Note: The Links popover is now handled by its own click handler
+    // on the BottomNavigationAction component
+  };
+
+  const handleSettingsClose = () => {
+    setSettingsOpen(false);
   };
 
   return (
@@ -65,7 +62,6 @@ const BottomNavBar = () => {
           <BottomNavigationAction
             label="Settings"
             icon={<SettingsIcon />}
-            onClick={handleSettingsClick}
             sx={{
               '&.Mui-selected': {
                 color: (theme) =>
@@ -86,11 +82,7 @@ const BottomNavBar = () => {
           />
         </BottomNavigation>
       </Paper>
-      <SettingsModal
-        open={settingsOpen}
-        anchorEl={settingsAnchorEl}
-        onClose={handleSettingsClose}
-      />
+      <SettingsModal open={settingsOpen} onClose={handleSettingsClose} />
       <LinksPopover
         open={linksOpen}
         anchorEl={linksAnchorEl}

@@ -26,6 +26,7 @@ export const levelDescriptions: Record<number, string> = {
 };
 
 import {
+  HelpOutline,
   CheckCircleOutline,
   WarningAmberOutlined,
   DoNotDisturbOutlined,
@@ -41,6 +42,12 @@ export const ragStatus: Record<
     backgroundColor: string;
   }
 > = {
+  Unknown: {
+    color: "#9E9E9E",
+    emoji: "🤷",
+    icon: HelpOutline,
+    backgroundColor: "#F5F5F5",
+  },
   "Light Green": {
     color: "#4CAF50",
     emoji: "✅",
@@ -107,5 +114,5 @@ export const calculateFinalRagStatus = (
   conditions: KayakConditions
 ): Status => {
   // Placeholder function - just returns the initial status for now
-  return conditions.initialStatus || "Light Green";
+  return conditions.initialStatus || "Unknown";
 };

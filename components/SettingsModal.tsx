@@ -9,10 +9,12 @@ import {
   Typography,
   List,
   ListItem,
+  ListItemButton,
   ListItemText,
   ListSubheader,
   Switch,
   Divider,
+  ListItemIcon,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
@@ -20,6 +22,14 @@ import { TransitionProps } from "@mui/material/transitions";
 import { useAppTheme } from "@/lib/ThemeContext";
 import CheckIcon from "@mui/icons-material/Check";
 import { useEffect, useState } from "react";
+import {
+  DarkMode,
+  LightMode,
+  Phone,
+  SettingsBrightness,
+  SystemSecurityUpdate,
+} from "@mui/icons-material";
+import { Cormorant_Garamond } from "next/font/google";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -94,18 +104,27 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       </AppBar>
       <List>
         <ListSubheader>Theme</ListSubheader>
-        <ListItem button onClick={() => setThemeMode("light")}>
+        <ListItemButton onClick={() => setThemeMode("light")}>
+          <ListItemIcon>
+            <LightMode />
+          </ListItemIcon>
           <ListItemText primary="Light" />
           {themeMode === "light" && <CheckIcon />}
-        </ListItem>
-        <ListItem button onClick={() => setThemeMode("dark")}>
+        </ListItemButton>
+        <ListItemButton onClick={() => setThemeMode("dark")}>
+          <ListItemIcon>
+            <DarkMode />
+          </ListItemIcon>
           <ListItemText primary="Dark" />
           {themeMode === "dark" && <CheckIcon />}
-        </ListItem>
-        <ListItem button onClick={() => setThemeMode("system")}>
+        </ListItemButton>
+        <ListItemButton onClick={() => setThemeMode("system")}>
+          <ListItemIcon>
+            <SettingsBrightness />
+          </ListItemIcon>
           <ListItemText primary="System" />
           {themeMode === "system" && <CheckIcon />}
-        </ListItem>
+        </ListItemButton>
         <Divider />
         <ListSubheader>Notifications</ListSubheader>
         <ListItem>

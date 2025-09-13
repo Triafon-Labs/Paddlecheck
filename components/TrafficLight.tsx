@@ -13,11 +13,19 @@ interface TrafficLightProps {
 const TrafficLight: React.FC<TrafficLightProps> = ({ status, disabled }) => {
   const theme = useTheme();
   const statuses = (Object.keys(ragStatus) as Status[]).filter(
-    (s) => s !== 'Unknown' && s !== 'No Paddling'
+    (s) => s !== "Unknown" && s !== "No Paddling"
   );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', filter: disabled ? 'grayscale(100%)' : 'none', opacity: disabled ? 0.5 : 1 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        filter: disabled ? "grayscale(100%)" : "none",
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
         {statuses.map((s) => {
           const { icon: Icon, color } = ragStatus[s];
@@ -42,9 +50,7 @@ const TrafficLight: React.FC<TrafficLightProps> = ({ status, disabled }) => {
                       )}, ${parseInt(color.slice(5, 7), 16)}, 0.2)`
                     : ragStatus[s].backgroundColor
                   : "transparent",
-                border: `2px solid ${
-                  isActive ? color : theme.palette.divider
-                }`,
+                border: `2px solid ${isActive ? color : theme.palette.divider}`,
                 transition: "all 0.3s ease-in-out",
                 opacity: isActive ? 1 : 0.5,
                 transform: isActive ? "scale(1.1)" : "scale(1)",

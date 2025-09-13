@@ -31,6 +31,7 @@ import {
   WarningAmberOutlined,
   DoNotDisturbOutlined,
   Flood,
+  WbSunnyOutlined,
 } from "@mui/icons-material";
 
 export const ragStatus: Record<
@@ -51,7 +52,7 @@ export const ragStatus: Record<
   "Light Green": {
     color: "#4CAF50",
     emoji: "✅",
-    icon: CheckCircleOutline,
+    icon: WbSunnyOutlined,
     backgroundColor: "#E8F5E9",
   },
   "Dark Green": {

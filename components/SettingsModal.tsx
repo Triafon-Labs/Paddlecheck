@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   AppBar,
@@ -13,13 +13,13 @@ import {
   ListSubheader,
   Switch,
   Divider,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import Slide from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
-import { useAppTheme } from '@/lib/ThemeContext';
-import CheckIcon from '@mui/icons-material/Check';
-import { useEffect, useState } from 'react';
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import Slide from "@mui/material/Slide";
+import { TransitionProps } from "@mui/material/transitions";
+import { useAppTheme } from "@/lib/ThemeContext";
+import CheckIcon from "@mui/icons-material/Check";
+import { useEffect, useState } from "react";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -40,25 +40,27 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      setNotificationsEnabled(Notification.permission === 'granted');
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotificationsEnabled(Notification.permission === "granted");
     }
   }, []);
 
   const handleNotificationToggle = async () => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      if (Notification.permission === 'granted') {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "granted") {
         // This part is tricky - you can't programmatically "un-grant" permission.
         // This toggle will therefore only reflect the "granted" state.
         // For a real app, you'd manage this state on your server.
-        alert("Notification permissions can only be changed in your browser's settings.");
+        alert(
+          "Notification permissions can only be changed in your browser's settings."
+        );
         return;
       }
 
       const permission = await Notification.requestPermission();
-      setNotificationsEnabled(permission === 'granted');
+      setNotificationsEnabled(permission === "granted");
     } else {
-      alert('This browser does not support desktop notification');
+      alert("This browser does not support desktop notification");
     }
   };
 
@@ -71,11 +73,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       maxWidth="sm"
       PaperProps={{
         sx: {
-          borderRadius: 4,
+          borderRadius: 1,
         },
       }}
     >
-      <AppBar sx={{ position: 'relative' }}>
+      <AppBar sx={{ position: "relative" }}>
         <Toolbar>
           <IconButton
             edge="start"
@@ -92,17 +94,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       </AppBar>
       <List>
         <ListSubheader>Theme</ListSubheader>
-        <ListItem button onClick={() => setThemeMode('light')}>
+        <ListItem button onClick={() => setThemeMode("light")}>
           <ListItemText primary="Light" />
-          {themeMode === 'light' && <CheckIcon />}
+          {themeMode === "light" && <CheckIcon />}
         </ListItem>
-        <ListItem button onClick={() => setThemeMode('dark')}>
+        <ListItem button onClick={() => setThemeMode("dark")}>
           <ListItemText primary="Dark" />
-          {themeMode === 'dark' && <CheckIcon />}
+          {themeMode === "dark" && <CheckIcon />}
         </ListItem>
-        <ListItem button onClick={() => setThemeMode('system')}>
+        <ListItem button onClick={() => setThemeMode("system")}>
           <ListItemText primary="System" />
-          {themeMode === 'system' && <CheckIcon />}
+          {themeMode === "system" && <CheckIcon />}
         </ListItem>
         <Divider />
         <ListSubheader>Notifications</ListSubheader>
@@ -110,9 +112,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           <ListItemText
             primary="Enable Notifications"
             secondary={
-              typeof window !== 'undefined' && !('Notification' in window)
-                ? 'Not supported by this browser'
-                : ''
+              typeof window !== "undefined" && !("Notification" in window)
+                ? "Not supported by this browser"
+                : ""
             }
           />
           <Switch
@@ -120,7 +122,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             checked={notificationsEnabled}
             onChange={handleNotificationToggle}
             disabled={
-              typeof window !== 'undefined' && !('Notification' in window)
+              typeof window !== "undefined" && !("Notification" in window)
             }
           />
         </ListItem>

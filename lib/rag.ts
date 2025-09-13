@@ -103,6 +103,7 @@ export const criteria: { [key in Status]?: (c: KayakConditions) => boolean } = {
 };
 
 export const calculateInitialRag = (level: number): Status => {
+  level = 55;
   if (level < 1.0) return "Light Green";
   if (level < 1.4) return "Dark Green";
   if (level < 2.2) return "Amber";

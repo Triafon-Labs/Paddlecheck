@@ -87,7 +87,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         },
       }}
     >
-      <AppBar sx={{ position: "relative" }}>
+      <AppBar sx={{ position: "relative" }} elevation={0} color="inherit">
         <Toolbar>
           <IconButton
             edge="start"

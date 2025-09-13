@@ -69,7 +69,7 @@ const StatusCard: React.FC<StatusCardProps> = ({
   };
 
   return (
-    <Card sx={{ minWidth: 275, m: 2, width: '100%' }}>
+    <Card sx={{ minWidth: 275, width: '100%', m: { xs: 0, sm: 2 } }}>
       <CardContent>
         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
           Status

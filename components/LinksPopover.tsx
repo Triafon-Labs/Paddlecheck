@@ -55,7 +55,11 @@ const LinksPopover: React.FC<LinksPopoverProps> = ({
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              sx={{ pl: 0 }}
+              sx={{
+                pl: 0,
+                color: (theme) =>
+                  theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
+              }}
             >
               <Typography sx={{ flexGrow: 1 }}>{link.name}</Typography>
               <OpenInNewIcon fontSize="small" />

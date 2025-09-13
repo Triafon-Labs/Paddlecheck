@@ -26,11 +26,11 @@ export const levelDescriptions: Record<number, string> = {
 };
 
 export const ragStatus: Record<Status, { color: string; emoji: string }> = {
-  Unknown: { color: '#bdbdbd', emoji: '🤷' },
-  'Light Green': { color: '#81c784', emoji: '✅' },
-  'Dark Green': { color: '#388e3c', emoji: '✅' },
-  Amber: { color: '#ff9800', emoji: '🔶' },
-  Red: { color: '#f44336', emoji: '❌' },
+  Unknown: { color: "#bdbdbd", emoji: "🤷" },
+  "Light Green": { color: "#81c784", emoji: "✅" },
+  "Dark Green": { color: "#388e3c", emoji: "✅" },
+  Amber: { color: "#ff9800", emoji: "🔶" },
+  Red: { color: "#f44336", emoji: "❌" },
 };
 
 export const criteria: { [key in Status]?: (c: KayakConditions) => boolean } = {
@@ -46,23 +46,25 @@ export const criteria: { [key in Status]?: (c: KayakConditions) => boolean } = {
     if (c.dark) return true;
     return false;
   },
-  'Dark Green': (c) => {
+  "Dark Green": (c) => {
     if (c.riverLevel && c.riverLevel >= 1.5) return true;
     return false;
   },
-  'Light Green': (c) => {
+  "Light Green": () => {
     return true; // Default if no other criteria met
   },
 };
 
 export const calculateInitialRag = (level: number): Status => {
-    if (level < 1.0) return 'Light Green';
-    if (level < 1.4) return 'Dark Green';
-    if (level < 2.2) return 'Amber';
-    return 'Red';
-}
+  if (level < 1.0) return "Light Green";
+  if (level < 1.4) return "Dark Green";
+  if (level < 2.2) return "Amber";
+  return "Red";
+};
 
-export const calculateFinalRagStatus = (conditions: KayakConditions): Status => {
+export const calculateFinalRagStatus = (
+  conditions: KayakConditions
+): Status => {
   // Placeholder function - just returns the initial status for now
-  return conditions.initialStatus || 'Unknown';
+  return conditions.initialStatus || "Unknown";
 };

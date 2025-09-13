@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AppBar, Toolbar, Box } from "@mui/material";
+import { AppBar, Toolbar } from "@mui/material";
 import Image from "next/image";
 
 const TopNavBar = () => {

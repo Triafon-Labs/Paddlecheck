@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   Card,
   CardContent,
@@ -8,26 +8,25 @@ import {
   Box,
   Grid,
   Tooltip,
-} from '@mui/material';
-import WbSunny from '@mui/icons-material/WbSunny';
-import Visibility from '@mui/icons-material/Visibility';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import TrendingDown from '@mui/icons-material/TrendingDown';
-import TrendingFlat from '@mui/icons-material/TrendingFlat';
-import Water from '@mui/icons-material/Water';
-import Air from '@mui/icons-material/Air';
-import { KayakConditions, Status } from '@/types';
+} from "@mui/material";
+import WbSunny from "@mui/icons-material/WbSunny";
+import Visibility from "@mui/icons-material/Visibility";
+import TrendingUp from "@mui/icons-material/TrendingUp";
+import TrendingDown from "@mui/icons-material/TrendingDown";
+import TrendingFlat from "@mui/icons-material/TrendingFlat";
+import Air from "@mui/icons-material/Air";
+import { KayakConditions, Status } from "@/types";
 
 interface StatsCardProps {
   conditions: KayakConditions | null;
 }
 
 const statusEmojis: Record<Status, string> = {
-  Unknown: '🤷',
-  'Light Green': '✅',
-  'Dark Green': '✅',
-  Amber: '🔶',
-  Red: '❌',
+  Unknown: "🤷",
+  "Light Green": "✅",
+  "Dark Green": "✅",
+  Amber: "🔶",
+  Red: "❌",
 };
 
 const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
@@ -38,7 +37,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
   const initialStatusEmoji = statusEmojis[conditions.initialStatus!];
 
   return (
-    <Card sx={{ minWidth: 275, width: '100%', mt: 2 }}>
+    <Card sx={{ minWidth: 275, width: "100%", mt: 2 }}>
       <CardContent>
         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
           Detailed Stats
@@ -51,15 +50,20 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
                 <Typography component="span" variant="body2" sx={{ ml: 1 }}>
                   (
                   {conditions.levelChange.value > 0 ? (
-                    <TrendingUp sx={{ fontSize: '1rem', verticalAlign: 'middle' }} />
+                    <TrendingUp
+                      sx={{ fontSize: "1rem", verticalAlign: "middle" }}
+                    />
                   ) : conditions.levelChange.value < 0 ? (
-                    <TrendingDown sx={{ fontSize: '1rem', verticalAlign: 'middle' }} />
+                    <TrendingDown
+                      sx={{ fontSize: "1rem", verticalAlign: "middle" }}
+                    />
                   ) : (
-                    <TrendingFlat sx={{ fontSize: '1rem', verticalAlign: 'middle' }} />
+                    <TrendingFlat
+                      sx={{ fontSize: "1rem", verticalAlign: "middle" }}
+                    />
                   )}
-                  {conditions.levelChange.value.toFixed(2)}m in {
-                    conditions.levelChange.period
-                  })
+                  {conditions.levelChange.value.toFixed(2)}m in{" "}
+                  {conditions.levelChange.period})
                 </Typography>
               )}
             </Typography>
@@ -76,8 +80,8 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
 
           <Grid item xs={4}>
             <Tooltip title="Temperature">
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <WbSunny sx={{ mr: 1, color: 'text.secondary' }} />
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <WbSunny sx={{ mr: 1, color: "text.secondary" }} />
                 <Typography variant="body1">
                   {conditions.temperature?.toFixed(1)}°C
                 </Typography>
@@ -87,8 +91,8 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
 
           <Grid item xs={4}>
             <Tooltip title="Wind Speed">
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Air sx={{ mr: 1, color: 'text.secondary' }} />
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Air sx={{ mr: 1, color: "text.secondary" }} />
                 <Typography variant="body1">
                   {conditions.windSpeed?.toFixed(1)} m/s
                 </Typography>
@@ -98,8 +102,8 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
 
           <Grid item xs={4}>
             <Tooltip title="Visibility">
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Visibility sx={{ mr: 1, color: 'text.secondary' }} />
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Visibility sx={{ mr: 1, color: "text.secondary" }} />
                 <Typography variant="body1">
                   {conditions.visibility?.toFixed(1)} km
                 </Typography>
@@ -110,7 +114,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
         <Typography
           variant="caption"
           color="text.secondary"
-          sx={{ display: 'block', textAlign: 'right', mt: 2 }}
+          sx={{ display: "block", textAlign: "right", mt: 2 }}
         >
           Last updated: {new Date(conditions.lastUpdated!).toLocaleString()}
         </Typography>

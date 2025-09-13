@@ -20,10 +20,30 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-interface RiverLevelGraphProps {}
+// Define interfaces for type safety
+interface RiverReading {
+  dateTime: string;
+  value: number;
+}
 
-const RiverLevelGraph: React.FC<RiverLevelGraphProps> = () => {
-  const [data, setData] = useState<any[] | null>(null);
+interface ApiResponse {
+  items: RiverReading[];
+}
+
+interface ChartDataPoint {
+  time: string;
+  level: number;
+}
+
+interface RiverLevelGraphProps {
+  // Add any props you might need in the future
+  stationId?: string;
+}
+
+const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
+  stationId = "2642",
+}) => {
+  const [data, setData] = useState<ChartDataPoint[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [change24h, setChange24h] = useState<number | null>(null);
   const [change8h, setChange8h] = useState<number | null>(null);
@@ -35,21 +55,23 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = () => {
           new Date().getTime() - 24 * 60 * 60 * 1000
         ).toISOString();
         const response = await fetch(
-          `https://environment.data.gov.uk/flood-monitoring/id/stations/2642/readings?since=${twentyFourHoursAgo}`
+          `https://environment.data.gov.uk/flood-monitoring/id/stations/${stationId}/readings?since=${twentyFourHoursAgo}`
         );
-        const result = await response.json();
+        const result: ApiResponse = await response.json();
         const sortedItems = result.items.sort(
-          (a: any, b: any) =>
+          (a: RiverReading, b: RiverReading) =>
             new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
         );
 
-        const formattedData = sortedItems.map((item: any) => ({
-          time: new Date(item.dateTime).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          level: item.value,
-        }));
+        const formattedData: ChartDataPoint[] = sortedItems.map(
+          (item: RiverReading) => ({
+            time: new Date(item.dateTime).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            level: item.value,
+          })
+        );
         setData(formattedData);
 
         if (sortedItems.length > 1) {
@@ -61,7 +83,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = () => {
             new Date().getTime() - 8 * 60 * 60 * 1000
           );
           const eightHourIndex = sortedItems.findIndex(
-            (item: any) => new Date(item.dateTime) >= eightHoursAgo
+            (item: RiverReading) => new Date(item.dateTime) >= eightHoursAgo
           );
           if (eightHourIndex !== -1) {
             const oldestLevel8h = sortedItems[eightHourIndex].value;
@@ -76,7 +98,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = () => {
     };
 
     fetchData();
-  }, []);
+  }, [stationId]);
 
   const renderContent = () => {
     if (loading) {
@@ -133,7 +155,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = () => {
                       <TrendingFlat sx={{ mr: 0.5 }} />
                     )
                   ) : null}
-                  {change24h !== null ? `${change24h.toFixed(2)}m` : 'N/A'}
+                  {change24h !== null ? `${change24h.toFixed(2)}m` : "N/A"}
                 </Typography>
               </Box>
             </Grid>
@@ -159,7 +181,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = () => {
                       <TrendingFlat sx={{ mr: 0.5 }} />
                     )
                   ) : null}
-                  {change8h !== null ? `${change8h.toFixed(2)}m` : 'N/A'}
+                  {change8h !== null ? `${change8h.toFixed(2)}m` : "N/A"}
                 </Typography>
               </Box>
             </Grid>

@@ -31,6 +31,7 @@ export const ragStatus: Record<Status, { color: string; emoji: string }> = {
   "Dark Green": { color: "#388e3c", emoji: "✅" },
   Amber: { color: "#ff9800", emoji: "🔶" },
   Red: { color: "#f44336", emoji: "❌" },
+  "No Paddling": { color: "#000000", emoji: "⛔" },
 };
 
 export const criteria: { [key in Status]?: (c: KayakConditions) => boolean } = {
@@ -56,10 +57,12 @@ export const criteria: { [key in Status]?: (c: KayakConditions) => boolean } = {
 };
 
 export const calculateInitialRag = (level: number): Status => {
+  level = 5;
   if (level < 1.0) return "Light Green";
   if (level < 1.4) return "Dark Green";
   if (level < 2.2) return "Amber";
-  return "Red";
+  if (level < 5) return "Red";
+  return "No Paddling";
 };
 
 export const calculateFinalRagStatus = (

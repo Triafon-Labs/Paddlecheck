@@ -122,7 +122,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="time" domain={["dataMin", "dataMax"]} />
               <YAxis />
-              <Tooltip />
+              <Tooltip
+                formatter={(value) => [
+                  Number(value).toFixed(2) + "m",
+                  "River Level",
+                ]}
+                labelFormatter={(label) => `Time: ${label}`}
+              />
               <Area
                 type="monotone"
                 dataKey="level"
@@ -133,7 +139,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             </AreaChart>
           </ResponsiveContainer>
           <Grid container spacing={2} sx={{ mt: 2 }}>
-            <Grid item xs={6}>
+            <Grid>
               <Box
                 sx={{
                   textAlign: "center",
@@ -159,7 +165,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={6}>
+            <Grid>
               <Box
                 sx={{
                   textAlign: "center",

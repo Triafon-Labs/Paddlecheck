@@ -1,4 +1,10 @@
-export type Status = 'Unknown' | 'Light Green' | 'Dark Green' | 'Amber' | 'Red';
+export type Status =
+  | "Unknown"
+  | "Light Green"
+  | "Dark Green"
+  | "Amber"
+  | "Red"
+  | "No Paddling";
 
 export interface KayakConditions {
   riverLevel?: number;

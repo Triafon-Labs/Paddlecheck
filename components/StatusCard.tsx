@@ -8,7 +8,7 @@ import {
   Box,
   CircularProgress,
 } from "@mui/material";
-import { KayakConditions, Status } from "@/types";
+import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import { ragStatus } from "@/lib/rag";
 

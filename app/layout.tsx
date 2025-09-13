@@ -14,6 +14,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Paddlecheck",
   description: "Kayaking conditions dashboard",
+  themeColor: '#0A1929',
 };
 
 export default function RootLayout({

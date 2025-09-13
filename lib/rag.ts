@@ -29,8 +29,8 @@ import {
   HelpOutline,
   CheckCircleOutline,
   WarningAmberOutlined,
-  CancelOutlined,
   DoNotDisturbOutlined,
+  Flood,
 } from "@mui/icons-material";
 
 export const ragStatus: Record<
@@ -69,7 +69,7 @@ export const ragStatus: Record<
   Red: {
     color: "#F44336",
     emoji: "❌",
-    icon: CancelOutlined,
+    icon: Flood,
     backgroundColor: "#FFEBEE",
   },
   "No Paddling": {

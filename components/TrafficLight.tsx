@@ -7,18 +7,21 @@ import { ragStatus } from "@/lib/rag";
 
 interface TrafficLightProps {
   status: Status;
+  disabled?: boolean;
 }
 
-const TrafficLight: React.FC<TrafficLightProps> = ({ status }) => {
+const TrafficLight: React.FC<TrafficLightProps> = ({ status, disabled }) => {
   const theme = useTheme();
-  const statuses = Object.keys(ragStatus) as Status[];
+  const statuses = (Object.keys(ragStatus) as Status[]).filter(
+    (s) => s !== 'Unknown' && s !== 'No Paddling'
+  );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', filter: disabled ? 'grayscale(100%)' : 'none', opacity: disabled ? 0.5 : 1 }}>
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
         {statuses.map((s) => {
           const { icon: Icon, color } = ragStatus[s];
-          const isActive = s === status;
+          const isActive = s === status && !disabled;
 
           return (
             <Box

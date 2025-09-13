@@ -11,7 +11,12 @@ interface TrafficLightProps {
 
 const TrafficLight: React.FC<TrafficLightProps> = ({ status }) => {
   const theme = useTheme();
-  const statuses = Object.keys(ragStatus) as Status[];
+  const statuses: Status[] = [
+    'Light Green',
+    'Dark Green',
+    'Amber',
+    'Red',
+  ];
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

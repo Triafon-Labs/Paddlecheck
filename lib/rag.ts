@@ -26,11 +26,10 @@ export const levelDescriptions: Record<number, string> = {
 };
 
 import {
-  HelpOutline,
   CheckCircleOutline,
   WarningAmberOutlined,
-  CancelOutlined,
   DoNotDisturbOutlined,
+  Flood,
 } from "@mui/icons-material";
 
 export const ragStatus: Record<
@@ -42,12 +41,6 @@ export const ragStatus: Record<
     backgroundColor: string;
   }
 > = {
-  Unknown: {
-    color: "#9E9E9E",
-    emoji: "🤷",
-    icon: HelpOutline,
-    backgroundColor: "#F5F5F5",
-  },
   "Light Green": {
     color: "#4CAF50",
     emoji: "✅",
@@ -69,7 +62,7 @@ export const ragStatus: Record<
   Red: {
     color: "#F44336",
     emoji: "❌",
-    icon: CancelOutlined,
+    icon: Flood,
     backgroundColor: "#FFEBEE",
   },
   "No Paddling": {
@@ -114,5 +107,5 @@ export const calculateFinalRagStatus = (
   conditions: KayakConditions
 ): Status => {
   // Placeholder function - just returns the initial status for now
-  return conditions.initialStatus || "Unknown";
+  return conditions.initialStatus || "Light Green";
 };

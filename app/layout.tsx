@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   description: "Kayaking conditions dashboard",
   appleWebApp: {
     statusBarStyle: 'black-translucent',
-  }
+  },
   themeColor: '#0A1929',
 };
 

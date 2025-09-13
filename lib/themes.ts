@@ -46,14 +46,14 @@ export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#7BCCFF', // A light, vibrant blue for dark mode
+      main: '#64B5F6', // A less saturated blue
     },
     secondary: {
       main: '#81C784', // A vibrant green for dark mode
     },
     background: {
-      default: '#001E3C', // A deep blue
-      paper: '#003366', // A slightly lighter blue
+      default: '#0A1929', // A darker, more navy blue
+      paper: '#132F4C', // A darker paper blue
     },
     text: {
       primary: '#FFFFFF',

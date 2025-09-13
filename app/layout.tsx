@@ -17,6 +17,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/icons/favicon.ico" />
+        <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+      </head>
       <body>
         <ThemeRegistry>
           <Box
@@ -35,7 +40,9 @@ export default function RootLayout({
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
+                justifyContent: 'flex-start',
+                pt: 4,
+                pb: 16,
               }}
             >
               {children}

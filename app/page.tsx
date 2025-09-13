@@ -51,6 +51,8 @@ export default function HomePage() {
       <Box
         sx={{
           py: 2,
+          display: 'flex',
+          justifyContent: 'center',
         }}
       >
         <StatusCard conditions={conditions} loading={loading} />

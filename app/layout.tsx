@@ -16,12 +16,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" style={{ colorScheme: 'dark' }}>
+    <html lang="en">
       <body>
         <ThemeRegistry>
-          <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: '100vh',
+              bgcolor: 'background.default',
+            }}
+          >
             <TopNavBar />
-            <Box component="main" sx={{ flex: 1, overflowY: 'auto' }}>
+            <Box
+              component="main"
+              sx={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               {children}
             </Box>
             <BottomNavBar />

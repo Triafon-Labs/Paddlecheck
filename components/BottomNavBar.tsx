@@ -47,12 +47,36 @@ const BottomNavBar = () => {
         elevation={3}
       >
         <BottomNavigation showLabels value={value} onChange={handleChange}>
-          <BottomNavigationAction label="Refresh" icon={<RefreshIcon />} />
-          <BottomNavigationAction label="Settings" icon={<SettingsIcon />} />
+          <BottomNavigationAction
+            label="Refresh"
+            icon={<RefreshIcon />}
+            sx={{
+              '&.Mui-selected': {
+                color: (theme) =>
+                  theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
+              },
+            }}
+          />
+          <BottomNavigationAction
+            label="Settings"
+            icon={<SettingsIcon />}
+            sx={{
+              '&.Mui-selected': {
+                color: (theme) =>
+                  theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
+              },
+            }}
+          />
           <BottomNavigationAction
             label="Links"
             icon={<LinkIcon />}
             onClick={handleLinksClick}
+            sx={{
+              '&.Mui-selected': {
+                color: (theme) =>
+                  theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
+              },
+            }}
           />
         </BottomNavigation>
       </Paper>

@@ -11,9 +11,19 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   weight: ["400", "600", "700"],
 });
 
+import { Viewport } from "next";
+
+export const viewport: Viewport = {
+  themeColor: '#0A1929',
+  viewportFit: 'cover',
+}
+
 export const metadata: Metadata = {
   title: "Paddlecheck",
   description: "Kayaking conditions dashboard",
+  appleWebApp: {
+    statusBarStyle: 'black-translucent',
+  }
 };
 
 export default function RootLayout({

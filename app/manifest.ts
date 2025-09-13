@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "A kayaking conditions dashboard",
     start_url: "/",
     display: "standalone",
-    background_color: "#121212",
-    theme_color: "#3f51b5",
+    background_color: "#0A1929",
+    theme_color: "#0A1929",
     icons: [
       {
         src: "/icons/favicon.svg",

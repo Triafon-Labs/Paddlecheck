@@ -6,7 +6,7 @@ import Image from "next/image";
 
 const TopNavBar = () => {
   return (
-    <AppBar position="static" color="primary" elevation={0}>
+    <AppBar position="static" color="inherit" elevation={0}>
       <Toolbar sx={{ justifyContent: "center" }}>
         <Image
           src="/icons/favicon.svg"

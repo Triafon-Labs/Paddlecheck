@@ -25,13 +25,59 @@ export const levelDescriptions: Record<number, string> = {
   5.55: "Boathouse inaccessible; dangerous flow – paddling not advised.",
 };
 
-export const ragStatus: Record<Status, { color: string; emoji: string }> = {
-  Unknown: { color: "#bdbdbd", emoji: "🤷" },
-  "Light Green": { color: "#81c784", emoji: "✅" },
-  "Dark Green": { color: "#388e3c", emoji: "✅" },
-  Amber: { color: "#ff9800", emoji: "🔶" },
-  Red: { color: "#f44336", emoji: "❌" },
-  "No Paddling": { color: "#000000", emoji: "⛔" },
+import {
+  HelpOutline,
+  CheckCircleOutline,
+  WarningAmberOutlined,
+  CancelOutlined,
+  DoNotDisturbOutlined,
+} from "@mui/icons-material";
+
+export const ragStatus: Record<
+  Status,
+  {
+    color: string;
+    emoji: string;
+    icon: React.ElementType;
+    backgroundColor: string;
+  }
+> = {
+  Unknown: {
+    color: "#9E9E9E",
+    emoji: "🤷",
+    icon: HelpOutline,
+    backgroundColor: "#F5F5F5",
+  },
+  "Light Green": {
+    color: "#4CAF50",
+    emoji: "✅",
+    icon: CheckCircleOutline,
+    backgroundColor: "#E8F5E9",
+  },
+  "Dark Green": {
+    color: "#388E3C",
+    emoji: "✅",
+    icon: CheckCircleOutline,
+    backgroundColor: "#C8E6C9",
+  },
+  Amber: {
+    color: "#FF9800",
+    emoji: "🔶",
+    icon: WarningAmberOutlined,
+    backgroundColor: "#FFF3E0",
+  },
+  Red: {
+    color: "#F44336",
+    emoji: "❌",
+    icon: CancelOutlined,
+    backgroundColor: "#FFEBEE",
+  },
+  "No Paddling": {
+    color: "#212121",
+    emoji: "⛔",
+    icon: DoNotDisturbOutlined,
+    backgroundColor: "#E0E0E0",
+  },
 };
 
 export const criteria: { [key in Status]?: (c: KayakConditions) => boolean } = {

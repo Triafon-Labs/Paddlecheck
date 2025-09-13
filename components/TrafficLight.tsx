@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme, Stack } from "@mui/material";
 import { Status } from "@/types";
 import { ragStatus } from "@/lib/rag";
 
@@ -10,57 +10,54 @@ interface TrafficLightProps {
 }
 
 const TrafficLight: React.FC<TrafficLightProps> = ({ status }) => {
-  const lights = ["Red", "Amber", "Dark Green", "Light Green"];
-
-  const getLightColor = (light: Status) => {
-    if (status === light) return ragStatus[light].color;
-    return "#bdbdbd"; // Default grey color
-  };
-
-  if (status === "No Paddling") {
-    return (
-      <Box sx={{ textAlign: "center", my: 2 }}>
-        <Typography variant="h1">⛔</Typography>
-        <Typography variant="h6">No Paddling</Typography>
-      </Box>
-    );
-  }
+  const theme = useTheme();
+  const statuses = Object.keys(ragStatus) as Status[];
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center" }}>
-      <Box
-        sx={{
-          bgcolor: "black",
-          borderRadius: "10px",
-          p: 2,
-          display: "flex",
-          flexDirection: "row",
-          gap: 1,
-        }}
-      >
-        {lights.map((light) => (
-          <Box
-            key={light}
-            sx={{
-              width: 80,
-              height: 80,
-              borderRadius: "50%",
-              backgroundColor: getLightColor(light as Status),
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: "2px solid #424242",
-            }}
-          >
-            <Typography
-              variant="caption"
-              sx={{ color: "white", fontWeight: "bold", textAlign: "center" }}
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+        {statuses.map((s) => {
+          const { icon: Icon, color } = ragStatus[s];
+          const isActive = s === status;
+
+          return (
+            <Box
+              key={s}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                width: isActive ? 80 : 50,
+                height: isActive ? 80 : 50,
+                borderRadius: "50%",
+                backgroundColor: isActive
+                  ? theme.palette.mode === "dark"
+                    ? `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(
+                        color.slice(3, 5),
+                        16
+                      )}, ${parseInt(color.slice(5, 7), 16)}, 0.2)`
+                    : ragStatus[s].backgroundColor
+                  : "transparent",
+                border: `2px solid ${
+                  isActive ? color : theme.palette.divider
+                }`,
+                transition: "all 0.3s ease-in-out",
+                opacity: isActive ? 1 : 0.5,
+                transform: isActive ? "scale(1.1)" : "scale(1)",
+              }}
             >
-              {light.replace(" ", "\n")}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
+              <Icon
+                sx={{
+                  fontSize: isActive ? 40 : 24,
+                  color: isActive ? color : theme.palette.text.secondary,
+                }}
+              />
+            </Box>
+          );
+        })}
+      </Stack>
+      <Typography variant="h6">{status}</Typography>
     </Box>
   );
 };

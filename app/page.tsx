@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Container, Box } from "@mui/material";
+import { Container, Stack } from "@mui/material";
 import StatusCard from "@/components/StatusCard";
 import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
@@ -72,19 +72,11 @@ export default function HomePage() {
 
   return (
     <Container maxWidth="md">
-      <Box
-        sx={{
-          py: 2,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          pb: 16,
-        }}
-      >
+      <Stack spacing={4} sx={{ py: 2, pb: 16 }}>
         <StatusCard conditions={conditions} loading={loading} />
         <StatsCard conditions={conditions} />
         <RiverLevelGraph />
-      </Box>
+      </Stack>
     </Container>
   );
 }

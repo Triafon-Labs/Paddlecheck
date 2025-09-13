@@ -43,9 +43,9 @@ const StatusCard: React.FC<StatusCardProps> = ({
   };
 
   return (
-    <Card sx={{ minWidth: 275, width: '100%' }}>
+    <Card variant="outlined" sx={{ width: '100%', p: 2 }}>
       <CardContent>
-        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+        <Typography variant="h5" component="div" gutterBottom>
           RAG Status
         </Typography>
         {renderContent()}

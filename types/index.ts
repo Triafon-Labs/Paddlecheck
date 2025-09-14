@@ -46,7 +46,23 @@ export interface WeatherData {
   temperature: number;
   windSpeed: number;
   rain: boolean;
-  dark: boolean;
+  dark:boolean;
   visibility: number;
   weatherCode: number;
+}
+
+export interface HourlyWeatherData {
+  time: string[];
+  temperature_2m: number[];
+  precipitation: number[];
+  visibility: number[];
+  wind_speed_10m: number[];
+  weather_code: number[];
+}
+
+export interface PredictedGraphDataPoint {
+  time: string;
+  status: Status;
+  reasons: string[];
+  value: number;
 }

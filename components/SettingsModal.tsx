@@ -25,11 +25,8 @@ import { useEffect, useState } from "react";
 import {
   DarkMode,
   LightMode,
-  Phone,
   SettingsBrightness,
-  SystemSecurityUpdate,
 } from "@mui/icons-material";
-import { Cormorant_Garamond } from "next/font/google";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {

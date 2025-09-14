@@ -35,13 +35,14 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
 
       return (
         <>
-          {isNoPaddling && NoPaddlingIcon && (
+          {isNoPaddling && NoPaddlingIcon ? (
             <Box
               sx={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
+                textAlign: "center",
                 mb: 2,
                 p: 2,
                 borderRadius: 1,
@@ -54,18 +55,39 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               />
               <Typography
                 variant="h6"
-                sx={{ color: noPaddlingStatusInfo.color }}
+                sx={{ color: noPaddlingStatusInfo.color, mb: 1 }}
               >
                 No Paddling
               </Typography>
+              {conditions.reasons && conditions.reasons.length > 0 && (
+                <Typography
+                  variant="body1"
+                  sx={{ color: noPaddlingStatusInfo.color }}
+                >
+                  ({conditions.reasons.join(", ")})
+                </Typography>
+              )}
+            </Box>
+          ) : (
+            <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+              <TrafficLight status={conditions.overallStatus} />
             </Box>
           )}
-          <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
-            <TrafficLight
-              status={conditions.overallStatus}
-              disabled={isNoPaddling}
-            />
-          </Box>
+
+          {conditions.reasons &&
+            conditions.reasons.length > 0 &&
+            !isNoPaddling && (
+              <Box sx={{ mt: 3, textAlign: "center" }}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Reasons
+                </Typography>
+                {conditions.reasons.map((reason, index) => (
+                  <Typography variant="body2" key={index}>
+                    {reason}
+                  </Typography>
+                ))}
+              </Box>
+            )}
         </>
       );
     }

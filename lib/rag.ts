@@ -1,4 +1,14 @@
 import { KayakConditions, Status } from "@/types";
+import {
+  HelpOutline,
+  CheckCircleOutline,
+  WarningAmberOutlined,
+  DoNotDisturbOutlined,
+  Flood,
+  WbSunnyOutlined,
+} from "@mui/icons-material";
+
+// --- Existing exports that are still needed ---
 
 export const levelDescriptions: Record<number, string> = {
   1.0: "Able to launch from the landing stage – OK.",
@@ -25,15 +35,6 @@ export const levelDescriptions: Record<number, string> = {
   5.55: "Boathouse inaccessible; dangerous flow – paddling not advised.",
 };
 
-import {
-  HelpOutline,
-  CheckCircleOutline,
-  WarningAmberOutlined,
-  DoNotDisturbOutlined,
-  Flood,
-  WbSunnyOutlined,
-} from "@mui/icons-material";
-
 export const ragStatus: Record<
   Status,
   {
@@ -43,77 +44,155 @@ export const ragStatus: Record<
     backgroundColor: string;
   }
 > = {
-  Unknown: {
-    color: "#9E9E9E",
-    emoji: "🤷",
-    icon: HelpOutline,
-    backgroundColor: "#F5F5F5",
-  },
-  "Light Green": {
-    color: "#4CAF50",
-    emoji: "✅",
-    icon: WbSunnyOutlined,
-    backgroundColor: "#E8F5E9",
-  },
-  "Dark Green": {
-    color: "#388E3C",
-    emoji: "✅",
-    icon: CheckCircleOutline,
-    backgroundColor: "#C8E6C9",
-  },
-  Amber: {
-    color: "#FF9800",
-    emoji: "🔶",
-    icon: WarningAmberOutlined,
-    backgroundColor: "#FFF3E0",
-  },
-  Red: {
-    color: "#F44336",
-    emoji: "❌",
-    icon: Flood,
-    backgroundColor: "#FFEBEE",
-  },
-  "No Paddling": {
-    color: "#212121",
-    emoji: "⛔",
-    icon: DoNotDisturbOutlined,
-    backgroundColor: "#E0E0E0",
-  },
+  Unknown: { color: "#9E9E9E", emoji: "🤷", icon: HelpOutline, backgroundColor: "#F5F5F5" },
+  "Light Green": { color: "#4CAF50", emoji: "✅", icon: WbSunnyOutlined, backgroundColor: "#E8F5E9" },
+  "Dark Green": { color: "#388E3C", emoji: "✅", icon: CheckCircleOutline, backgroundColor: "#C8E6C9" },
+  Amber: { color: "#FF9800", emoji: "🔶", icon: WarningAmberOutlined, backgroundColor: "#FFF3E0" },
+  Red: { color: "#F44336", emoji: "❌", icon: Flood, backgroundColor: "#FFEBEE" },
+  "No Paddling": { color: "#212121", emoji: "⛔", icon: DoNotDisturbOutlined, backgroundColor: "#E0E0E0" },
 };
 
-export const criteria: { [key in Status]?: (c: KayakConditions) => boolean } = {
-  Red: (c) => {
-    if (c.riverLevel && c.riverLevel >= 2.5) return true;
-    if (c.windSpeed && c.windSpeed > 15) return true;
-    return false;
-  },
-  Amber: (c) => {
-    if (c.riverLevel && c.riverLevel >= 2.0) return true;
-    if (c.windSpeed && c.windSpeed > 10) return true;
-    if (c.rain) return true;
-    if (c.dark) return true;
-    return false;
-  },
-  "Dark Green": (c) => {
-    if (c.riverLevel && c.riverLevel >= 1.5) return true;
-    return false;
-  },
-  "Light Green": () => {
-    return true; // Default if no other criteria met
-  },
+export const findLevelDescription = (level: number): string => {
+  const relevantLevels = Object.keys(levelDescriptions)
+    .map(parseFloat)
+    .filter((key) => key <= level);
+
+  if (relevantLevels.length === 0) {
+    return "River level is very low.";
+  }
+
+  const closestLevel = Math.max(...relevantLevels);
+  return levelDescriptions[closestLevel];
 };
 
-export const calculateInitialRag = (level: number): Status => {
-  if (level < 1.0) return "Light Green";
-  if (level < 1.4) return "Dark Green";
-  if (level < 2.2) return "Amber";
-  if (level < 5) return "Red";
-  return "No Paddling";
+
+// --- New RAG calculation logic based on old application ---
+
+const RAG_STATUS_MAP: Record<number, Status> = {
+  0: "Light Green",
+  1: "Dark Green",
+  2: "Amber",
+  3: "Red",
+};
+
+const CRITERIA_TABLE: {
+  [key: string]: { [key: string]: number[] };
+} = {
+  high: { calm: [0, 1, 2, 3], windy: [1, 2, 3, 3] },
+  moderate: { calm: [1, 2, 2, 3], windy: [2, 2, 2, 3], rainy: [2, 2, 2, 3] },
+  low: { calm: [2, 2, 3, 3], windy: [2, 3, 3, 3], rainy: [2, 2, 3, 3] },
+};
+
+const calculateInitialRag = (level: number): number => {
+  if (level < 1.0) return 0;
+  if (level < 1.4) return 1;
+  if (level < 2.2) return 2;
+  return 3;
+};
+
+const getWeatherConditions = (
+  temp: number,
+  wind: number,
+  isRainy: boolean
+): {
+  temperatureConditions: string;
+  weatherConditions: string;
+  reasons: string[];
+} => {
+  const reasons: string[] = [];
+  let temperatureConditions: string;
+
+  if (temp >= 13) {
+    temperatureConditions = "high";
+  } else if (temp >= 5) {
+    temperatureConditions = "moderate";
+    reasons.push("Moderate temperature");
+  } else {
+    temperatureConditions = "low";
+    reasons.push("Low temperature");
+  }
+
+  let weatherConditions: string;
+  // Wind speed is in m/s. 7 m/s is approx 15.7 mph.
+  if (wind >= 7) {
+    weatherConditions = "windy";
+    reasons.push("High winds");
+  } else if (temperatureConditions !== "high" && isRainy) {
+    weatherConditions = "rainy";
+    reasons.push("Rain");
+  } else {
+    weatherConditions = "calm";
+  }
+
+  return { temperatureConditions, weatherConditions, reasons };
+};
+
+const adjustRagForConditions = (
+  baseRag: number,
+  isDark: boolean,
+  visibility: number, // in meters
+  weatherReasons: string[]
+): { ragNumber: number; reasons: string[] } => {
+  let ragNumber = baseRag;
+  const reasons = [...weatherReasons];
+
+  if (isDark) {
+    reasons.push("Dark");
+    ragNumber += ragNumber === 0 ? 2 : 1;
+  }
+
+  if (visibility < 1000) {
+    reasons.push("Foggy");
+    ragNumber += ragNumber === 0 ? 2 : 1;
+  }
+
+  return { ragNumber: Math.min(ragNumber, 3), reasons };
 };
 
 export const calculateFinalRagStatus = (
-  conditions: KayakConditions
-): Status => {
-  // Placeholder function - just returns the initial status for now
-  return conditions.initialStatus || "Unknown";
+  conditions: Partial<KayakConditions>
+): { status: Status; reasons: string[] } => {
+  const { riverLevel, temperature, windSpeed, rain, dark, visibility, weatherCode } = conditions;
+
+  if (
+    riverLevel === undefined ||
+    temperature === undefined ||
+    windSpeed === undefined ||
+    rain === undefined ||
+    dark === undefined ||
+    visibility === undefined ||
+    weatherCode === undefined
+  ) {
+    return { status: "Unknown", reasons: ["Missing data"] };
+  }
+
+  // Overriding conditions
+  if (riverLevel >= 5.0) {
+    return { status: "No Paddling", reasons: ["River level is dangerously high"] };
+  }
+  // Thunder weather codes in Open-Meteo are 95, 96, 99
+  if ([95, 96, 99].includes(weatherCode)) {
+    return { status: "No Paddling", reasons: ["Risk of thunderstorms"] };
+  }
+
+  const initialRag = calculateInitialRag(riverLevel);
+  const { temperatureConditions, weatherConditions, reasons: weatherReasons } =
+    getWeatherConditions(temperature, windSpeed, rain);
+
+  const finalRag = CRITERIA_TABLE[temperatureConditions]?.[weatherConditions]?.[initialRag];
+
+  if (finalRag === undefined) {
+    return { status: "Unknown", reasons: ["Could not determine conditions from criteria table"] };
+  }
+
+  const { ragNumber, reasons } = adjustRagForConditions(
+    finalRag,
+    dark,
+    visibility,
+    weatherReasons
+  );
+
+  const finalStatus = RAG_STATUS_MAP[ragNumber] || "Unknown";
+
+  return { status: finalStatus, reasons };
 };

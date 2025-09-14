@@ -7,9 +7,8 @@ import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
 import { KayakConditions, ChartDataPoint } from "@/types";
 import {
-  calculateInitialRag,
   calculateFinalRagStatus,
-  levelDescriptions,
+  findLevelDescription,
 } from "@/lib/rag";
 import { fetchRiverData } from "@/lib/river";
 import { fetchWeatherData } from "@/lib/weather";
@@ -33,36 +32,30 @@ export default function HomePage() {
 
         const weatherData = await fetchWeatherData(52.2, -2.2);
 
-        const newConditions: Omit<
-          KayakConditions,
-          "overallStatus" | "statusReason" | "initialStatus"
-        > = {
-          riverLevel: riverData.latestLevel || 0,
-          levelChange: {
-            value: riverData.change8h || 0,
-            period: "8h",
-          },
-          launchMessage: "Able to launch from the landing stage - OK.",
+        // Consolidate all conditions for calculation
+        const currentConditions: Partial<KayakConditions> = {
+          riverLevel: riverData.latestLevel,
           temperature: weatherData.temperature,
           windSpeed: weatherData.windSpeed,
           rain: weatherData.rain,
           dark: weatherData.dark,
           visibility: weatherData.visibility,
-          lastUpdated: new Date().toISOString(),
+          weatherCode: weatherData.weatherCode,
         };
 
-        const initialStatus = calculateInitialRag(newConditions.riverLevel!);
-        const overallStatus = calculateFinalRagStatus({
-          ...newConditions,
-          initialStatus,
-        } as KayakConditions);
-        const statusReason =
-          levelDescriptions[Math.round(newConditions.riverLevel! * 2) / 2];
+        const { status, reasons } = calculateFinalRagStatus(currentConditions);
+
+        // Set the final state for the UI
         setConditions({
-          ...newConditions,
-          initialStatus,
-          overallStatus,
-          statusReason,
+          ...currentConditions,
+          overallStatus: status,
+          reasons: reasons,
+          levelChange: {
+            value: riverData.change8h || 0,
+            period: "8h",
+          },
+          launchMessage: findLevelDescription(riverData.latestLevel || 0),
+          lastUpdated: new Date().toISOString(),
         });
       } catch (error) {
         console.error("Failed to fetch data:", error);

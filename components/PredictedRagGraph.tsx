@@ -7,7 +7,6 @@ import {
   Typography,
   Box,
   CircularProgress,
-  useTheme,
   Paper,
 } from "@mui/material";
 import {
@@ -18,7 +17,9 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  TooltipProps,
 } from "recharts";
+import { PredictedGraphDataPoint } from "@/types";
 import { ragStatus } from "@/lib/rag";
 import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
@@ -28,11 +29,11 @@ import AcUnit from "@mui/icons-material/AcUnit";
 import Thermostat from "@mui/icons-material/Thermostat";
 
 interface PredictedRagGraphProps {
-  data: any[] | null;
+  data: PredictedGraphDataPoint[] | null;
   loading?: boolean;
 }
 
-const reasonToIcon = {
+const reasonToIcon: { [key: string]: React.ReactElement } = {
   "High winds": <Air fontSize="small" />,
   Rain: <WaterDrop fontSize="small" />,
   Dark: <NightsStay fontSize="small" />,
@@ -41,7 +42,11 @@ const reasonToIcon = {
   "Moderate temperature": <Thermostat fontSize="small" />,
 };
 
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -51,7 +56,7 @@ const CustomTooltip = ({ active, payload, label }) => {
         {data.reasons && data.reasons.length > 0 && (
           <Box sx={{ mt: 1 }}>
             <Typography variant="subtitle2">Reasons:</Typography>
-            {data.reasons.map((reason, index) => (
+            {data.reasons.map((reason: string, index: number) => (
               <Box
                 key={index}
                 sx={{ display: "flex", alignItems: "center", mt: 0.5 }}
@@ -75,8 +80,6 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
   data,
   loading,
 }) => {
-  const theme = useTheme();
-
   const renderContent = () => {
     if (loading) {
       return (

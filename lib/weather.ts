@@ -1,4 +1,4 @@
-import { WeatherData } from "@/types";
+import { WeatherData, HourlyWeatherData } from "@/types";
 
 export const fetchWeatherData = async (
   latitude: number,
@@ -39,7 +39,7 @@ export const getVisibilityDescription = (visibility: number): string => {
 export const fetchFutureWeatherData = async (
   latitude: number,
   longitude: number
-): Promise<any> => {
+): Promise<HourlyWeatherData> => {
   const response = await fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation,visibility,wind_speed_10m,weather_code&wind_speed_unit=mph&forecast_days=2`
   );

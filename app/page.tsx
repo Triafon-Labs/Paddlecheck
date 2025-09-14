@@ -6,7 +6,11 @@ import StatusCard from "@/components/StatusCard";
 import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
 import PredictedRagGraph from "@/components/PredictedRagGraph";
-import { KayakConditions, ChartDataPoint } from "@/types";
+import {
+  KayakConditions,
+  ChartDataPoint,
+  PredictedGraphDataPoint,
+} from "@/types";
 import {
   calculateFinalRagStatus,
   findLevelDescription,
@@ -22,9 +26,9 @@ import {
 
 export default function HomePage() {
   const [conditions, setConditions] = useState<KayakConditions | null>(null);
-  const [predictedGraphData, setPredictedGraphData] = useState<any[] | null>(
-    null
-  );
+  const [predictedGraphData, setPredictedGraphData] = useState<
+    PredictedGraphDataPoint[] | null
+  >(null);
   const [loading, setLoading] = useState(true);
   const [predictLoading, setPredictLoading] = useState(true);
   const [riverGraphData, setRiverGraphData] = useState<ChartDataPoint[] | null>(

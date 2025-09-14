@@ -5,6 +5,7 @@ import { Container, Stack } from "@mui/material";
 import StatusCard from "@/components/StatusCard";
 import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
+import PredictedRagGraph from "@/components/PredictedRagGraph";
 import { KayakConditions, ChartDataPoint } from "@/types";
 import {
   calculateFinalRagStatus,
@@ -13,11 +14,19 @@ import {
   RAG_STATUS_MAP,
 } from "@/lib/rag";
 import { fetchRiverData } from "@/lib/river";
-import { fetchWeatherData, getVisibilityDescription } from "@/lib/weather";
+import {
+  fetchWeatherData,
+  getVisibilityDescription,
+  fetchFutureWeatherData,
+} from "@/lib/weather";
 
 export default function HomePage() {
   const [conditions, setConditions] = useState<KayakConditions | null>(null);
+  const [predictedGraphData, setPredictedGraphData] = useState<any[] | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
+  const [predictLoading, setPredictLoading] = useState(true);
   const [riverGraphData, setRiverGraphData] = useState<ChartDataPoint[] | null>(
     null
   );
@@ -76,7 +85,58 @@ export default function HomePage() {
       }
     };
 
+    const getPredictedData = async () => {
+      try {
+        const riverData = await fetchRiverData();
+        const futureWeatherData = await fetchFutureWeatherData(52.2, -2.2);
+
+        const graphData = [];
+        const now = new Date();
+
+        for (let i = 0; i < 24; i++) {
+          const futureTime = new Date(now.getTime() + i * 60 * 60 * 1000);
+          const futureTimeStr = futureTime.toISOString().slice(0, 14) + "00";
+          const index = futureWeatherData.time.findIndex(
+            (t: string) => t >= futureTimeStr
+          );
+
+          if (index === -1) continue;
+
+          const hourlyRiverLevelChange = (riverData.change8h || 0) / 8;
+          const predictedRiverLevel =
+            (riverData.latestLevel || 0) + hourlyRiverLevelChange * i;
+
+          const hour = futureTime.getHours();
+          const dark = hour > 20 || hour < 6;
+
+          const predictedConditions: Partial<KayakConditions> = {
+            riverLevel: predictedRiverLevel,
+            temperature: futureWeatherData.temperature_2m[index],
+            windSpeed: futureWeatherData.wind_speed_10m[index],
+            rain: futureWeatherData.precipitation[index] > 0,
+            dark: dark,
+            visibility: futureWeatherData.visibility[index],
+            weatherCode: futureWeatherData.weather_code[index],
+          };
+
+          const { status, reasons } = calculateFinalRagStatus(predictedConditions);
+          graphData.push({
+            time: `${futureTime.getHours()}:00`,
+            status: status,
+            reasons: reasons,
+            value: 1, // Dummy value for bar height
+          });
+        }
+        setPredictedGraphData(graphData);
+      } catch (error) {
+        console.error("Failed to fetch predicted data:", error);
+      } finally {
+        setPredictLoading(false);
+      }
+    };
+
     getData();
+    getPredictedData();
 
     // Register service worker
     if ("serviceWorker" in navigator) {
@@ -97,6 +157,7 @@ export default function HomePage() {
     <Container maxWidth="md">
       <Stack spacing={4} sx={{ py: 2, pb: 16 }}>
         <StatusCard conditions={conditions} loading={loading} />
+        <PredictedRagGraph data={predictedGraphData} loading={predictLoading} />
         <StatsCard conditions={conditions} />
         <RiverLevelGraph
           data={riverGraphData}

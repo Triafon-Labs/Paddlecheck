@@ -17,7 +17,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
-  TooltipProps,
+  TooltipContentProps,
 } from "recharts";
 import { PredictedGraphDataPoint } from "@/types";
 import { ragStatus } from "@/lib/rag";
@@ -42,13 +42,15 @@ const reasonToIcon: { [key: string]: React.ReactElement } = {
   "Moderate temperature": <Thermostat fontSize="small" />,
 };
 
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+
 const CustomTooltip = ({
   active,
   payload,
   label,
-}: TooltipProps<number, string>) => {
+}: TooltipContentProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload;
+    const data = payload[0].payload as PredictedGraphDataPoint;
     return (
       <Paper sx={{ p: 2 }}>
         <Typography variant="body1">{`${label}`}</Typography>
@@ -94,7 +96,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
           <BarChart data={data}>
             <XAxis dataKey="time" />
             <YAxis hide />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+            <Tooltip content={CustomTooltip} cursor={{ fill: 'transparent' }} />
             <Bar dataKey="value">
               {data.map((entry, index) => (
                 <Cell
@@ -135,3 +137,5 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
 };
 
 export default PredictedRagGraph;
+
+// Trigger CI build

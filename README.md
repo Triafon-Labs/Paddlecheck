@@ -9,6 +9,15 @@ Paddlecheck is a kayaking conditions dashboard that provides real-time informati
 *   **Themeable**: Switch between light, dark, and system themes.
 *   **Notifications**: Get notified about important changes in conditions.
 
+## 📊 Data Sources
+
+This application uses the following open data sources:
+
+*   **River Level Data**: Real-time river level information is sourced from the [Environment Agency's flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/api-reference.html).
+*   **Weather Data**: Weather forecasts are provided by the [Open-Meteo API](https://open-meteo.com/).
+
+Both of these APIs are free to use for non-commercial purposes and do not require an API key.
+
 ## 🚀 Getting Started
 
 ### Prerequisites

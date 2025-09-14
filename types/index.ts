@@ -20,7 +20,32 @@ export interface KayakConditions {
   rain?: boolean;
   dark?: boolean;
   visibility?: number;
+  weatherCode?: number;
   overallStatus: Status;
-  statusReason?: string;
+  reasons?: string[];
   lastUpdated?: string;
+}
+
+// From RiverLevelGraph.tsx
+export interface RiverReading {
+  dateTime: string;
+  value: number;
+}
+
+export interface ApiResponse {
+  items: RiverReading[];
+}
+
+export interface ChartDataPoint {
+  time: string;
+  level: number;
+}
+
+export interface WeatherData {
+  temperature: number;
+  windSpeed: number;
+  rain: boolean;
+  dark: boolean;
+  visibility: number;
+  weatherCode: number;
 }

@@ -7,7 +7,7 @@ import {
   Schedule,
   Update,
 } from "@mui/icons-material";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -27,24 +27,13 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// Define interfaces for type safety
-interface RiverReading {
-  dateTime: string;
-  value: number;
-}
-
-interface ApiResponse {
-  items: RiverReading[];
-}
-
-interface ChartDataPoint {
-  time: string;
-  level: number;
-}
+import { ChartDataPoint } from "@/types";
 
 interface RiverLevelGraphProps {
-  // Add any props you might need in the future
-  stationId?: string;
+  data: ChartDataPoint[] | null;
+  loading: boolean;
+  change24h: number | null;
+  change8h: number | null;
 }
 
 const ChangeIndicator: React.FC<{
@@ -87,65 +76,12 @@ const ChangeIndicator: React.FC<{
 );
 
 const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
-  stationId = "2642",
+  data,
+  loading,
+  change24h,
+  change8h,
 }) => {
   const theme = useTheme();
-  const [data, setData] = useState<ChartDataPoint[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [change24h, setChange24h] = useState<number | null>(null);
-  const [change8h, setChange8h] = useState<number | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const twentyFourHoursAgo = new Date(
-          new Date().getTime() - 24 * 60 * 60 * 1000
-        ).toISOString();
-        const response = await fetch(
-          `https://environment.data.gov.uk/flood-monitoring/id/stations/${stationId}/readings?since=${twentyFourHoursAgo}`
-        );
-        const result: ApiResponse = await response.json();
-        const sortedItems = result.items.sort(
-          (a: RiverReading, b: RiverReading) =>
-            new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
-        );
-
-        const formattedData: ChartDataPoint[] = sortedItems.map(
-          (item: RiverReading) => ({
-            time: new Date(item.dateTime).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            level: item.value,
-          })
-        );
-        setData(formattedData);
-
-        if (sortedItems.length > 1) {
-          const latestLevel = sortedItems[sortedItems.length - 1].value;
-          const oldestLevel24h = sortedItems[0].value;
-          setChange24h(latestLevel - oldestLevel24h);
-
-          const eightHoursAgo = new Date(
-            new Date().getTime() - 8 * 60 * 60 * 1000
-          );
-          const eightHourIndex = sortedItems.findIndex(
-            (item: RiverReading) => new Date(item.dateTime) >= eightHoursAgo
-          );
-          if (eightHourIndex !== -1) {
-            const oldestLevel8h = sortedItems[eightHourIndex].value;
-            setChange8h(latestLevel - oldestLevel8h);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching river level data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [stationId]);
 
   const renderContent = () => {
     if (loading) {

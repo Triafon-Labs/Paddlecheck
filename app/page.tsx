@@ -34,7 +34,7 @@ export default function HomePage() {
 
         // Consolidate all conditions for calculation
         const currentConditions: Partial<KayakConditions> = {
-          riverLevel: riverData.latestLevel,
+          riverLevel: riverData.latestLevel === null ? undefined : riverData.latestLevel,
           temperature: weatherData.temperature,
           windSpeed: weatherData.windSpeed,
           rain: weatherData.rain,

@@ -25,7 +25,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  TooltipContentProps,
 } from "recharts";
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 import { ChartDataPoint } from "@/types";
 
@@ -75,6 +77,22 @@ const ChangeIndicator: React.FC<{
   </Paper>
 );
 
+const CustomTooltip = ({ active, payload, label }: TooltipContentProps<ValueType, NameType>) => {
+  if (active && payload && payload.length) {
+    const value = payload[0].value as number;
+    return (
+      <Paper sx={{ p: 2 }}>
+        <Typography variant="body1">{`Time: ${label}`}</Typography>
+        <Typography variant="body2">{`Level: ${value.toFixed(
+          2
+        )}m`}</Typography>
+      </Paper>
+    );
+  }
+
+  return null;
+};
+
 const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   data,
   loading,
@@ -110,20 +128,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                   />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={theme.palette.divider}
+              />
               <XAxis dataKey="time" stroke={theme.palette.text.secondary} />
               <YAxis stroke={theme.palette.text.secondary} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: theme.palette.background.paper,
-                  borderColor: theme.palette.divider,
-                }}
-                formatter={(value: number) => [
-                  `${value.toFixed(2)}m`,
-                  "River Level",
-                ]}
-                labelFormatter={(label: string) => `Time: ${label}`}
-              />
+              <Tooltip content={CustomTooltip} />
               <Area
                 type="monotone"
                 dataKey="level"

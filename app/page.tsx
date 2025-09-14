@@ -119,7 +119,8 @@ export default function HomePage() {
             weatherCode: futureWeatherData.weather_code[index],
           };
 
-          const { status, reasons } = calculateFinalRagStatus(predictedConditions);
+          const { status, reasons } =
+            calculateFinalRagStatus(predictedConditions);
           graphData.push({
             time: `${futureTime.getHours()}:00`,
             status: status,
@@ -157,7 +158,6 @@ export default function HomePage() {
     <Container maxWidth="md">
       <Stack spacing={4} sx={{ py: 2, pb: 16 }}>
         <StatusCard conditions={conditions} loading={loading} />
-        <PredictedRagGraph data={predictedGraphData} loading={predictLoading} />
         <StatsCard conditions={conditions} />
         <RiverLevelGraph
           data={riverGraphData}
@@ -165,6 +165,7 @@ export default function HomePage() {
           change24h={riverChange24h}
           change8h={riverChange8h}
         />
+        <PredictedRagGraph data={predictedGraphData} loading={predictLoading} />
       </Stack>
     </Container>
   );

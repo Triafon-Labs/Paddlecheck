@@ -20,6 +20,7 @@ export interface KayakConditions {
   rain?: boolean;
   dark?: boolean;
   visibility?: number;
+  visibilityDescription?: string;
   weatherCode?: number;
   overallStatus: Status;
   reasons?: string[];

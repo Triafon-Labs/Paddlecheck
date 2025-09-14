@@ -1,14 +1,8 @@
 "use client";
 
 import React from "react";
-import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Tooltip,
-} from "@mui/material";
-import WbSunny from "@mui/icons-material/WbSunny";
+import { Card, CardContent, Typography, Box, Tooltip } from "@mui/material";
+import Thermostat from "@mui/icons-material/Thermostat";
 import Visibility from "@mui/icons-material/Visibility";
 import TrendingUp from "@mui/icons-material/TrendingUp";
 import TrendingDown from "@mui/icons-material/TrendingDown";
@@ -16,6 +10,8 @@ import TrendingFlat from "@mui/icons-material/TrendingFlat";
 import Air from "@mui/icons-material/Air";
 import Water from "@mui/icons-material/Water";
 import Info from "@mui/icons-material/Info";
+import WaterDrop from "@mui/icons-material/WaterDrop";
+import NightsStay from "@mui/icons-material/NightsStay";
 import { KayakConditions } from "@/types";
 import { ragStatus } from "@/lib/rag";
 
@@ -112,24 +108,30 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
           <Box>
             <StatItem
               icon={<InitialStatusIcon />}
-              label="Initial Status"
+              label="Initial RAG Status"
               value={conditions.initialStatus}
             />
             <StatItem
-              icon={<WbSunny />}
+              icon={<Thermostat />}
               label="Temperature"
               value={`${conditions.temperature?.toFixed(1)}°C`}
             />
             <StatItem
               icon={<Air />}
               label="Wind Speed"
-              value={`${conditions.windSpeed?.toFixed(1)} m/s`}
+              value={`${conditions.windSpeed?.toFixed(1)} mph`}
             />
             <StatItem
               icon={<Visibility />}
               label="Visibility"
-              value={`${conditions.visibility?.toFixed(1)} km`}
+              value={conditions.visibilityDescription}
             />
+            {conditions.rain && (
+              <StatItem icon={<WaterDrop />} label="Rain" value="Yes" />
+            )}
+            {conditions.dark && (
+              <StatItem icon={<NightsStay />} label="Dark" value="Yes" />
+            )}
           </Box>
         </Box>
         <Typography

@@ -4,17 +4,17 @@ Paddlecheck is a kayaking conditions dashboard that provides real-time informati
 
 ## ✨ Features
 
-*   **Real-time Conditions**: Get up-to-date information on river status.
-*   **PWA Support**: Installable as a mobile app for easy access.
-*   **Themeable**: Switch between light, dark, and system themes.
-*   **Notifications**: Get notified about important changes in conditions.
+- **Real-time Conditions**: Get up-to-date information on river status.
+- **PWA Support**: Installable as a mobile app for easy access.
+- **Themeable**: Switch between light, dark, and system themes.
+- **Notifications**: Get notified about important changes in conditions.
 
 ## 📊 Data Sources
 
 This application uses the following open data sources:
 
-*   **River Level Data**: Real-time river level information is sourced from the [Environment Agency's flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/api-reference.html).
-*   **Weather Data**: Weather forecasts are provided by the [Open-Meteo API](https://open-meteo.com/).
+- **River Level Data**: Real-time river level information is sourced from the [Environment Agency's flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/api-reference.html).
+- **Weather Data**: Weather forecasts are provided by the [Open-Meteo API](https://open-meteo.com/).
 
 Both of these APIs are free to use for non-commercial purposes and do not require an API key.
 
@@ -22,8 +22,8 @@ Both of these APIs are free to use for non-commercial purposes and do not requir
 
 ### Prerequisites
 
-*   Node.js (v18 or later)
-*   npm
+- Node.js (v18 or later)
+- npm
 
 ### Installation
 
@@ -50,21 +50,12 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 🚀 Deployment on Render
-
-This application is ready to be deployed on [Render](https://render.com/).
-
-You can deploy it as a "Web Service". Use the following settings during creation:
-
--   **Build Command**: `npm install && npm run build`
--   **Start Command**: `npm start`
-
 ### Environment Variables
 
-Create a `.env.local` file for local development. For production on Render, add environment variables in the Render dashboard.
+Create a `.env.local` file for local development.
 
 ## 🛠️ Built With
 
-*   [Next.js](https://nextjs.org/) - React Framework
-*   [Material-UI (MUI)](https://mui.com/) - UI Component Library
-*   [TypeScript](https://www.typescriptlang.org/) - Typed JavaScript
+- [Next.js](https://nextjs.org/) - React Framework
+- [Material-UI (MUI)](https://mui.com/) - UI Component Library
+- [TypeScript](https://www.typescriptlang.org/) - Typed JavaScript

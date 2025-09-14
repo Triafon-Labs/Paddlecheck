@@ -9,9 +9,11 @@ import { KayakConditions, ChartDataPoint } from "@/types";
 import {
   calculateFinalRagStatus,
   findLevelDescription,
+  calculateInitialRagStatus,
+  RAG_STATUS_MAP,
 } from "@/lib/rag";
 import { fetchRiverData } from "@/lib/river";
-import { fetchWeatherData } from "@/lib/weather";
+import { fetchWeatherData, getVisibilityDescription } from "@/lib/weather";
 
 export default function HomePage() {
   const [conditions, setConditions] = useState<KayakConditions | null>(null);
@@ -34,7 +36,8 @@ export default function HomePage() {
 
         // Consolidate all conditions for calculation
         const currentConditions: Partial<KayakConditions> = {
-          riverLevel: riverData.latestLevel === null ? undefined : riverData.latestLevel,
+          riverLevel:
+            riverData.latestLevel === null ? undefined : riverData.latestLevel,
           temperature: weatherData.temperature,
           windSpeed: weatherData.windSpeed,
           rain: weatherData.rain,
@@ -43,11 +46,19 @@ export default function HomePage() {
           weatherCode: weatherData.weatherCode,
         };
 
+        const initialRagNumber = calculateInitialRagStatus(
+          currentConditions.riverLevel || 0
+        );
+        const initialStatus = RAG_STATUS_MAP[initialRagNumber];
         const { status, reasons } = calculateFinalRagStatus(currentConditions);
+        const visibilityDescription = getVisibilityDescription(
+          currentConditions.visibility || 0
+        );
 
         // Set the final state for the UI
         setConditions({
           ...currentConditions,
+          initialStatus,
           overallStatus: status,
           reasons: reasons,
           levelChange: {
@@ -56,6 +67,7 @@ export default function HomePage() {
           },
           launchMessage: findLevelDescription(riverData.latestLevel || 0),
           lastUpdated: new Date().toISOString(),
+          visibilityDescription,
         });
       } catch (error) {
         console.error("Failed to fetch data:", error);

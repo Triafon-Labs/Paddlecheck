@@ -11,28 +11,28 @@ import {
 // --- Existing exports that are still needed ---
 
 export const levelDescriptions: Record<number, string> = {
-  1.0: "Able to launch from the landing stage – OK.",
-  1.15: "Water over one end of the landing stage.",
-  1.38: "10 cm over the landing stage; able to launch OK.",
+  1.0: "Able to launch from the landing stage – OK",
+  1.15: "Water over one end of the landing stage",
+  1.38: "10 cm over the landing stage; able to launch OK",
   1.48: "On the concrete lower deck – wet feet!",
   1.52: "5 cm over the concrete lower deck; not deep enough – wet feet!",
-  1.55: "Boat well below the concrete for easy access; water shallow nearby – wet feet.",
-  1.68: "10 cm over the concrete lower deck; boat floats – dry feet.",
-  2.0: "Bollards submerged; launch with care to avoid collisions.",
-  2.12: "Halfway up steps; caution with rudders. Portage around the lock at Diglis.",
-  2.75: "10th step level with water; concrete terrace slightly wet – wet feet possible.",
-  4.28: "Almost on the car park – dry feet! Pitchcroft unlikely paddleable; monitor levels closely.",
-  4.3: "Pitchcroft still unlikely paddleable; monitor levels closely.",
-  4.37: "5 cm on the car park; not deep enough for boats – wet feet. Pitchcroft still unlikely paddleable.",
-  4.4: "Water coming onto the WCC car park; Pitchcroft paddleable near the boathouse; avoid the far side.",
-  4.49: "Water on the car park; safe to park only if falling. Variable paddling conditions on Pitchcroft depending on water flow.",
-  4.62: "Plenty of water on Pitchcroft for paddling.",
-  4.7: "Water just in the boathouse – Pitchcroft paddleable.",
-  5.01: "Boathouse flooding. Pitchcroft paddleable, but shallow on the far side; watch for underwater posts.",
-  5.02: "Deep water in the boathouse; boats can float out to the car park. Pitchcroft paddleable, but shallow on the far side; watch for underwater posts.",
-  5.18: "Grand Stand Road flooded; unsafe to access the boathouse; water flowing back over the road adds risks.",
-  5.54: "Sabrina Bridge closed; North Parade underwater; dangerous flows.",
-  5.55: "Boathouse inaccessible; dangerous flow – paddling not advised.",
+  1.55: "Boat well below the concrete for easy access; water shallow nearby – wet feet",
+  1.68: "10 cm over the concrete lower deck; boat floats – dry feet",
+  2.0: "Bollards submerged; launch with care to avoid collisions",
+  2.12: "Halfway up steps; caution with rudders. Portage around the lock at Diglis",
+  2.75: "10th step level with water; concrete terrace slightly wet – wet feet possible",
+  4.28: "Almost on the car park – dry feet! Pitchcroft unlikely paddleable; monitor levels closely",
+  4.3: "Pitchcroft still unlikely paddleable; monitor levels closely",
+  4.37: "5 cm on the car park; not deep enough for boats – wet feet. Pitchcroft still unlikely paddleable",
+  4.4: "Water coming onto the WCC car park; Pitchcroft paddleable near the boathouse; avoid the far side",
+  4.49: "Water on the car park; safe to park only if falling. Variable paddling conditions on Pitchcroft depending on water flow",
+  4.62: "Plenty of water on Pitchcroft for paddling",
+  4.7: "Water just in the boathouse – Pitchcroft paddleable",
+  5.01: "Boathouse flooding. Pitchcroft paddleable, but shallow on the far side; watch for underwater posts",
+  5.02: "Deep water in the boathouse; boats can float out to the car park. Pitchcroft paddleable, but shallow on the far side; watch for underwater posts",
+  5.18: "Grand Stand Road flooded; unsafe to access the boathouse; water flowing back over the road adds risks",
+  5.54: "Sabrina Bridge closed; North Parade underwater; dangerous flows",
+  5.55: "Boathouse inaccessible; dangerous flow – paddling not advised",
 };
 
 export const ragStatus: Record<
@@ -44,12 +44,42 @@ export const ragStatus: Record<
     backgroundColor: string;
   }
 > = {
-  Unknown: { color: "#9E9E9E", emoji: "🤷", icon: HelpOutline, backgroundColor: "#F5F5F5" },
-  "Light Green": { color: "#4CAF50", emoji: "✅", icon: WbSunnyOutlined, backgroundColor: "#E8F5E9" },
-  "Dark Green": { color: "#388E3C", emoji: "✅", icon: CheckCircleOutline, backgroundColor: "#C8E6C9" },
-  Amber: { color: "#FF9800", emoji: "🔶", icon: WarningAmberOutlined, backgroundColor: "#FFF3E0" },
-  Red: { color: "#F44336", emoji: "❌", icon: Flood, backgroundColor: "#FFEBEE" },
-  "No Paddling": { color: "#212121", emoji: "⛔", icon: DoNotDisturbOutlined, backgroundColor: "#E0E0E0" },
+  Unknown: {
+    color: "#9E9E9E",
+    emoji: "🤷",
+    icon: HelpOutline,
+    backgroundColor: "#F5F5F5",
+  },
+  "Light Green": {
+    color: "#4CAF50",
+    emoji: "✅",
+    icon: WbSunnyOutlined,
+    backgroundColor: "#E8F5E9",
+  },
+  "Dark Green": {
+    color: "#388E3C",
+    emoji: "✅",
+    icon: CheckCircleOutline,
+    backgroundColor: "#C8E6C9",
+  },
+  Amber: {
+    color: "#FF9800",
+    emoji: "🔶",
+    icon: WarningAmberOutlined,
+    backgroundColor: "#FFF3E0",
+  },
+  Red: {
+    color: "#F44336",
+    emoji: "❌",
+    icon: Flood,
+    backgroundColor: "#FFEBEE",
+  },
+  "No Paddling": {
+    color: "#212121",
+    emoji: "⛔",
+    icon: DoNotDisturbOutlined,
+    backgroundColor: "#E0E0E0",
+  },
 };
 
 export const findLevelDescription = (level: number): string => {
@@ -58,17 +88,16 @@ export const findLevelDescription = (level: number): string => {
     .filter((key) => key <= level);
 
   if (relevantLevels.length === 0) {
-    return "River level is very low.";
+    return levelDescriptions[1.0];
   }
 
   const closestLevel = Math.max(...relevantLevels);
   return levelDescriptions[closestLevel];
 };
 
-
 // --- New RAG calculation logic based on old application ---
 
-const RAG_STATUS_MAP: Record<number, Status> = {
+export const RAG_STATUS_MAP: Record<number, Status> = {
   0: "Light Green",
   1: "Dark Green",
   2: "Amber",
@@ -83,7 +112,7 @@ const CRITERIA_TABLE: {
   low: { calm: [2, 2, 3, 3], windy: [2, 3, 3, 3], rainy: [2, 2, 3, 3] },
 };
 
-const calculateInitialRag = (level: number): number => {
+export const calculateInitialRagStatus = (level: number): number => {
   if (level < 1.0) return 0;
   if (level < 1.4) return 1;
   if (level < 2.2) return 2;
@@ -113,8 +142,7 @@ const getWeatherConditions = (
   }
 
   let weatherConditions: string;
-  // Wind speed is in m/s. 7 m/s is approx 15.7 mph.
-  if (wind >= 7) {
+  if (wind >= 15) {
     weatherConditions = "windy";
     reasons.push("High winds");
   } else if (temperatureConditions !== "high" && isRainy) {
@@ -130,7 +158,7 @@ const getWeatherConditions = (
 const adjustRagForConditions = (
   baseRag: number,
   isDark: boolean,
-  visibility: number, // in meters
+  visibility: number, // in metres
   weatherReasons: string[]
 ): { ragNumber: number; reasons: string[] } => {
   let ragNumber = baseRag;
@@ -152,7 +180,15 @@ const adjustRagForConditions = (
 export const calculateFinalRagStatus = (
   conditions: Partial<KayakConditions>
 ): { status: Status; reasons: string[] } => {
-  const { riverLevel, temperature, windSpeed, rain, dark, visibility, weatherCode } = conditions;
+  const {
+    riverLevel,
+    temperature,
+    windSpeed,
+    rain,
+    dark,
+    visibility,
+    weatherCode,
+  } = conditions;
 
   if (
     riverLevel === undefined ||
@@ -168,21 +204,31 @@ export const calculateFinalRagStatus = (
 
   // Overriding conditions
   if (riverLevel >= 5.0) {
-    return { status: "No Paddling", reasons: ["River level is dangerously high"] };
+    return {
+      status: "No Paddling",
+      reasons: ["River level is dangerously high"],
+    };
   }
   // Thunder weather codes in Open-Meteo are 95, 96, 99
   if ([95, 96, 99].includes(weatherCode)) {
     return { status: "No Paddling", reasons: ["Risk of thunderstorms"] };
   }
 
-  const initialRag = calculateInitialRag(riverLevel);
-  const { temperatureConditions, weatherConditions, reasons: weatherReasons } =
-    getWeatherConditions(temperature, windSpeed, rain);
+  const initialRag = calculateInitialRagStatus(riverLevel);
+  const {
+    temperatureConditions,
+    weatherConditions,
+    reasons: weatherReasons,
+  } = getWeatherConditions(temperature, windSpeed, rain);
 
-  const finalRag = CRITERIA_TABLE[temperatureConditions]?.[weatherConditions]?.[initialRag];
+  const finalRag =
+    CRITERIA_TABLE[temperatureConditions]?.[weatherConditions]?.[initialRag];
 
   if (finalRag === undefined) {
-    return { status: "Unknown", reasons: ["Could not determine conditions from criteria table"] };
+    return {
+      status: "Unknown",
+      reasons: ["Could not determine conditions from criteria table"],
+    };
   }
 
   const { ragNumber, reasons } = adjustRagForConditions(

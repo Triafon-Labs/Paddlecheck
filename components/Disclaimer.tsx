@@ -12,7 +12,7 @@ const Disclaimer = () => {
       }}
     >
       <Typography variant="caption" color="text.secondary">
-        This information is for guidance only. Please use your own judgment and
+        This information is for guidance only. Please use your own judgement and
         consult with experienced individuals before making any decisions.
         Conditions can change rapidly.
       </Typography>

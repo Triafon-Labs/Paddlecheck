@@ -86,12 +86,20 @@ const CustomTooltip = ({
   return null;
 };
 
-const IconLabel = ({ viewBox, icon, time }: any) => {
+interface IconLabelProps {
+  viewBox: { x: number; y: number; width: number; height: number };
+  icon: React.ReactElement;
+  time: string;
+}
+
+const IconLabel = ({ viewBox, icon, time }: IconLabelProps) => {
   const { x } = viewBox;
   const timeText = time ? time.split("T")[1] : "";
   return (
     <foreignObject x={x - 30} y={0} width={60} height={40}>
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <Box
+        sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      >
         {icon}
         <Typography variant="caption" sx={{ color: "text.secondary" }}>
           {timeText}
@@ -127,7 +135,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
         : null;
 
       return (
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={200}>
           <BarChart data={data} margin={{ top: 40 }}>
             <XAxis dataKey="time" />
             <YAxis hide domain={[0, 1]} />
@@ -137,7 +145,18 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 x={`${sunriseHour}:00`}
                 stroke={lineColor}
                 strokeDasharray="3 3"
-                label={<IconLabel icon={<WbSunny fontSize="small" fill={lineColor} />} time={sunrise} />}
+                label={
+                  <IconLabel
+                    icon={<WbSunny fontSize="small" fill={lineColor} />}
+                    time={sunrise}
+                    viewBox={{
+                      x: 0,
+                      y: 0,
+                      width: 0,
+                      height: 0,
+                    }}
+                  />
+                }
               />
             )}
             {sunsetHour && sunset && (
@@ -145,7 +164,18 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 x={`${sunsetHour}:00`}
                 stroke={lineColor}
                 strokeDasharray="3 3"
-                label={<IconLabel icon={<NightsStay fontSize="small" fill={lineColor} />} time={sunset} />}
+                label={
+                  <IconLabel
+                    icon={<NightsStay fontSize="small" fill={lineColor} />}
+                    time={sunset}
+                    viewBox={{
+                      x: 0,
+                      y: 0,
+                      width: 0,
+                      height: 0,
+                    }}
+                  />
+                }
               />
             )}
             <Bar dataKey="value">

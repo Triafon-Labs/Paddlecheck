@@ -8,6 +8,7 @@ import {
   Box,
   CircularProgress,
   Paper,
+  useTheme,
 } from "@mui/material";
 import {
   BarChart,
@@ -18,6 +19,7 @@ import {
   ResponsiveContainer,
   Cell,
   TooltipContentProps,
+  ReferenceLine,
 } from "recharts";
 import { PredictedGraphDataPoint } from "@/types";
 import { ragStatus } from "@/lib/rag";
@@ -27,10 +29,13 @@ import NightsStay from "@mui/icons-material/NightsStay";
 import Grain from "@mui/icons-material/Grain";
 import AcUnit from "@mui/icons-material/AcUnit";
 import Thermostat from "@mui/icons-material/Thermostat";
+import WbSunny from "@mui/icons-material/WbSunny";
 
 interface PredictedRagGraphProps {
   data: PredictedGraphDataPoint[] | null;
   loading?: boolean;
+  sunrise: string | null;
+  sunset: string | null;
 }
 
 const reasonToIcon: { [key: string]: React.ReactElement } = {
@@ -81,10 +86,30 @@ const CustomTooltip = ({
   return null;
 };
 
+const IconLabel = ({ viewBox, icon, time }: any) => {
+  const { x } = viewBox;
+  const timeText = time ? time.split("T")[1] : "";
+  return (
+    <foreignObject x={x - 30} y={0} width={60} height={40}>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        {icon}
+        <Typography variant="caption" sx={{ color: "text.secondary" }}>
+          {timeText}
+        </Typography>
+      </Box>
+    </foreignObject>
+  );
+};
+
 const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
   data,
   loading,
+  sunrise,
+  sunset,
 }) => {
+  const theme = useTheme();
+  const lineColor = theme.palette.text.secondary;
+
   const renderContent = () => {
     if (loading) {
       return (
@@ -94,12 +119,35 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
       );
     }
     if (data && data.length > 0) {
+      const sunriseHour = sunrise
+        ? parseInt(sunrise.split("T")[1].split(":")[0], 10)
+        : null;
+      const sunsetHour = sunset
+        ? parseInt(sunset.split("T")[1].split(":")[0], 10)
+        : null;
+
       return (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data}>
+          <BarChart data={data} margin={{ top: 40 }}>
             <XAxis dataKey="time" />
-            <YAxis hide />
+            <YAxis hide domain={[0, 1]} />
             <Tooltip content={CustomTooltip} cursor={{ fill: "transparent" }} />
+            {sunriseHour && sunrise && (
+              <ReferenceLine
+                x={`${sunriseHour}:00`}
+                stroke={lineColor}
+                strokeDasharray="3 3"
+                label={<IconLabel icon={<WbSunny fontSize="small" fill={lineColor} />} time={sunrise} />}
+              />
+            )}
+            {sunsetHour && sunset && (
+              <ReferenceLine
+                x={`${sunsetHour}:00`}
+                stroke={lineColor}
+                strokeDasharray="3 3"
+                label={<IconLabel icon={<NightsStay fontSize="small" fill={lineColor} />} time={sunset} />}
+              />
+            )}
             <Bar dataKey="value">
               {data.map((entry, index) => (
                 <Cell
@@ -140,5 +188,3 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
 };
 
 export default PredictedRagGraph;
-
-// Trigger CI build

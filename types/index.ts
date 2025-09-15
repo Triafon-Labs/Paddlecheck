@@ -51,13 +51,24 @@ export interface WeatherData {
   weatherCode: number;
 }
 
-export interface HourlyWeatherData {
+export interface HourlyData {
   time: string[];
   temperature_2m: number[];
   precipitation: number[];
   visibility: number[];
   wind_speed_10m: number[];
   weather_code: number[];
+  is_day: number[];
+}
+
+export interface DailyData {
+  sunrise: string[];
+  sunset: string[];
+}
+
+export interface FutureWeatherData {
+  hourly: HourlyData;
+  daily: DailyData;
 }
 
 export interface PredictedGraphDataPoint {

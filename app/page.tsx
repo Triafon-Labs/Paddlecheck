@@ -36,6 +36,8 @@ export default function HomePage() {
   );
   const [riverChange24h, setRiverChange24h] = useState<number | null>(null);
   const [riverChange8h, setRiverChange8h] = useState<number | null>(null);
+  const [sunrise, setSunrise] = useState<string | null>(null);
+  const [sunset, setSunset] = useState<string | null>(null);
 
   useEffect(() => {
     const getData = async () => {
@@ -94,44 +96,76 @@ export default function HomePage() {
         const riverData = await fetchRiverData();
         const futureWeatherData = await fetchFutureWeatherData(52.2, -2.2);
 
-        const graphData = [];
+        setSunrise(futureWeatherData.daily.sunrise[0]);
+        setSunset(futureWeatherData.daily.sunset[0]);
+
+        const graphData: PredictedGraphDataPoint[] = [];
         const now = new Date();
+        const currentHour = now.getHours();
 
+        // Find the index for the current hour in the fetched data
+        const startIndex = futureWeatherData.hourly.time.findIndex((t) => {
+          const hour = parseInt(t.split("T")[1].split(":")[0], 10);
+          return hour >= currentHour;
+        });
+
+        if (startIndex === -1) {
+          setPredictLoading(false);
+          return;
+        }
+
+        // Create graph data for the next 24 hours from the startIndex
         for (let i = 0; i < 24; i++) {
-          const futureTime = new Date(now.getTime() + i * 60 * 60 * 1000);
-          const futureTimeStr = futureTime.toISOString().slice(0, 14) + "00";
-          const index = futureWeatherData.time.findIndex(
-            (t: string) => t >= futureTimeStr
-          );
+          const index = startIndex + i;
+          if (index >= futureWeatherData.hourly.time.length) break;
 
-          if (index === -1) continue;
+          const timeStr = futureWeatherData.hourly.time[index];
+          const hour = parseInt(timeStr.split("T")[1].split(":")[0], 10);
 
           const hourlyRiverLevelChange = (riverData.change8h || 0) / 8;
           const predictedRiverLevel =
             (riverData.latestLevel || 0) + hourlyRiverLevelChange * i;
 
-          const hour = futureTime.getHours();
-          const dark = hour > 20 || hour < 6;
+          const sunriseHour = futureWeatherData.daily.sunrise[0]
+            ? parseInt(
+                futureWeatherData.daily.sunrise[0].split("T")[1].split(":")[0],
+                10
+              )
+            : null;
+          const sunsetHour = futureWeatherData.daily.sunset[0]
+            ? parseInt(
+                futureWeatherData.daily.sunset[0].split("T")[1].split(":")[0],
+                10
+              )
+            : null;
+
+          let dark;
+          if (sunriseHour && sunsetHour) {
+            dark = hour <= sunriseHour || hour >= sunsetHour;
+          } else {
+            dark = !futureWeatherData.hourly.is_day[index];
+          }
 
           const predictedConditions: Partial<KayakConditions> = {
             riverLevel: predictedRiverLevel,
-            temperature: futureWeatherData.temperature_2m[index],
-            windSpeed: futureWeatherData.wind_speed_10m[index],
-            rain: futureWeatherData.precipitation[index] > 0,
+            temperature: futureWeatherData.hourly.temperature_2m[index],
+            windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
+            rain: futureWeatherData.hourly.precipitation[index] > 0,
             dark: dark,
-            visibility: futureWeatherData.visibility[index],
-            weatherCode: futureWeatherData.weather_code[index],
+            visibility: futureWeatherData.hourly.visibility[index],
+            weatherCode: futureWeatherData.hourly.weather_code[index],
           };
 
           const { status, reasons } =
             calculateFinalRagStatus(predictedConditions);
           graphData.push({
-            time: `${futureTime.getHours()}:00`,
+            time: `${hour}:00`,
             status: status,
             reasons: reasons,
-            value: 1, // Dummy value for bar height
+            value: 0.9, // Dummy value for bar height
           });
         }
+
         setPredictedGraphData(graphData);
       } catch (error) {
         console.error("Failed to fetch predicted data:", error);
@@ -169,7 +203,12 @@ export default function HomePage() {
           change24h={riverChange24h}
           change8h={riverChange8h}
         />
-        <PredictedRagGraph data={predictedGraphData} loading={predictLoading} />
+        <PredictedRagGraph
+          data={predictedGraphData}
+          loading={predictLoading}
+          sunrise={sunrise}
+          sunset={sunset}
+        />
       </Stack>
     </Container>
   );

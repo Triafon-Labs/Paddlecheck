@@ -6,6 +6,7 @@ import StatusCard from "@/components/StatusCard";
 import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
 import PredictedRagGraph from "@/components/PredictedRagGraph";
+import Disclaimer from "@/components/Disclaimer";
 import {
   KayakConditions,
   ChartDataPoint,
@@ -209,6 +210,7 @@ export default function HomePage() {
           sunrise={sunrise}
           sunset={sunset}
         />
+        <Disclaimer />
       </Stack>
     </Container>
   );

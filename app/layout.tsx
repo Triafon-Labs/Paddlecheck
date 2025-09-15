@@ -5,6 +5,8 @@ import ThemeRegistry from "@/components/ThemeRegistry";
 import BottomNavBar from "@/components/BottomNavBar";
 import TopNavBar from "@/components/TopNavBar";
 import { Box } from "@mui/material";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -14,17 +16,17 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 import { Viewport } from "next";
 
 export const viewport: Viewport = {
-  themeColor: '#0A1929',
-  viewportFit: 'cover',
-}
+  themeColor: "#0A1929",
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "Paddlecheck",
   description: "Kayaking conditions dashboard",
   appleWebApp: {
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: "black-translucent",
   },
-  themeColor: '#0A1929',
+  themeColor: "#0A1929",
 };
 
 export default function RootLayout({
@@ -43,10 +45,10 @@ export default function RootLayout({
         <ThemeRegistry>
           <Box
             sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: '100vh',
-              bgcolor: 'background.default',
+              display: "flex",
+              flexDirection: "column",
+              minHeight: "100vh",
+              bgcolor: "background.default",
             }}
           >
             <TopNavBar />
@@ -54,10 +56,10 @@ export default function RootLayout({
               component="main"
               sx={{
                 flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "flex-start",
                 pt: 4,
                 pb: 16,
               }}
@@ -67,6 +69,8 @@ export default function RootLayout({
             <BottomNavBar />
           </Box>
         </ThemeRegistry>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

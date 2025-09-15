@@ -42,7 +42,10 @@ const reasonToIcon: { [key: string]: React.ReactElement } = {
   "Moderate temperature": <Thermostat fontSize="small" />,
 };
 
-import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 
 const CustomTooltip = ({
   active,
@@ -96,7 +99,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
           <BarChart data={data}>
             <XAxis dataKey="time" />
             <YAxis hide />
-            <Tooltip content={CustomTooltip} cursor={{ fill: 'transparent' }} />
+            <Tooltip content={CustomTooltip} cursor={{ fill: "transparent" }} />
             <Bar dataKey="value">
               {data.map((entry, index) => (
                 <Cell
@@ -120,7 +123,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
-          Predicted RAG (next 24 hours)
+          RAG Forecast (Next 24 Hours)
         </Typography>
         {renderContent()}
         <Typography

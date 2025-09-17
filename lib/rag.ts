@@ -6,6 +6,7 @@ import {
   DoNotDisturbOutlined,
   Flood,
   WbSunnyOutlined,
+  TrendingUp,
 } from "@mui/icons-material";
 
 // --- Existing exports that are still needed ---
@@ -59,7 +60,7 @@ export const ragStatus: Record<
   "Dark Green": {
     color: "#388E3C",
     emoji: "✅",
-    icon: CheckCircleOutline,
+    icon: TrendingUp,
     backgroundColor: "#C8E6C9",
   },
   Amber: {
@@ -239,6 +240,14 @@ export const calculateFinalRagStatus = (
   );
 
   const finalStatus = RAG_STATUS_MAP[ragNumber] || "Unknown";
+
+  if (initialRag === 1) {
+    reasons.unshift("Slightly elevated river level");
+  } else if (initialRag === 2) {
+    reasons.unshift("Moderately elevated river level");
+  } else if (initialRag === 3) {
+    reasons.unshift("Significantly elevated river level");
+  }
 
   return { status: finalStatus, reasons };
 };

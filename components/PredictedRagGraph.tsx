@@ -30,6 +30,9 @@ import Grain from "@mui/icons-material/Grain";
 import AcUnit from "@mui/icons-material/AcUnit";
 import Thermostat from "@mui/icons-material/Thermostat";
 import WbSunny from "@mui/icons-material/WbSunny";
+import TrendingUp from "@mui/icons-material/TrendingUp";
+import Warning from "@mui/icons-material/Warning";
+import Flood from "@mui/icons-material/Flood";
 
 interface PredictedRagGraphProps {
   data: PredictedGraphDataPoint[] | null;
@@ -45,6 +48,9 @@ const reasonToIcon: { [key: string]: React.ReactElement } = {
   Foggy: <Grain fontSize="small" />,
   "Low temperature": <AcUnit fontSize="small" />,
   "Moderate temperature": <Thermostat fontSize="small" />,
+  "Slightly elevated river level": <TrendingUp fontSize="small" />,
+  "Moderately elevated river level": <Warning fontSize="small" />,
+  "Significantly elevated river level": <Flood fontSize="small" />,
 };
 
 import {

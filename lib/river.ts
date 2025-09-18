@@ -1,11 +1,11 @@
 import { RiverReading, ApiResponse, ChartDataPoint } from "@/types";
 
-export const fetchRiverData = async (stationId: string = "2642") => {
-  const twentyFourHoursAgo = new Date(
-    new Date().getTime() - 24 * 60 * 60 * 1000
+export const fetchRiverData = async (stationId: string = "2642", days: number = 1) => {
+  const sinceDate = new Date(
+    new Date().getTime() - days * 24 * 60 * 60 * 1000
   ).toISOString();
   const response = await fetch(
-    `https://environment.data.gov.uk/flood-monitoring/id/stations/${stationId}/readings?since=${twentyFourHoursAgo}`
+    `https://environment.data.gov.uk/flood-monitoring/id/stations/${stationId}/readings?since=${sinceDate}`
   );
   const result: ApiResponse = await response.json();
   const sortedItems = result.items.sort(
@@ -15,10 +15,7 @@ export const fetchRiverData = async (stationId: string = "2642") => {
 
   const formattedData: ChartDataPoint[] = sortedItems.map(
     (item: RiverReading) => ({
-      time: new Date(item.dateTime).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      dateTime: item.dateTime,
       level: item.value,
     })
   );

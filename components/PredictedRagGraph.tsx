@@ -206,8 +206,11 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
   return (
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
-        <Typography variant="h5" component="div" gutterBottom>
-          RAG Forecast (Next 24 Hours)
+        <Typography variant="h5" component="div">
+          RAG Forecast
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+          Next 24 Hours
         </Typography>
         {renderContent()}
         <Typography

@@ -38,7 +38,7 @@ export interface ApiResponse {
 }
 
 export interface ChartDataPoint {
-  time: string;
+  dateTime: string; // ISO string
   level: number;
 }
 

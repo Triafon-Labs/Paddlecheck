@@ -5,8 +5,7 @@ import {
   WarningAmberOutlined,
   DoNotDisturbOutlined,
   Flood,
-  WbSunnyOutlined,
-  TrendingUp,
+  TrendingUpOutlined,
 } from "@mui/icons-material";
 
 // --- Existing exports that are still needed ---
@@ -52,31 +51,31 @@ export const ragStatus: Record<
     backgroundColor: "#F5F5F5",
   },
   "Light Green": {
-    color: "#4CAF50",
+    color: "#4CBB17",
     emoji: "✅",
-    icon: WbSunnyOutlined,
+    icon: CheckCircleOutline,
     backgroundColor: "#E8F5E9",
   },
   "Dark Green": {
-    color: "#388E3C",
-    emoji: "✅",
-    icon: TrendingUp,
+    color: "#008000",
+    emoji: "📈",
+    icon: TrendingUpOutlined,
     backgroundColor: "#C8E6C9",
   },
   Amber: {
-    color: "#FF9800",
-    emoji: "🔶",
+    color: "#FFBF00",
+    emoji: "⚠️",
     icon: WarningAmberOutlined,
     backgroundColor: "#FFF3E0",
   },
   Red: {
-    color: "#F44336",
-    emoji: "❌",
+    color: "#FF0000",
+    emoji: "🚨",
     icon: Flood,
     backgroundColor: "#FFEBEE",
   },
   "No Paddling": {
-    color: "#212121",
+    color: "#FF0000",
     emoji: "⛔",
     icon: DoNotDisturbOutlined,
     backgroundColor: "#E0E0E0",

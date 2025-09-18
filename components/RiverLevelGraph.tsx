@@ -91,7 +91,7 @@ const CustomTooltip = ({
   payload,
   label,
 }: TooltipContentProps<ValueType, NameType>) => {
-  if (active && payload && payload.length) {
+  if (active && payload && payload.length && label) {
     const value = payload[0].value as number;
     return (
       <Paper sx={{ p: 2 }}>

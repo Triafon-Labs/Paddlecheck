@@ -1,11 +1,11 @@
 import { RiverReading, ApiResponse, ChartDataPoint } from "@/types";
 
-export const fetchRiverData = async (stationId: string = "2642") => {
-  const twentyFourHoursAgo = new Date(
-    new Date().getTime() - 24 * 60 * 60 * 1000
+export const fetchRiverData = async (stationId: string = "2642", days: number = 1) => {
+  const sinceDate = new Date(
+    new Date().getTime() - days * 24 * 60 * 60 * 1000
   ).toISOString();
   const response = await fetch(
-    `https://environment.data.gov.uk/flood-monitoring/id/stations/${stationId}/readings?since=${twentyFourHoursAgo}`
+    `https://environment.data.gov.uk/flood-monitoring/id/stations/${stationId}/readings?since=${sinceDate}`
   );
   const result: ApiResponse = await response.json();
   const sortedItems = result.items.sort(
@@ -15,10 +15,7 @@ export const fetchRiverData = async (stationId: string = "2642") => {
 
   const formattedData: ChartDataPoint[] = sortedItems.map(
     (item: RiverReading) => ({
-      time: new Date(item.dateTime).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      dateTime: item.dateTime,
       level: item.value,
     })
   );
@@ -26,11 +23,23 @@ export const fetchRiverData = async (stationId: string = "2642") => {
   let latestLevel: number | null = null;
   let change24h: number | null = null;
   let change8h: number | null = null;
+  let change5d: number | null = null;
 
   if (sortedItems.length > 1) {
     latestLevel = sortedItems[sortedItems.length - 1].value;
-    const oldestLevel24h = sortedItems[0].value;
-    change24h = latestLevel - oldestLevel24h;
+    const oldestLevel5d = sortedItems[0].value;
+    change5d = latestLevel - oldestLevel5d;
+
+    const twentyFourHoursAgo = new Date(
+      new Date().getTime() - 24 * 60 * 60 * 1000
+    );
+    const twentyFourHourIndex = sortedItems.findIndex(
+      (item: RiverReading) => new Date(item.dateTime) >= twentyFourHoursAgo
+    );
+    if (twentyFourHourIndex !== -1) {
+      const oldestLevel24h = sortedItems[twentyFourHourIndex].value;
+      change24h = latestLevel - oldestLevel24h;
+    }
 
     const eightHoursAgo = new Date(
       new Date().getTime() - 8 * 60 * 60 * 1000
@@ -48,6 +57,7 @@ export const fetchRiverData = async (stationId: string = "2642") => {
     latestLevel,
     change24h,
     change8h,
+    change5d,
     historicalData: formattedData,
   };
 };

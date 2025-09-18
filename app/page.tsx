@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from "react";
 import { Container, Stack } from "@mui/material";
@@ -37,16 +37,18 @@ export default function HomePage() {
   );
   const [riverChange24h, setRiverChange24h] = useState<number | null>(null);
   const [riverChange8h, setRiverChange8h] = useState<number | null>(null);
+  const [riverChange5d, setRiverChange5d] = useState<number | null>(null);
   const [sunrise, setSunrise] = useState<string | null>(null);
   const [sunset, setSunset] = useState<string | null>(null);
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const riverData = await fetchRiverData();
+        const riverData = await fetchRiverData("2642", 5);
         setRiverGraphData(riverData.historicalData);
         setRiverChange24h(riverData.change24h);
         setRiverChange8h(riverData.change8h);
+        setRiverChange5d(riverData.change5d);
 
         const weatherData = await fetchWeatherData(52.2, -2.2);
 
@@ -94,7 +96,7 @@ export default function HomePage() {
 
     const getPredictedData = async () => {
       try {
-        const riverData = await fetchRiverData();
+        const riverData = await fetchRiverData("2642", 5);
         const futureWeatherData = await fetchFutureWeatherData(52.2, -2.2);
 
         setSunrise(futureWeatherData.daily.sunrise[0]);
@@ -203,6 +205,7 @@ export default function HomePage() {
           loading={loading}
           change24h={riverChange24h}
           change8h={riverChange8h}
+          change5d={riverChange5d}
         />
         <PredictedRagGraph
           data={predictedGraphData}

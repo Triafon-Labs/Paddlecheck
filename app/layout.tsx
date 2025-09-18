@@ -26,7 +26,6 @@ export const metadata: Metadata = {
   appleWebApp: {
     statusBarStyle: "black-translucent",
   },
-  themeColor: "#0A1929",
 };
 
 export default function RootLayout({

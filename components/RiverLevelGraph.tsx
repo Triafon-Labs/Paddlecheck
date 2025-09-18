@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   TrendingUp,
@@ -6,8 +6,9 @@ import {
   TrendingFlat,
   Schedule,
   Update,
+  CalendarToday,
 } from "@mui/icons-material";
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -16,6 +17,8 @@ import {
   CircularProgress,
   useTheme,
   Paper,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import {
   AreaChart,
@@ -27,7 +30,10 @@ import {
   ResponsiveContainer,
   TooltipContentProps,
 } from "recharts";
-import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 
 import { ChartDataPoint } from "@/types";
 
@@ -36,6 +42,7 @@ interface RiverLevelGraphProps {
   loading: boolean;
   change24h: number | null;
   change8h: number | null;
+  change5d: number | null;
 }
 
 const ChangeIndicator: React.FC<{
@@ -54,7 +61,9 @@ const ChangeIndicator: React.FC<{
       height: "100%",
     }}
   >
-    <Box sx={{ display: "flex", alignItems: "center", color: "text.secondary" }}>
+    <Box
+      sx={{ display: "flex", alignItems: "center", color: "text.secondary" }}
+    >
       {icon}
       <Typography variant="subtitle2" sx={{ ml: 0.5 }}>
         {period}
@@ -64,9 +73,9 @@ const ChangeIndicator: React.FC<{
       <Typography variant="h6" component="span">
         {change !== null ? (
           change > 0 ? (
-            <TrendingUp sx={{ color: "success.main", mr: 0.5 }} />
+            <TrendingUp sx={{ color: "error.main", mr: 0.5 }} />
           ) : change < 0 ? (
-            <TrendingDown sx={{ color: "error.main", mr: 0.5 }} />
+            <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
           ) : (
             <TrendingFlat sx={{ mr: 0.5 }} />
           )
@@ -77,15 +86,19 @@ const ChangeIndicator: React.FC<{
   </Paper>
 );
 
-const CustomTooltip = ({ active, payload, label }: TooltipContentProps<ValueType, NameType>) => {
-  if (active && payload && payload.length) {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: TooltipContentProps<ValueType, NameType>) => {
+  if (active && payload && payload.length && label) {
     const value = payload[0].value as number;
     return (
       <Paper sx={{ p: 2 }}>
-        <Typography variant="body1">{`Time: ${label}`}</Typography>
-        <Typography variant="body2">{`Level: ${value.toFixed(
-          2
-        )}m`}</Typography>
+        <Typography variant="body1">{`Time: ${new Date(
+          label
+        ).toLocaleString()}`}</Typography>
+        <Typography variant="body2">{`Level: ${value.toFixed(2)}m`}</Typography>
       </Paper>
     );
   }
@@ -98,8 +111,47 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   loading,
   change24h,
   change8h,
+  change5d,
 }) => {
   const theme = useTheme();
+  const [timeRange, setTimeRange] = useState("24h");
+
+  useEffect(() => {
+    const savedTimeRange = localStorage.getItem("riverGraphTimeRange");
+    if (savedTimeRange) {
+      setTimeRange(savedTimeRange);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("riverGraphTimeRange", timeRange);
+  }, [timeRange]);
+
+  const filteredData = useMemo(() => {
+    if (!data) return null;
+
+    const now = new Date();
+    let hoursToFilter;
+    if (timeRange === "24h") {
+      hoursToFilter = 24;
+    } else if (timeRange === "8h") {
+      hoursToFilter = 8;
+    } else {
+      return data;
+    }
+
+    const filterDate = new Date(now.getTime() - hoursToFilter * 60 * 60 * 1000);
+
+    return data.filter((d) => new Date(d.dateTime) > filterDate);
+  }, [data, timeRange]);
+
+  const formatXAxis = (tickItem: string) => {
+    const date = new Date(tickItem);
+    if (timeRange === "5d") {
+      return date.toLocaleDateString([], { month: "short", day: "numeric" });
+    }
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
 
   const renderContent = () => {
     if (loading) {
@@ -109,11 +161,11 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
         </Box>
       );
     }
-    if (data) {
+    if (filteredData) {
       return (
         <>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={data}>
+            <AreaChart data={filteredData}>
               <defs>
                 <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
                   <stop
@@ -132,7 +184,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 strokeDasharray="3 3"
                 stroke={theme.palette.divider}
               />
-              <XAxis dataKey="time" stroke={theme.palette.text.secondary} />
+              <XAxis dataKey="dateTime" tickFormatter={formatXAxis} />
               <YAxis stroke={theme.palette.text.secondary} />
               <Tooltip content={CustomTooltip} />
               <Area
@@ -147,11 +199,16 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
+              gridTemplateColumns: "repeat(3, 1fr)",
               gap: 2,
               mt: 2,
             }}
           >
+            <ChangeIndicator
+              period="5d Change"
+              change={change5d}
+              icon={<CalendarToday />}
+            />
             <ChangeIndicator
               period="24h Change"
               change={change24h}
@@ -176,9 +233,36 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   return (
     <Card variant="outlined" sx={{ width: "100%", mt: 2, p: 2 }}>
       <CardContent>
-        <Typography variant="h5" component="div" gutterBottom>
-          River Level (Last 24 Hours)
-        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <Typography variant="h5" component="div">
+              River Level
+            </Typography>
+            <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+              Last 5 Days
+            </Typography>
+          </div>
+          <ToggleButtonGroup
+            value={timeRange}
+            exclusive
+            onChange={(event, newTimeRange) => {
+              if (newTimeRange) {
+                setTimeRange(newTimeRange);
+              }
+            }}
+            aria-label="time range"
+          >
+            <ToggleButton value="5d" aria-label="5 days">
+              <Typography variant="caption">5d</Typography>
+            </ToggleButton>
+            <ToggleButton value="24h" aria-label="24 hours">
+              <Typography variant="caption">24h</Typography>
+            </ToggleButton>
+            <ToggleButton value="8h" aria-label="8 hours">
+              <Typography variant="caption">8h</Typography>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
         {renderContent()}
       </CardContent>
     </Card>

@@ -6,6 +6,7 @@ import {
   TrendingFlat,
   Schedule,
   Update,
+  CalendarToday,
 } from "@mui/icons-material";
 import React, { useState, useEffect, useMemo } from "react";
 import {
@@ -41,6 +42,7 @@ interface RiverLevelGraphProps {
   loading: boolean;
   change24h: number | null;
   change8h: number | null;
+  change5d: number | null;
 }
 
 const ChangeIndicator: React.FC<{
@@ -109,6 +111,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   loading,
   change24h,
   change8h,
+  change5d,
 }) => {
   const theme = useTheme();
   const [timeRange, setTimeRange] = useState("24h");
@@ -196,11 +199,16 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
+              gridTemplateColumns: "repeat(3, 1fr)",
               gap: 2,
               mt: 2,
             }}
           >
+            <ChangeIndicator
+              period="5d Change"
+              change={change5d}
+              icon={<CalendarToday />}
+            />
             <ChangeIndicator
               period="24h Change"
               change={change24h}

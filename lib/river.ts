@@ -23,11 +23,23 @@ export const fetchRiverData = async (stationId: string = "2642", days: number = 
   let latestLevel: number | null = null;
   let change24h: number | null = null;
   let change8h: number | null = null;
+  let change5d: number | null = null;
 
   if (sortedItems.length > 1) {
     latestLevel = sortedItems[sortedItems.length - 1].value;
-    const oldestLevel24h = sortedItems[0].value;
-    change24h = latestLevel - oldestLevel24h;
+    const oldestLevel5d = sortedItems[0].value;
+    change5d = latestLevel - oldestLevel5d;
+
+    const twentyFourHoursAgo = new Date(
+      new Date().getTime() - 24 * 60 * 60 * 1000
+    );
+    const twentyFourHourIndex = sortedItems.findIndex(
+      (item: RiverReading) => new Date(item.dateTime) >= twentyFourHoursAgo
+    );
+    if (twentyFourHourIndex !== -1) {
+      const oldestLevel24h = sortedItems[twentyFourHourIndex].value;
+      change24h = latestLevel - oldestLevel24h;
+    }
 
     const eightHoursAgo = new Date(
       new Date().getTime() - 8 * 60 * 60 * 1000
@@ -45,6 +57,7 @@ export const fetchRiverData = async (stationId: string = "2642", days: number = 
     latestLevel,
     change24h,
     change8h,
+    change5d,
     historicalData: formattedData,
   };
 };

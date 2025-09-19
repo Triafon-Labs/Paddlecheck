@@ -7,6 +7,7 @@ import {
   Schedule,
   Update,
   CalendarToday,
+  AccessTime,
 } from "@mui/icons-material";
 import React, { useState, useEffect, useMemo } from "react";
 import {
@@ -40,6 +41,7 @@ import { ChartDataPoint } from "@/types";
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
   loading: boolean;
+  change1h: number | null;
   change24h: number | null;
   change8h: number | null;
   change5d: number | null;
@@ -93,12 +95,19 @@ const CustomTooltip = ({
 }: TooltipContentProps<ValueType, NameType>) => {
   if (active && payload && payload.length && label) {
     const value = payload[0].value as number;
+    const date = new Date(label);
+    const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}, ${date
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
     return (
       <Paper sx={{ p: 2 }}>
-        <Typography variant="body1">{`Time: ${new Date(
-          label
-        ).toLocaleString()}`}</Typography>
-        <Typography variant="body2">{`Level: ${value.toFixed(2)}m`}</Typography>
+        <Typography variant="body1">{formattedDate}</Typography>
+        <Typography variant="body2">{`${value.toFixed(2)}m`}</Typography>
       </Paper>
     );
   }
@@ -109,6 +118,7 @@ const CustomTooltip = ({
 const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   data,
   loading,
+  change1h,
   change24h,
   change8h,
   change5d,
@@ -132,10 +142,12 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
 
     const now = new Date();
     let hoursToFilter;
-    if (timeRange === "24h") {
-      hoursToFilter = 24;
+    if (timeRange === "1h") {
+      hoursToFilter = 1;
     } else if (timeRange === "8h") {
       hoursToFilter = 8;
+    } else if (timeRange === "24h") {
+      hoursToFilter = 24;
     } else {
       return data;
     }
@@ -199,15 +211,20 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
+              gridTemplateColumns: "repeat(2, 1fr)",
               gap: 2,
               mt: 2,
             }}
           >
             <ChangeIndicator
-              period="5d Change"
-              change={change5d}
-              icon={<CalendarToday />}
+              period="1h Change"
+              change={change1h}
+              icon={<AccessTime />}
+            />
+            <ChangeIndicator
+              period="8h Change"
+              change={change8h}
+              icon={<Schedule />}
             />
             <ChangeIndicator
               period="24h Change"
@@ -215,9 +232,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               icon={<Update />}
             />
             <ChangeIndicator
-              period="8h Change"
-              change={change8h}
-              icon={<Schedule />}
+              period="5d Change"
+              change={change5d}
+              icon={<CalendarToday />}
             />
           </Box>
         </>
@@ -260,6 +277,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             </ToggleButton>
             <ToggleButton value="8h" aria-label="8 hours">
               <Typography variant="caption">8h</Typography>
+            </ToggleButton>
+            <ToggleButton value="1h" aria-label="1 hour">
+              <Typography variant="caption">1h</Typography>
             </ToggleButton>
           </ToggleButtonGroup>
         </Box>

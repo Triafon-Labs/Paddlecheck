@@ -36,6 +36,7 @@ export default function HomePage() {
   const [riverGraphData, setRiverGraphData] = useState<ChartDataPoint[] | null>(
     null
   );
+  const [riverChange1h, setRiverChange1h] = useState<number | null>(null);
   const [riverChange24h, setRiverChange24h] = useState<number | null>(null);
   const [riverChange8h, setRiverChange8h] = useState<number | null>(null);
   const [riverChange5d, setRiverChange5d] = useState<number | null>(null);
@@ -47,6 +48,7 @@ export default function HomePage() {
       try {
         const riverData = await fetchRiverData("2642", 5);
         setRiverGraphData(riverData.historicalData);
+        setRiverChange1h(riverData.change1h);
         setRiverChange24h(riverData.change24h);
         setRiverChange8h(riverData.change8h);
         setRiverChange5d(riverData.change5d);
@@ -210,6 +212,7 @@ export default function HomePage() {
         <RiverLevelGraph
           data={riverGraphData}
           loading={loading}
+          change1h={riverChange1h}
           change24h={riverChange24h}
           change8h={riverChange8h}
           change5d={riverChange5d}

@@ -79,7 +79,7 @@ const ChangeIndicator: React.FC<{
           ) : change < 0 ? (
             <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
           ) : (
-            <TrendingFlat sx={{ mr: 0.5 }} />
+            <TrendingFlat sx={{ color: "warning.main", mr: 0.5 }} />
           )
         ) : null}
         {change !== null ? `${change.toFixed(2)}m` : "N/A"}

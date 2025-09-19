@@ -159,6 +159,7 @@ const adjustRagForConditions = (
   baseRag: number,
   isDark: boolean,
   visibility: number, // in metres
+  weatherCode: number,
   weatherReasons: string[]
 ): { ragNumber: number; reasons: string[] } => {
   let ragNumber = baseRag;
@@ -166,12 +167,14 @@ const adjustRagForConditions = (
 
   if (isDark) {
     reasons.push("Dark");
-    ragNumber += ragNumber === 0 ? 2 : 1;
+    ragNumber += 1;
   }
 
-  if (visibility < 1000) {
+  const isFoggy = visibility < 1000 || [45, 48].includes(weatherCode);
+
+  if (isFoggy) {
     reasons.push("Foggy");
-    ragNumber += ragNumber === 0 ? 2 : 1;
+    ragNumber += 1;
   }
 
   return { ragNumber: Math.min(ragNumber, 3), reasons };
@@ -235,6 +238,7 @@ export const calculateFinalRagStatus = (
     finalRag,
     dark,
     visibility,
+    weatherCode,
     weatherReasons
   );
 

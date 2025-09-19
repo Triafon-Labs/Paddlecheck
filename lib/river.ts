@@ -21,6 +21,7 @@ export const fetchRiverData = async (stationId: string = "2642", days: number = 
   );
 
   let latestLevel: number | null = null;
+  let change1h: number | null = null;
   let change24h: number | null = null;
   let change8h: number | null = null;
   let change5d: number | null = null;
@@ -29,6 +30,15 @@ export const fetchRiverData = async (stationId: string = "2642", days: number = 
     latestLevel = sortedItems[sortedItems.length - 1].value;
     const oldestLevel5d = sortedItems[0].value;
     change5d = latestLevel - oldestLevel5d;
+
+    const oneHourAgo = new Date(new Date().getTime() - 1 * 60 * 60 * 1000);
+    const oneHourIndex = sortedItems.findIndex(
+      (item: RiverReading) => new Date(item.dateTime) >= oneHourAgo
+    );
+    if (oneHourIndex !== -1) {
+      const oldestLevel1h = sortedItems[oneHourIndex].value;
+      change1h = latestLevel - oldestLevel1h;
+    }
 
     const twentyFourHoursAgo = new Date(
       new Date().getTime() - 24 * 60 * 60 * 1000
@@ -55,6 +65,7 @@ export const fetchRiverData = async (stationId: string = "2642", days: number = 
 
   return {
     latestLevel,
+    change1h,
     change24h,
     change8h,
     change5d,

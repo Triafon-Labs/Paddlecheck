@@ -51,42 +51,51 @@ const ChangeIndicator: React.FC<{
   period: string;
   change: number | null;
   icon: React.ReactNode;
-}> = ({ period, change, icon }) => (
-  <Paper
-    variant="outlined"
-    sx={{
-      p: 2,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      flexDirection: "column",
-      height: "100%",
-    }}
-  >
-    <Box
-      sx={{ display: "flex", alignItems: "center", color: "text.secondary" }}
+}> = ({ period, change, icon }) => {
+  const changeStr = change !== null ? change.toFixed(2) : null;
+  const isFlat = changeStr === "0.00" || changeStr === "-0.00";
+
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column",
+        height: "100%",
+      }}
     >
-      {icon}
-      <Typography variant="subtitle2" sx={{ ml: 0.5 }}>
-        {period}
-      </Typography>
-    </Box>
-    <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-      <Typography variant="h6" component="span">
-        {change !== null ? (
-          change > 0 ? (
-            <TrendingUp sx={{ color: "error.main", mr: 0.5 }} />
-          ) : change < 0 ? (
-            <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
-          ) : (
-            <TrendingFlat sx={{ color: "warning.main", mr: 0.5 }} />
-          )
-        ) : null}
-        {change !== null ? `${change.toFixed(2)}m` : "N/A"}
-      </Typography>
-    </Box>
-  </Paper>
-);
+      <Box
+        sx={{ display: "flex", alignItems: "center", color: "text.secondary" }}
+      >
+        {icon}
+        <Typography variant="subtitle2" sx={{ ml: 0.5 }}>
+          {period}
+        </Typography>
+      </Box>
+      <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+        <Typography variant="h6" component="span">
+          {change !== null ? (
+            isFlat ? (
+              <TrendingFlat sx={{ color: "warning.main", mr: 0.5 }} />
+            ) : change > 0 ? (
+              <TrendingUp sx={{ color: "error.main", mr: 0.5 }} />
+            ) : (
+              <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
+            )
+          ) : null}
+          {change !== null
+            ? isFlat
+              ? `0.00m`
+              : `${changeStr}m`
+            : "N/A"}
+        </Typography>
+      </Box>
+    </Paper>
+  );
+};
 
 const CustomTooltip = ({
   active,

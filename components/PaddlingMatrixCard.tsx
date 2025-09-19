@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -11,12 +11,16 @@ import {
   TableRow,
   Tooltip,
   Box,
+  Collapse,
+  IconButton,
 } from "@mui/material";
 import {
   CheckCircleOutline,
   CancelOutlined,
   WarningAmberOutlined,
   HelpOutline,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
 } from "@mui/icons-material";
 import {
   Status,
@@ -25,6 +29,7 @@ import {
   PaddlingStatus,
   PaddlingStatusValue,
 } from "@/types";
+import { ragStatus } from "@/lib/rag";
 
 interface PaddlingMatrixCardProps {
   overallStatus: Status;
@@ -34,15 +39,21 @@ interface PaddlingMatrixCardProps {
 const getStatusIcon = (status: PaddlingStatusValue) => {
   switch (status) {
     case "Yes":
-      return <CheckCircleOutline style={{ color: "green" }} />;
+      return (
+        <CheckCircleOutline style={{ color: ragStatus["Light Green"].color }} />
+      );
     case "No":
-      return <CancelOutlined style={{ color: "red" }} />;
+      return <CancelOutlined style={{ color: ragStatus["Red"].color }} />;
     case "Discretion":
-      return <WarningAmberOutlined style={{ color: "orange" }} />;
+      return (
+        <WarningAmberOutlined style={{ color: ragStatus["Amber"].color }} />
+      );
     case "Warning":
-      return <WarningAmberOutlined style={{ color: "orange" }} />;
+      return (
+        <WarningAmberOutlined style={{ color: ragStatus["Amber"].color }} />
+      );
     default:
-      return <HelpOutline style={{ color: "grey" }} />;
+      return <HelpOutline style={{ color: ragStatus["Unknown"].color }} />;
   }
 };
 
@@ -156,7 +167,55 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
 }) => {
   const paddlingMatrix = getPaddlingMatrix(overallStatus, riverLevel);
 
-  const paddlerTypes = Object.keys(paddlingMatrix) as PaddlerType[];
+  const paddlerTypes: PaddlerType[] = [
+    "Junior",
+    "Beginner",
+    "Improver",
+    "Intermediate",
+    "Independent",
+  ];
+
+  const [open, setOpen] = useState<Record<PaddlerType, boolean>>({});
+
+  useEffect(() => {
+    const savedLevel = localStorage.getItem("paddlerLevel") as PaddlerType | null;
+
+    const newOpenState = paddlerTypes.reduce((acc, paddler) => {
+      if (savedLevel) {
+        acc[paddler] = paddler === savedLevel;
+      } else {
+        acc[paddler] = true; // Expand all if no level is selected
+      }
+      return acc;
+    }, {} as Record<PaddlerType, boolean>);
+
+    setOpen(newOpenState);
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === "paddlerLevel") {
+        const newLevel = event.newValue as PaddlerType | null;
+        const updatedOpenState = paddlerTypes.reduce((acc, paddler) => {
+          if (newLevel) {
+            acc[paddler] = paddler === newLevel;
+          } else {
+            acc[paddler] = true;
+          }
+          return acc;
+        }, {} as Record<PaddlerType, boolean>);
+        setOpen(updatedOpenState);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []); // Empty dependency array to run only on mount and unmount
+
+  const handleToggle = (paddler: PaddlerType) => {
+    setOpen((prevOpen) => ({ ...prevOpen, [paddler]: !prevOpen[paddler] }));
+  };
 
   return (
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
@@ -168,32 +227,62 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
           <Table size="small">
             <TableHead>
               <TableRow>
+                <TableCell /> {/* For the collapse button */}
                 <TableCell>Paddler</TableCell>
                 <TableCell align="center">Status</TableCell>
-                <TableCell>Details</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {paddlerTypes.map((paddler) => {
                 const statusInfo = paddlingMatrix[paddler];
                 return (
-                  <TableRow key={paddler}>
-                    <TableCell component="th" scope="row">
-                      {paddler}
-                    </TableCell>
-                    <TableCell align="center">
-                      {statusInfo && (
-                        <Tooltip title={statusInfo.status} placement="top">
-                          <Box display="flex" justifyContent="center">
-                            {getStatusIcon(statusInfo.status)}
+                  <React.Fragment key={paddler}>
+                    <TableRow>
+                      <TableCell>
+                        <IconButton
+                          aria-label="expand row"
+                          size="small"
+                          onClick={() => handleToggle(paddler)}
+                        >
+                          {open[paddler] ? (
+                            <KeyboardArrowUp />
+                          ) : (
+                            <KeyboardArrowDown />
+                          )}
+                        </IconButton>
+                      </TableCell>
+                      <TableCell component="th" scope="row">
+                        {paddler}
+                      </TableCell>
+                      <TableCell align="center">
+                        {statusInfo && (
+                          <Tooltip title={statusInfo.status} placement="top">
+                            <Box display="flex" justifyContent="center">
+                              {getStatusIcon(statusInfo.status)}
+                            </Box>
+                          </Tooltip>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell
+                        style={{ paddingBottom: 0, paddingTop: 0 }}
+                        colSpan={3}
+                      >
+                        <Collapse
+                          in={open[paddler]}
+                          timeout="auto"
+                          unmountOnExit
+                        >
+                          <Box sx={{ margin: 1 }}>
+                            <Typography variant="body2">
+                              {statusInfo ? statusInfo.details : ""}
+                            </Typography>
                           </Box>
-                        </Tooltip>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {statusInfo ? statusInfo.details : ""}
-                    </TableCell>
-                  </TableRow>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
                 );
               })}
             </TableBody>

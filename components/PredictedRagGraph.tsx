@@ -20,6 +20,7 @@ import {
   Cell,
   TooltipContentProps,
   ReferenceLine,
+  Line,
 } from "recharts";
 import { PredictedGraphDataPoint } from "@/types";
 import { ragStatus } from "@/lib/rag";
@@ -69,6 +70,9 @@ const CustomTooltip = ({
       <Paper sx={{ p: 2 }}>
         <Typography variant="body1">{`${label}`}</Typography>
         <Typography variant="body2">{`${data.status}`}</Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          River Level: {data.predictedLevel.toFixed(2)}m
+        </Typography>
         {data.reasons && data.reasons.length > 0 && (
           <Box sx={{ mt: 1 }}>
             <Typography variant="subtitle2">Reasons:</Typography>
@@ -144,7 +148,8 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={data} margin={{ top: 40 }}>
             <XAxis dataKey="time" />
-            <YAxis hide domain={[0, 1]} />
+            <YAxis yAxisId="left" hide domain={[0, 1]} />
+            <YAxis yAxisId="right" orientation="right" stroke={lineColor} />
             <Tooltip content={CustomTooltip} cursor={{ fill: "transparent" }} />
             {sunriseHour && sunrise && (
               <ReferenceLine
@@ -192,6 +197,14 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 />
               ))}
             </Bar>
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="predictedLevel"
+              stroke={theme.palette.primary.main}
+              strokeWidth={2}
+              dot={false}
+            />
           </BarChart>
         </ResponsiveContainer>
       );

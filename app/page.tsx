@@ -172,6 +172,7 @@ export default function HomePage() {
             status: status,
             reasons: reasons,
             value: 0.9, // Dummy value for bar height
+            predictedLevel: predictedRiverLevel,
           });
         }
 

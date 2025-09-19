@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Stack } from "@mui/material";
 import StatusCard from "@/components/StatusCard";
+import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";
 import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
 import PredictedRagGraph from "@/components/PredictedRagGraph";
@@ -199,6 +200,12 @@ export default function HomePage() {
     <Container maxWidth="md">
       <Stack spacing={4} sx={{ py: 2, pb: 16 }}>
         <StatusCard conditions={conditions} loading={loading} />
+        {conditions && (
+          <PaddlingMatrixCard
+            overallStatus={conditions.overallStatus}
+            riverLevel={conditions.riverLevel}
+          />
+        )}
         <StatsCard conditions={conditions} />
         <RiverLevelGraph
           data={riverGraphData}

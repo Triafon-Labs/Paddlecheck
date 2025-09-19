@@ -60,17 +60,16 @@ const getPaddlingMatrix = (
 
   switch (overallStatus) {
     case "Light Green":
-      beginner.status = "Yes";
-      beginner.details = "Must be supervised by a club coach and wear a PFD.";
-      junior.status = "Yes";
-      junior.details =
-        "Must be supervised by a club coach or independent paddler and wear a PFD.";
+      beginner.status = "No";
+      beginner.details = "Can only paddle in Dark Green conditions.";
+      junior.status = "No";
+      junior.details = "Can only paddle in Dark Green conditions.";
       improver.status = "Yes";
       improver.details =
         "Can paddle in a group without a coach under Annex rules. Must wear a PFD.";
       intermediate.status = "Yes";
       intermediate.details =
-        "Can paddle solo under Annex rules. Must wear a PFD.";
+        "Can paddle solo under Annex rules (phone, approved boat, stay in defined area). Must wear a PFD.";
       independent.status = "Yes";
       independent.details = "No restrictions.";
       break;
@@ -84,7 +83,7 @@ const getPaddlingMatrix = (
       improver.details = "Must be supervised by a club coach and wear a PFD.";
       intermediate.status = "Yes";
       intermediate.details =
-        "Can paddle with at least one other intermediate paddler under Annex rules. Must wear a PFD.";
+        "Can paddle with at least one other intermediate paddler under Annex rules (phone, approved boat, stay in defined area). Must wear a PFD.";
       independent.status = "Yes";
       independent.details = "No restrictions.";
       break;
@@ -119,7 +118,7 @@ const getPaddlingMatrix = (
       }
       independent.status = "Warning";
       independent.details =
-        "Strongly advised not to paddle alone. Must wear a PFD.";
+        "Strongly advised not to paddle alone. Must wear PFD.";
       break;
     case "No Paddling":
     case "Unknown":
@@ -132,14 +131,13 @@ const getPaddlingMatrix = (
       break;
   }
 
-  if (riverLevel && riverLevel >= 1.48) {
+  // Independent PFD warning for high water level, if not in Red conditions (as Red already includes it)
+  if (overallStatus !== 'Red' && riverLevel && riverLevel >= 1.48) {
     if (independent.status === "Yes") {
       independent.status = "Warning";
-      independent.details +=
-        " Must wear PFD as river is on or above concrete landing stage.";
+      independent.details = "Must wear PFD as river is on or above concrete landing stage.";
     } else if (independent.status !== "No") {
-      independent.details +=
-        " Must wear PFD as river is on or above concrete landing stage.";
+      independent.details += " Must wear PFD as river is on or above concrete landing stage.";
     }
   }
 
@@ -158,18 +156,12 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
 }) => {
   const paddlingMatrix = getPaddlingMatrix(overallStatus, riverLevel);
 
-  const paddlerTypes: PaddlerType[] = [
-    "Beginner",
-    "Junior",
-    "Improver",
-    "Intermediate",
-    "Independent",
-  ];
+  const paddlerTypes = Object.keys(paddlingMatrix) as PaddlerType[];
 
   return (
-    <Card>
+    <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h5" component="div" gutterBottom>
           Who Can Paddle
         </Typography>
         <TableContainer>

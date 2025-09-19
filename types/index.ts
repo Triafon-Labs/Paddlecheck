@@ -77,3 +77,21 @@ export interface PredictedGraphDataPoint {
   reasons: string[];
   value: number;
 }
+
+export type PaddlerType =
+  | "Beginner"
+  | "Improver"
+  | "Intermediate"
+  | "Junior"
+  | "Independent";
+
+export type PaddlingStatusValue = "Yes" | "No" | "Discretion" | "Warning";
+
+export interface PaddlingStatus {
+  status: PaddlingStatusValue;
+  details: string;
+}
+
+export type PaddlingMatrix = {
+  [key in PaddlerType]?: PaddlingStatus;
+};

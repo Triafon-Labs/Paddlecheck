@@ -15,6 +15,12 @@ import {
   Switch,
   Divider,
   ListItemIcon,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  SelectChangeEvent,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
@@ -27,6 +33,7 @@ import {
   LightMode,
   SettingsBrightness,
 } from "@mui/icons-material";
+import { PaddlerType } from "@/types";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -45,12 +52,44 @@ interface SettingsModalProps {
 const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const { themeMode, setThemeMode } = useAppTheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">("");
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      setNotificationsEnabled(Notification.permission === "granted");
+    if (typeof window !== "undefined") {
+      const savedLevel = localStorage.getItem("paddlerLevel") as
+        | PaddlerType
+        | undefined;
+      if (savedLevel) {
+        setPaddlerLevel(savedLevel);
+      }
+      if ("Notification" in window) {
+        setNotificationsEnabled(Notification.permission === "granted");
+      }
     }
   }, []);
+
+  const handleLevelChange = (event: SelectChangeEvent<PaddlerType | "">) => {
+    const level = event.target.value as PaddlerType | "";
+    setPaddlerLevel(level);
+    if (level) {
+      localStorage.setItem("paddlerLevel", level);
+    } else {
+      localStorage.removeItem("paddlerLevel");
+    }
+  };
+
+  const handleClearLevel = () => {
+    setPaddlerLevel("");
+    localStorage.removeItem("paddlerLevel");
+  };
+
+  const paddlerTypes: PaddlerType[] = [
+    "Junior",
+    "Beginner",
+    "Improver",
+    "Intermediate",
+    "Independent",
+  ];
 
   const handleNotificationToggle = async () => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -122,6 +161,31 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           <ListItemText primary="System" />
           {themeMode === "system" && <CheckIcon />}
         </ListItemButton>
+        <Divider />
+        <ListSubheader>Paddling Level</ListSubheader>
+        <ListItem>
+          <FormControl fullWidth>
+            <InputLabel id="paddler-level-select-label">My Level</InputLabel>
+            <Select
+              labelId="paddler-level-select-label"
+              id="paddler-level-select"
+              value={paddlerLevel}
+              label="My Level"
+              onChange={handleLevelChange}
+            >
+              {paddlerTypes.map((level) => (
+                <MenuItem key={level} value={level}>
+                  {level}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </ListItem>
+        <ListItem>
+          <Button onClick={handleClearLevel} disabled={!paddlerLevel}>
+            Clear Selection
+          </Button>
+        </ListItem>
         <Divider />
         <ListSubheader>Notifications</ListSubheader>
         <ListItem>

@@ -19,7 +19,7 @@ import {
   calculateInitialRagStatus,
   RAG_STATUS_MAP,
 } from "@/lib/rag";
-import { fetchRiverData } from "@/lib/river";
+import { fetchRiverData, predictRiverLevel } from "@/lib/river";
 import {
   fetchWeatherData,
   getVisibilityDescription,
@@ -128,9 +128,12 @@ export default function HomePage() {
           const timeStr = futureWeatherData.hourly.time[index];
           const hour = parseInt(timeStr.split("T")[1].split(":")[0], 10);
 
-          const hourlyRiverLevelChange = (riverData.change8h || 0) / 8;
-          const predictedRiverLevel =
-            (riverData.latestLevel || 0) + hourlyRiverLevelChange * i;
+          const predictedRiverLevel = predictRiverLevel(
+            riverData.latestLevel || 0,
+            riverData.change1h || 0,
+            riverData.change8h || 0,
+            i + 1
+          );
 
           const sunriseHour = futureWeatherData.daily.sunrise[0]
             ? parseInt(
@@ -169,6 +172,7 @@ export default function HomePage() {
             status: status,
             reasons: reasons,
             value: 0.9, // Dummy value for bar height
+            predictedLevel: predictedRiverLevel,
           });
         }
 

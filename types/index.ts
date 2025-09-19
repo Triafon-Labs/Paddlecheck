@@ -76,6 +76,7 @@ export interface PredictedGraphDataPoint {
   status: Status;
   reasons: string[];
   value: number;
+  predictedLevel: number;
 }
 
 export type PaddlerType =

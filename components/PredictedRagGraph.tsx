@@ -68,7 +68,7 @@ const CustomTooltip = ({
     return (
       <Paper sx={{ p: 2 }}>
         <Typography variant="body1">{`${label}`}</Typography>
-        <Typography variant="body2">{`Status: ${data.status}`}</Typography>
+        <Typography variant="body2">{`${data.status}`}</Typography>
         {data.reasons && data.reasons.length > 0 && (
           <Box sx={{ mt: 1 }}>
             <Typography variant="subtitle2">Reasons:</Typography>

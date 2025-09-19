@@ -175,7 +175,12 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
     "Independent",
   ];
 
-  const [open, setOpen] = useState<Record<PaddlerType, boolean>>({});
+  const [open, setOpen] = useState<Record<PaddlerType, boolean>>(
+    paddlerTypes.reduce(
+      (acc, paddler) => ({ ...acc, [paddler]: false }),
+      {} as Record<PaddlerType, boolean>
+    )
+  );
 
   useEffect(() => {
     const savedLevel = localStorage.getItem("paddlerLevel") as PaddlerType | null;

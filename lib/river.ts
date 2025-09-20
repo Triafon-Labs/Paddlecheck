@@ -79,20 +79,11 @@ export const predictRiverLevel = (
   change8h: number,
   hoursInFuture: number
 ): number => {
-  // v0 (initial velocity) is the change in the last hour
-  const v0 = change1h;
+  // Use the average velocity over the last 8 hours for a more stable prediction.
+  const averageVelocity8h = change8h / 8;
 
-  // Estimate v_start (velocity at the start of the 8-hour period)
-  // v_avg = (v_start + v_end) / 2  => v_start = 2 * v_avg - v_end
-  const v_avg_8h = change8h / 8;
-  const v_start = 2 * v_avg_8h - v0;
-
-  // a (acceleration) is the change in velocity over 8 hours
-  const a = (v0 - v_start) / 8;
-
-  // Kinematic equation: s = s0 + v0*t + 0.5*a*t^2
-  const predictedLevel =
-    latestLevel + v0 * hoursInFuture + 0.5 * a * Math.pow(hoursInFuture, 2);
+  // Simple linear extrapolation: level = initial_level + velocity * time
+  const predictedLevel = latestLevel + averageVelocity8h * hoursInFuture;
 
   // Ensure prediction doesn't go below a sensible minimum (e.g., 0)
   return Math.max(0, predictedLevel);

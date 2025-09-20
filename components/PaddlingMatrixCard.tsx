@@ -71,10 +71,11 @@ const getPaddlingMatrix = (
 
   switch (overallStatus) {
     case "Light Green":
-      beginner.status = "No";
-      beginner.details = "Can only paddle in Dark Green conditions.";
-      junior.status = "No";
-      junior.details = "Can only paddle in Dark Green conditions.";
+      beginner.status = "Yes";
+      beginner.details = "Must be supervised by a club coach and wear a PFD.";
+      junior.status = "Yes";
+      junior.details =
+        "Must be supervised by a club coach or independent paddler and wear a PFD.";
       improver.status = "Yes";
       improver.details =
         "Can paddle in a group without a coach under Annex rules. Must wear a PFD.";

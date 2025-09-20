@@ -75,25 +75,56 @@ export const fetchRiverData = async (stationId: string = "2642", days: number = 
 
 export const predictRiverLevel = (
   latestLevel: number,
-  change1h: number,
-  change8h: number,
+  historicalData: ChartDataPoint[],
   hoursInFuture: number
 ): number => {
-  // v0 (initial velocity) is the change in the last hour
-  const v0 = change1h;
+  // 1. Filter data for the last 8 hours
+  const eightHoursAgo = new Date().getTime() - 8 * 60 * 60 * 1000;
+  const recentData = historicalData.filter(
+    (d) => new Date(d.dateTime).getTime() >= eightHoursAgo
+  );
 
-  // Estimate v_start (velocity at the start of the 8-hour period)
-  // v_avg = (v_start + v_end) / 2  => v_start = 2 * v_avg - v_end
-  const v_avg_8h = change8h / 8;
-  const v_start = 2 * v_avg_8h - v0;
+  // 2. Check if there's enough data to calculate a trend
+  if (recentData.length < 2) {
+    // Fallback: no trend can be calculated, return the latest level
+    return latestLevel;
+  }
 
-  // a (acceleration) is the change in velocity over 8 hours
-  const a = (v0 - v_start) / 8;
+  // 3. Prepare data for linear regression
+  const firstTimestamp = new Date(recentData[0].dateTime).getTime() / 1000; // in seconds
+  const x = recentData.map(
+    (d) => new Date(d.dateTime).getTime() / 1000 - firstTimestamp
+  );
+  const y = recentData.map((d) => d.level);
+  const n = recentData.length;
 
-  // Kinematic equation: s = s0 + v0*t + 0.5*a*t^2
-  const predictedLevel =
-    latestLevel + v0 * hoursInFuture + 0.5 * a * Math.pow(hoursInFuture, 2);
+  // 4. Calculate sums for linear regression
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumX2 = 0;
+  for (let i = 0; i < n; i++) {
+    sumX += x[i];
+    sumY += y[i];
+    sumXY += x[i] * y[i];
+    sumX2 += x[i] * x[i];
+  }
 
-  // Ensure prediction doesn't go below a sensible minimum (e.g., 0)
+  // 5. Calculate slope (trend)
+  const numerator = n * sumXY - sumX * sumY;
+  const denominator = n * sumX2 - sumX * sumX;
+
+  // Avoid division by zero if all x values are the same (shouldn't happen with timestamps)
+  if (denominator === 0) {
+    return latestLevel;
+  }
+
+  const slope = numerator / denominator; // level change per second
+
+  // 6. Predict future level
+  const slopePerHour = slope * 3600; // convert from seconds to hours
+  const predictedLevel = latestLevel + slopePerHour * hoursInFuture;
+
+  // 7. Ensure prediction doesn't go below a sensible minimum (e.g., 0)
   return Math.max(0, predictedLevel);
 };

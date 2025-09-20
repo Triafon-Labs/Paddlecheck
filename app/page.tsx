@@ -130,8 +130,7 @@ export default function HomePage() {
 
           const predictedRiverLevel = predictRiverLevel(
             riverData.latestLevel || 0,
-            riverData.change1h || 0,
-            riverData.change8h || 0,
+            riverData.historicalData,
             i + 1
           );
 

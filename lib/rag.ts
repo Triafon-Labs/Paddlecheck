@@ -82,6 +82,15 @@ export const ragStatus: Record<
   },
 };
 
+export const ragHeight: Record<Status, number> = {
+  "Light Green": 1.0,
+  "Dark Green": 0.75,
+  Amber: 0.5,
+  Red: 0.25,
+  "No Paddling": 0.1,
+  Unknown: 0.1,
+};
+
 export const findLevelDescription = (level: number): string => {
   const allLevels = Object.keys(levelDescriptions)
     .map(parseFloat)

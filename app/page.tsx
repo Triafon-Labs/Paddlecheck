@@ -18,6 +18,7 @@ import {
   findLevelDescription,
   calculateInitialRagStatus,
   RAG_STATUS_MAP,
+  ragHeight,
 } from "@/lib/rag";
 import { fetchRiverData, predictRiverLevel } from "@/lib/river";
 import {
@@ -170,7 +171,7 @@ export default function HomePage() {
             time: `${hour}:00`,
             status: status,
             reasons: reasons,
-            value: 0.9, // Dummy value for bar height
+            value: ragHeight[status] || 0.1,
             predictedLevel: predictedRiverLevel,
           });
         }

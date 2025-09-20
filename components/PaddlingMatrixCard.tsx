@@ -162,19 +162,19 @@ const getPaddlingMatrix = (
   return matrix;
 };
 
+const paddlerTypes: PaddlerType[] = [
+  "Junior",
+  "Beginner",
+  "Improver",
+  "Intermediate",
+  "Independent",
+];
+
 const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
   overallStatus,
   riverLevel,
 }) => {
   const paddlingMatrix = getPaddlingMatrix(overallStatus, riverLevel);
-
-  const paddlerTypes: PaddlerType[] = [
-    "Junior",
-    "Beginner",
-    "Improver",
-    "Intermediate",
-    "Independent",
-  ];
 
   const [open, setOpen] = useState<Record<PaddlerType, boolean>>(
     paddlerTypes.reduce(

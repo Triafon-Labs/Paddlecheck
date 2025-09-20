@@ -117,17 +117,22 @@ const IconLabel = ({ viewBox, icon, time }: IconLabelProps) => {
 };
 
 interface BarLabelProps {
-  x: number;
-  y: number;
-  width: number;
-  index: number;
+  x?: number;
+  y?: number;
+  width?: number;
+  index?: number;
   data: PredictedGraphDataPoint[];
 }
 
 const BarLabel = (props: BarLabelProps) => {
   const { x, y, width, index, data } = props;
-  const entry = data[index];
   const theme = useTheme();
+
+  if (x === undefined || y === undefined || width === undefined || index === undefined) {
+    return null;
+  }
+
+  const entry = data[index];
 
   if (entry.status === "No Paddling") {
     const Icon = ragStatus[entry.status]?.icon;

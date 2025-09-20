@@ -20,6 +20,7 @@ import {
   Cell,
   TooltipContentProps,
   ReferenceLine,
+  LabelList,
 } from "recharts";
 import { PredictedGraphDataPoint } from "@/types";
 import { ragStatus } from "@/lib/rag";
@@ -115,6 +116,39 @@ const IconLabel = ({ viewBox, icon, time }: IconLabelProps) => {
   );
 };
 
+interface BarLabelProps {
+  x: number;
+  y: number;
+  width: number;
+  index: number;
+  data: PredictedGraphDataPoint[];
+}
+
+const BarLabel = (props: BarLabelProps) => {
+  const { x, y, width, index, data } = props;
+  const entry = data[index];
+  const theme = useTheme();
+
+  if (entry.status === "No Paddling") {
+    const Icon = ragStatus[entry.status]?.icon;
+    if (Icon) {
+      return (
+        <g>
+          <foreignObject
+            x={x + width / 2 - 12}
+            y={y - 28}
+            width={24}
+            height={24}
+          >
+            <Icon sx={{ color: theme.palette.error.main, fontSize: 24 }} />
+          </foreignObject>
+        </g>
+      );
+    }
+  }
+  return null;
+};
+
 const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
   data,
   loading,
@@ -144,7 +178,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={data} margin={{ top: 40 }}>
             <XAxis dataKey="time" />
-            <YAxis hide domain={[0, 1]} />
+            <YAxis hide domain={[0, 1.2]} />
             <Tooltip content={CustomTooltip} cursor={{ fill: "transparent" }} />
             {sunriseHour && sunrise && (
               <ReferenceLine
@@ -191,6 +225,11 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                   fill={ragStatus[entry.status]?.color || "#9E9E9E"}
                 />
               ))}
+              <LabelList
+                dataKey="value"
+                content={<BarLabel data={data} />}
+                position="top"
+              />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

@@ -83,16 +83,28 @@ export const ragStatus: Record<
 };
 
 export const findLevelDescription = (level: number): string => {
-  const relevantLevels = Object.keys(levelDescriptions)
+  const allLevels = Object.keys(levelDescriptions)
     .map(parseFloat)
-    .filter((key) => key <= level);
+    .sort((a, b) => a - b);
 
-  if (relevantLevels.length === 0) {
-    return levelDescriptions[1.0];
+  // Find the next level up from current level
+  const nextLevelUp = allLevels.find((key) => key > level);
+
+  // If we're below the lowest level, return the lowest level description
+  if (!nextLevelUp) {
+    return levelDescriptions[allLevels[0]];
   }
 
-  const closestLevel = Math.max(...relevantLevels);
-  return levelDescriptions[closestLevel];
+  // Get the difference between current level and the next level up
+  const gap = nextLevelUp - level;
+
+  // If gap is significant (> 0.1m), indicate the level this description is for
+  const description = levelDescriptions[nextLevelUp];
+  if (gap > 0.1) {
+    return `${description} (at ${nextLevelUp.toFixed(2)}m)`;
+  }
+
+  return description;
 };
 
 // --- New RAG calculation logic based on old application ---

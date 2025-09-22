@@ -51,7 +51,6 @@ interface SettingsModalProps {
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const { themeMode, setThemeMode } = useAppTheme();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">("");
 
   useEffect(() => {
@@ -61,9 +60,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         | undefined;
       if (savedLevel) {
         setPaddlerLevel(savedLevel);
-      }
-      if ("Notification" in window) {
-        setNotificationsEnabled(Notification.permission === "granted");
       }
     }
   }, []);
@@ -90,25 +86,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     "Intermediate",
     "Independent",
   ];
-
-  const handleNotificationToggle = async () => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      if (Notification.permission === "granted") {
-        // This part is tricky - you can't programmatically "un-grant" permission.
-        // This toggle will therefore only reflect the "granted" state.
-        // For a real app, you'd manage this state on your server.
-        alert(
-          "Notification permissions can only be changed in your browser's settings."
-        );
-        return;
-      }
-
-      const permission = await Notification.requestPermission();
-      setNotificationsEnabled(permission === "granted");
-    } else {
-      alert("This browser does not support desktop notification");
-    }
-  };
 
   return (
     <Dialog
@@ -185,26 +162,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           <Button onClick={handleClearLevel} disabled={!paddlerLevel}>
             Clear Selection
           </Button>
-        </ListItem>
-        <Divider />
-        <ListSubheader>Notifications</ListSubheader>
-        <ListItem>
-          <ListItemText
-            primary="Enable Notifications"
-            secondary={
-              typeof window !== "undefined" && !("Notification" in window)
-                ? "Not supported by this browser"
-                : ""
-            }
-          />
-          <Switch
-            edge="end"
-            checked={notificationsEnabled}
-            onChange={handleNotificationToggle}
-            disabled={
-              typeof window !== "undefined" && !("Notification" in window)
-            }
-          />
         </ListItem>
         <Divider />
         <ListSubheader>About</ListSubheader>

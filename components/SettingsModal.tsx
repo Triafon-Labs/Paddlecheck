@@ -114,9 +114,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       <List>
         <ListSubheader>Theme</ListSubheader>
         <ListItem>
-          <ListItemIcon>
-            {themeMode === "dark" ? <DarkMode /> : <LightMode />}
-          </ListItemIcon>
           <ListItemText primary={themeMode === 'dark' ? 'Dark Mode' : 'Light Mode'} />
           <MaterialSwitch
             edge="end"

@@ -12,7 +12,6 @@ import {
   ListItemButton,
   ListItemText,
   ListSubheader,
-  Switch,
   Divider,
   ListItemIcon,
   FormControl,
@@ -22,6 +21,7 @@ import {
   Button,
   SelectChangeEvent,
 } from "@mui/material";
+import MaterialSwitch from './MaterialSwitch';
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
@@ -117,8 +117,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           <ListItemIcon>
             {themeMode === "dark" ? <DarkMode /> : <LightMode />}
           </ListItemIcon>
-          <ListItemText primary="Dark Mode" />
-          <Switch
+          <ListItemText primary={themeMode === 'dark' ? 'Dark Mode' : 'Light Mode'} />
+          <MaterialSwitch
             edge="end"
             checked={themeMode === "dark"}
             onChange={(e) => setThemeMode(e.target.checked ? "dark" : "light")}

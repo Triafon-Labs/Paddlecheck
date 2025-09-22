@@ -11,11 +11,10 @@ import React,
 } from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { lightTheme, darkTheme } from './themes';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import CssBaseline from '@mui/material/CssBaseline';
 import { GlobalStyles } from '@mui/material';
 
-type ThemeMode = 'light' | 'dark' | 'system';
+type ThemeMode = 'light' | 'dark';
 
 interface ThemeContextType {
   themeMode: ThemeMode;
@@ -33,8 +32,7 @@ export const useAppTheme = () => {
 };
 
 export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const [themeMode, setThemeMode] = useState<ThemeMode>('light');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('themeMode') as ThemeMode | null;
@@ -44,11 +42,8 @@ export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const activeTheme = useMemo(() => {
-    if (themeMode === 'system') {
-      return prefersDarkMode ? darkTheme : lightTheme;
-    }
     return themeMode === 'dark' ? darkTheme : lightTheme;
-  }, [themeMode, prefersDarkMode]);
+  }, [themeMode]);
 
   const contextValue = useMemo(
     () => ({

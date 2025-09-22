@@ -28,11 +28,7 @@ import { TransitionProps } from "@mui/material/transitions";
 import { useAppTheme } from "@/lib/ThemeContext";
 import CheckIcon from "@mui/icons-material/Check";
 import { useEffect, useState } from "react";
-import {
-  DarkMode,
-  LightMode,
-  SettingsBrightness,
-} from "@mui/icons-material";
+import { DarkMode, LightMode } from "@mui/icons-material";
 import { PaddlerType } from "@/types";
 
 const Transition = React.forwardRef(function Transition(
@@ -117,27 +113,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       </AppBar>
       <List>
         <ListSubheader>Theme</ListSubheader>
-        <ListItemButton onClick={() => setThemeMode("light")}>
+        <ListItem>
           <ListItemIcon>
-            <LightMode />
+            {themeMode === "dark" ? <DarkMode /> : <LightMode />}
           </ListItemIcon>
-          <ListItemText primary="Light" />
-          {themeMode === "light" && <CheckIcon />}
-        </ListItemButton>
-        <ListItemButton onClick={() => setThemeMode("dark")}>
-          <ListItemIcon>
-            <DarkMode />
-          </ListItemIcon>
-          <ListItemText primary="Dark" />
-          {themeMode === "dark" && <CheckIcon />}
-        </ListItemButton>
-        <ListItemButton onClick={() => setThemeMode("system")}>
-          <ListItemIcon>
-            <SettingsBrightness />
-          </ListItemIcon>
-          <ListItemText primary="System" />
-          {themeMode === "system" && <CheckIcon />}
-        </ListItemButton>
+          <ListItemText primary="Dark Mode" />
+          <Switch
+            edge="end"
+            checked={themeMode === "dark"}
+            onChange={(e) => setThemeMode(e.target.checked ? "dark" : "light")}
+          />
+        </ListItem>
         <Divider />
         <ListSubheader>Paddling Level</ListSubheader>
         <ListItem>

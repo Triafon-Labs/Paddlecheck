@@ -156,7 +156,7 @@ const getWeatherConditions = (
     temperatureConditions = "high";
   } else if (temp >= 5) {
     temperatureConditions = "moderate";
-    reasons.push("Moderate temperature");
+    reasons.push("Moderately low temperature");
   } else {
     temperatureConditions = "low";
     reasons.push("Low temperature");

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Container, Stack } from "@mui/material";
+import LastUpdated from "@/components/LastUpdated";
 import StatusCard from "@/components/StatusCard";
 import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";
 import StatsCard from "@/components/StatsCard";
@@ -204,6 +205,7 @@ export default function HomePage() {
 
   return (
     <Container maxWidth="md">
+      <LastUpdated date={conditions?.lastUpdated} />
       <Stack spacing={4} sx={{ py: 2, pb: 16 }}>
         <StatusCard conditions={conditions} loading={loading} />
         {conditions && (

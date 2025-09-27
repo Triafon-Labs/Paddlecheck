@@ -110,13 +110,6 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
             )}
           </Box>
         </Box>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ display: "block", textAlign: "right", mt: 2 }}
-        >
-          Last updated: {new Date(conditions.lastUpdated!).toLocaleString()}
-        </Typography>
       </CardContent>
     </Card>
   );

@@ -110,7 +110,7 @@ export const findLevelDescription = (level: number): string => {
   // If gap is significant (> 0.1m), indicate the level this description is for
   const description = levelDescriptions[nextLevelUp];
   if (gap > 0.1) {
-    return `${description} (at ${nextLevelUp.toFixed(2)}m)`;
+    return `${description} (applies at ${nextLevelUp.toFixed(2)}m)`;
   }
 
   return description;

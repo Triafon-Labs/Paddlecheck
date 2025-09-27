@@ -149,7 +149,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <Divider />
         <ListSubheader>About</ListSubheader>
         <ListItem>
-          <ListItemText primary="Paddlecheck Version" secondary="0.2.0" />
+          <ListItemText
+            primary="Paddlecheck Version"
+            secondary={process.env.NEXT_PUBLIC_APP_VERSION || "N/A"}
+          />
         </ListItem>
       </List>
     </Dialog>

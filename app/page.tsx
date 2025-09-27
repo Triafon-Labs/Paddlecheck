@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { Container, Stack } from "@mui/material";
+import { Container, Stack, Box, Divider } from "@mui/material";
 import LastUpdated from "@/components/LastUpdated";
 import StatusCard from "@/components/StatusCard";
 import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";
@@ -228,8 +228,11 @@ export default function HomePage() {
           sunrise={sunrise}
           sunset={sunset}
         />
-        <LastUpdated date={conditions?.lastUpdated} />
-        <Disclaimer />
+        <Box sx={{ width: "100%", textAlign: "center" }}>
+          <LastUpdated date={conditions?.lastUpdated} />
+          <Divider sx={{ my: 1 }} />
+          <Disclaimer />
+        </Box>
       </Stack>
     </Container>
   );

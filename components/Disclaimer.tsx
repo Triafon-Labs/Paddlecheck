@@ -6,7 +6,8 @@ const Disclaimer = () => {
     <Paper
       elevation={0}
       sx={{
-        padding: 2,
+        padding: 1,
+        paddingTop: 2,
         textAlign: "center",
         backgroundColor: "transparent",
       }}

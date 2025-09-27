@@ -16,7 +16,7 @@ const LastUpdated: React.FC<LastUpdatedProps> = ({ date }) => {
   const formattedDate = format(new Date(date), "PPP p");
 
   return (
-    <Box sx={{ width: "100%", textAlign: "center", mb: 1 }}>
+    <Box sx={{ width: "100%", textAlign: "center" }}>
       <Typography variant="caption" color="text.secondary">
         Last updated: {formattedDate}
       </Typography>

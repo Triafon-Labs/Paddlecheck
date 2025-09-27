@@ -2,7 +2,8 @@
 
 import React from "react";
 import { Typography, Box } from "@mui/material";
-import { formatRelative } from "date-fns";
+import { format } from "date-fns";
+import { enGB } from "date-fns/locale";
 
 interface LastUpdatedProps {
   date?: string;
@@ -13,7 +14,9 @@ const LastUpdated: React.FC<LastUpdatedProps> = ({ date }) => {
     return null;
   }
 
-  const formattedDate = formatRelative(new Date(date), new Date());
+  const formattedDate = format(new Date(date), "PPP p", {
+    locale: enGB,
+  });
 
   return (
     <Box sx={{ width: "100%", textAlign: "center" }}>

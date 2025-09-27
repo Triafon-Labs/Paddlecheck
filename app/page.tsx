@@ -213,7 +213,11 @@ export default function HomePage() {
             riverLevel={conditions.riverLevel}
           />
         )}
-        <StatsCard conditions={conditions} />
+        <StatsCard
+          conditions={conditions}
+          sunrise={sunrise}
+          sunset={sunset}
+        />
         <RiverLevelGraph
           data={riverGraphData}
           loading={loading}

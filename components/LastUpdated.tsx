@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Typography, Box } from "@mui/material";
-import { format } from "date-fns";
+import { formatRelative } from "date-fns";
 
 interface LastUpdatedProps {
   date?: string;
@@ -13,7 +13,7 @@ const LastUpdated: React.FC<LastUpdatedProps> = ({ date }) => {
     return null;
   }
 
-  const formattedDate = format(new Date(date), "PPP p");
+  const formattedDate = formatRelative(new Date(date), new Date());
 
   return (
     <Box sx={{ width: "100%", textAlign: "center" }}>

@@ -5,7 +5,7 @@ import { Typography, Box } from "@mui/material";
 import { format } from "date-fns";
 
 interface LastUpdatedProps {
-  date: string;
+  date?: string;
 }
 
 const LastUpdated: React.FC<LastUpdatedProps> = ({ date }) => {

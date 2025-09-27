@@ -6,12 +6,16 @@ const Disclaimer = () => {
     <Paper
       elevation={0}
       sx={{
-        padding: 2,
         textAlign: "center",
         backgroundColor: "transparent",
+        padding: 0,
       }}
     >
-      <Typography variant="caption" color="text.secondary">
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ fontSize: "0.7rem" }}
+      >
         This information is for guidance only. Please use your own judgement and
         consult with experienced individuals before making any decisions.
         Conditions can change rapidly.

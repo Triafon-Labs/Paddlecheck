@@ -230,7 +230,7 @@ export default function HomePage() {
         />
         <Box sx={{ width: "100%", textAlign: "center" }}>
           <LastUpdated date={conditions?.lastUpdated} />
-          <Divider sx={{ my: 1 }} />
+          <Divider sx={{ my: 2, width: "50%", mx: "auto" }} />
           <Disclaimer />
         </Box>
       </Stack>

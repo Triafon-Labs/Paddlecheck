@@ -72,30 +72,6 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
               value={
                 <>
                   {conditions.riverLevel?.toFixed(2)}m
-                  {conditions.levelChange && (
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      sx={{ ml: 0.5, color: "text.secondary" }}
-                    >
-                      (
-                      {conditions.levelChange.value > 0 ? (
-                        <TrendingUp
-                          sx={{ fontSize: "1rem", verticalAlign: "middle" }}
-                        />
-                      ) : conditions.levelChange.value < 0 ? (
-                        <TrendingDown
-                          sx={{ fontSize: "1rem", verticalAlign: "middle" }}
-                        />
-                      ) : (
-                        <TrendingFlat
-                          sx={{ fontSize: "1rem", verticalAlign: "middle" }}
-                        />
-                      )}
-                      {conditions.levelChange.value.toFixed(2)}m in{" "}
-                      {conditions.levelChange.period})
-                    </Typography>
-                  )}
                 </>
               }
             />

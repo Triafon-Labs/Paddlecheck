@@ -22,6 +22,10 @@ const links = [
     name: 'GOV.UK River Level',
     url: 'https://check-for-flooding.service.gov.uk/station/2092',
   },
+  {
+    name: 'Worcester Canoe Club',
+    url: 'https://worcestercanoeclub.org/',
+  },
 ];
 
 const LinksPopover: React.FC<LinksPopoverProps> = ({

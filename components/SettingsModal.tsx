@@ -20,8 +20,12 @@ import {
   MenuItem,
   Button,
   SelectChangeEvent,
+  DialogContent,
+  Card,
+  CardContent,
+  Box,
 } from "@mui/material";
-import MaterialSwitch from './MaterialSwitch';
+import MaterialSwitch from "./MaterialSwitch";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
@@ -111,50 +115,81 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <List>
-        <ListSubheader>Theme</ListSubheader>
-        <ListItem>
-          <ListItemText primary={themeMode === 'dark' ? 'Dark Mode' : 'Light Mode'} />
-          <MaterialSwitch
-            edge="end"
-            checked={themeMode === "dark"}
-            onChange={(e) => setThemeMode(e.target.checked ? "dark" : "light")}
-          />
-        </ListItem>
-        <Divider />
-        <ListSubheader>Paddling Level</ListSubheader>
-        <ListItem>
-          <FormControl fullWidth>
-            <InputLabel id="paddler-level-select-label">My Level</InputLabel>
-            <Select
-              labelId="paddler-level-select-label"
-              id="paddler-level-select"
-              value={paddlerLevel}
-              label="My Level"
-              onChange={handleLevelChange}
+      <DialogContent>
+        <Card variant="outlined" sx={{ mb: 2 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Theme
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              {paddlerTypes.map((level) => (
-                <MenuItem key={level} value={level}>
-                  {level}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </ListItem>
-        <ListItem>
-          <Button onClick={handleClearLevel} disabled={!paddlerLevel}>
-            Clear Selection
-          </Button>
-        </ListItem>
-        <Divider />
-        <ListSubheader>About</ListSubheader>
-        <ListItem>
-          <ListItemText
-            primary="Paddlecheck Version"
-            secondary={process.env.NEXT_PUBLIC_APP_VERSION || "N/A"}
-          />
-        </ListItem>
-      </List>
+              <Typography>{themeMode === "dark" ? "Dark Mode" : "Light Mode"}</Typography>
+              <MaterialSwitch
+                checked={themeMode === "dark"}
+                onChange={(e) =>
+                  setThemeMode(e.target.checked ? "dark" : "light")
+                }
+              />
+            </Box>
+          </CardContent>
+        </Card>
+        <Card variant="outlined" sx={{ mb: 2 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Paddling Level
+            </Typography>
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel id="paddler-level-select-label">
+                My Level
+              </InputLabel>
+              <Select
+                labelId="paddler-level-select-label"
+                id="paddler-level-select"
+                value={paddlerLevel}
+                label="My Level"
+                onChange={handleLevelChange}
+              >
+                {paddlerTypes.map((level) => (
+                  <MenuItem key={level} value={level}>
+                    {level}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              onClick={handleClearLevel}
+              disabled={!paddlerLevel}
+              fullWidth
+            >
+              Clear Selection
+            </Button>
+          </CardContent>
+        </Card>
+        <Card variant="outlined">
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              About
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Typography>Paddlecheck Version</Typography>
+              <Typography>
+                {process.env.NEXT_PUBLIC_APP_VERSION || "N/A"}
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </DialogContent>
     </Dialog>
   );
 };

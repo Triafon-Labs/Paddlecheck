@@ -12,15 +12,11 @@ import Water from "@mui/icons-material/Water";
 import Info from "@mui/icons-material/Info";
 import WaterDrop from "@mui/icons-material/WaterDrop";
 import NightsStay from "@mui/icons-material/NightsStay";
-import WbSunny from "@mui/icons-material/WbSunny";
-import { format } from "date-fns";
 import { KayakConditions } from "@/types";
 import { ragStatus } from "@/lib/rag";
 
 interface StatsCardProps {
   conditions: KayakConditions | null;
-  sunrise: string | null;
-  sunset: string | null;
 }
 
 const StatItem: React.FC<{
@@ -44,11 +40,7 @@ const StatItem: React.FC<{
   </Tooltip>
 );
 
-const StatsCard: React.FC<StatsCardProps> = ({
-  conditions,
-  sunrise,
-  sunset,
-}) => {
+const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
   if (!conditions) {
     return null;
   }
@@ -88,20 +80,6 @@ const StatsCard: React.FC<StatsCardProps> = ({
               label="Launch Message"
               value={conditions.launchMessage}
             />
-            {sunrise && (
-              <StatItem
-                icon={<WbSunny />}
-                label="Sunrise"
-                value={format(new Date(sunrise), "HH:mm")}
-              />
-            )}
-            {sunset && (
-              <StatItem
-                icon={<NightsStay />}
-                label="Sunset"
-                value={format(new Date(sunset), "HH:mm")}
-              />
-            )}
           </Box>
           <Box>
             <StatItem

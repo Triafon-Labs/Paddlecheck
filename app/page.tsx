@@ -205,7 +205,6 @@ export default function HomePage() {
 
   return (
     <Container maxWidth="md">
-      <LastUpdated date={conditions?.lastUpdated} />
       <Stack spacing={4} sx={{ py: 2, pb: 16 }}>
         <StatusCard conditions={conditions} loading={loading} />
         {conditions && (
@@ -229,6 +228,7 @@ export default function HomePage() {
           sunrise={sunrise}
           sunset={sunset}
         />
+        <LastUpdated date={conditions?.lastUpdated} />
         <Disclaimer />
       </Stack>
     </Container>

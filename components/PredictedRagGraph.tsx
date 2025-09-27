@@ -93,6 +93,8 @@ const CustomTooltip = ({
   return null;
 };
 
+import { format } from "date-fns";
+
 interface IconLabelProps {
   viewBox: { x: number; y: number; width: number; height: number };
   icon: React.ReactElement;
@@ -101,7 +103,7 @@ interface IconLabelProps {
 
 const IconLabel = ({ viewBox, icon, time }: IconLabelProps) => {
   const { x } = viewBox;
-  const timeText = time ? time.split("T")[1] : "";
+  const timeText = time ? format(new Date(time), "HH:mm") : "";
   return (
     <foreignObject x={x - 30} y={0} width={60} height={40}>
       <Box

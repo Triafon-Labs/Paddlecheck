@@ -29,11 +29,11 @@ const StatItem: React.FC<{
     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
       <Box sx={{ mr: 1.5, color: "primary.main" }}>{icon}</Box>
       <Box>
-        <Typography variant="body1" component="div">
-          {value}
-        </Typography>
         <Typography variant="caption" color="text.secondary">
           {label}
+        </Typography>
+        <Typography variant="body1" component="div">
+          {value}
         </Typography>
       </Box>
     </Box>

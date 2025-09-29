@@ -7,13 +7,6 @@ import {
   Toolbar,
   IconButton,
   Typography,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  ListSubheader,
-  Divider,
-  ListItemIcon,
   FormControl,
   InputLabel,
   Select,
@@ -30,9 +23,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import { useAppTheme } from "@/lib/ThemeContext";
-import CheckIcon from "@mui/icons-material/Check";
 import { useEffect, useState } from "react";
-import { DarkMode, LightMode } from "@mui/icons-material";
 import { PaddlerType } from "@/types";
 
 const Transition = React.forwardRef(function Transition(

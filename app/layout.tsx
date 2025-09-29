@@ -7,6 +7,7 @@ import TopNavBar from "@/components/TopNavBar";
 import { Box } from "@mui/material";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -70,6 +71,7 @@ export default function RootLayout({
         </ThemeRegistry>
         <Analytics />
         <SpeedInsights />
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );

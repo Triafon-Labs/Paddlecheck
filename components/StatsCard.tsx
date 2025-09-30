@@ -1,7 +1,14 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, Typography, Box, Tooltip } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Tooltip,
+  Skeleton,
+} from "@mui/material";
 import Thermostat from "@mui/icons-material/Thermostat";
 import Visibility from "@mui/icons-material/Visibility";
 import Air from "@mui/icons-material/Air";
@@ -14,6 +21,7 @@ import { ragStatus } from "@/lib/rag";
 
 interface StatsCardProps {
   conditions: KayakConditions | null;
+  loading: boolean;
 }
 
 const StatItem: React.FC<{
@@ -37,7 +45,65 @@ const StatItem: React.FC<{
   </Tooltip>
 );
 
-const StatsCard: React.FC<StatsCardProps> = ({ conditions }) => {
+const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading }) => {
+  if (loading) {
+    return (
+      <Card variant="outlined" sx={{ width: "100%", mt: 2, p: 2 }}>
+        <CardContent>
+          <Typography variant="h5" component="div" gutterBottom>
+            Detailed Stats
+          </Typography>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "1fr 1fr",
+              },
+              gap: 2,
+              mt: 1,
+            }}
+          >
+            <Box>
+              <StatItem
+                icon={<Water />}
+                label="River Level"
+                value={<Skeleton width="80px" />}
+              />
+              <StatItem
+                icon={<Info />}
+                label="Launch Message"
+                value={<Skeleton width="120px" />}
+              />
+            </Box>
+            <Box>
+              <StatItem
+                icon={<Thermostat />}
+                label="Initial RAG Status"
+                value={<Skeleton width="60px" />}
+              />
+              <StatItem
+                icon={<Air />}
+                label="Temperature"
+                value={<Skeleton width="60px" />}
+              />
+              <StatItem
+                icon={<Visibility />}
+                label="Wind Speed"
+                value={<Skeleton width="80px" />}
+              />
+              <StatItem
+                icon={<Water />}
+                label="Visibility"
+                value={<Skeleton width="100px" />}
+              />
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (!conditions) {
     return null;
   }

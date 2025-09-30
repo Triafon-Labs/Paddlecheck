@@ -11,10 +11,12 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LinkIcon from '@mui/icons-material/Link';
 import SettingsModal from './SettingsModal';
 import LinksPopover from './LinksPopover';
+import { useKayakContext } from '@/lib/KayakDataContext';
 
 const BottomNavBar = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [linksAnchorEl, setLinksAnchorEl] = useState<null | HTMLElement>(null);
+  const { refetch } = useKayakContext();
 
   const handleLinksClick = (event: React.MouseEvent<HTMLElement>) => {
     setLinksAnchorEl(event.currentTarget);
@@ -47,7 +49,7 @@ const BottomNavBar = () => {
           <BottomNavigationAction
             label="Refresh"
             icon={<RefreshIcon />}
-            onClick={() => window.location.reload()}
+            onClick={() => refetch()}
           />
           <BottomNavigationAction
             label="Settings"

@@ -9,7 +9,7 @@ import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
 import PredictedRagGraph from "@/components/PredictedRagGraph";
 import Disclaimer from "@/components/Disclaimer";
-import { useKayakData } from "@/lib/hooks";
+import { useKayakContext } from "@/lib/KayakDataContext";
 
 export default function HomePage() {
   const {
@@ -24,7 +24,7 @@ export default function HomePage() {
     riverChange5d,
     sunrise,
     sunset,
-  } = useKayakData();
+  } = useKayakContext();
 
   return (
     <Container maxWidth="md">

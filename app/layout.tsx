@@ -5,6 +5,7 @@ import ThemeRegistry from "@/components/ThemeRegistry";
 import BottomNavBar from "@/components/BottomNavBar";
 import TopNavBar from "@/components/TopNavBar";
 import { Box } from "@mui/material";
+import { KayakDataProvider } from "@/lib/KayakDataContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
@@ -43,31 +44,33 @@ export default function RootLayout({
       </head>
       <body style={{ fontFamily: "inherit" }}>
         <ThemeRegistry>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              minHeight: "100vh",
-              bgcolor: "background.default",
-            }}
-          >
-            <TopNavBar />
+          <KayakDataProvider>
             <Box
-              component="main"
               sx={{
-                flex: 1,
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "flex-start",
-                pt: 4,
-                pb: 16,
+                minHeight: "100vh",
+                bgcolor: "background.default",
               }}
             >
-              {children}
+              <TopNavBar />
+              <Box
+                component="main"
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  pt: 4,
+                  pb: 16,
+                }}
+              >
+                {children}
+              </Box>
+              <BottomNavBar />
             </Box>
-            <BottomNavBar />
-          </Box>
+          </KayakDataProvider>
         </ThemeRegistry>
         <Analytics />
         <SpeedInsights />

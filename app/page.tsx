@@ -30,12 +30,11 @@ export default function HomePage() {
     <Container maxWidth="md">
       <Stack spacing={4} sx={{ py: 2, pb: 16 }}>
         <StatusCard conditions={conditions} loading={loading} />
-        {conditions && (
-          <PaddlingMatrixCard
-            overallStatus={conditions.overallStatus}
-            riverLevel={conditions.riverLevel}
-          />
-        )}
+        <PaddlingMatrixCard
+          loading={loading}
+          overallStatus={conditions?.overallStatus}
+          riverLevel={conditions?.riverLevel}
+        />
         <StatsCard conditions={conditions} loading={loading} />
         <RiverLevelGraph
           data={riverGraphData}

@@ -8,15 +8,13 @@ import {
   IconButton,
   Typography,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   Button,
   SelectChangeEvent,
   DialogContent,
-  Card,
-  CardContent,
   Box,
+  Divider,
 } from "@mui/material";
 import MaterialSwitch from "./MaterialSwitch";
 import CloseIcon from "@mui/icons-material/Close";
@@ -107,79 +105,72 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         </Toolbar>
       </AppBar>
       <DialogContent>
-        <Card variant="outlined" sx={{ mb: 2 }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Theme
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography>{themeMode === "dark" ? "Dark Mode" : "Light Mode"}</Typography>
-              <MaterialSwitch
-                checked={themeMode === "dark"}
-                onChange={(e) =>
-                  setThemeMode(e.target.checked ? "dark" : "light")
-                }
-              />
-            </Box>
-          </CardContent>
-        </Card>
-        <Card variant="outlined" sx={{ mb: 2 }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              My Paddling Level
-            </Typography>
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel id="paddler-level-select-label">
-                Select Level
-              </InputLabel>
-              <Select
-                labelId="paddler-level-select-label"
-                id="paddler-level-select"
-                value={paddlerLevel}
-                label="Select Level"
-                onChange={handleLevelChange}
-              >
-                {paddlerTypes.map((level) => (
-                  <MenuItem key={level} value={level}>
-                    {level}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Button
-              onClick={handleClearLevel}
-              disabled={!paddlerLevel}
-              fullWidth
-            >
-              Clear Selection
-            </Button>
-          </CardContent>
-        </Card>
-        <Card variant="outlined">
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              About
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography>Paddlecheck Version</Typography>
-              <Typography>
-                {process.env.NEXT_PUBLIC_APP_VERSION || "N/A"}
-              </Typography>
-            </Box>
-          </CardContent>
-        </Card>
+        <Typography variant="h6" gutterBottom>
+          Theme
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography>
+            {themeMode === "dark" ? "Dark Mode" : "Light Mode"}
+          </Typography>
+          <MaterialSwitch
+            checked={themeMode === "dark"}
+            onChange={(e) =>
+              setThemeMode(e.target.checked ? "dark" : "light")
+            }
+          />
+        </Box>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6" gutterBottom>
+          My Paddling Level
+        </Typography>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <Select
+            id="paddler-level-select"
+            value={paddlerLevel}
+            onChange={handleLevelChange}
+            displayEmpty
+            inputProps={{ "aria-label": "Paddling Level" }}
+          >
+            {paddlerTypes.map((level) => (
+              <MenuItem key={level} value={level}>
+                {level}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Button
+          onClick={handleClearLevel}
+          disabled={!paddlerLevel}
+          fullWidth
+        >
+          Clear Selection
+        </Button>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6" gutterBottom>
+          About
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography>Paddlecheck Version</Typography>
+          <Typography>
+            {process.env.NEXT_PUBLIC_APP_VERSION || "N/A"}
+          </Typography>
+        </Box>
       </DialogContent>
     </Dialog>
   );

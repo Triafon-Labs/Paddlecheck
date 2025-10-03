@@ -86,6 +86,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       PaperProps={{
         sx: {
           borderRadius: 1,
+          bgcolor: "background.paper",
         },
       }}
     >

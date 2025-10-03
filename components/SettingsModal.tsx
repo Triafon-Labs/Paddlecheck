@@ -132,17 +132,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <Card variant="outlined" sx={{ mb: 2 }}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              Paddling Level
+              My Paddling Level
             </Typography>
             <FormControl fullWidth sx={{ mb: 2 }}>
               <InputLabel id="paddler-level-select-label">
-                My Level
+                Select Level
               </InputLabel>
               <Select
                 labelId="paddler-level-select-label"
                 id="paddler-level-select"
                 value={paddlerLevel}
-                label="My Level"
+                label="Select Level"
                 onChange={handleLevelChange}
               >
                 {paddlerTypes.map((level) => (

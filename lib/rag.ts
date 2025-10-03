@@ -6,6 +6,11 @@ import {
   DoNotDisturbOutlined,
   Flood,
   TrendingUpOutlined,
+  Thermostat,
+  Air,
+  WaterDrop,
+  NightsStay,
+  WbCloudy,
 } from "@mui/icons-material";
 
 // --- Constants and Type Definitions ---
@@ -97,6 +102,18 @@ export const ragStatus: Record<
     icon: DoNotDisturbOutlined,
     backgroundColor: "#E0E0E0",
   },
+};
+
+export const reasonIcons: Record<string, React.ElementType> = {
+  "Slightly elevated river level": TrendingUpOutlined,
+  "Moderately elevated river level": TrendingUpOutlined,
+  "Significantly elevated river level": Flood,
+  "Moderately low temperature": Thermostat,
+  "Low temperature": Thermostat,
+  "High winds": Air,
+  Rain: WaterDrop,
+  Dark: NightsStay,
+  Foggy: WbCloudy,
 };
 
 export const ragHeight: Record<Status, number> = {

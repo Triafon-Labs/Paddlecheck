@@ -7,10 +7,11 @@ import {
   Typography,
   Box,
   CircularProgress,
+  Paper,
 } from "@mui/material";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
-import { ragStatus } from "@/lib/rag";
+import { ragStatus, reasonIcons } from "@/lib/rag";
 
 interface StatusCardProps {
   conditions: KayakConditions | null;
@@ -77,15 +78,51 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
           {conditions.reasons &&
             conditions.reasons.length > 0 &&
             !isNoPaddling && (
-              <Box sx={{ mt: 3, textAlign: "center" }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Reasons
-                </Typography>
-                {conditions.reasons.map((reason, index) => (
-                  <Typography variant="body2" key={index}>
-                    {reason}
-                  </Typography>
-                ))}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  gap: 2,
+                  mt: 2,
+                }}
+              >
+                {conditions.reasons.map((reason, index) => {
+                  const Icon = reasonIcons[reason];
+                  return (
+                    <Paper
+                      key={index}
+                      variant="outlined"
+                      sx={{
+                        p: 2,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexDirection: "column",
+                        height: "100%",
+                        flexBasis: "150px",
+                        flexGrow: 1,
+                        maxWidth: "calc(50% - 8px)",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          color: "text.secondary",
+                        }}
+                      >
+                        {Icon && <Icon sx={{ mr: 0.5 }} />}
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ ml: 0.5, textAlign: "center" }}
+                        >
+                          {reason}
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  );
+                })}
               </Box>
             )}
         </>

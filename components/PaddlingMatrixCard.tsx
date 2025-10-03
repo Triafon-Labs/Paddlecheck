@@ -13,6 +13,7 @@ import {
   Box,
   Collapse,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import {
   CheckCircleOutline,
@@ -32,8 +33,9 @@ import {
 import { ragStatus } from "@/lib/rag";
 
 interface PaddlingMatrixCardProps {
-  overallStatus: Status;
+  overallStatus?: Status;
   riverLevel?: number;
+  loading?: boolean;
 }
 
 const getStatusIcon = (status: PaddlingStatusValue) => {
@@ -157,8 +159,12 @@ const paddlerTypes: PaddlerType[] = [
 const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
   overallStatus,
   riverLevel,
+  loading,
 }) => {
-  const paddlingMatrix = getPaddlingMatrix(overallStatus, riverLevel);
+  const paddlingMatrix =
+    !loading && overallStatus
+      ? getPaddlingMatrix(overallStatus, riverLevel)
+      : {};
 
   const [open, setOpen] = useState<Record<PaddlerType, boolean>>(
     paddlerTypes.reduce(
@@ -213,71 +219,77 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
         <Typography variant="h5" component="div" gutterBottom>
           Who Can Paddle
         </Typography>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell /> {/* For the collapse button */}
-                <TableCell>Paddler</TableCell>
-                <TableCell align="center">Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paddlerTypes.map((paddler) => {
-                const statusInfo = paddlingMatrix[paddler];
-                return (
-                  <React.Fragment key={paddler}>
-                    <TableRow>
-                      <TableCell>
-                        <IconButton
-                          aria-label="expand row"
-                          size="small"
-                          onClick={() => handleToggle(paddler)}
-                        >
-                          {open[paddler] ? (
-                            <KeyboardArrowUp />
-                          ) : (
-                            <KeyboardArrowDown />
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell /> {/* For the collapse button */}
+                  <TableCell>Paddler</TableCell>
+                  <TableCell align="center">Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paddlerTypes.map((paddler) => {
+                  const statusInfo = paddlingMatrix[paddler];
+                  return (
+                    <React.Fragment key={paddler}>
+                      <TableRow>
+                        <TableCell>
+                          <IconButton
+                            aria-label="expand row"
+                            size="small"
+                            onClick={() => handleToggle(paddler)}
+                          >
+                            {open[paddler] ? (
+                              <KeyboardArrowUp />
+                            ) : (
+                              <KeyboardArrowDown />
+                            )}
+                          </IconButton>
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          {paddler}
+                        </TableCell>
+                        <TableCell align="center">
+                          {statusInfo && (
+                            <Tooltip title={statusInfo.status} placement="top">
+                              <Box display="flex" justifyContent="center">
+                                {getStatusIcon(statusInfo.status)}
+                              </Box>
+                            </Tooltip>
                           )}
-                        </IconButton>
-                      </TableCell>
-                      <TableCell component="th" scope="row">
-                        {paddler}
-                      </TableCell>
-                      <TableCell align="center">
-                        {statusInfo && (
-                          <Tooltip title={statusInfo.status} placement="top">
-                            <Box display="flex" justifyContent="center">
-                              {getStatusIcon(statusInfo.status)}
-                            </Box>
-                          </Tooltip>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell
-                        style={{ paddingBottom: 0, paddingTop: 0 }}
-                        colSpan={3}
-                      >
-                        <Collapse
-                          in={open[paddler]}
-                          timeout="auto"
-                          unmountOnExit
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell
+                          style={{ paddingBottom: 0, paddingTop: 0 }}
+                          colSpan={3}
                         >
-                          <Box sx={{ margin: 1 }}>
-                            <Typography variant="body2">
-                              {statusInfo ? statusInfo.details : ""}
-                            </Typography>
-                          </Box>
-                        </Collapse>
-                      </TableCell>
-                    </TableRow>
-                  </React.Fragment>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                          <Collapse
+                            in={open[paddler]}
+                            timeout="auto"
+                            unmountOnExit
+                          >
+                            <Box sx={{ margin: 1 }}>
+                              <Typography variant="body2">
+                                {statusInfo ? statusInfo.details : ""}
+                              </Typography>
+                            </Box>
+                          </Collapse>
+                        </TableCell>
+                      </TableRow>
+                    </React.Fragment>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </CardContent>
     </Card>
   );

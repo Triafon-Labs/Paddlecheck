@@ -80,8 +80,9 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
             !isNoPaddling && (
               <Box
                 sx={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
                   gap: 2,
                   mt: 2,
                 }}
@@ -99,6 +100,9 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                         justifyContent: "center",
                         flexDirection: "column",
                         height: "100%",
+                        flexBasis: "150px",
+                        flexGrow: 1,
+                        maxWidth: "calc(50% - 8px)",
                       }}
                     >
                       <Box

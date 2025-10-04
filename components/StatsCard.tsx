@@ -17,7 +17,6 @@ import Info from "@mui/icons-material/Info";
 import WaterDrop from "@mui/icons-material/WaterDrop";
 import NightsStay from "@mui/icons-material/NightsStay";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
-import Traffic from "@mui/icons-material/Traffic";
 import { KayakConditions } from "@/types";
 import { ragStatus } from "@/lib/rag";
 
@@ -49,7 +48,7 @@ const StatItem: React.FC<{
               component="span"
               sx={{ display: "inline-flex", alignItems: "center", ml: 0.5 }}
             >
-              <Traffic sx={{ fontSize: "inherit", color: "warning.main" }} />
+              🚦
               <ArrowUpward sx={{ fontSize: "inherit", color: "error.main" }} />
             </Box>
           )}

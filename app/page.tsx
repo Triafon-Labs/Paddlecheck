@@ -35,7 +35,11 @@ export default function HomePage() {
           overallStatus={conditions?.overallStatus}
           riverLevel={conditions?.riverLevel}
         />
-        <StatsCard conditions={conditions} loading={loading} />
+        <StatsCard
+          conditions={conditions}
+          loading={loading}
+          reasons={conditions?.reasons || []}
+        />
         <RiverLevelGraph
           data={riverGraphData}
           loading={loading}

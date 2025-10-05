@@ -136,7 +136,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
   };
 
   return (
-    <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
+    <Card data-testid="status-card" variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
           RAG Status

@@ -1,12 +1,12 @@
 import { KayakConditions, Status } from "@/types";
 import {
   HelpOutline,
-  CheckCircleOutline,
+  Check,
   WarningAmberOutlined,
   DoNotDisturbOutlined,
-  Flood,
   TrendingUpOutlined,
   Thermostat,
+  CrisisAlert,
   Air,
   WaterDrop,
   NightsStay,
@@ -75,7 +75,7 @@ export const ragStatus: Record<
   "Light Green": {
     color: "#4CBB17",
     emoji: "✅",
-    icon: CheckCircleOutline,
+    icon: Check,
     backgroundColor: "#E8F5E9",
   },
   "Dark Green": {
@@ -93,7 +93,7 @@ export const ragStatus: Record<
   Red: {
     color: "#FF0000",
     emoji: "🚨",
-    icon: Flood,
+    icon: CrisisAlert,
     backgroundColor: "#FFEBEE",
   },
   "No Paddling": {
@@ -107,7 +107,7 @@ export const ragStatus: Record<
 export const reasonIcons: Record<string, React.ElementType> = {
   "Slightly elevated river level": TrendingUpOutlined,
   "Moderately elevated river level": TrendingUpOutlined,
-  "Significantly elevated river level": Flood,
+  "Significantly elevated river level": CrisisAlert,
   "Moderately low temperature": Thermostat,
   "Low temperature": Thermostat,
   "High winds": Air,

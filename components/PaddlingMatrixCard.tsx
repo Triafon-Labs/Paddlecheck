@@ -131,13 +131,20 @@ const getPaddlingMatrix = (
       break;
   }
 
-  // Independent PFD warning for high water level, if not in Red conditions (as Red already includes it)
-  if (overallStatus !== 'Red' && riverLevel && riverLevel >= 1.48) {
+  // PFD warning for high water level, if not in Red conditions (as Red already includes it)
+  if (overallStatus !== "Red" && riverLevel && riverLevel >= 1.48) {
     if (independent.status === "Yes") {
       independent.status = "Warning";
       independent.details = "PFD required. River is high.";
     } else if (independent.status !== "No") {
       independent.details += " PFD required. River is high.";
+    }
+
+    if (intermediate.status === "Yes") {
+      intermediate.status = "Warning";
+      intermediate.details = "PFD required. River is high.";
+    } else if (intermediate.status !== "No") {
+      intermediate.details += " PFD required. River is high.";
     }
   }
 

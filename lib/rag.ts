@@ -44,13 +44,13 @@ export const levelDescriptions: Record<number, string> = {
   2.75: "10th step wet, wet feet possible",
   4.28: "Almost on the car park – dry feet!",
   4.37: "5cm on the car park – not deep enough for boats, wet feet!",
-  4.49: "Water on car park, safe to park only if falling. Variable paddling on Pitchcroft.",
+  4.49: "Water on car park, safe to park only if falling. Variable paddling on Pitchcroft",
   4.7: "Just in the boat house!!",
-  5.01: "Boathouse flooding. Pitchcroft paddleable but shallow, watch for posts.",
-  5.02: "Deep water in boathouse, boats can float out. Pitchcroft paddleable but shallow, watch for posts.",
-  5.18: "Grand Stand Road flooded, unsafe to access boathouse.",
-  5.54: "Sabrina Bridge closed, North Parade underwater, dangerous flows.",
-  5.55: "Boathouse inaccessible, dangerous flow, no paddling advised.",
+  5.01: "Boathouse flooding. Pitchcroft paddleable but shallow, watch for posts",
+  5.02: "Deep water in boathouse, boats can float out. Pitchcroft paddleable but shallow, watch for posts",
+  5.18: "Grand Stand Road flooded, unsafe to access boathouse",
+  5.54: "Sabrina Bridge closed, North Parade underwater, dangerous flows",
+  5.55: "Boathouse inaccessible, dangerous flow, no paddling advised",
 };
 
 export const ragStatus: Record<

@@ -152,7 +152,27 @@ const StatsCard: React.FC<StatsCardProps> = ({
             <StatItem
               icon={<Water />}
               label="River Level"
-              value={<>{conditions.riverLevel?.toFixed(2)}m</>}
+              value={
+                <>
+                  {conditions.riverLevel?.toFixed(2)}m{" "}
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.secondary",
+                      fontStyle: "italic",
+                      ml: 0.5,
+                    }}
+                  >
+                    (
+                    {conditions.levelChange.value > 0.01
+                      ? "and rising"
+                      : conditions.levelChange.value < -0.01
+                      ? "and falling"
+                      : "and steady"}
+                    )
+                  </Typography>
+                </>
+              }
               isInfluencing={reasons.some((r) => r.includes("river level"))}
             />
             <StatItem

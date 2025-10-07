@@ -154,23 +154,25 @@ const StatsCard: React.FC<StatsCardProps> = ({
               label="River Level"
               value={
                 <>
-                  {conditions.riverLevel?.toFixed(2)}m{" "}
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "text.secondary",
-                      fontStyle: "italic",
-                      ml: 0.5,
-                    }}
-                  >
-                    (
-                    {conditions.levelChange.value > 0.01
-                      ? "and rising"
-                      : conditions.levelChange.value < -0.01
-                      ? "and falling"
-                      : "and steady"}
-                    )
-                  </Typography>
+                  {conditions.riverLevel?.toFixed(2)}m
+                  {conditions.levelChange && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        fontStyle: "italic",
+                        ml: 0.5,
+                      }}
+                    >
+                      (
+                      {conditions.levelChange.value > 0.01
+                        ? "and rising"
+                        : conditions.levelChange.value < -0.01
+                        ? "and falling"
+                        : "and steady"}
+                      )
+                    </Typography>
+                  )}
                 </>
               }
               isInfluencing={reasons.some((r) => r.includes("river level"))}
@@ -178,7 +180,32 @@ const StatsCard: React.FC<StatsCardProps> = ({
             <StatItem
               icon={<Info />}
               label="Launch Message"
-              value={conditions.launchMessage}
+              value={
+                conditions.launchMessage &&
+                (() => {
+                  const match = conditions.launchMessage.match(
+                    /(.*?)\s*\((.*)\)/
+                  );
+                  if (match) {
+                    return (
+                      <>
+                        {match[1]}
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                            fontStyle: "italic",
+                            ml: 0.5,
+                          }}
+                        >
+                          ({match[2]})
+                        </Typography>
+                      </>
+                    );
+                  }
+                  return conditions.launchMessage;
+                })()
+              }
             />
           </Box>
           <Box>

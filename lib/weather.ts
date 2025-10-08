@@ -1,11 +1,12 @@
 import { WeatherData, FutureWeatherData } from "@/types";
+import { API_ENDPOINTS, VISIBILITY_DESCRIPTIONS } from "@/lib/config";
 
 export const fetchWeatherData = async (
   latitude: number,
   longitude: number
 ): Promise<WeatherData> => {
   const response = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,is_day,visibility,wind_speed_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon`
+    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,is_day,visibility,wind_speed_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon`
   );
   const data = await response.json();
 
@@ -21,19 +22,15 @@ export const fetchWeatherData = async (
 };
 
 export const getVisibilityDescription = (visibility: number): string => {
-  if (visibility > 10000) {
-    return "Excellent";
-  }
-  if (visibility > 5000) {
-    return "Good";
-  }
-  if (visibility > 2000) {
-    return "Moderate";
-  }
-  if (visibility > 1000) {
-    return "Poor";
-  }
-  return "Very Poor";
+  if (visibility > VISIBILITY_DESCRIPTIONS.EXCELLENT.min)
+    return VISIBILITY_DESCRIPTIONS.EXCELLENT.desc;
+  if (visibility > VISIBILITY_DESCRIPTIONS.GOOD.min)
+    return VISIBILITY_DESCRIPTIONS.GOOD.desc;
+  if (visibility > VISIBILITY_DESCRIPTIONS.MODERATE.min)
+    return VISIBILITY_DESCRIPTIONS.MODERATE.desc;
+  if (visibility > VISIBILITY_DESCRIPTIONS.POOR.min)
+    return VISIBILITY_DESCRIPTIONS.POOR.desc;
+  return VISIBILITY_DESCRIPTIONS.VERY_POOR.desc;
 };
 
 export const fetchFutureWeatherData = async (
@@ -41,7 +38,7 @@ export const fetchFutureWeatherData = async (
   longitude: number
 ): Promise<FutureWeatherData> => {
   const response = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation,visibility,wind_speed_10m,weather_code,is_day&daily=sunrise,sunset&wind_speed_unit=mph&forecast_days=2&timezone=Europe%2FLondon`
+    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation,visibility,wind_speed_10m,weather_code,is_day&daily=sunrise,sunset&wind_speed_unit=mph&forecast_days=2&timezone=Europe%2FLondon`
   );
   const data = await response.json();
   return data;

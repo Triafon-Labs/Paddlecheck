@@ -1,11 +1,19 @@
 import { RiverReading, ApiResponse, ChartDataPoint } from "@/types";
+import {
+  API_ENDPOINTS,
+  RIVER_STATION_ID,
+  TIME_PERIODS,
+} from "@/lib/config";
 
-export const fetchRiverData = async (stationId: string = "2642", days: number = 1) => {
+export const fetchRiverData = async (
+  stationId: string = RIVER_STATION_ID,
+  days: number = 1
+) => {
   const sinceDate = new Date(
-    new Date().getTime() - days * 24 * 60 * 60 * 1000
+    new Date().getTime() - days * TIME_PERIODS.TWENTY_FOUR_HOURS
   ).toISOString();
   const response = await fetch(
-    `https://environment.data.gov.uk/flood-monitoring/id/stations/${stationId}/readings?since=${sinceDate}`
+    `${API_ENDPOINTS.RIVER}/${stationId}/readings?since=${sinceDate}`
   );
   const result: ApiResponse = await response.json();
   const sortedItems = result.items.sort(
@@ -31,7 +39,8 @@ export const fetchRiverData = async (stationId: string = "2642", days: number = 
     const oldestLevel5d = sortedItems[0].value;
     change5d = latestLevel - oldestLevel5d;
 
-    const oneHourAgo = new Date(new Date().getTime() - 1 * 60 * 60 * 1000);
+    const now = new Date().getTime();
+    const oneHourAgo = new Date(now - TIME_PERIODS.ONE_HOUR);
     const oneHourIndex = sortedItems.findIndex(
       (item: RiverReading) => new Date(item.dateTime) >= oneHourAgo
     );
@@ -40,9 +49,7 @@ export const fetchRiverData = async (stationId: string = "2642", days: number = 
       change1h = latestLevel - oldestLevel1h;
     }
 
-    const twentyFourHoursAgo = new Date(
-      new Date().getTime() - 24 * 60 * 60 * 1000
-    );
+    const twentyFourHoursAgo = new Date(now - TIME_PERIODS.TWENTY_FOUR_HOURS);
     const twentyFourHourIndex = sortedItems.findIndex(
       (item: RiverReading) => new Date(item.dateTime) >= twentyFourHoursAgo
     );
@@ -51,9 +58,7 @@ export const fetchRiverData = async (stationId: string = "2642", days: number = 
       change24h = latestLevel - oldestLevel24h;
     }
 
-    const eightHoursAgo = new Date(
-      new Date().getTime() - 8 * 60 * 60 * 1000
-    );
+    const eightHoursAgo = new Date(now - TIME_PERIODS.EIGHT_HOURS);
     const eightHourIndex = sortedItems.findIndex(
       (item: RiverReading) => new Date(item.dateTime) >= eightHoursAgo
     );
@@ -79,7 +84,7 @@ export const predictRiverLevel = (
   hoursInFuture: number
 ): number => {
   // 1. Filter data for the last 8 hours
-  const eightHoursAgo = new Date().getTime() - 8 * 60 * 60 * 1000;
+  const eightHoursAgo = new Date().getTime() - TIME_PERIODS.EIGHT_HOURS;
   const recentData = historicalData.filter(
     (d) => new Date(d.dateTime).getTime() >= eightHoursAgo
   );

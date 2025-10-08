@@ -22,7 +22,7 @@ import {
   LATITUDE,
   LONGITUDE,
   HISTORICAL_DAYS,
-} from "@/lib/constants";
+} from "@/lib/config";
 
 export const useKayakData = () => {
   const [conditions, setConditions] = useState<KayakConditions | null>(null);

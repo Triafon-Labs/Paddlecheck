@@ -88,7 +88,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         },
       }}
     >
-      <AppBar sx={{ position: "relative" }} elevation={0}>
+      <AppBar sx={{ position: "relative" }} elevation={0} color="inherit">
         <Toolbar>
           <Typography sx={{ flex: 1 }} variant="h6" component="div">
             Settings

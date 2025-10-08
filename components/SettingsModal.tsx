@@ -5,7 +5,6 @@ import {
   Dialog,
   AppBar,
   Toolbar,
-  IconButton,
   Typography,
   FormControl,
   Select,
@@ -17,7 +16,6 @@ import {
   Divider,
 } from "@mui/material";
 import MaterialSwitch from "./MaterialSwitch";
-import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import { useAppTheme } from "@/lib/ThemeContext";
@@ -92,21 +90,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     >
       <AppBar sx={{ position: "relative" }} elevation={0} color="inherit">
         <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={onClose}
-            aria-label="close"
-          >
-            <CloseIcon />
-          </IconButton>
-          <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+          <Typography sx={{ flex: 1 }} variant="h6" component="div">
             Settings
           </Typography>
         </Toolbar>
       </AppBar>
-      <DialogContent>
-        <Typography variant="h6" gutterBottom>
+      <DialogContent sx={{ bgcolor: "background.paper" }}>
+        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
           Theme
         </Typography>
         <Box

@@ -38,9 +38,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={plusJakartaSans.className}>
       <head>
-        <link rel="icon" href="/icons/favicon.ico" />
-        <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body style={{ fontFamily: "inherit" }}>
         <ThemeRegistry>

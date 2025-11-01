@@ -9,7 +9,7 @@ const TopNavBar = () => {
     <AppBar position="static" color="inherit" elevation={0}>
       <Toolbar sx={{ justifyContent: "center" }}>
         <Image
-          src="/icons/favicon.svg"
+          src="/favicon.svg"
           alt="Paddlecheck Logo"
           width={32}
           height={32}

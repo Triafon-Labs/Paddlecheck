@@ -60,14 +60,6 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               >
                 No Paddling
               </Typography>
-              {conditions.reasons && conditions.reasons.length > 0 && (
-                <Typography
-                  variant="body1"
-                  sx={{ color: noPaddlingStatusInfo.color }}
-                >
-                  ({conditions.reasons.join(", ")})
-                </Typography>
-              )}
             </Box>
           ) : (
             <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
@@ -75,9 +67,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
             </Box>
           )}
 
-          {conditions.reasons &&
-            conditions.reasons.length > 0 &&
-            !isNoPaddling && (
+          {conditions.reasons && conditions.reasons.length > 0 && (
               <Box
                 sx={{
                   display: "flex",

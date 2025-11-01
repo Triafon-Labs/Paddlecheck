@@ -10,6 +10,8 @@ import {
     WaterDrop,
     NightsStay,
     WbCloudy,
+    Thunderstorm,
+    Flood,
   } from "@mui/icons-material";
   import { Status } from "@/types";
 
@@ -121,6 +123,8 @@ import {
     Rain: WaterDrop,
     Dark: NightsStay,
     Foggy: WbCloudy,
+    "River level is dangerously high": Flood,
+    "Risk of thunderstorms": Thunderstorm,
   };
 
   export const LEVEL_DESCRIPTIONS: Record<number, string> = {

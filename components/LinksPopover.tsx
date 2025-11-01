@@ -19,8 +19,12 @@ interface LinksPopoverProps {
 
 const links = [
   {
-    name: 'GOV.UK River Level',
+    name: 'River Severn level at Worcester (Barbourne)',
     url: 'https://check-for-flooding.service.gov.uk/station/2092',
+  },
+  {
+    name: 'River Severn level at Bewdley',
+    url: 'https://check-for-flooding.service.gov.uk/station/2001',
   },
   {
     name: 'Worcester Canoe Club',

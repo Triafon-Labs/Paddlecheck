@@ -1,6 +1,16 @@
 import { WeatherData, FutureWeatherData } from "@/types";
 import { API_ENDPOINTS, VISIBILITY_DESCRIPTIONS } from "@/lib/config";
 
+// According to WMO weather interpretation codes
+const RAIN_CODES = new Set([
+  51, 53, 55, // Drizzle
+  56, 57, // Freezing Drizzle
+  61, 63, 65, // Rain
+  66, 67, // Freezing Rain
+  80, 81, 82, // Rain showers
+  95, 96, 99, // Thunderstorm
+]);
+
 export const fetchWeatherData = async (
   latitude: number,
   longitude: number
@@ -14,7 +24,7 @@ export const fetchWeatherData = async (
   return {
     temperature: current.temperature_2m,
     windSpeed: current.wind_speed_10m,
-    rain: current.precipitation > 0,
+    rain: RAIN_CODES.has(current.weather_code),
     dark: !current.is_day,
     visibility: current.visibility, // visibility in meters
     weatherCode: current.weather_code,

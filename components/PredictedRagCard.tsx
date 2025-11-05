@@ -17,7 +17,10 @@ interface PredictedRagCardProps {
   loading?: boolean;
 }
 
-const PredictedRagCard: React.FC<PredictedRagCardProps> = ({ conditions, loading }) => {
+const PredictedRagCard: React.FC<PredictedRagCardProps> = ({
+  conditions,
+  loading,
+}) => {
   const renderContent = () => {
     if (loading) {
       return (
@@ -105,8 +108,13 @@ const PredictedRagCard: React.FC<PredictedRagCardProps> = ({ conditions, loading
           Predicted RAG (next 8 hours)
         </Typography>
         {renderContent()}
-        <Typography variant="caption" color="text.secondary" sx={{ display: "block", textAlign: "center", mt: 2 }}>
-          This is an experimental prediction based on current trends and may not be accurate.
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: "block", textAlign: "center", mt: 2 }}
+        >
+          This is an experimental prediction based on current trends and may not
+          be accurate.
         </Typography>
       </CardContent>
     </Card>

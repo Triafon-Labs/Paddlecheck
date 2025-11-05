@@ -3,20 +3,30 @@ import { API_ENDPOINTS, VISIBILITY_DESCRIPTIONS } from "@/lib/config";
 
 // According to WMO weather interpretation codes
 const RAIN_CODES = new Set([
-  51, 53, 55, // Drizzle
-  56, 57, // Freezing Drizzle
-  61, 63, 65, // Rain
-  66, 67, // Freezing Rain
-  80, 81, 82, // Rain showers
-  95, 96, 99, // Thunderstorm
+  51,
+  53,
+  55, // Drizzle
+  56,
+  57, // Freezing Drizzle
+  61,
+  63,
+  65, // Rain
+  66,
+  67, // Freezing Rain
+  80,
+  81,
+  82, // Rain showers
+  95,
+  96,
+  99, // Thunderstorm
 ]);
 
 export const fetchWeatherData = async (
   latitude: number,
-  longitude: number
+  longitude: number,
 ): Promise<WeatherData> => {
   const response = await fetch(
-    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,is_day,visibility,wind_speed_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon`
+    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,is_day,visibility,wind_speed_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon`,
   );
   const data = await response.json();
 
@@ -45,10 +55,10 @@ export const getVisibilityDescription = (visibility: number): string => {
 
 export const fetchFutureWeatherData = async (
   latitude: number,
-  longitude: number
+  longitude: number,
 ): Promise<FutureWeatherData> => {
   const response = await fetch(
-    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation,visibility,wind_speed_10m,weather_code,is_day&daily=sunrise,sunset&wind_speed_unit=mph&forecast_days=2&timezone=Europe%2FLondon`
+    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation,visibility,wind_speed_10m,weather_code,is_day&daily=sunrise,sunset&wind_speed_unit=mph&forecast_days=2&timezone=Europe%2FLondon`,
   );
   const data = await response.json();
   return data;

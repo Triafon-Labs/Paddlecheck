@@ -1,26 +1,27 @@
-import { createTheme } from '@mui/material/styles';
-import { grey } from '@mui/material/colors';
+import { createTheme } from "@mui/material/styles";
+import { grey } from "@mui/material/colors";
 
 // A custom theme for this app
 export const lightTheme = createTheme({
   palette: {
-    mode: 'light',
+    mode: "light",
     primary: {
-      main: '#005AC1', // A vibrant blue
+      main: "#005AC1", // A vibrant blue
     },
     secondary: {
-      main: '#4CAF50', // A vibrant green
+      main: "#4CAF50", // A vibrant green
     },
     background: {
-      default: '#F4F9FF',
-      paper: '#FFFFFF',
+      default: "#F4F9FF",
+      paper: "#FFFFFF",
     },
   },
   shape: {
     borderRadius: 12,
   },
   typography: {
-    fontFamily: '"Plus Jakarta Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily:
+      '"Plus Jakarta Sans", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
       fontWeight: 700,
     },
@@ -44,19 +45,19 @@ export const lightTheme = createTheme({
 
 export const darkTheme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: "dark",
     primary: {
-      main: '#64B5F6', // A less saturated blue
+      main: "#64B5F6", // A less saturated blue
     },
     secondary: {
-      main: '#81C784', // A vibrant green for dark mode
+      main: "#81C784", // A vibrant green for dark mode
     },
     background: {
-      default: '#0A1929', // A darker, more navy blue
-      paper: '#132F4C', // A darker paper blue
+      default: "#0A1929", // A darker, more navy blue
+      paper: "#132F4C", // A darker paper blue
     },
     text: {
-      primary: '#FFFFFF',
+      primary: "#FFFFFF",
       secondary: grey[400],
     },
   },
@@ -64,7 +65,8 @@ export const darkTheme = createTheme({
     borderRadius: 12,
   },
   typography: {
-    fontFamily: '"Plus Jakarta Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily:
+      '"Plus Jakarta Sans", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
       fontWeight: 700,
     },

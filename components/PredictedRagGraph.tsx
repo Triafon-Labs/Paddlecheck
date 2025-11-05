@@ -130,7 +130,12 @@ const BarLabel = (props: BarLabelProps) => {
   const { x, y, width, index, data } = props;
   const theme = useTheme();
 
-  if (x === undefined || y === undefined || width === undefined || index === undefined) {
+  if (
+    x === undefined ||
+    y === undefined ||
+    width === undefined ||
+    index === undefined
+  ) {
     return null;
   }
 

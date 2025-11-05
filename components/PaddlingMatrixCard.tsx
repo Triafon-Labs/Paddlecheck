@@ -280,8 +280,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                           )}
                         </TableCell>
                       </TableRow>
-                      <TableRow>
-                        <TableCell
+                      <TableRow><TableCell
                           style={{ paddingBottom: 0, paddingTop: 0 }}
                           colSpan={3}
                         >
@@ -296,8 +295,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                               </Typography>
                             </Box>
                           </Collapse>
-                        </TableCell>
-                      </TableRow>
+                        </TableCell></TableRow>
                     </React.Fragment>
                   );
                 })}

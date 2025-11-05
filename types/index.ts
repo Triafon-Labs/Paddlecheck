@@ -46,7 +46,7 @@ export interface WeatherData {
   temperature: number;
   windSpeed: number;
   rain: boolean;
-  dark:boolean;
+  dark: boolean;
   visibility: number;
   weatherCode: number;
 }

@@ -26,7 +26,7 @@ const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement;
   },
-  ref: React.Ref<unknown>
+  ref: React.Ref<unknown>,
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -111,9 +111,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           </Typography>
           <MaterialSwitch
             checked={themeMode === "dark"}
-            onChange={(e) =>
-              setThemeMode(e.target.checked ? "dark" : "light")
-            }
+            onChange={(e) => setThemeMode(e.target.checked ? "dark" : "light")}
           />
         </Box>
 
@@ -137,11 +135,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             ))}
           </Select>
         </FormControl>
-        <Button
-          onClick={handleClearLevel}
-          disabled={!paddlerLevel}
-          fullWidth
-        >
+        <Button onClick={handleClearLevel} disabled={!paddlerLevel} fullWidth>
           Clear Selection
         </Button>
 

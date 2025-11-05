@@ -1,17 +1,13 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import {
-  Paper,
-  BottomNavigation,
-  BottomNavigationAction,
-} from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SettingsIcon from '@mui/icons-material/Settings';
-import LinkIcon from '@mui/icons-material/Link';
-import SettingsModal from './SettingsModal';
-import LinksPopover from './LinksPopover';
-import { useKayakContext } from '@/lib/KayakDataContext';
+import React, { useState } from "react";
+import { Paper, BottomNavigation, BottomNavigationAction } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LinkIcon from "@mui/icons-material/Link";
+import SettingsModal from "./SettingsModal";
+import LinksPopover from "./LinksPopover";
+import { useKayakContext } from "@/lib/KayakDataContext";
 
 const BottomNavBar = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -36,12 +32,12 @@ const BottomNavBar = () => {
     <>
       <Paper
         sx={{
-          position: 'fixed',
+          position: "fixed",
           bottom: 0,
           left: 0,
           right: 0,
-          bgcolor: 'background.paper',
-          paddingBottom: 'env(safe-area-inset-bottom)',
+          bgcolor: "background.paper",
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
         elevation={0}
       >

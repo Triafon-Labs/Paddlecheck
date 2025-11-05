@@ -168,8 +168,8 @@ const StatsCard: React.FC<StatsCardProps> = ({
                       {conditions.levelChange.value > 0.01
                         ? "and rising"
                         : conditions.levelChange.value < -0.01
-                        ? "and falling"
-                        : "and steady"}
+                          ? "and falling"
+                          : "and steady"}
                       )
                     </Typography>
                   )}
@@ -183,9 +183,8 @@ const StatsCard: React.FC<StatsCardProps> = ({
               value={
                 conditions.launchMessage &&
                 (() => {
-                  const match = conditions.launchMessage.match(
-                    /(.*?)\s*\((.*)\)/
-                  );
+                  const match =
+                    conditions.launchMessage.match(/(.*?)\s*\((.*)\)/);
                   if (match) {
                     return (
                       <>

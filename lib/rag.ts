@@ -86,9 +86,12 @@ const adjustRagForFactors = (
 };
 
 const getRiverLevelReason = (initialRag: number): string | undefined => {
-  if (initialRag === 1) return "Slightly elevated river level";
-  if (initialRag === 2) return "Moderately elevated river level";
-  if (initialRag === 3) return "Significantly elevated river level";
+  if (initialRag === 1)
+    return `Slightly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1}m)`;
+  if (initialRag === 2)
+    return `Moderately elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2}m)`;
+  if (initialRag === 3)
+    return `Significantly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3}m)`;
   return undefined;
 };
 

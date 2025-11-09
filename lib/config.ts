@@ -114,9 +114,12 @@ export const THRESHOLDS = {
 
 // --- UI Text and Icons ---
 export const REASON_ICONS: Record<string, React.ElementType> = {
-  "Slightly elevated river level": TrendingUpOutlined,
-  "Moderately elevated river level": TrendingUpOutlined,
-  "Significantly elevated river level": CrisisAlert,
+  [`Slightly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1}m)`]:
+    TrendingUpOutlined,
+  [`Moderately elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2}m)`]:
+    TrendingUpOutlined,
+  [`Significantly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3}m)`]:
+    CrisisAlert,
   "Moderately low temperature": Thermostat,
   "Low temperature": Thermostat,
   "High winds": Air,

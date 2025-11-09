@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext } from 'react';
-import { useKayakData } from './hooks';
+import React, { createContext, useContext } from "react";
+import { useKayakData } from "./hooks";
 
 // Infer the return type of useKayakData
 type KayakDataContextType = ReturnType<typeof useKayakData>;
@@ -10,7 +10,11 @@ type KayakDataContextType = ReturnType<typeof useKayakData>;
 const KayakDataContext = createContext<KayakDataContextType | null>(null);
 
 // Create a provider component
-export const KayakDataProvider = ({ children }: { children: React.ReactNode }) => {
+export const KayakDataProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const kayakData = useKayakData();
   return (
     <KayakDataContext.Provider value={kayakData}>
@@ -23,7 +27,7 @@ export const KayakDataProvider = ({ children }: { children: React.ReactNode }) =
 export const useKayakContext = () => {
   const context = useContext(KayakDataContext);
   if (!context) {
-    throw new Error('useKayakContext must be used within a KayakDataProvider');
+    throw new Error("useKayakContext must be used within a KayakDataProvider");
   }
   return context;
 };

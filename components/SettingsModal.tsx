@@ -14,6 +14,7 @@ import {
   DialogContent,
   Box,
   Divider,
+  Link,
 } from "@mui/material";
 import MaterialSwitch from "./MaterialSwitch";
 import Slide from "@mui/material/Slide";
@@ -26,7 +27,7 @@ const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement;
   },
-  ref: React.Ref<unknown>
+  ref: React.Ref<unknown>,
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -111,9 +112,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           </Typography>
           <MaterialSwitch
             checked={themeMode === "dark"}
-            onChange={(e) =>
-              setThemeMode(e.target.checked ? "dark" : "light")
-            }
+            onChange={(e) => setThemeMode(e.target.checked ? "dark" : "light")}
           />
         </Box>
 
@@ -137,11 +136,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             ))}
           </Select>
         </FormControl>
-        <Button
-          onClick={handleClearLevel}
-          disabled={!paddlerLevel}
-          fullWidth
-        >
+        <Button onClick={handleClearLevel} disabled={!paddlerLevel} fullWidth>
           Clear Selection
         </Button>
 
@@ -162,6 +157,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             {process.env.NEXT_PUBLIC_APP_VERSION || "N/A"}
           </Typography>
         </Box>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 2 }}>
+          This is a hobby project and may contain mistakes. The information
+          provided is for guidance only. Please use your own judgement and
+          consult with experienced individuals before making any decisions.
+          Feedback is welcome, please{" "}
+          <Link href="mailto:REDACTED" color="inherit">
+            send feedback here
+          </Link>
+          .
+        </Typography>
       </DialogContent>
     </Dialog>
   );

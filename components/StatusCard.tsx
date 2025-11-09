@@ -68,53 +68,53 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
           )}
 
           {conditions.reasons && conditions.reasons.length > 0 && (
-              <Box
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  gap: 2,
-                  mt: 2,
-                }}
-              >
-                {conditions.reasons.map((reason, index) => {
-                  const Icon = reasonIcons[reason];
-                  return (
-                    <Paper
-                      key={index}
-                      variant="outlined"
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                gap: 2,
+                mt: 2,
+              }}
+            >
+              {conditions.reasons.map((reason, index) => {
+                const Icon = reasonIcons[reason];
+                return (
+                  <Paper
+                    key={index}
+                    variant="outlined"
+                    sx={{
+                      p: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexDirection: "column",
+                      height: "100%",
+                      flexBasis: "150px",
+                      flexGrow: 1,
+                      maxWidth: "calc(50% - 8px)",
+                    }}
+                  >
+                    <Box
                       sx={{
-                        p: 2,
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
-                        flexDirection: "column",
-                        height: "100%",
-                        flexBasis: "150px",
-                        flexGrow: 1,
-                        maxWidth: "calc(50% - 8px)",
+                        color: "text.secondary",
                       }}
                     >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          color: "text.secondary",
-                        }}
+                      {Icon && <Icon sx={{ mr: 0.5 }} />}
+                      <Typography
+                        variant="subtitle2"
+                        sx={{ ml: 0.5, textAlign: "center" }}
                       >
-                        {Icon && <Icon sx={{ mr: 0.5 }} />}
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ ml: 0.5, textAlign: "center" }}
-                        >
-                          {reason}
-                        </Typography>
-                      </Box>
-                    </Paper>
-                  );
-                })}
-              </Box>
-            )}
+                        {reason}
+                      </Typography>
+                    </Box>
+                  </Paper>
+                );
+              })}
+            </Box>
+          )}
         </>
       );
     }
@@ -126,7 +126,11 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
   };
 
   return (
-    <Card data-testid="status-card" variant="outlined" sx={{ width: "100%", p: 2 }}>
+    <Card
+      data-testid="status-card"
+      variant="outlined"
+      sx={{ width: "100%", p: 2 }}
+    >
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
           RAG Status

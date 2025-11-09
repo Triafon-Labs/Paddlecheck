@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React from "react";
 import { Container, Stack, Box, Divider } from "@mui/material";
@@ -8,7 +8,6 @@ import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";
 import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
 import PredictedRagGraph from "@/components/PredictedRagGraph";
-import Disclaimer from "@/components/Disclaimer";
 import { useKayakContext } from "@/lib/KayakDataContext";
 
 export default function HomePage() {
@@ -56,8 +55,6 @@ export default function HomePage() {
         />
         <Box sx={{ width: "100%", textAlign: "center" }}>
           <LastUpdated date={conditions?.lastUpdated} />
-          <Divider sx={{ my: 2, width: "50%", mx: "auto" }} />
-          <Disclaimer />
         </Box>
       </Stack>
     </Container>

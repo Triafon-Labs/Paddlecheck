@@ -1,15 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import {
-  Popover,
-  List,
-  ListItem,
-  Link,
-  Typography,
-  Box,
-} from '@mui/material';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import React from "react";
+import { Popover, List, ListItem, Link, Typography, Box } from "@mui/material";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 interface LinksPopoverProps {
   open: boolean;
@@ -19,16 +12,16 @@ interface LinksPopoverProps {
 
 const links = [
   {
-    name: 'River Severn level at Worcester (Barbourne)',
-    url: 'https://check-for-flooding.service.gov.uk/station/2092',
+    name: "River Severn level at Worcester (Barbourne)",
+    url: "https://check-for-flooding.service.gov.uk/station/2092",
   },
   {
-    name: 'River Severn level at Bewdley',
-    url: 'https://check-for-flooding.service.gov.uk/station/2001',
+    name: "River Severn level at Bewdley",
+    url: "https://check-for-flooding.service.gov.uk/station/2001",
   },
   {
-    name: 'Worcester Canoe Club',
-    url: 'https://worcestercanoeclub.org/',
+    name: "Worcester Canoe Club",
+    url: "https://worcestercanoeclub.org/",
   },
 ];
 
@@ -43,12 +36,12 @@ const LinksPopover: React.FC<LinksPopoverProps> = ({
       anchorEl={anchorEl}
       onClose={onClose}
       anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'center',
+        vertical: "top",
+        horizontal: "center",
       }}
       transformOrigin={{
-        vertical: 'bottom',
-        horizontal: 'center',
+        vertical: "bottom",
+        horizontal: "center",
       }}
     >
       <Box sx={{ p: 2 }}>
@@ -66,7 +59,9 @@ const LinksPopover: React.FC<LinksPopoverProps> = ({
               sx={{
                 pl: 0,
                 color: (theme) =>
-                  theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
+                  theme.palette.mode === "dark"
+                    ? "common.white"
+                    : "primary.main",
               }}
             >
               <Typography sx={{ flexGrow: 1 }}>{link.name}</Typography>

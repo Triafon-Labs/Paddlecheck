@@ -11,8 +11,8 @@ const TopNavBar = () => {
         <Image
           src="/favicon.svg"
           alt="Paddlecheck Logo"
-          width={32}
-          height={32}
+          width={40}
+          height={40}
         />
       </Toolbar>
     </AppBar>

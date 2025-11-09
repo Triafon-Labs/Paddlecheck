@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   TrendingUp,
@@ -86,11 +86,7 @@ const ChangeIndicator: React.FC<{
               <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
             )
           ) : null}
-          {change !== null
-            ? isFlat
-              ? `0.00m`
-              : `${changeStr}m`
-            : "N/A"}
+          {change !== null ? (isFlat ? `0.00m` : `${changeStr}m`) : "N/A"}
         </Typography>
       </Box>
     </Paper>
@@ -259,7 +255,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   return (
     <Card variant="outlined" sx={{ width: "100%", mt: 2, p: 2 }}>
       <CardContent>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <div>
             <Typography variant="h5" component="div">
               River Level

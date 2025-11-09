@@ -61,7 +61,7 @@ const getStatusIcon = (status: PaddlingStatusValue) => {
 
 const getPaddlingMatrix = (
   overallStatus: Status,
-  riverLevel?: number
+  riverLevel?: number,
 ): PaddlingMatrix => {
   const matrix: PaddlingMatrix = {};
 
@@ -176,35 +176,43 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
   const [open, setOpen] = useState<Record<PaddlerType, boolean>>(
     paddlerTypes.reduce(
       (acc, paddler) => ({ ...acc, [paddler]: false }),
-      {} as Record<PaddlerType, boolean>
-    )
+      {} as Record<PaddlerType, boolean>,
+    ),
   );
 
   useEffect(() => {
-    const savedLevel = localStorage.getItem("paddlerLevel") as PaddlerType | null;
+    const savedLevel = localStorage.getItem(
+      "paddlerLevel",
+    ) as PaddlerType | null;
 
-    const newOpenState = paddlerTypes.reduce((acc, paddler) => {
-      if (savedLevel) {
-        acc[paddler] = paddler === savedLevel;
-      } else {
-        acc[paddler] = true; // Expand all if no level is selected
-      }
-      return acc;
-    }, {} as Record<PaddlerType, boolean>);
+    const newOpenState = paddlerTypes.reduce(
+      (acc, paddler) => {
+        if (savedLevel) {
+          acc[paddler] = paddler === savedLevel;
+        } else {
+          acc[paddler] = true; // Expand all if no level is selected
+        }
+        return acc;
+      },
+      {} as Record<PaddlerType, boolean>,
+    );
 
     setOpen(newOpenState);
 
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === "paddlerLevel") {
         const newLevel = event.newValue as PaddlerType | null;
-        const updatedOpenState = paddlerTypes.reduce((acc, paddler) => {
-          if (newLevel) {
-            acc[paddler] = paddler === newLevel;
-          } else {
-            acc[paddler] = true;
-          }
-          return acc;
-        }, {} as Record<PaddlerType, boolean>);
+        const updatedOpenState = paddlerTypes.reduce(
+          (acc, paddler) => {
+            if (newLevel) {
+              acc[paddler] = paddler === newLevel;
+            } else {
+              acc[paddler] = true;
+            }
+            return acc;
+          },
+          {} as Record<PaddlerType, boolean>,
+        );
         setOpen(updatedOpenState);
       }
     };
@@ -272,8 +280,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                           )}
                         </TableCell>
                       </TableRow>
-                      <TableRow>
-                        <TableCell
+                      <TableRow><TableCell
                           style={{ paddingBottom: 0, paddingTop: 0 }}
                           colSpan={3}
                         >
@@ -288,8 +295,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                               </Typography>
                             </Box>
                           </Collapse>
-                        </TableCell>
-                      </TableRow>
+                        </TableCell></TableRow>
                     </React.Fragment>
                   );
                 })}

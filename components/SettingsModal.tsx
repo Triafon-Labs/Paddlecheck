@@ -158,13 +158,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           </Typography>
         </Box>
         <Typography variant="caption" color="text.secondary" sx={{ mt: 2 }}>
-          This is a hobby project made by a fellow paddler, so there might be
-          mistakes. Always check conditions yourself and talk to coaches or
-          experienced paddlers before heading out. Feedback welcome{" "}
+          This is a hobby project, so there might be mistakes. Always check
+          conditions yourself and talk to coaches or experienced paddlers before
+          heading out.{" "}
           <Link href="mailto:REDACTED" color="inherit">
-            here
+            Feedback welcome here!
           </Link>
-          !
         </Typography>
       </DialogContent>
     </Dialog>

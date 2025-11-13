@@ -262,7 +262,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
             <Line
               type="monotone"
               dataKey="scaledPredictedLevel"
-              stroke={lineColor}
+              stroke={theme.palette.primary.main}
               strokeDasharray="5 5"
               dot={false}
               strokeWidth={2}

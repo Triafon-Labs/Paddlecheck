@@ -11,7 +11,8 @@ import {
   useTheme,
 } from "@mui/material";
 import {
-  BarChart,
+  ComposedChart,
+  Area,
   Bar,
   XAxis,
   YAxis,
@@ -51,6 +52,9 @@ const CustomTooltip = ({
       <Paper sx={{ p: 2 }}>
         <Typography variant="body1">{`${label}`}</Typography>
         <Typography variant="body2">{`${data.status}`}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          Predicted Level: {data.predictedLevel.toFixed(2)}m
+        </Typography>
         {data.reasons && data.reasons.length > 0 && (
           <Box sx={{ mt: 1 }}>
             <Typography variant="subtitle2">Reasons:</Typography>
@@ -170,9 +174,35 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
         ? parseInt(sunset.split("T")[1].split(":")[0], 10)
         : null;
 
+      const predictedLevels = data.map((d) => d.predictedLevel);
+      const minLevel = Math.min(...predictedLevels);
+      const maxLevel = Math.max(...predictedLevels);
+
+      const chartData = data.map((d) => ({
+        ...d,
+        scaledPredictedLevel:
+          maxLevel - minLevel !== 0
+            ? ((d.predictedLevel - minLevel) / (maxLevel - minLevel)) * 1.0
+            : 0.5,
+      }));
+
       return (
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={data} margin={{ top: 40 }}>
+          <ComposedChart data={chartData} margin={{ top: 40 }}>
+            <defs>
+              <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor={theme.palette.primary.main}
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={theme.palette.primary.main}
+                  stopOpacity={0}
+                />
+              </linearGradient>
+            </defs>
             <XAxis dataKey="time" />
             <YAxis hide domain={[0, 1.2]} />
             <Tooltip content={CustomTooltip} cursor={{ fill: "transparent" }} />
@@ -214,6 +244,16 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 }
               />
             )}
+            <Area
+              type="monotone"
+              dataKey="scaledPredictedLevel"
+              stroke={theme.palette.primary.main}
+              fillOpacity={1}
+              fill="url(#colorLevel)"
+              strokeDasharray="5 5"
+              dot={false}
+              strokeWidth={2}
+            />
             <Bar dataKey="value">
               {data.map((entry, index) => (
                 <Cell
@@ -223,11 +263,11 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
               ))}
               <LabelList
                 dataKey="value"
-                content={<BarLabel data={data} />}
+                content={<BarLabel data={chartData} />}
                 position="top"
               />
             </Bar>
-          </BarChart>
+          </ComposedChart>
         </ResponsiveContainer>
       );
     }

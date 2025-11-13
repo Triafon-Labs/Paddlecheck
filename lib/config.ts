@@ -12,6 +12,9 @@ import {
   WbCloudy,
   Thunderstorm,
   Flood,
+  Water,
+  Waves,
+  Tsunami,
 } from "@mui/icons-material";
 import { Status } from "@/types";
 
@@ -115,11 +118,11 @@ export const THRESHOLDS = {
 // --- UI Text and Icons ---
 export const REASON_ICONS: Record<string, React.ElementType> = {
   [`Slightly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1}m)`]:
-    TrendingUpOutlined,
+    Water,
   [`Moderately elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2}m)`]:
-    TrendingUpOutlined,
+    Waves,
   [`Significantly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3}m)`]:
-    CrisisAlert,
+    Tsunami,
   "Moderately low temperature": Thermostat,
   "Low temperature": Thermostat,
   "High winds": Air,

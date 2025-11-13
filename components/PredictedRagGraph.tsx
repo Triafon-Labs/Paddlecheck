@@ -24,16 +24,9 @@ import {
 } from "recharts";
 import { PredictedGraphDataPoint } from "@/types";
 import { ragStatus } from "@/lib/rag";
-import Air from "@mui/icons-material/Air";
-import WaterDrop from "@mui/icons-material/WaterDrop";
+import { REASON_ICONS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
-import Grain from "@mui/icons-material/Grain";
-import AcUnit from "@mui/icons-material/AcUnit";
-import Thermostat from "@mui/icons-material/Thermostat";
 import WbSunny from "@mui/icons-material/WbSunny";
-import TrendingUp from "@mui/icons-material/TrendingUp";
-import Warning from "@mui/icons-material/Warning";
-import Flood from "@mui/icons-material/Flood";
 
 interface PredictedRagGraphProps {
   data: PredictedGraphDataPoint[] | null;
@@ -41,18 +34,6 @@ interface PredictedRagGraphProps {
   sunrise: string | null;
   sunset: string | null;
 }
-
-const reasonToIcon: { [key: string]: React.ReactElement } = {
-  "High winds": <Air fontSize="small" />,
-  Rain: <WaterDrop fontSize="small" />,
-  Dark: <NightsStay fontSize="small" />,
-  Foggy: <Grain fontSize="small" />,
-  "Low temperature": <AcUnit fontSize="small" />,
-  "Moderately low temperature": <Thermostat fontSize="small" />,
-  "Slightly elevated river level": <TrendingUp fontSize="small" />,
-  "Moderately elevated river level": <Warning fontSize="small" />,
-  "Significantly elevated river level": <Flood fontSize="small" />,
-};
 
 import {
   NameType,
@@ -73,17 +54,20 @@ const CustomTooltip = ({
         {data.reasons && data.reasons.length > 0 && (
           <Box sx={{ mt: 1 }}>
             <Typography variant="subtitle2">Reasons:</Typography>
-            {data.reasons.map((reason: string, index: number) => (
-              <Box
-                key={index}
-                sx={{ display: "flex", alignItems: "center", mt: 0.5 }}
-              >
-                {reasonToIcon[reason]}
-                <Typography variant="caption" sx={{ ml: 1 }}>
-                  {reason}
-                </Typography>
-              </Box>
-            ))}
+            {data.reasons.map((reason: string, index: number) => {
+              const Icon = REASON_ICONS[reason];
+              return (
+                <Box
+                  key={index}
+                  sx={{ display: "flex", alignItems: "center", mt: 0.5 }}
+                >
+                  {Icon && <Icon fontSize="small" />}
+                  <Typography variant="caption" sx={{ ml: 1 }}>
+                    {reason}
+                  </Typography>
+                </Box>
+              );
+            })}
           </Box>
         )}
       </Paper>

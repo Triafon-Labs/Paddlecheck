@@ -7,7 +7,7 @@ import {
   Typography,
   Box,
   Tooltip,
-  Skeleton,
+  CircularProgress,
 } from "@mui/material";
 import Thermostat from "@mui/icons-material/Thermostat";
 import Visibility from "@mui/icons-material/Visibility";
@@ -84,39 +84,16 @@ const StatsCard: React.FC<StatsCardProps> = ({
               mt: 1,
             }}
           >
-            <Box>
-              <StatItem
-                icon={<Water />}
-                label="River Level"
-                value={<Skeleton width="80px" />}
-              />
-              <StatItem
-                icon={<Info />}
-                label="Launch Message"
-                value={<Skeleton width="120px" />}
-              />
-            </Box>
-            <Box>
-              <StatItem
-                icon={<Thermostat />}
-                label="Initial RAG Status"
-                value={<Skeleton width="60px" />}
-              />
-              <StatItem
-                icon={<Air />}
-                label="Temperature"
-                value={<Skeleton width="60px" />}
-              />
-              <StatItem
-                icon={<Visibility />}
-                label="Wind Speed"
-                value={<Skeleton width="80px" />}
-              />
-              <StatItem
-                icon={<Water />}
-                label="Visibility"
-                value={<Skeleton width="100px" />}
-              />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                minHeight: "200px",
+              }}
+            >
+              <CircularProgress />
             </Box>
           </Box>
         </CardContent>

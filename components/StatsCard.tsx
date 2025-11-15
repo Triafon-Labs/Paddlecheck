@@ -91,6 +91,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
                 alignItems: "center",
                 width: "100%",
                 minHeight: "200px",
+                gridColumn: "span 2",
               }}
             >
               <CircularProgress />

@@ -3,8 +3,6 @@
 import React from "react";
 import {
   Dialog,
-  AppBar,
-  Toolbar,
   Typography,
   FormControl,
   Select,
@@ -89,14 +87,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         },
       }}
     >
-      <AppBar sx={{ position: "relative" }} elevation={0} color="inherit">
-        <Toolbar>
-          <Typography sx={{ flex: 1 }} variant="h6" component="div">
-            Settings
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <DialogContent sx={{ bgcolor: "background.paper" }}>
+      <DialogContent sx={{ bgcolor: "background.paper", p: 2 }}>
+        <Typography variant="h5" component="div" gutterBottom>
+          Settings
+        </Typography>
+
         <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
           Theme
         </Typography>

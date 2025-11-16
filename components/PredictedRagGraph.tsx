@@ -275,7 +275,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
         <Typography variant="h5" component="div">
-          RAG Forecast
+          Paddling Forecast
         </Typography>
         <Typography variant="subtitle1" color="text.secondary" gutterBottom>
           Next 24 Hours

@@ -133,7 +133,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
     >
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
-          RAG Status
+          Paddling Status
         </Typography>
         {renderContent()}
       </CardContent>

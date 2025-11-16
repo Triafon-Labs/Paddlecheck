@@ -174,16 +174,9 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
         ? parseInt(sunset.split("T")[1].split(":")[0], 10)
         : null;
 
-      const predictedLevels = data.map((d) => d.predictedLevel);
-      const minLevel = Math.min(...predictedLevels);
-      const maxLevel = Math.max(...predictedLevels);
-
       const chartData = data.map((d) => ({
         ...d,
-        scaledPredictedLevel:
-          maxLevel - minLevel !== 0
-            ? ((d.predictedLevel - minLevel) / (maxLevel - minLevel)) * 1.0
-            : 0.5,
+        scaledPredictedLevel: d.predictedLevel / 6.0,
       }));
 
       return (
@@ -248,7 +241,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
               type="monotone"
               dataKey="scaledPredictedLevel"
               stroke={theme.palette.primary.main}
-              fillOpacity={1}
+              fillOpacity={0}
               fill="url(#colorLevel)"
               strokeDasharray="5 5"
               dot={false}

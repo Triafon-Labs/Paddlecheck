@@ -202,7 +202,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 stroke={theme.palette.divider}
               />
               <XAxis dataKey="dateTime" tickFormatter={formatXAxis} />
-              <YAxis stroke={theme.palette.text.secondary} />
+              <YAxis stroke={theme.palette.text.secondary} domain={[0, 6]} />
               <Tooltip content={CustomTooltip} />
               <Area
                 type="monotone"

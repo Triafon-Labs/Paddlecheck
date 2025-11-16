@@ -17,6 +17,7 @@ import Info from "@mui/icons-material/Info";
 import WaterDrop from "@mui/icons-material/WaterDrop";
 import NightsStay from "@mui/icons-material/NightsStay";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
+import Kayaking from "@mui/icons-material/Kayaking";
 import { KayakConditions } from "@/types";
 import { ragStatus } from "@/lib/rag";
 
@@ -191,6 +192,27 @@ const StatsCard: React.FC<StatsCardProps> = ({
               label="Initial RAG Status"
               value={conditions.initialStatus}
             />
+            {conditions.pitchcroftPaddleability && (
+              <StatItem
+                icon={<Kayaking />}
+                label="Pitchcroft Paddleability"
+                value={
+                  <>
+                    {conditions.pitchcroftPaddleability}
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        fontStyle: "italic",
+                        ml: 0.5,
+                      }}
+                    >
+                      (at your own risk)
+                    </Typography>
+                  </>
+                }
+              />
+            )}
             <StatItem
               icon={<Thermostat />}
               label="Temperature"

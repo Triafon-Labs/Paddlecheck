@@ -22,6 +22,7 @@ import {
   LATITUDE,
   LONGITUDE,
   HISTORICAL_DAYS,
+  getPitchcroftPaddleability,
 } from "@/lib/config";
 
 export const useKayakData = () => {
@@ -79,6 +80,9 @@ export const useKayakData = () => {
       const visibilityDescription = getVisibilityDescription(
         currentConditions.visibility || 0,
       );
+      const pitchcroftPaddleability = getPitchcroftPaddleability(
+        currentConditions.riverLevel || 0,
+      );
 
       setConditions({
         ...currentConditions,
@@ -92,6 +96,7 @@ export const useKayakData = () => {
         launchMessage: findLevelDescription(riverData.latestLevel || 0),
         lastUpdated: new Date().toISOString(),
         visibilityDescription,
+        pitchcroftPaddleability,
       });
       setLoading(false);
 

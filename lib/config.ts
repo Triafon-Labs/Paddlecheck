@@ -154,6 +154,24 @@ export const LEVEL_DESCRIPTIONS: Record<number, string> = {
   5.55: "Boathouse inaccessible, dangerous flow, no paddling advised",
 };
 
+export const PITCHCROFT_PADDLEABILITY: Record<number, string> = {
+  4.0: "Variable",
+  4.5: "Good",
+  5.0: "Risky",
+};
+
+export const getPitchcroftPaddleability = (
+  level: number
+): string | undefined => {
+  const allLevels = Object.keys(PITCHCROFT_PADDLEABILITY)
+    .map(parseFloat)
+    .sort((a, b) => a - b);
+  const applicableLevel = allLevels.find((key) => level >= key);
+  return applicableLevel
+    ? PITCHCROFT_PADDLEABILITY[applicableLevel]
+    : undefined;
+};
+
 export const VISIBILITY_DESCRIPTIONS: {
   [key: string]: { min: number; desc: string };
 } = {

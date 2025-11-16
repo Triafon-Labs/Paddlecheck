@@ -119,10 +119,6 @@ const StatsCard: React.FC<StatsCardProps> = ({
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              md: "1fr 1fr",
-            },
             gap: 2,
             mt: 1,
           }}

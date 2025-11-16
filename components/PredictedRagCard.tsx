@@ -105,7 +105,7 @@ const PredictedRagCard: React.FC<PredictedRagCardProps> = ({
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
-          Predicted RAG (next 8 hours)
+          Paddling Forecast (next 24 hours)
         </Typography>
         {renderContent()}
         <Typography

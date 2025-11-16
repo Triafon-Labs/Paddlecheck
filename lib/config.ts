@@ -172,7 +172,7 @@ export const getPitchcroftPaddleability = (level: number): string | undefined =>
 
   return applicableLevel
 
-    ? PITCHCROFT_PADDLEABILITY[applicableLevel]
+    ? PITCHCROFT_PADDLEABILITY[applicableLevel.toString()]
 
     : undefined;
 

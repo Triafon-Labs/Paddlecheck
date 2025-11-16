@@ -244,7 +244,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
               <TableHead>
                 <TableRow>
                   <TableCell /> {/* For the collapse button */}
-                  <TableCell>Paddler</TableCell>
+                  <TableCell align="center">Paddler</TableCell>
                   <TableCell align="center">Status</TableCell>
                 </TableRow>
               </TableHead>
@@ -267,7 +267,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                             )}
                           </IconButton>
                         </TableCell>
-                        <TableCell component="th" scope="row">
+                        <TableCell component="th" scope="row" align="center">
                           {paddler}
                         </TableCell>
                         <TableCell align="center">

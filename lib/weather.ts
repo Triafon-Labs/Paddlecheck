@@ -2,24 +2,7 @@ import { WeatherData, FutureWeatherData } from "@/types";
 import { API_ENDPOINTS, VISIBILITY_DESCRIPTIONS } from "@/lib/config";
 
 // According to WMO weather interpretation codes
-const RAIN_CODES = new Set([
-  51,
-  53,
-  55, // Drizzle
-  56,
-  57, // Freezing Drizzle
-  61,
-  63,
-  65, // Rain
-  66,
-  67, // Freezing Rain
-  80,
-  81,
-  82, // Rain showers
-  95,
-  96,
-  99, // Thunderstorm
-]);
+const RAIN_CODES = new Set(Array.from({ length: 50 }, (_, i) => i + 50));
 
 export const fetchWeatherData = async (
   latitude: number,

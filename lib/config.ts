@@ -9,12 +9,13 @@ import {
   Air,
   WaterDrop,
   NightsStay,
-  WbCloudy,
   Thunderstorm,
   Flood,
   Water,
   Waves,
   Tsunami,
+  AcUnit,
+  Foggy,
 } from "@mui/icons-material";
 import { Status } from "@/types";
 
@@ -108,8 +109,8 @@ export const THRESHOLDS = {
   WIND_HIGH: 15,
   VISIBILITY_POOR: 1000,
   RIVER_LEVEL_NO_PADDLING: 5.0,
-  THUNDERSTORM_CODES: [95, 96, 99],
-  FOG_CODES: [45, 48],
+  THUNDERSTORM_CODES: [95, 96, 97, 98, 99],
+  FOG_CODES: [40, 41, 42, 43, 44, 45, 46, 47, 48, 49],
   RIVER_LEVEL_INITIAL_RAG_1: 1.0,
   RIVER_LEVEL_INITIAL_RAG_2: 1.4,
   RIVER_LEVEL_INITIAL_RAG_3: 2.2,
@@ -124,11 +125,11 @@ export const REASON_ICONS: Record<string, React.ElementType> = {
   [`Significantly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3}m)`]:
     Tsunami,
   "Moderately low temperature": Thermostat,
-  "Low temperature": Thermostat,
+  "Low temperature": AcUnit,
   "High winds": Air,
   Rain: WaterDrop,
   Dark: NightsStay,
-  Foggy: WbCloudy,
+  Foggy: Foggy,
   "River level is dangerously high": Flood,
   "Risk of thunderstorms": Thunderstorm,
 };

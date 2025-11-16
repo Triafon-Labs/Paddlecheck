@@ -61,7 +61,7 @@ const getStatusIcon = (status: PaddlingStatusValue) => {
 
 const getPaddlingMatrix = (
   overallStatus: Status,
-  riverLevel?: number,
+  riverLevel?: number
 ): PaddlingMatrix => {
   const matrix: PaddlingMatrix = {};
 
@@ -176,13 +176,13 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
   const [open, setOpen] = useState<Record<PaddlerType, boolean>>(
     paddlerTypes.reduce(
       (acc, paddler) => ({ ...acc, [paddler]: false }),
-      {} as Record<PaddlerType, boolean>,
-    ),
+      {} as Record<PaddlerType, boolean>
+    )
   );
 
   useEffect(() => {
     const savedLevel = localStorage.getItem(
-      "paddlerLevel",
+      "paddlerLevel"
     ) as PaddlerType | null;
 
     const newOpenState = paddlerTypes.reduce(
@@ -194,7 +194,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
         }
         return acc;
       },
-      {} as Record<PaddlerType, boolean>,
+      {} as Record<PaddlerType, boolean>
     );
 
     setOpen(newOpenState);
@@ -211,7 +211,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
             }
             return acc;
           },
-          {} as Record<PaddlerType, boolean>,
+          {} as Record<PaddlerType, boolean>
         );
         setOpen(updatedOpenState);
       }
@@ -243,8 +243,9 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell /> {/* For the collapse button */}
-                  <TableCell>Paddler</TableCell>
+                  <TableCell />
+                  {/* For the collapse button */}
+                  <TableCell align="center">Paddler</TableCell>
                   <TableCell align="center">Status</TableCell>
                 </TableRow>
               </TableHead>
@@ -267,7 +268,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                             )}
                           </IconButton>
                         </TableCell>
-                        <TableCell component="th" scope="row">
+                        <TableCell component="th" scope="row" align="center">
                           {paddler}
                         </TableCell>
                         <TableCell align="center">
@@ -280,7 +281,8 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                           )}
                         </TableCell>
                       </TableRow>
-                      <TableRow><TableCell
+                      <TableRow>
+                        <TableCell
                           style={{ paddingBottom: 0, paddingTop: 0 }}
                           colSpan={3}
                         >
@@ -295,7 +297,8 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                               </Typography>
                             </Box>
                           </Collapse>
-                        </TableCell></TableRow>
+                        </TableCell>
+                      </TableRow>
                     </React.Fragment>
                   );
                 })}

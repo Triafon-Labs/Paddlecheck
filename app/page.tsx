@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Container, Stack, Box, Divider } from "@mui/material";
+import { Container, Stack, Box } from "@mui/material";
 import LastUpdated from "@/components/LastUpdated";
 import StatusCard from "@/components/StatusCard";
 import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";

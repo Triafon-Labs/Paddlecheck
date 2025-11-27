@@ -162,6 +162,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return data.filter((d) => new Date(d.dateTime) > filterDate);
   }, [data, timeRange]);
 
+  const yDomainMax = useMemo(() => {
+    if (!filteredData || filteredData.length === 0) return 6;
+    const maxLevel = Math.max(...filteredData.map((d) => d.level));
+    const roundedMax = Math.ceil(maxLevel);
+    return roundedMax > 0 ? roundedMax : 6;
+  }, [filteredData]);
+
   const formatXAxis = (tickItem: string) => {
     const date = new Date(tickItem);
     if (timeRange === "5d") {
@@ -202,7 +209,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 stroke={theme.palette.divider}
               />
               <XAxis dataKey="dateTime" tickFormatter={formatXAxis} />
-              <YAxis stroke={theme.palette.text.secondary} domain={[0, 6]} />
+              <YAxis
+                stroke={theme.palette.text.secondary}
+                domain={[0, yDomainMax]}
+              />
               <Tooltip content={CustomTooltip} />
               <Area
                 type="monotone"

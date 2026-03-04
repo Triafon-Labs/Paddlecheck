@@ -40,6 +40,10 @@ export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem("themeMode", themeMode);
+  }, [themeMode]);
+
   const activeTheme = useMemo(() => {
     return themeMode === "dark" ? darkTheme : lightTheme;
   }, [themeMode]);

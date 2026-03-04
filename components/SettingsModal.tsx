@@ -40,13 +40,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">("");
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedLevel = localStorage.getItem("paddlerLevel") as
-        | PaddlerType
-        | undefined;
-      if (savedLevel) {
-        setPaddlerLevel(savedLevel);
-      }
+    const savedLevel = localStorage.getItem("paddlerLevel") as
+      | PaddlerType
+      | undefined;
+    if (savedLevel) {
+      setPaddlerLevel(savedLevel);
     }
   }, []);
 

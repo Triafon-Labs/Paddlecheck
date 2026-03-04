@@ -13,7 +13,7 @@ interface TrafficLightProps {
 const TrafficLight: React.FC<TrafficLightProps> = ({ status, disabled }) => {
   const theme = useTheme();
   const statuses = (Object.keys(ragStatus) as Status[]).filter(
-    (s) => s !== "Unknown" && s !== "No Paddling",
+    (s) => s !== "Unknown" && s !== "No Paddling"
   );
 
   return (
@@ -46,7 +46,7 @@ const TrafficLight: React.FC<TrafficLightProps> = ({ status, disabled }) => {
                   ? theme.palette.mode === "dark"
                     ? `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(
                         color.slice(3, 5),
-                        16,
+                        16
                       )}, ${parseInt(color.slice(5, 7), 16)}, 0.2)`
                     : ragStatus[s].backgroundColor
                   : "transparent",

@@ -3,25 +3,25 @@ import { API_ENDPOINTS, RIVER_STATION_ID, TIME_PERIODS } from "@/lib/config";
 
 export const fetchRiverData = async (
   stationId: string = RIVER_STATION_ID,
-  days: number = 1,
+  days: number = 1
 ) => {
   const sinceDate = new Date(
-    new Date().getTime() - days * TIME_PERIODS.TWENTY_FOUR_HOURS,
+    new Date().getTime() - days * TIME_PERIODS.TWENTY_FOUR_HOURS
   ).toISOString();
   const response = await fetch(
-    `${API_ENDPOINTS.RIVER}/${stationId}/readings?since=${sinceDate}`,
+    `${API_ENDPOINTS.RIVER}/${stationId}/readings?since=${sinceDate}`
   );
   const result: ApiResponse = await response.json();
   const sortedItems = result.items.sort(
     (a: RiverReading, b: RiverReading) =>
-      new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime(),
+      new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
   );
 
   const formattedData: ChartDataPoint[] = sortedItems.map(
     (item: RiverReading) => ({
       dateTime: item.dateTime,
       level: item.value,
-    }),
+    })
   );
 
   let latestLevel: number | null = null;
@@ -38,7 +38,7 @@ export const fetchRiverData = async (
     const now = new Date().getTime();
     const oneHourAgo = new Date(now - TIME_PERIODS.ONE_HOUR);
     const oneHourIndex = sortedItems.findIndex(
-      (item: RiverReading) => new Date(item.dateTime) >= oneHourAgo,
+      (item: RiverReading) => new Date(item.dateTime) >= oneHourAgo
     );
     if (oneHourIndex !== -1) {
       const oldestLevel1h = sortedItems[oneHourIndex].value;
@@ -47,7 +47,7 @@ export const fetchRiverData = async (
 
     const twentyFourHoursAgo = new Date(now - TIME_PERIODS.TWENTY_FOUR_HOURS);
     const twentyFourHourIndex = sortedItems.findIndex(
-      (item: RiverReading) => new Date(item.dateTime) >= twentyFourHoursAgo,
+      (item: RiverReading) => new Date(item.dateTime) >= twentyFourHoursAgo
     );
     if (twentyFourHourIndex !== -1) {
       const oldestLevel24h = sortedItems[twentyFourHourIndex].value;
@@ -56,7 +56,7 @@ export const fetchRiverData = async (
 
     const eightHoursAgo = new Date(now - TIME_PERIODS.EIGHT_HOURS);
     const eightHourIndex = sortedItems.findIndex(
-      (item: RiverReading) => new Date(item.dateTime) >= eightHoursAgo,
+      (item: RiverReading) => new Date(item.dateTime) >= eightHoursAgo
     );
     if (eightHourIndex !== -1) {
       const oldestLevel8h = sortedItems[eightHourIndex].value;
@@ -77,12 +77,12 @@ export const fetchRiverData = async (
 export const predictRiverLevel = (
   latestLevel: number,
   historicalData: ChartDataPoint[],
-  hoursInFuture: number,
+  hoursInFuture: number
 ): number => {
   // 1. Filter data for the last 8 hours
   const eightHoursAgo = new Date().getTime() - TIME_PERIODS.EIGHT_HOURS;
   const recentData = historicalData.filter(
-    (d) => new Date(d.dateTime).getTime() >= eightHoursAgo,
+    (d) => new Date(d.dateTime).getTime() >= eightHoursAgo
   );
 
   // 2. Check if there's enough data to calculate a trend
@@ -94,7 +94,7 @@ export const predictRiverLevel = (
   // 3. Prepare data for linear regression
   const firstTimestamp = new Date(recentData[0].dateTime).getTime() / 1000; // in seconds
   const x = recentData.map(
-    (d) => new Date(d.dateTime).getTime() / 1000 - firstTimestamp,
+    (d) => new Date(d.dateTime).getTime() / 1000 - firstTimestamp
   );
   const y = recentData.map((d) => d.level);
   const n = recentData.length;

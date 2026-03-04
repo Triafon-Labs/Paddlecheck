@@ -52,7 +52,7 @@ export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
         setThemeMode(mode);
       },
     }),
-    [themeMode],
+    [themeMode]
   );
 
   return (

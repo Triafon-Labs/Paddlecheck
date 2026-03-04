@@ -44,6 +44,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       | PaddlerType
       | undefined;
     if (savedLevel) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPaddlerLevel(savedLevel);
     }
   }, []);

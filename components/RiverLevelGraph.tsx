@@ -134,6 +134,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   useEffect(() => {
     const savedTimeRange = localStorage.getItem("riverGraphTimeRange");
     if (savedTimeRange) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTimeRange(savedTimeRange);
     }
   }, []);

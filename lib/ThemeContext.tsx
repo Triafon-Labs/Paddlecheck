@@ -36,6 +36,7 @@ export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const savedTheme = localStorage.getItem("themeMode") as ThemeMode | null;
     if (savedTheme) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeMode(savedTheme);
     }
   }, []);

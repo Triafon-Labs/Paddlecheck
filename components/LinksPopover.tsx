@@ -3,27 +3,13 @@
 import React from "react";
 import { Popover, List, ListItem, Link, Typography, Box } from "@mui/material";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import { USEFUL_LINKS } from "@/lib/config";
 
 interface LinksPopoverProps {
   open: boolean;
   anchorEl: HTMLElement | null;
   onClose: () => void;
 }
-
-const links = [
-  {
-    name: "River Severn level at Worcester (Barbourne)",
-    url: "https://check-for-flooding.service.gov.uk/station/2092",
-  },
-  {
-    name: "River Severn level at Bewdley",
-    url: "https://check-for-flooding.service.gov.uk/station/2001",
-  },
-  {
-    name: "Worcester Canoe Club",
-    url: "https://worcestercanoeclub.org/",
-  },
-];
 
 const LinksPopover: React.FC<LinksPopoverProps> = ({
   open,
@@ -49,7 +35,7 @@ const LinksPopover: React.FC<LinksPopoverProps> = ({
           Useful Links
         </Typography>
         <List>
-          {links.map((link) => (
+          {USEFUL_LINKS.map((link) => (
             <ListItem
               key={link.name}
               component={Link}

@@ -185,7 +185,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
           <Box>
             <StatItem
               icon={<InitialStatusIcon />}
-              label="Initial RAG Status"
+              label="Initial Status"
               value={conditions.initialStatus}
             />
             {conditions.pitchcroftPaddleability && (

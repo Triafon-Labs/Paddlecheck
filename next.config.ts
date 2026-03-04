@@ -2,9 +2,11 @@ import type { NextConfig } from "next";
 import { GenerateSW } from "workbox-webpack-plugin";
 
 const nextConfig: NextConfig = {
+  turbopack: {},
   env: {
     NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version,
   },
+  turbopack: {},
   webpack: (config, { isServer, dev }) => {
     if (!isServer && !dev) {
       config.plugins.push(

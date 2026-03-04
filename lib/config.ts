@@ -19,8 +19,35 @@ import {
 } from "@mui/icons-material";
 import { Status } from "@/types";
 
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+// This file contains all the configuration for the Paddlecheck application.
+// It is currently set up for Worcester Canoe Club (UK) on the River Severn.
+// If you are forking this repo for another club, you will need to update
+// the values below to match your location and river conditions.
+// ============================================================================
+
+// --- Club Information & Links ---
+// Links displayed in the "Useful Links" popover
+export const USEFUL_LINKS = [
+  {
+    name: "River Severn level at Worcester (Barbourne)",
+    url: "https://check-for-flooding.service.gov.uk/station/2092",
+  },
+  {
+    name: "River Severn level at Bewdley",
+    url: "https://check-for-flooding.service.gov.uk/station/2001",
+  },
+  {
+    name: "Worcester Canoe Club",
+    url: "https://worcestercanoeclub.org/",
+  },
+];
+
 // --- River and Weather Service ---
-export const RIVER_STATION_ID = "2642";
+// Station ID for the Environment Agency Flood Monitoring API
+export const RIVER_STATION_ID = "2642"; // Diglis
 export const LATITUDE = 52.2;
 export const LONGITUDE = -2.2;
 export const HISTORICAL_DAYS = 5;
@@ -95,6 +122,7 @@ export const RAG_STATUS_UI: Record<
 };
 
 // --- RAG Calculation Criteria ---
+// Adjust these thresholds based on your local safety guidelines
 export const CRITERIA_TABLE: {
   [key: string]: { [key: string]: number[] };
 } = {
@@ -134,6 +162,8 @@ export const REASON_ICONS: Record<string, React.ElementType> = {
   "Risk of thunderstorms": Thunderstorm,
 };
 
+// Descriptions of river levels at specific local landmarks.
+// The key is the river level in meters.
 export const LEVEL_DESCRIPTIONS: Record<number, string> = {
   1.0: "Able to launch from the landing stage – OK",
   1.15: "Water over one end of the landing stage",
@@ -154,8 +184,7 @@ export const LEVEL_DESCRIPTIONS: Record<number, string> = {
   5.54: "Sabrina Bridge closed, North Parade underwater, dangerous flows",
   5.55: "Boathouse inaccessible, dangerous flow, no paddling advised",
 };
-
-export const PITCHCROFT_PADDLEABILITY: Record<number, string> = {
+// Specific to Pitchcroft race course paddleabilityexport const PITCHCROFT_PADDLEABILITY: Record<number, string> = {
   4.0: "Variable",
   4.5: "Good",
   5.0: "Risky",

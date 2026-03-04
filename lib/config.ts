@@ -184,7 +184,9 @@ export const LEVEL_DESCRIPTIONS: Record<number, string> = {
   5.54: "Sabrina Bridge closed, North Parade underwater, dangerous flows",
   5.55: "Boathouse inaccessible, dangerous flow, no paddling advised",
 };
-// Specific to Pitchcroft race course paddleabilityexport const PITCHCROFT_PADDLEABILITY: Record<number, string> = {
+
+// Specific to Pitchcroft race course paddleability
+export const PITCHCROFT_PADDLEABILITY: Record<number, string> = {
   4.0: "Variable",
   4.5: "Good",
   5.0: "Risky",

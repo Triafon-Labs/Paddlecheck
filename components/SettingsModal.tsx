@@ -25,7 +25,7 @@ const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement;
   },
-  ref: React.Ref<unknown>,
+  ref: React.Ref<unknown>
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
@@ -40,13 +40,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">("");
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedLevel = localStorage.getItem("paddlerLevel") as
-        | PaddlerType
-        | undefined;
-      if (savedLevel) {
-        setPaddlerLevel(savedLevel);
-      }
+    const savedLevel = localStorage.getItem("paddlerLevel") as
+      | PaddlerType
+      | undefined;
+    if (savedLevel) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPaddlerLevel(savedLevel);
     }
   }, []);
 

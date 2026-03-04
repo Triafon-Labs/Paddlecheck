@@ -192,8 +192,9 @@ export const PITCHCROFT_PADDLEABILITY: Record<number, string> = {
   5.0: "Risky",
 };
 
-export const getPitchcroftPaddleability = (level: number): string | undefined => {
-
+export const getPitchcroftPaddleability = (
+  level: number
+): string | undefined => {
   const allLevels = Object.keys(PITCHCROFT_PADDLEABILITY)
 
     .map(parseFloat)
@@ -203,11 +204,8 @@ export const getPitchcroftPaddleability = (level: number): string | undefined =>
   const applicableLevel = allLevels.find((key) => level >= key);
 
   return applicableLevel
-
     ? PITCHCROFT_PADDLEABILITY[applicableLevel]
-
     : undefined;
-
 };
 
 export const VISIBILITY_DESCRIPTIONS: {

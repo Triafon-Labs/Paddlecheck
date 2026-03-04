@@ -36,9 +36,14 @@ export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const savedTheme = localStorage.getItem("themeMode") as ThemeMode | null;
     if (savedTheme) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeMode(savedTheme);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("themeMode", themeMode);
+  }, [themeMode]);
 
   const activeTheme = useMemo(() => {
     return themeMode === "dark" ? darkTheme : lightTheme;
@@ -52,7 +57,7 @@ export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
         setThemeMode(mode);
       },
     }),
-    [themeMode],
+    [themeMode]
   );
 
   return (

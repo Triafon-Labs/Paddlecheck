@@ -197,6 +197,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
       {} as Record<PaddlerType, boolean>
     );
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpen(newOpenState);
 
     const handleStorageChange = (event: StorageEvent) => {

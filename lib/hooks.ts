@@ -33,7 +33,7 @@ export const useKayakData = () => {
   const [loading, setLoading] = useState(true);
   const [predictLoading, setPredictLoading] = useState(true);
   const [riverGraphData, setRiverGraphData] = useState<ChartDataPoint[] | null>(
-    null,
+    null
   );
   const [riverChange1h, setRiverChange1h] = useState<number | null>(null);
   const [riverChange24h, setRiverChange24h] = useState<number | null>(null);
@@ -73,15 +73,15 @@ export const useKayakData = () => {
       };
 
       const initialRagNumber = calculateInitialRagStatus(
-        currentConditions.riverLevel || 0,
+        currentConditions.riverLevel || 0
       );
       const initialStatus = RAG_STATUS_MAP[initialRagNumber];
       const { status, reasons } = calculateFinalRagStatus(currentConditions);
       const visibilityDescription = getVisibilityDescription(
-        currentConditions.visibility || 0,
+        currentConditions.visibility || 0
       );
       const pitchcroftPaddleability = getPitchcroftPaddleability(
-        currentConditions.riverLevel || 0,
+        currentConditions.riverLevel || 0
       );
 
       setConditions({
@@ -124,19 +124,19 @@ export const useKayakData = () => {
           const predictedRiverLevel = predictRiverLevel(
             riverData.latestLevel || 0,
             riverData.historicalData,
-            i + 1,
+            i + 1
           );
 
           const sunriseHour = futureWeatherData.daily.sunrise[0]
             ? parseInt(
                 futureWeatherData.daily.sunrise[0].split("T")[1].split(":")[0],
-                10,
+                10
               )
             : null;
           const sunsetHour = futureWeatherData.daily.sunset[0]
             ? parseInt(
                 futureWeatherData.daily.sunset[0].split("T")[1].split(":")[0],
-                10,
+                10
               )
             : null;
 

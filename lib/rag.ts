@@ -40,7 +40,7 @@ export const calculateInitialRagStatus = (level: number): number => {
 };
 
 const getTemperatureConditions = (
-  temp: number,
+  temp: number
 ): { tempCondition: string; reason?: string } => {
   if (temp >= THRESHOLDS.TEMP_HIGH) return { tempCondition: "high" };
   if (temp >= THRESHOLDS.TEMP_MODERATE)
@@ -54,7 +54,7 @@ const getTemperatureConditions = (
 const getWeatherConditions = (
   wind: number,
   isRainy: boolean,
-  tempCondition: string,
+  tempCondition: string
 ): { weatherCondition: string; reason?: string } => {
   if (wind >= THRESHOLDS.WIND_HIGH)
     return { weatherCondition: "windy", reason: "High winds" };
@@ -67,7 +67,7 @@ const adjustRagForFactors = (
   baseRag: number,
   isDark: boolean,
   visibility: number,
-  weatherCode: number,
+  weatherCode: number
 ): { ragNumber: number; reasons: string[] } => {
   let ragNumber = baseRag;
   const reasons: string[] = [];
@@ -98,7 +98,7 @@ const getRiverLevelReason = (initialRag: number): string | undefined => {
 // --- Main RAG Calculation Function ---
 
 export const calculateFinalRagStatus = (
-  conditions: Partial<KayakConditions>,
+  conditions: Partial<KayakConditions>
 ): { status: Status; reasons: string[] } => {
   const {
     riverLevel,
@@ -136,12 +136,12 @@ export const calculateFinalRagStatus = (
 
   const initialRag = calculateInitialRagStatus(riverLevel!);
   const { tempCondition, reason: tempReason } = getTemperatureConditions(
-    temperature!,
+    temperature!
   );
   const { weatherCondition, reason: weatherReason } = getWeatherConditions(
     windSpeed!,
     rain!,
-    tempCondition,
+    tempCondition
   );
 
   const finalRag =
@@ -157,7 +157,7 @@ export const calculateFinalRagStatus = (
     finalRag,
     dark!,
     visibility!,
-    weatherCode!,
+    weatherCode!
   );
 
   const allReasons = [

@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version,
   },
-  turbopack: {},
   webpack: (config, { isServer, dev }) => {
     if (!isServer && !dev) {
       config.plugins.push(

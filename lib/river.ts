@@ -14,6 +14,7 @@ export interface BewdleyForecastPoint {
 
 export const fetchBewdleyForecast = async (): Promise<{
   forecasts: BewdleyForecastPoint[];
+  observations: BewdleyForecastPoint[];
   currentLevel: number | null;
 }> => {
   const response = await fetch(BEWDLEY_CSV_URL);
@@ -21,7 +22,7 @@ export const fetchBewdleyForecast = async (): Promise<{
   const lines = text.trim().split("\n");
 
   const forecasts: BewdleyForecastPoint[] = [];
-  let latestObserved: BewdleyForecastPoint | null = null;
+  const observations: BewdleyForecastPoint[] = [];
 
   // Skip header row (index 0)
   for (let i = 1; i < lines.length; i++) {
@@ -42,35 +43,45 @@ export const fetchBewdleyForecast = async (): Promise<{
     if (type === "forecast") {
       forecasts.push({ timestamp, level });
     } else if (type === "observed") {
-      if (!latestObserved || timestamp > latestObserved.timestamp) {
-        latestObserved = { timestamp, level };
-      }
+      observations.push({ timestamp, level });
     }
   }
 
-  return { forecasts, currentLevel: latestObserved?.level ?? null };
+  // Current level = latest observed reading
+  const latestObserved = observations.reduce<BewdleyForecastPoint | null>(
+    (latest, pt) => (!latest || pt.timestamp > latest.timestamp ? pt : latest),
+    null
+  );
+
+  return { forecasts, observations, currentLevel: latestObserved?.level ?? null };
 };
 
-// Apply a delta-transfer from Bewdley's forecast to predict Worcester's level.
+// Apply a delta-transfer from Bewdley's data to predict Worcester's level.
 // The flood wave takes BEWDLEY_TRAVEL_HOURS to reach Worcester, so we look up
-// what Bewdley is predicted to be at (targetWorcesterTime - BEWDLEY_TRAVEL_HOURS)
+// what Bewdley was/is predicted to be at (targetWorcesterTime - BEWDLEY_TRAVEL_HOURS)
 // and apply that same change to the current Worcester level.
+// For the first ~6 hours, targetBewdleyTime falls in the past, so we search
+// observed readings from the CSV rather than forecast rows.
 export const getBewdleyBasedWorcesterLevel = (
   worcesterCurrentLevel: number,
   bewdleyCurrentLevel: number,
   bewdleyForecasts: BewdleyForecastPoint[],
+  bewdleyObservations: BewdleyForecastPoint[],
   targetWorcesterTime: Date
 ): number | null => {
-  if (!bewdleyForecasts.length) return null;
+  if (!bewdleyForecasts.length && !bewdleyObservations.length) return null;
 
   const targetBewdleyTime = new Date(
     targetWorcesterTime.getTime() - BEWDLEY_TRAVEL_HOURS * 3600 * 1000
   );
 
-  // Find the closest Bewdley forecast point to the required time
+  // Search both observed and forecast rows so the first 6 hours (where
+  // targetBewdleyTime is in the past) use real readings rather than falling
+  // back to linear regression.
+  const allPoints = [...bewdleyObservations, ...bewdleyForecasts];
   let closest: BewdleyForecastPoint | null = null;
   let minDiff = Infinity;
-  for (const pt of bewdleyForecasts) {
+  for (const pt of allPoints) {
     const diff = Math.abs(pt.timestamp.getTime() - targetBewdleyTime.getTime());
     if (diff < minDiff) {
       minDiff = diff;

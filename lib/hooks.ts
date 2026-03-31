@@ -144,6 +144,7 @@ export const useKayakData = () => {
                   riverData.latestLevel || 0,
                   bewdleyData.currentLevel,
                   bewdleyData.forecasts,
+                  bewdleyData.observations,
                   targetWorcesterTime
                 )
               : null;

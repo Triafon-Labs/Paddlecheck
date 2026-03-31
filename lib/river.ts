@@ -95,9 +95,6 @@ export const getBewdleyBasedWorcesterLevel = (
   return Math.max(0, worcesterCurrentLevel + delta);
 };
 
-  // Only use if within 45 minutes of a forecast point
-  if (!closest || minDiff > 45 * 60 * 1000) return null;
-
 export const fetchRiverData = async (
   stationId: string = RIVER_STATION_ID,
   days: number = 1

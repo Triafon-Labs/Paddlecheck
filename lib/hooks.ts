@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   KayakConditions,
   ChartDataPoint,
-  PredictedGraphDataPoint,
+  DayForecast,
 } from "@/types";
 import {
   calculateFinalRagStatus,
@@ -25,11 +25,11 @@ import {
   getPitchcroftPaddleability,
 } from "@/lib/config";
 
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 export const useKayakData = () => {
   const [conditions, setConditions] = useState<KayakConditions | null>(null);
-  const [predictedGraphData, setPredictedGraphData] = useState<
-    PredictedGraphDataPoint[] | null
-  >(null);
+  const [forecastDays, setForecastDays] = useState<DayForecast[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [predictLoading, setPredictLoading] = useState(true);
   const [riverGraphData, setRiverGraphData] = useState<ChartDataPoint[] | null>(
@@ -39,8 +39,6 @@ export const useKayakData = () => {
   const [riverChange24h, setRiverChange24h] = useState<number | null>(null);
   const [riverChange8h, setRiverChange8h] = useState<number | null>(null);
   const [riverChange5d, setRiverChange5d] = useState<number | null>(null);
-  const [sunrise, setSunrise] = useState<string | null>(null);
-  const [sunset, setSunset] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -100,49 +98,40 @@ export const useKayakData = () => {
       });
       setLoading(false);
 
-      // Process predicted data
-      setSunrise(futureWeatherData.daily.sunrise[0]);
-      setSunset(futureWeatherData.daily.sunset[0]);
-
-      const graphData: PredictedGraphDataPoint[] = [];
+      // Build 5-day forecast (today + 4 days ahead)
       const now = new Date();
       const currentHour = now.getHours();
+      const days: DayForecast[] = [];
 
-      const startIndex = futureWeatherData.hourly.time.findIndex((t) => {
-        const hour = parseInt(t.split("T")[1].split(":")[0], 10);
-        return hour >= currentHour;
-      });
+      for (let d = 0; d < 5; d++) {
+        const dayStartIndex = d * 24;
+        const sunrise = futureWeatherData.daily.sunrise[d] ?? null;
+        const sunset = futureWeatherData.daily.sunset[d] ?? null;
+        const sunriseHour = sunrise
+          ? parseInt(sunrise.split("T")[1].split(":")[0], 10)
+          : null;
+        const sunsetHour = sunset
+          ? parseInt(sunset.split("T")[1].split(":")[0], 10)
+          : null;
 
-      if (startIndex !== -1) {
-        for (let i = 0; i < 24; i++) {
-          const index = startIndex + i;
+        const hourStart = d === 0 ? currentHour : 0;
+        const graphData = [];
+
+        for (let h = hourStart; h < 24; h++) {
+          const index = dayStartIndex + h;
           if (index >= futureWeatherData.hourly.time.length) break;
 
-          const timeStr = futureWeatherData.hourly.time[index];
-          const hour = parseInt(timeStr.split("T")[1].split(":")[0], 10);
-
+          // Hours ahead from now for river level prediction
+          const hoursAhead = d * 24 + h - currentHour + 1;
           const predictedRiverLevel = predictRiverLevel(
             riverData.latestLevel || 0,
             riverData.historicalData,
-            i + 1
+            hoursAhead
           );
 
-          const sunriseHour = futureWeatherData.daily.sunrise[0]
-            ? parseInt(
-                futureWeatherData.daily.sunrise[0].split("T")[1].split(":")[0],
-                10
-              )
-            : null;
-          const sunsetHour = futureWeatherData.daily.sunset[0]
-            ? parseInt(
-                futureWeatherData.daily.sunset[0].split("T")[1].split(":")[0],
-                10
-              )
-            : null;
-
           let dark;
-          if (sunriseHour && sunsetHour) {
-            dark = hour <= sunriseHour || hour >= sunsetHour;
+          if (sunriseHour !== null && sunsetHour !== null) {
+            dark = h < sunriseHour || h >= sunsetHour;
           } else {
             dark = !futureWeatherData.hourly.is_day[index];
           }
@@ -152,7 +141,7 @@ export const useKayakData = () => {
             temperature: futureWeatherData.hourly.temperature_2m[index],
             windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
             rain: futureWeatherData.hourly.precipitation[index] > 0,
-            dark: dark,
+            dark,
             visibility: futureWeatherData.hourly.visibility[index],
             weatherCode: futureWeatherData.hourly.weather_code[index],
           };
@@ -161,16 +150,27 @@ export const useKayakData = () => {
             calculateFinalRagStatus(predictedConditions);
 
           graphData.push({
-            time: `${hour}:00`,
+            time: `${h}:00`,
             status: predictedStatus,
             reasons: predictedReasons,
             value: ragHeight[predictedStatus] || 0.1,
             predictedLevel: predictedRiverLevel,
           });
         }
+
+        const dayDateStr =
+          futureWeatherData.hourly.time[dayStartIndex].split("T")[0];
+        // Use noon to avoid timezone offset issues when parsing date-only strings
+        const dateObj = new Date(`${dayDateStr}T12:00:00`);
+        const label =
+          d === 0
+            ? "Today"
+            : `${DAY_NAMES[dateObj.getDay()]} ${dateObj.getDate()}`;
+
+        days.push({ date: dayDateStr, label, graphData, sunrise, sunset });
       }
 
-      setPredictedGraphData(graphData);
+      setForecastDays(days);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -185,7 +185,7 @@ export const useKayakData = () => {
 
   return {
     conditions,
-    predictedGraphData,
+    forecastDays,
     loading,
     predictLoading,
     riverGraphData,
@@ -193,8 +193,6 @@ export const useKayakData = () => {
     riverChange24h,
     riverChange8h,
     riverChange5d,
-    sunrise,
-    sunset,
     refetch: fetchData,
   };
 };

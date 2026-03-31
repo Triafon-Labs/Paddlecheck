@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,6 +9,7 @@ import {
   CircularProgress,
   Paper,
   useTheme,
+  Slider,
 } from "@mui/material";
 import {
   ComposedChart,
@@ -23,17 +24,15 @@ import {
   ReferenceLine,
   LabelList,
 } from "recharts";
-import { PredictedGraphDataPoint } from "@/types";
+import { DayForecast, PredictedGraphDataPoint } from "@/types";
 import { ragStatus } from "@/lib/rag";
 import { REASON_ICONS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 
 interface PredictedRagGraphProps {
-  data: PredictedGraphDataPoint[] | null;
+  forecastDays: DayForecast[] | null;
   loading?: boolean;
-  sunrise: string | null;
-  sunset: string | null;
 }
 
 import {
@@ -128,6 +127,7 @@ const BarLabel = (props: BarLabelProps) => {
   }
 
   const entry = data[index];
+  if (!entry) return null;
 
   if (entry.status === "No Paddling") {
     const Icon = ragStatus[entry.status]?.icon;
@@ -150,15 +150,19 @@ const BarLabel = (props: BarLabelProps) => {
 };
 
 const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
-  data,
+  forecastDays,
   loading,
-  sunrise,
-  sunset,
 }) => {
   const theme = useTheme();
   const lineColor = theme.palette.text.secondary;
+  const [selectedDay, setSelectedDay] = useState(0);
 
-  const renderContent = () => {
+  const currentDay = forecastDays?.[selectedDay] ?? null;
+  const data = currentDay?.graphData ?? null;
+  const sunrise = currentDay?.sunrise ?? null;
+  const sunset = currentDay?.sunset ?? null;
+
+  const renderChart = () => {
     if (loading) {
       return (
         <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
@@ -277,10 +281,19 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
         <Typography variant="h5" component="div">
           Paddling Forecast
         </Typography>
-        <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-          Next 24 Hours
-        </Typography>
-        {renderContent()}
+        {forecastDays && forecastDays.length > 0 && (
+          <Box sx={{ px: 2, pt: 2, pb: 0 }}>
+            <Slider
+              value={selectedDay}
+              onChange={(_, v) => setSelectedDay(v as number)}
+              min={0}
+              max={forecastDays.length - 1}
+              step={1}
+              marks={forecastDays.map((day, i) => ({ value: i, label: day.label }))}
+            />
+          </Box>
+        )}
+        {renderChart()}
         <Typography
           variant="caption"
           color="text.secondary"

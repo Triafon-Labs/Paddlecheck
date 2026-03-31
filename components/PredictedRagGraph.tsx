@@ -128,6 +128,7 @@ const BarLabel = (props: BarLabelProps) => {
   }
 
   const entry = data[index];
+  if (!entry) return null;
 
   if (entry.status === "No Paddling") {
     const Icon = ragStatus[entry.status]?.icon;
@@ -285,8 +286,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
           <Tabs
             value={selectedDay}
             onChange={(_, v: number) => setSelectedDay(v)}
-            variant="scrollable"
-            scrollButtons="auto"
+            variant="fullWidth"
             sx={{ mt: 1, mb: 1 }}
           >
             {forecastDays.map((day, i) => (

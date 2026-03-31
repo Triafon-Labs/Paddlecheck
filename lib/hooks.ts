@@ -11,7 +11,12 @@ import {
   RAG_STATUS_MAP,
   ragHeight,
 } from "@/lib/rag";
-import { fetchRiverData, predictRiverLevel } from "@/lib/river";
+import {
+  fetchRiverData,
+  predictRiverLevel,
+  fetchBewdleyForecast,
+  getBewdleyBasedWorcesterLevel,
+} from "@/lib/river";
 import {
   fetchWeatherData,
   getVisibilityDescription,
@@ -45,12 +50,17 @@ export const useKayakData = () => {
       setLoading(true);
       setPredictLoading(true);
 
-      // Fetch all data concurrently
-      const [riverData, weatherData, futureWeatherData] = await Promise.all([
-        fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS),
-        fetchWeatherData(LATITUDE, LONGITUDE),
-        fetchFutureWeatherData(LATITUDE, LONGITUDE),
-      ]);
+      // Fetch all data concurrently; Bewdley failure is non-fatal
+      const [riverData, weatherData, futureWeatherData, bewdleyData] =
+        await Promise.all([
+          fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS),
+          fetchWeatherData(LATITUDE, LONGITUDE),
+          fetchFutureWeatherData(LATITUDE, LONGITUDE),
+          fetchBewdleyForecast().catch(() => ({
+            forecasts: [],
+            currentLevel: null,
+          })),
+        ]);
 
       // Process current conditions
       setRiverGraphData(riverData.historicalData);
@@ -124,11 +134,30 @@ export const useKayakData = () => {
 
           // Hours ahead from now for river level prediction
           const hoursAhead = d * 24 + h - currentHour + 1;
-          const predictedRiverLevel = predictRiverLevel(
-            riverData.latestLevel || 0,
-            riverData.historicalData,
-            hoursAhead
+          const targetWorcesterTime = new Date(
+            now.getTime() + hoursAhead * 3600 * 1000
           );
+
+          const bewdleyLevel =
+            bewdleyData.currentLevel !== null
+              ? getBewdleyBasedWorcesterLevel(
+                  riverData.latestLevel || 0,
+                  bewdleyData.currentLevel,
+                  bewdleyData.forecasts,
+                  targetWorcesterTime
+                )
+              : null;
+
+          const predictionSource: "bewdley" | "linear" =
+            bewdleyLevel !== null ? "bewdley" : "linear";
+
+          const predictedRiverLevel =
+            bewdleyLevel ??
+            predictRiverLevel(
+              riverData.latestLevel || 0,
+              riverData.historicalData,
+              hoursAhead
+            );
 
           let dark;
           if (sunriseHour !== null && sunsetHour !== null) {
@@ -156,6 +185,7 @@ export const useKayakData = () => {
             reasons: predictedReasons,
             value: ragHeight[predictedStatus] || 0.1,
             predictedLevel: predictedRiverLevel,
+            predictionSource,
           });
         }
 

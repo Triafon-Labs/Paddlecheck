@@ -1,5 +1,89 @@
 import { RiverReading, ApiResponse, ChartDataPoint } from "@/types";
-import { API_ENDPOINTS, RIVER_STATION_ID, TIME_PERIODS } from "@/lib/config";
+import {
+  API_ENDPOINTS,
+  RIVER_STATION_ID,
+  TIME_PERIODS,
+  BEWDLEY_CSV_URL,
+  BEWDLEY_TRAVEL_HOURS,
+} from "@/lib/config";
+
+export interface BewdleyForecastPoint {
+  timestamp: Date;
+  level: number;
+}
+
+export const fetchBewdleyForecast = async (): Promise<{
+  forecasts: BewdleyForecastPoint[];
+  currentLevel: number | null;
+}> => {
+  const response = await fetch(BEWDLEY_CSV_URL);
+  const text = await response.text();
+  const lines = text.trim().split("\n");
+
+  const forecasts: BewdleyForecastPoint[] = [];
+  let latestObserved: BewdleyForecastPoint | null = null;
+
+  // Skip header row (index 0)
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const parts = line.split(",");
+    if (parts.length < 3) continue;
+
+    // Normalise timestamp: replace space with T and append Z if no timezone given
+    let tsStr = parts[0].trim().replace(" ", "T");
+    if (!tsStr.endsWith("Z") && !tsStr.includes("+")) tsStr += "Z";
+    const timestamp = new Date(tsStr);
+    const level = parseFloat(parts[1].trim());
+    const type = parts[2].trim().toLowerCase();
+
+    if (isNaN(level) || isNaN(timestamp.getTime())) continue;
+
+    if (type === "forecast") {
+      forecasts.push({ timestamp, level });
+    } else if (type === "observed") {
+      if (!latestObserved || timestamp > latestObserved.timestamp) {
+        latestObserved = { timestamp, level };
+      }
+    }
+  }
+
+  return { forecasts, currentLevel: latestObserved?.level ?? null };
+};
+
+// Apply a delta-transfer from Bewdley's forecast to predict Worcester's level.
+// The flood wave takes BEWDLEY_TRAVEL_HOURS to reach Worcester, so we look up
+// what Bewdley is predicted to be at (targetWorcesterTime - BEWDLEY_TRAVEL_HOURS)
+// and apply that same change to the current Worcester level.
+export const getBewdleyBasedWorcesterLevel = (
+  worcesterCurrentLevel: number,
+  bewdleyCurrentLevel: number,
+  bewdleyForecasts: BewdleyForecastPoint[],
+  targetWorcesterTime: Date
+): number | null => {
+  if (!bewdleyForecasts.length) return null;
+
+  const targetBewdleyTime = new Date(
+    targetWorcesterTime.getTime() - BEWDLEY_TRAVEL_HOURS * 3600 * 1000
+  );
+
+  // Find the closest Bewdley forecast point to the required time
+  let closest: BewdleyForecastPoint | null = null;
+  let minDiff = Infinity;
+  for (const pt of bewdleyForecasts) {
+    const diff = Math.abs(pt.timestamp.getTime() - targetBewdleyTime.getTime());
+    if (diff < minDiff) {
+      minDiff = diff;
+      closest = pt;
+    }
+  }
+
+  // Only use if within 45 minutes of a forecast point
+  if (!closest || minDiff > 45 * 60 * 1000) return null;
+
+  const delta = closest.level - bewdleyCurrentLevel;
+  return Math.max(0, worcesterCurrentLevel + delta);
+};
 
 export const fetchRiverData = async (
   stationId: string = RIVER_STATION_ID,

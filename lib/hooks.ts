@@ -162,7 +162,7 @@ export const useKayakData = () => {
               reasons: calculateFinalRagStatus({ riverLevel: Math.max(0, mockLevel) }).reasons,
               value: ragHeight[calculateFinalRagStatus({ riverLevel: Math.max(0, mockLevel) }).status] || 0.1,
               predictedLevel: Math.max(0, mockLevel),
-              predictionSource: hoursAhead <= 30 ? "bewdley" : "linear",
+              predictionSource: (hoursAhead <= 30 ? "bewdley" : "linear") as "bewdley" | "linear",
             });
             continue;
           }

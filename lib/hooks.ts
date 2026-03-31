@@ -114,6 +114,18 @@ export const useKayakData = () => {
       const currentHour = now.getHours();
       const days: DayForecast[] = [];
 
+      // Pre-compute Worcester's linear trend slope (m/h) once so the fallback
+      // after the Bewdley window can continue smoothly from wherever Bewdley
+      // left off, rather than jumping back to the current level.
+      const worcesterSlopePerHour =
+        predictRiverLevel(riverData.latestLevel || 0, riverData.historicalData, 1) -
+        (riverData.latestLevel || 0);
+
+      // Tracks the last Bewdley-based prediction level and the hoursAhead at
+      // which the Bewdley data ran out, so linear regression is anchored there.
+      let lastBewdleyPrediction: number | null = null;
+      let transitionHoursAhead: number | null = null;
+
       for (let d = 0; d < 5; d++) {
         const dayStartIndex = d * 24;
         const sunrise = futureWeatherData.daily.sunrise[d] ?? null;
@@ -152,13 +164,21 @@ export const useKayakData = () => {
           const predictionSource: "bewdley" | "linear" =
             bewdleyLevel !== null ? "bewdley" : "linear";
 
-          const predictedRiverLevel =
-            bewdleyLevel ??
-            predictRiverLevel(
-              riverData.latestLevel || 0,
-              riverData.historicalData,
-              hoursAhead
+          let predictedRiverLevel: number;
+          if (bewdleyLevel !== null) {
+            predictedRiverLevel = bewdleyLevel;
+            lastBewdleyPrediction = bewdleyLevel;
+            transitionHoursAhead = hoursAhead;
+          } else {
+            // Anchor linear regression to the last Bewdley-predicted level so
+            // there's no jump at the transition point.
+            const baseLevel = lastBewdleyPrediction ?? (riverData.latestLevel || 0);
+            const baseHours = transitionHoursAhead ?? 0;
+            predictedRiverLevel = Math.max(
+              0,
+              baseLevel + worcesterSlopePerHour * (hoursAhead - baseHours)
             );
+          }
 
           let dark;
           if (sunriseHour !== null && sunsetHour !== null) {

@@ -241,16 +241,6 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 }
               />
             )}
-            <Area
-              type="monotone"
-              dataKey="scaledPredictedLevel"
-              stroke={theme.palette.primary.main}
-              fillOpacity={0}
-              fill="url(#colorLevel)"
-              strokeDasharray="5 5"
-              dot={false}
-              strokeWidth={2}
-            />
             <Bar dataKey="value">
               {data.map((entry, index) => (
                 <Cell
@@ -264,6 +254,16 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 position="top"
               />
             </Bar>
+            <Area
+              type="monotone"
+              dataKey="scaledPredictedLevel"
+              stroke={theme.palette.primary.main}
+              fillOpacity={0}
+              fill="url(#colorLevel)"
+              strokeDasharray="5 5"
+              dot={false}
+              strokeWidth={2}
+            />
           </ComposedChart>
         </ResponsiveContainer>
       );

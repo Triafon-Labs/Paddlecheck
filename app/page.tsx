@@ -13,7 +13,7 @@ import { useKayakContext } from "@/lib/KayakDataContext";
 export default function HomePage() {
   const {
     conditions,
-    predictedGraphData,
+    forecastDays,
     loading,
     predictLoading,
     riverGraphData,
@@ -21,8 +21,6 @@ export default function HomePage() {
     riverChange24h,
     riverChange8h,
     riverChange5d,
-    sunrise,
-    sunset,
   } = useKayakContext();
 
   return (
@@ -48,10 +46,8 @@ export default function HomePage() {
           change5d={riverChange5d}
         />
         <PredictedRagGraph
-          data={predictedGraphData}
+          forecastDays={forecastDays}
           loading={predictLoading}
-          sunrise={sunrise}
-          sunset={sunset}
         />
         <Box sx={{ width: "100%", textAlign: "center" }}>
           <LastUpdated date={conditions?.lastUpdated} />

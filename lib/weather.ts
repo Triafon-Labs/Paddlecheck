@@ -41,7 +41,7 @@ export const fetchFutureWeatherData = async (
   longitude: number
 ): Promise<FutureWeatherData> => {
   const response = await fetch(
-    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation,visibility,wind_speed_10m,weather_code,is_day&daily=sunrise,sunset&wind_speed_unit=mph&forecast_days=2&timezone=Europe%2FLondon`
+    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation,visibility,wind_speed_10m,weather_code,is_day&daily=sunrise,sunset&wind_speed_unit=mph&forecast_days=5&timezone=Europe%2FLondon`
   );
   const data = await response.json();
   return data;

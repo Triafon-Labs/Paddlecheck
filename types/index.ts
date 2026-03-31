@@ -80,6 +80,14 @@ export interface PredictedGraphDataPoint {
   predictedLevel: number;
 }
 
+export interface DayForecast {
+  date: string; // "YYYY-MM-DD"
+  label: string; // "Today", "Mon 1", etc.
+  graphData: PredictedGraphDataPoint[];
+  sunrise: string | null;
+  sunset: string | null;
+}
+
 export type PaddlerType =
   | "Beginner"
   | "Improver"

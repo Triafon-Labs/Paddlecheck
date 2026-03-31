@@ -57,44 +57,46 @@ export const fetchBewdleyForecast = async (): Promise<{
 };
 
 // Apply a delta-transfer from Bewdley's data to predict Worcester's level.
-// The flood wave takes BEWDLEY_TRAVEL_HOURS to reach Worcester, so we look up
-// what Bewdley was/is predicted to be at (targetWorcesterTime - BEWDLEY_TRAVEL_HOURS)
-// and apply that same change to the current Worcester level.
-// For the first ~6 hours, targetBewdleyTime falls in the past, so we search
-// observed readings from the CSV rather than forecast rows.
+// Worcester's current level already reflects what Bewdley was doing 6 hours
+// ago, so the reference baseline is Bewdley at (now - 6h), not Bewdley now.
+// delta = bewdley(targetWorcesterTime - 6h) - bewdley(now - 6h)
+// worcesterPredicted = worcesterCurrentLevel + delta
 export const getBewdleyBasedWorcesterLevel = (
   worcesterCurrentLevel: number,
-  bewdleyCurrentLevel: number,
   bewdleyForecasts: BewdleyForecastPoint[],
   bewdleyObservations: BewdleyForecastPoint[],
-  targetWorcesterTime: Date
+  targetWorcesterTime: Date,
+  now: Date
 ): number | null => {
-  if (!bewdleyForecasts.length && !bewdleyObservations.length) return null;
-
-  const targetBewdleyTime = new Date(
-    targetWorcesterTime.getTime() - BEWDLEY_TRAVEL_HOURS * 3600 * 1000
-  );
-
-  // Search both observed and forecast rows so the first 6 hours (where
-  // targetBewdleyTime is in the past) use real readings rather than falling
-  // back to linear regression.
   const allPoints = [...bewdleyObservations, ...bewdleyForecasts];
-  let closest: BewdleyForecastPoint | null = null;
-  let minDiff = Infinity;
-  for (const pt of allPoints) {
-    const diff = Math.abs(pt.timestamp.getTime() - targetBewdleyTime.getTime());
-    if (diff < minDiff) {
-      minDiff = diff;
-      closest = pt;
+  if (!allPoints.length) return null;
+
+  const findClosest = (target: Date): BewdleyForecastPoint | null => {
+    let closest: BewdleyForecastPoint | null = null;
+    let minDiff = Infinity;
+    for (const pt of allPoints) {
+      const diff = Math.abs(pt.timestamp.getTime() - target.getTime());
+      if (diff < minDiff) { minDiff = diff; closest = pt; }
     }
-  }
+    return closest && minDiff <= 45 * 60 * 1000 ? closest : null;
+  };
+
+  // Baseline: what Bewdley was reading 6h ago (already baked into Worcester's current level)
+  const baselineBewdleyTime = new Date(now.getTime() - BEWDLEY_TRAVEL_HOURS * 3600 * 1000);
+  const baseline = findClosest(baselineBewdleyTime);
+  if (!baseline) return null;
+
+  // Target: what Bewdley was/is/will be at (targetWorcesterTime - 6h)
+  const targetBewdleyTime = new Date(targetWorcesterTime.getTime() - BEWDLEY_TRAVEL_HOURS * 3600 * 1000);
+  const target = findClosest(targetBewdleyTime);
+  if (!target) return null;
+
+  const delta = target.level - baseline.level;
+  return Math.max(0, worcesterCurrentLevel + delta);
+};
 
   // Only use if within 45 minutes of a forecast point
   if (!closest || minDiff > 45 * 60 * 1000) return null;
-
-  const delta = closest.level - bewdleyCurrentLevel;
-  return Math.max(0, worcesterCurrentLevel + delta);
-};
 
 export const fetchRiverData = async (
   stationId: string = RIVER_STATION_ID,

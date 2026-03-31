@@ -142,10 +142,10 @@ export const useKayakData = () => {
             bewdleyData.currentLevel !== null
               ? getBewdleyBasedWorcesterLevel(
                   riverData.latestLevel || 0,
-                  bewdleyData.currentLevel,
                   bewdleyData.forecasts,
                   bewdleyData.observations,
-                  targetWorcesterTime
+                  targetWorcesterTime,
+                  now
                 )
               : null;
 

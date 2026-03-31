@@ -155,13 +155,23 @@ export const useKayakData = () => {
           const MOCK_PEAK_TROUGH = true;
           if (MOCK_PEAK_TROUGH) {
             const base = riverData.latestLevel || 0;
-            const mockLevel = base + 3.5 * Math.sin((hoursAhead / 60) * 2 * Math.PI);
+            const mockLevel = Math.max(0, base + 3.5 * Math.sin((hoursAhead / 60) * 2 * Math.PI));
+            const mockConditions: Partial<KayakConditions> = {
+              riverLevel: mockLevel,
+              temperature: futureWeatherData.hourly.temperature_2m[index],
+              windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
+              rain: futureWeatherData.hourly.precipitation[index] > 0,
+              dark: !futureWeatherData.hourly.is_day[index],
+              visibility: futureWeatherData.hourly.visibility[index],
+              weatherCode: futureWeatherData.hourly.weather_code[index],
+            };
+            const { status: mockStatus, reasons: mockReasons } = calculateFinalRagStatus(mockConditions);
             graphData.push({
               time: `${h}:00`,
-              status: calculateFinalRagStatus({ riverLevel: Math.max(0, mockLevel), temperature: futureWeatherData.hourly.temperature_2m[index], windSpeed: futureWeatherData.hourly.wind_speed_10m[index], rain: futureWeatherData.hourly.precipitation[index] > 0, dark: !futureWeatherData.hourly.is_day[index], visibility: futureWeatherData.hourly.visibility[index], weatherCode: futureWeatherData.hourly.weather_code[index] }).status,
-              reasons: calculateFinalRagStatus({ riverLevel: Math.max(0, mockLevel) }).reasons,
-              value: ragHeight[calculateFinalRagStatus({ riverLevel: Math.max(0, mockLevel) }).status] || 0.1,
-              predictedLevel: Math.max(0, mockLevel),
+              status: mockStatus,
+              reasons: mockReasons,
+              value: ragHeight[mockStatus] || 0.1,
+              predictedLevel: mockLevel,
               predictionSource: (hoursAhead <= 30 ? "bewdley" : "linear") as "bewdley" | "linear",
             });
             continue;

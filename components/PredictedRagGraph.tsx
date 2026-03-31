@@ -14,8 +14,8 @@ import {
 } from "@mui/material";
 import {
   ComposedChart,
+  Line,
   Bar,
-  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -184,13 +184,6 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
         ? parseInt(sunset.split("T")[1].split(":")[0], 10)
         : null;
 
-      // Find the first hour that switches to linear-only prediction
-      const transitionIndex = data.findIndex(
-        (d) => d.predictionSource === "linear"
-      );
-      const transitionTime =
-        transitionIndex > 0 ? data[transitionIndex].time : null;
-
       const chartData = data.map((d, i) => {
         const scaled = d.predictedLevel / 6.0;
         const isBewdley = d.predictionSource === "bewdley";
@@ -251,48 +244,6 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 }
               />
             )}
-            {/* Solid line = Bewdley-informed prediction (~30h); dashed = linear regression fallback */}
-            <Area
-              type="monotone"
-              dataKey="bewdleyLevel"
-              stroke={theme.palette.primary.main}
-              fillOpacity={0}
-              dot={false}
-              strokeWidth={2}
-              connectNulls={false}
-            />
-            <Area
-              type="monotone"
-              dataKey="linearLevel"
-              stroke={theme.palette.primary.main}
-              fillOpacity={0}
-              dot={false}
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              strokeOpacity={0.5}
-              connectNulls={false}
-            />
-            {transitionTime && (
-              <ReferenceLine
-                x={transitionTime}
-                stroke={theme.palette.text.disabled}
-                strokeDasharray="3 3"
-                label={
-                  <IconLabel
-                    icon={
-                      <Typography
-                        variant="caption"
-                        sx={{ color: "text.disabled", fontSize: "0.6rem" }}
-                      >
-                        trend
-                      </Typography>
-                    }
-                    time=""
-                    viewBox={{ x: 0, y: 0, width: 0, height: 0 }}
-                  />
-                }
-              />
-            )}
             <Bar dataKey="value" isAnimationActive={false}>
               {data.map((entry, index) => (
                 <Cell
@@ -306,6 +257,25 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 position="top"
               />
             </Bar>
+            {/* Solid line = Bewdley-informed prediction (~30h); dashed = linear regression fallback */}
+            <Line
+              type="monotone"
+              dataKey="bewdleyLevel"
+              stroke={theme.palette.primary.main}
+              dot={false}
+              strokeWidth={2}
+              connectNulls={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="linearLevel"
+              stroke={theme.palette.primary.main}
+              dot={false}
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              strokeOpacity={0.5}
+              connectNulls={false}
+            />
           </ComposedChart>
         </ResponsiveContainer>
       );

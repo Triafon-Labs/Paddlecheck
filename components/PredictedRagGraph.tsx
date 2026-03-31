@@ -9,8 +9,7 @@ import {
   CircularProgress,
   Paper,
   useTheme,
-  Tabs,
-  Tab,
+  Slider,
 } from "@mui/material";
 import {
   ComposedChart,
@@ -283,16 +282,16 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
           Paddling Forecast
         </Typography>
         {forecastDays && forecastDays.length > 0 && (
-          <Tabs
-            value={selectedDay}
-            onChange={(_, v: number) => setSelectedDay(v)}
-            variant="fullWidth"
-            sx={{ mt: 1, mb: 1 }}
-          >
-            {forecastDays.map((day, i) => (
-              <Tab key={i} label={day.label} value={i} />
-            ))}
-          </Tabs>
+          <Box sx={{ px: 2, pt: 2, pb: 0 }}>
+            <Slider
+              value={selectedDay}
+              onChange={(_, v) => setSelectedDay(v as number)}
+              min={0}
+              max={forecastDays.length - 1}
+              step={1}
+              marks={forecastDays.map((day, i) => ({ value: i, label: day.label }))}
+            />
+          </Box>
         )}
         {renderChart()}
         <Typography

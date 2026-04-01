@@ -22,13 +22,15 @@ import {
   ToggleButton,
 } from "@mui/material";
 import {
-  AreaChart,
+  ComposedChart,
   Area,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  ReferenceLine,
   TooltipContentProps,
 } from "recharts";
 import {
@@ -40,6 +42,7 @@ import { ChartDataPoint } from "@/types";
 
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
+  predictionData: ChartDataPoint[] | null;
   loading: boolean;
   change1h: number | null;
   change24h: number | null;
@@ -122,6 +125,7 @@ const CustomTooltip = ({
 
 const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   data,
+  predictionData,
   loading,
   change1h,
   change24h,
@@ -144,7 +148,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   }, [timeRange]);
 
   const filteredData = useMemo(() => {
-    if (!data) return null;
+    if (!data || timeRange === "pred") return null;
 
     const now = new Date();
     let hoursToFilter;
@@ -170,10 +174,48 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return roundedMax > 0 ? roundedMax : 6;
   }, [filteredData]);
 
+  // Combined dataset for the "pred" view: last 24h of actual readings followed
+  // by the full prediction series, joined at the current level so the line is continuous.
+  const combinedPredData = useMemo(() => {
+    if (!data || !predictionData) return null;
+    const now = new Date();
+    const last24h = data.filter(
+      (d) => new Date(d.dateTime) > new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    );
+    const historical = last24h.map((d) => ({
+      dateTime: d.dateTime,
+      actual: d.level,
+      predicted: null as number | null,
+    }));
+    const future = predictionData.map((d) => ({
+      dateTime: d.dateTime,
+      actual: null as number | null,
+      predicted: d.level,
+    }));
+    // Add the latest actual point to the start of future so the lines connect
+    if (last24h.length > 0) {
+      const latest = last24h[last24h.length - 1];
+      future.unshift({ dateTime: latest.dateTime, actual: null, predicted: latest.level });
+    }
+    return [...historical, ...future];
+  }, [data, predictionData]);
+
+  const predYDomainMax = useMemo(() => {
+    if (!combinedPredData) return 6;
+    const allLevels = combinedPredData.flatMap((d) =>
+      [d.actual, d.predicted].filter((v): v is number => v !== null)
+    );
+    if (allLevels.length === 0) return 6;
+    return Math.max(Math.ceil(Math.max(...allLevels)), 1);
+  }, [combinedPredData]);
+
   const formatXAxis = (tickItem: string) => {
     const date = new Date(tickItem);
     if (timeRange === "5d") {
       return date.toLocaleDateString([], { month: "short", day: "numeric" });
+    }
+    if (timeRange === "pred") {
+      return date.toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit" });
     }
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
@@ -186,11 +228,54 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
         </Box>
       );
     }
+    if (timeRange === "pred" && combinedPredData) {
+      const nowIso = new Date().toISOString();
+      return (
+        <ResponsiveContainer width="100%" height={200}>
+          <ComposedChart data={combinedPredData}>
+            <defs>
+              <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.8} />
+                <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+            <XAxis dataKey="dateTime" tickFormatter={formatXAxis} />
+            <YAxis stroke={theme.palette.text.secondary} domain={[0, predYDomainMax]} />
+            <Tooltip content={CustomTooltip} />
+            <ReferenceLine
+              x={nowIso}
+              stroke={theme.palette.text.disabled}
+              strokeDasharray="3 3"
+            />
+            <Area
+              type="monotone"
+              dataKey="actual"
+              stroke={theme.palette.primary.main}
+              fillOpacity={1}
+              fill="url(#colorActual)"
+              connectNulls={false}
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="predicted"
+              stroke={theme.palette.primary.main}
+              strokeDasharray="5 5"
+              strokeOpacity={0.7}
+              dot={false}
+              connectNulls={false}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      );
+    }
+
     if (filteredData) {
       return (
         <>
           <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={filteredData}>
+            <ComposedChart data={filteredData}>
               <defs>
                 <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
                   <stop
@@ -222,7 +307,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 fillOpacity={1}
                 fill="url(#colorLevel)"
               />
-            </AreaChart>
+            </ComposedChart>
           </ResponsiveContainer>
           <Box
             sx={{
@@ -291,6 +376,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             }}
             aria-label="time range"
           >
+            <ToggleButton value="pred" aria-label="prediction">
+              <Typography variant="caption">Pred</Typography>
+            </ToggleButton>
             <ToggleButton value="5d" aria-label="5 days">
               <Typography variant="caption">5d</Typography>
             </ToggleButton>

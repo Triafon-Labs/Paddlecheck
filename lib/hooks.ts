@@ -35,6 +35,7 @@ const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export const useKayakData = () => {
   const [conditions, setConditions] = useState<KayakConditions | null>(null);
   const [forecastDays, setForecastDays] = useState<DayForecast[] | null>(null);
+  const [predictionData, setPredictionData] = useState<ChartDataPoint[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [predictLoading, setPredictLoading] = useState(true);
   const [riverGraphData, setRiverGraphData] = useState<ChartDataPoint[] | null>(
@@ -113,6 +114,7 @@ export const useKayakData = () => {
       const now = new Date();
       const currentHour = now.getHours();
       const days: DayForecast[] = [];
+      const predictionPoints: ChartDataPoint[] = [];
 
       // Pre-compute Worcester's linear trend slope (m/h) once so the fallback
       // after the Bewdley window can continue smoothly from wherever Bewdley
@@ -208,6 +210,14 @@ export const useKayakData = () => {
             predictedLevel: predictedRiverLevel,
             predictionSource,
           });
+
+          // Only include Bewdley-backed points in the river level graph prediction
+          if (predictionSource === "bewdley") {
+            predictionPoints.push({
+              dateTime: futureWeatherData.hourly.time[index],
+              level: predictedRiverLevel,
+            });
+          }
         }
 
         const dayDateStr =
@@ -223,6 +233,7 @@ export const useKayakData = () => {
       }
 
       setForecastDays(days);
+      setPredictionData(predictionPoints);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -238,6 +249,7 @@ export const useKayakData = () => {
   return {
     conditions,
     forecastDays,
+    predictionData,
     loading,
     predictLoading,
     riverGraphData,

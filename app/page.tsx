@@ -15,6 +15,7 @@ export default function HomePage() {
   const {
     conditions,
     forecastDays,
+    predictionData,
     loading,
     predictLoading,
     riverGraphData,
@@ -42,6 +43,7 @@ export default function HomePage() {
         />
         <RiverLevelGraph
           data={riverGraphData}
+          predictionData={predictionData}
           loading={loading}
           change1h={riverChange1h}
           change24h={riverChange24h}

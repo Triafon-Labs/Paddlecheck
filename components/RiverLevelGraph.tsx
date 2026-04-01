@@ -103,7 +103,8 @@ const CustomTooltip = ({
 }: TooltipContentProps<ValueType, NameType>) => {
   if (active && payload && payload.length && label) {
     const value = payload[0].value as number;
-    const date = new Date(label);
+    // label is either an ISO string (historical views) or a numeric timestamp (pred view)
+    const date = new Date(typeof label === "number" ? label : label);
     const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(
       date.getMonth() + 1
     )
@@ -183,19 +184,18 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
       (d) => new Date(d.dateTime) > new Date(now.getTime() - 24 * 60 * 60 * 1000)
     );
     const historical = last24h.map((d) => ({
-      dateTime: d.dateTime,
+      ts: new Date(d.dateTime).getTime(),
       actual: d.level,
       predicted: null as number | null,
     }));
     const future = predictionData.map((d) => ({
-      dateTime: d.dateTime,
+      ts: new Date(d.dateTime).getTime(),
       actual: null as number | null,
       predicted: d.level,
     }));
-    // Add the latest actual point to the start of future so the lines connect
     if (last24h.length > 0) {
       const latest = last24h[last24h.length - 1];
-      future.unshift({ dateTime: latest.dateTime, actual: null, predicted: latest.level });
+      future.unshift({ ts: new Date(latest.dateTime).getTime(), actual: null, predicted: latest.level });
     }
     return [...historical, ...future];
   }, [data, predictionData]);
@@ -209,18 +209,17 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return Math.max(Math.ceil(Math.max(...allLevels)), 1);
   }, [combinedPredData]);
 
-  // Ticks every 6 hours so the pred X axis is clean and evenly spaced
+  // Numeric ticks every 6 hours — works with type="number" XAxis
   const predTicks = useMemo(() => {
     if (!combinedPredData || combinedPredData.length === 0) return [];
-    const start = new Date(combinedPredData[0].dateTime);
-    const end = new Date(combinedPredData[combinedPredData.length - 1].dateTime);
-    const ticks: string[] = [];
+    const start = new Date(combinedPredData[0].ts);
+    const end = new Date(combinedPredData[combinedPredData.length - 1].ts);
+    const ticks: number[] = [];
     const cursor = new Date(start);
-    // Snap forward to the next 6-hour boundary
     cursor.setMinutes(0, 0, 0);
     cursor.setHours(Math.ceil(cursor.getHours() / 6) * 6);
     while (cursor <= end) {
-      ticks.push(cursor.toISOString());
+      ticks.push(cursor.getTime());
       cursor.setHours(cursor.getHours() + 6);
     }
     return ticks;
@@ -234,8 +233,8 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  const formatPredTick = (tickItem: string) => {
-    const date = new Date(tickItem);
+  const formatPredTick = (ts: number) => {
+    const date = new Date(ts);
     const day = date.toLocaleDateString([], { weekday: "short", day: "numeric" });
     const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     return `${day} ${time}`;
@@ -250,7 +249,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
       );
     }
     if (timeRange === "pred" && combinedPredData) {
-      const nowIso = new Date().toISOString();
+      const nowTs = new Date().getTime();
       return (
         <ResponsiveContainer width="100%" height={200}>
           <ComposedChart data={combinedPredData}>
@@ -262,7 +261,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
             <XAxis
-              dataKey="dateTime"
+              dataKey="ts"
+              type="number"
+              scale="time"
+              domain={["dataMin", "dataMax"]}
               ticks={predTicks}
               tickFormatter={formatPredTick}
               tick={{ fontSize: 10 }}
@@ -271,7 +273,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             <YAxis stroke={theme.palette.text.secondary} domain={[0, predYDomainMax]} />
             <Tooltip content={CustomTooltip} />
             <ReferenceLine
-              x={nowIso}
+              x={nowTs}
               stroke={theme.palette.text.disabled}
               strokeDasharray="3 3"
             />

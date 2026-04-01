@@ -13,8 +13,8 @@ import {
 } from "@mui/material";
 import {
   ComposedChart,
-  Area,
   Bar,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -186,20 +186,6 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
       return (
         <ResponsiveContainer width="100%" height={200}>
           <ComposedChart data={chartData} margin={{ top: 40 }}>
-            <defs>
-              <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor={theme.palette.primary.main}
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor={theme.palette.primary.main}
-                  stopOpacity={0}
-                />
-              </linearGradient>
-            </defs>
             <XAxis dataKey="time" />
             <YAxis hide domain={[0, 1.2]} />
             <Tooltip content={CustomTooltip} cursor={{ fill: "transparent" }} />
@@ -241,17 +227,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 }
               />
             )}
-            <Area
-              type="monotone"
-              dataKey="scaledPredictedLevel"
-              stroke={theme.palette.primary.main}
-              fillOpacity={0}
-              fill="url(#colorLevel)"
-              strokeDasharray="5 5"
-              dot={false}
-              strokeWidth={2}
-            />
-            <Bar dataKey="value">
+            <Bar dataKey="value" isAnimationActive={false}>
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
@@ -264,6 +240,15 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 position="top"
               />
             </Bar>
+            <Line
+              type="monotone"
+              dataKey="scaledPredictedLevel"
+              stroke={theme.palette.primary.main}
+              strokeDasharray="5 5"
+              dot={false}
+              strokeWidth={2}
+              isAnimationActive={false}
+            />
           </ComposedChart>
         </ResponsiveContainer>
       );

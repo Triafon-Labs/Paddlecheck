@@ -209,15 +209,36 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return Math.max(Math.ceil(Math.max(...allLevels)), 1);
   }, [combinedPredData]);
 
+  // Ticks every 6 hours so the pred X axis is clean and evenly spaced
+  const predTicks = useMemo(() => {
+    if (!combinedPredData || combinedPredData.length === 0) return [];
+    const start = new Date(combinedPredData[0].dateTime);
+    const end = new Date(combinedPredData[combinedPredData.length - 1].dateTime);
+    const ticks: string[] = [];
+    const cursor = new Date(start);
+    // Snap forward to the next 6-hour boundary
+    cursor.setMinutes(0, 0, 0);
+    cursor.setHours(Math.ceil(cursor.getHours() / 6) * 6);
+    while (cursor <= end) {
+      ticks.push(cursor.toISOString());
+      cursor.setHours(cursor.getHours() + 6);
+    }
+    return ticks;
+  }, [combinedPredData]);
+
   const formatXAxis = (tickItem: string) => {
     const date = new Date(tickItem);
     if (timeRange === "5d") {
       return date.toLocaleDateString([], { month: "short", day: "numeric" });
     }
-    if (timeRange === "pred") {
-      return date.toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit" });
-    }
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const formatPredTick = (tickItem: string) => {
+    const date = new Date(tickItem);
+    const day = date.toLocaleDateString([], { weekday: "short", day: "numeric" });
+    const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return `${day} ${time}`;
   };
 
   const renderContent = () => {
@@ -240,7 +261,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
-            <XAxis dataKey="dateTime" tickFormatter={formatXAxis} />
+            <XAxis
+              dataKey="dateTime"
+              ticks={predTicks}
+              tickFormatter={formatPredTick}
+              tick={{ fontSize: 10 }}
+              interval={0}
+            />
             <YAxis stroke={theme.palette.text.secondary} domain={[0, predYDomainMax]} />
             <Tooltip content={CustomTooltip} />
             <ReferenceLine

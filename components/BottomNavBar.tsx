@@ -37,7 +37,7 @@ const buildShareText = (
     if (conditions.levelChange !== undefined) {
       const { value, period } = conditions.levelChange;
       const arrow = value > 0.01 ? "⬆️" : value < -0.01 ? "⬇️" : "➡️";
-      riverLine += ` (${arrow} ${Math.abs(value).toFixed(2)}m in ${period})`;
+      riverLine += ` _(${arrow} ${Math.abs(value).toFixed(2)}m in ${period})_`;
     }
     lines.push(riverLine);
   }

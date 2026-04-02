@@ -20,42 +20,48 @@ const buildShareText = (
   conditions: ReturnType<typeof useKayakContext>["conditions"]
 ): string => {
   if (!conditions) return "Check current paddling conditions at Paddlecheck.";
+
   const statusEmojis: Record<string, string> = {
     "Light Green": "✅",
-    "Dark Green": "📈",
+    "Dark Green": "✅",
     Amber: "⚠️",
     Red: "🚨",
     "No Paddling": "⛔",
     Unknown: "🤷",
   };
-  const emoji = statusEmojis[conditions.overallStatus] ?? "";
-  const trend =
-    conditions.levelChange?.value !== undefined
-      ? conditions.levelChange.value > 0.01
-        ? " rising"
-        : conditions.levelChange.value < -0.01
-          ? " falling"
-          : " steady"
-      : "";
-  const wind =
-    conditions.windSpeed !== undefined
-      ? `Wind: ${conditions.windSpeed.toFixed(0)} mph${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`
-      : null;
-  const temp =
-    conditions.temperature !== undefined
-      ? `Temp: ${conditions.temperature.toFixed(0)}°C`
-      : null;
-  const river =
-    conditions.riverLevel !== undefined
-      ? `River: ${conditions.riverLevel.toFixed(2)}m${trend}`
-      : null;
 
-  const lines = [
-    `🏄 Paddlecheck – Worcester Canoe Club`,
-    `Status: ${emoji} ${conditions.overallStatus}`,
-    river,
-    [wind, temp].filter(Boolean).join(" | "),
-  ].filter(Boolean);
+  const lines: string[] = [];
+
+  if (conditions.riverLevel !== undefined) {
+    let riverLine = `*River Level:* ${conditions.riverLevel.toFixed(2)}m`;
+    if (conditions.levelChange !== undefined) {
+      const { value, period } = conditions.levelChange;
+      const arrow = value > 0.01 ? "⬆️" : value < -0.01 ? "⬇️" : "➡️";
+      riverLine += ` (${arrow} ${Math.abs(value).toFixed(2)}m in ${period})`;
+    }
+    lines.push(riverLine);
+  }
+
+  if (conditions.launchMessage) {
+    lines.push("");
+    lines.push(`${conditions.launchMessage}`);
+    lines.push("");
+  }
+
+  const tempStr =
+    conditions.temperature !== undefined
+      ? `*Temperature:* ${conditions.temperature.toFixed(1)}°C`
+      : null;
+  const windStr =
+    conditions.windSpeed !== undefined
+      ? `*Wind:* ${conditions.windSpeed.toFixed(1)}mph${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`
+      : null;
+  const weatherLine = [tempStr, windStr].filter(Boolean).join(" | ");
+  if (weatherLine) lines.push(weatherLine);
+
+  lines.push("");
+  const emoji = statusEmojis[conditions.overallStatus] ?? "";
+  lines.push(`🚦 *Overall Status:* ${conditions.overallStatus} ${emoji}`);
 
   return lines.join("\n");
 };

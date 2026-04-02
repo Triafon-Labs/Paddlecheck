@@ -9,7 +9,8 @@ import {
   CircularProgress,
   Paper,
   useTheme,
-  Slider,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import {
   ComposedChart,
@@ -267,15 +268,20 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
           Paddling Forecast
         </Typography>
         {forecastDays && forecastDays.length > 0 && (
-          <Box sx={{ px: 2, pt: 2, pb: 0 }}>
-            <Slider
+          <Box sx={{ pt: 2, pb: 0 }}>
+            <ToggleButtonGroup
               value={selectedDay}
-              onChange={(_, v) => setSelectedDay(v as number)}
-              min={0}
-              max={forecastDays.length - 1}
-              step={1}
-              marks={forecastDays.map((day, i) => ({ value: i, label: day.label }))}
-            />
+              exclusive
+              onChange={(_, val) => { if (val !== null) setSelectedDay(val); }}
+              fullWidth
+              size="small"
+            >
+              {forecastDays.map((day, i) => (
+                <ToggleButton key={i} value={i}>
+                  {day.label}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
           </Box>
         )}
         {renderChart()}

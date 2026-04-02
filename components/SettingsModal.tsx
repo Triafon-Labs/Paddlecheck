@@ -13,9 +13,9 @@ import {
   Box,
   Divider,
   Link,
-  Switch,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
-import MaterialSwitch from "./MaterialSwitch";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import { useAppTheme } from "@/lib/ThemeContext";
@@ -116,21 +116,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
           Theme
         </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
+        <ToggleButtonGroup
+          value={themeMode}
+          exclusive
+          onChange={(_, val) => { if (val) setThemeMode(val); }}
+          fullWidth
+          size="small"
         >
-          <Typography>
-            {themeMode === "dark" ? "Dark Mode" : "Light Mode"}
-          </Typography>
-          <MaterialSwitch
-            checked={themeMode === "dark"}
-            onChange={(e) => setThemeMode(e.target.checked ? "dark" : "light")}
-          />
-        </Box>
+          <ToggleButton value="light">Light</ToggleButton>
+          <ToggleButton value="dark">Dark</ToggleButton>
+        </ToggleButtonGroup>
 
         <Divider sx={{ my: 2 }} />
 
@@ -161,22 +156,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <Typography variant="h6" gutterBottom>
           Notifications
         </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
+        <ToggleButtonGroup
+          value={notificationsEnabled ? "on" : "off"}
+          exclusive
+          onChange={(_, val) => { if (val) handleNotificationsChange(val === "on"); }}
+          fullWidth
+          size="small"
+          disabled={notificationPermission === "denied"}
         >
-          <Typography>
-            Notify me when status changes
-          </Typography>
-          <Switch
-            checked={notificationsEnabled}
-            onChange={(e) => handleNotificationsChange(e.target.checked)}
-            disabled={notificationPermission === "denied"}
-          />
-        </Box>
+          <ToggleButton value="off">Off</ToggleButton>
+          <ToggleButton value="on">On</ToggleButton>
+        </ToggleButtonGroup>
         {notificationPermission === "denied" && (
           <Typography variant="caption" color="error" sx={{ mt: 0.5, display: "block" }}>
             Notifications are blocked in your browser settings.

@@ -268,7 +268,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
           Paddling Forecast
         </Typography>
         {forecastDays && forecastDays.length > 0 && (
-          <Box sx={{ pt: 2, pb: 0 }}>
+          <Box sx={{ pt: 2, pb: 2 }}>
             <ToggleButtonGroup
               value={selectedDay}
               exclusive

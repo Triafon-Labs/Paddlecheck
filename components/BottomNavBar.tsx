@@ -15,25 +15,17 @@ import SettingsModal from "./SettingsModal";
 import LinksPopover from "./LinksPopover";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { degreesToCompass } from "@/lib/weather";
+import { ragStatus } from "@/lib/rag";
 
 const buildShareText = (
   conditions: ReturnType<typeof useKayakContext>["conditions"]
 ): string => {
   if (!conditions) return "Check current paddling conditions at Paddlecheck.";
 
-  const statusEmojis: Record<string, string> = {
-    "Light Green": "✅",
-    "Dark Green": "✅",
-    Amber: "⚠️",
-    Red: "🚨",
-    "No Paddling": "⛔",
-    Unknown: "🤷",
-  };
-
   const lines: string[] = [];
 
   if (conditions.riverLevel !== undefined) {
-    let riverLine = `*River Level:* ${conditions.riverLevel.toFixed(2)}m`;
+    let riverLine = `🛶 *River Level:* ${conditions.riverLevel.toFixed(2)}m`;
     if (conditions.levelChange !== undefined) {
       const { value, period } = conditions.levelChange;
       const arrow = value > 0.01 ? "⬆️" : value < -0.01 ? "⬇️" : "➡️";
@@ -44,23 +36,23 @@ const buildShareText = (
 
   if (conditions.launchMessage) {
     lines.push("");
-    lines.push(`${conditions.launchMessage}`);
+    lines.push(conditions.launchMessage);
     lines.push("");
   }
 
   const tempStr =
     conditions.temperature !== undefined
-      ? `*Temperature:* ${conditions.temperature.toFixed(1)}°C`
+      ? `🌡️ *Temperature:* ${conditions.temperature.toFixed(1)}°C`
       : null;
   const windStr =
     conditions.windSpeed !== undefined
-      ? `*Wind:* ${conditions.windSpeed.toFixed(1)}mph${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`
+      ? `💨 *Wind:* ${conditions.windSpeed.toFixed(1)}mph${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`
       : null;
   const weatherLine = [tempStr, windStr].filter(Boolean).join(" | ");
   if (weatherLine) lines.push(weatherLine);
 
   lines.push("");
-  const emoji = statusEmojis[conditions.overallStatus] ?? "";
+  const emoji = ragStatus[conditions.overallStatus]?.emoji ?? "";
   lines.push(`🚦 *Overall Status:* ${conditions.overallStatus} ${emoji}`);
 
   return lines.join("\n");

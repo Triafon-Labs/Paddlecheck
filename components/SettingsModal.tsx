@@ -13,6 +13,7 @@ import {
   Box,
   Divider,
   Link,
+  Switch,
 } from "@mui/material";
 import MaterialSwitch from "./MaterialSwitch";
 import Slide from "@mui/material/Slide";
@@ -170,7 +171,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           <Typography>
             Notify me when status changes
           </Typography>
-          <MaterialSwitch
+          <Switch
             checked={notificationsEnabled}
             onChange={(e) => handleNotificationsChange(e.target.checked)}
             disabled={notificationPermission === "denied"}

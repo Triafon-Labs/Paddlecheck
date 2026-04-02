@@ -20,6 +20,7 @@ import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import Kayaking from "@mui/icons-material/Kayaking";
 import { KayakConditions } from "@/types";
 import { ragStatus } from "@/lib/rag";
+import { degreesToCompass } from "@/lib/weather";
 
 interface StatsCardProps {
   conditions: KayakConditions | null;
@@ -218,7 +219,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
             <StatItem
               icon={<Air />}
               label="Wind Speed"
-              value={`${conditions.windSpeed?.toFixed(1)} mph`}
+              value={`${conditions.windSpeed?.toFixed(1)} mph${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`}
               isInfluencing={reasons.includes("High winds")}
             />
             <StatItem

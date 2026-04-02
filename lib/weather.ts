@@ -9,7 +9,7 @@ export const fetchWeatherData = async (
   longitude: number
 ): Promise<WeatherData> => {
   const response = await fetch(
-    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,is_day,visibility,wind_speed_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon`
+    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,is_day,visibility,wind_speed_10m,wind_direction_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon`
   );
   const data = await response.json();
 
@@ -17,11 +17,17 @@ export const fetchWeatherData = async (
   return {
     temperature: current.temperature_2m,
     windSpeed: current.wind_speed_10m,
+    windDirection: current.wind_direction_10m,
     rain: RAIN_CODES.has(current.weather_code),
     dark: !current.is_day,
     visibility: current.visibility, // visibility in meters
     weatherCode: current.weather_code,
   };
+};
+
+export const degreesToCompass = (degrees: number): string => {
+  const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  return dirs[Math.round(degrees / 45) % 8];
 };
 
 export const getVisibilityDescription = (visibility: number): string => {

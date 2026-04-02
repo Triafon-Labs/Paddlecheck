@@ -17,6 +17,7 @@ export interface KayakConditions {
   initialStatus?: Status;
   temperature?: number;
   windSpeed?: number;
+  windDirection?: number;
   rain?: boolean;
   dark?: boolean;
   visibility?: number;
@@ -46,6 +47,7 @@ export interface ChartDataPoint {
 export interface WeatherData {
   temperature: number;
   windSpeed: number;
+  windDirection: number;
   rain: boolean;
   dark: boolean;
   visibility: number;

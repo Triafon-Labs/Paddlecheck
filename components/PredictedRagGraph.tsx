@@ -9,7 +9,8 @@ import {
   CircularProgress,
   Paper,
   useTheme,
-  Slider,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import {
   ComposedChart,
@@ -227,7 +228,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 }
               />
             )}
-            <Bar dataKey="value" isAnimationActive={false}>
+            <Bar dataKey="value" isAnimationActive={true}>
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
@@ -247,7 +248,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
               strokeDasharray="5 5"
               dot={false}
               strokeWidth={2}
-              isAnimationActive={false}
+              isAnimationActive={true}
             />
           </ComposedChart>
         </ResponsiveContainer>
@@ -267,15 +268,18 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
           Paddling Forecast
         </Typography>
         {forecastDays && forecastDays.length > 0 && (
-          <Box sx={{ px: 2, pt: 2, pb: 0 }}>
-            <Slider
+          <Box sx={{ pt: 2, pb: 2 }}>
+            <ToggleButtonGroup
               value={selectedDay}
-              onChange={(_, v) => setSelectedDay(v as number)}
-              min={0}
-              max={forecastDays.length - 1}
-              step={1}
-              marks={forecastDays.map((day, i) => ({ value: i, label: day.label }))}
-            />
+              exclusive
+              onChange={(_, val) => { if (val !== null) setSelectedDay(val); }}
+              fullWidth
+              size="small"
+            >
+              {forecastDays.map((day, i) => (
+                <ToggleButton key={i} value={i}>{day.label}</ToggleButton>
+              ))}
+            </ToggleButtonGroup>
           </Box>
         )}
         {renderChart()}

@@ -13,8 +13,9 @@ import {
   Box,
   Divider,
   Link,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
-import MaterialSwitch from "./MaterialSwitch";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import { useAppTheme } from "@/lib/ThemeContext";
@@ -38,6 +39,9 @@ interface SettingsModalProps {
 const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const { themeMode, setThemeMode } = useAppTheme();
   const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">("");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationPermission, setNotificationPermission] =
+    useState<NotificationPermission>("default");
 
   useEffect(() => {
     const savedLevel = localStorage.getItem("paddlerLevel") as
@@ -47,7 +51,23 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setPaddlerLevel(savedLevel);
     }
+    setNotificationsEnabled(
+      localStorage.getItem("notificationsEnabled") === "true"
+    );
+    if ("Notification" in window) {
+      setNotificationPermission(Notification.permission);
+    }
   }, []);
+
+  const handleNotificationsChange = async (checked: boolean) => {
+    if (checked && Notification.permission !== "granted") {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+      if (permission !== "granted") return;
+    }
+    setNotificationsEnabled(checked);
+    localStorage.setItem("notificationsEnabled", String(checked));
+  };
 
   const handleLevelChange = (event: SelectChangeEvent<PaddlerType | "">) => {
     const level = event.target.value as PaddlerType | "";
@@ -94,21 +114,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
           Theme
         </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
+        <ToggleButtonGroup
+          value={themeMode}
+          exclusive
+          onChange={(_, val) => { if (val) setThemeMode(val); }}
+          fullWidth
+          size="small"
         >
-          <Typography>
-            {themeMode === "dark" ? "Dark Mode" : "Light Mode"}
-          </Typography>
-          <MaterialSwitch
-            checked={themeMode === "dark"}
-            onChange={(e) => setThemeMode(e.target.checked ? "dark" : "light")}
-          />
-        </Box>
+          <ToggleButton value="light">Light</ToggleButton>
+          <ToggleButton value="dark">Dark</ToggleButton>
+        </ToggleButtonGroup>
 
         <Divider sx={{ my: 2 }} />
 
@@ -133,6 +148,28 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <Button onClick={handleClearLevel} disabled={!paddlerLevel} fullWidth>
           Clear Selection
         </Button>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6" gutterBottom>
+          Notifications
+        </Typography>
+        <ToggleButtonGroup
+          value={notificationsEnabled ? "on" : "off"}
+          exclusive
+          onChange={(_, val) => { if (val) handleNotificationsChange(val === "on"); }}
+          fullWidth
+          size="small"
+          disabled={notificationPermission === "denied"}
+        >
+          <ToggleButton value="off">Off</ToggleButton>
+          <ToggleButton value="on">On</ToggleButton>
+        </ToggleButtonGroup>
+        {notificationPermission === "denied" && (
+          <Typography variant="caption" color="error" sx={{ mt: 0.5, display: "block" }}>
+            Notifications are blocked in your browser settings.
+          </Typography>
+        )}
 
         <Divider sx={{ my: 2 }} />
 

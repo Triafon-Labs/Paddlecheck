@@ -24,6 +24,7 @@ const LastUpdated: React.FC<LastUpdatedProps> = ({ date }) => {
   useEffect(() => {
     if (!date) return;
     const dateObj = new Date(date);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRelativeTime(getRelativeTime(dateObj));
     const interval = setInterval(() => {
       setRelativeTime(getRelativeTime(dateObj));

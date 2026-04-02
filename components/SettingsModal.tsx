@@ -51,12 +51,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setPaddlerLevel(savedLevel);
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNotificationsEnabled(
       localStorage.getItem("notificationsEnabled") === "true"
     );
     if ("Notification" in window) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNotificationPermission(Notification.permission);
     }
   }, []);

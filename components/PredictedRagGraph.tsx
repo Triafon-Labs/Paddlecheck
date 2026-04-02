@@ -227,7 +227,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 }
               />
             )}
-            <Bar dataKey="value" isAnimationActive={false}>
+            <Bar dataKey="value" isAnimationActive={true}>
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
@@ -247,7 +247,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
               strokeDasharray="5 5"
               dot={false}
               strokeWidth={2}
-              isAnimationActive={false}
+              isAnimationActive={true}
             />
           </ComposedChart>
         </ResponsiveContainer>

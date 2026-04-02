@@ -18,8 +18,7 @@ import {
   CircularProgress,
   useTheme,
   Paper,
-  ToggleButtonGroup,
-  ToggleButton,
+  Slider,
 } from "@mui/material";
 import {
   AreaChart,
@@ -129,37 +128,34 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   change5d,
 }) => {
   const theme = useTheme();
-  const [timeRange, setTimeRange] = useState("24h");
+  const TIME_RANGES = ["1h", "8h", "24h", "5d"] as const;
+  type TimeRange = (typeof TIME_RANGES)[number];
+  const [timeRangeIndex, setTimeRangeIndex] = useState(2); // default 24h
 
   useEffect(() => {
-    const savedTimeRange = localStorage.getItem("riverGraphTimeRange");
-    if (savedTimeRange) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTimeRange(savedTimeRange);
+    const saved = localStorage.getItem("riverGraphTimeRange");
+    if (saved) {
+      const idx = TIME_RANGES.indexOf(saved as TimeRange);
+      if (idx !== -1) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setTimeRangeIndex(idx);
+      }
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("riverGraphTimeRange", timeRange);
-  }, [timeRange]);
+    localStorage.setItem("riverGraphTimeRange", TIME_RANGES[timeRangeIndex]);
+  }, [timeRangeIndex]);
+
+  const timeRange = TIME_RANGES[timeRangeIndex];
 
   const filteredData = useMemo(() => {
     if (!data) return null;
-
     const now = new Date();
-    let hoursToFilter;
-    if (timeRange === "1h") {
-      hoursToFilter = 1;
-    } else if (timeRange === "8h") {
-      hoursToFilter = 8;
-    } else if (timeRange === "24h") {
-      hoursToFilter = 24;
-    } else {
-      return data;
-    }
-
-    const filterDate = new Date(now.getTime() - hoursToFilter * 60 * 60 * 1000);
-
+    const hoursMap: Record<TimeRange, number | null> = { "1h": 1, "8h": 8, "24h": 24, "5d": null };
+    const hours = hoursMap[timeRange];
+    if (hours === null) return data;
+    const filterDate = new Date(now.getTime() - hours * 60 * 60 * 1000);
     return data.filter((d) => new Date(d.dateTime) > filterDate);
   }, [data, timeRange]);
 
@@ -281,29 +277,18 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               Last 5 Days
             </Typography>
           </div>
-          <ToggleButtonGroup
-            value={timeRange}
-            exclusive
-            onChange={(event, newTimeRange) => {
-              if (newTimeRange) {
-                setTimeRange(newTimeRange);
-              }
-            }}
-            aria-label="time range"
-          >
-            <ToggleButton value="5d" aria-label="5 days">
-              <Typography variant="caption">5d</Typography>
-            </ToggleButton>
-            <ToggleButton value="24h" aria-label="24 hours">
-              <Typography variant="caption">24h</Typography>
-            </ToggleButton>
-            <ToggleButton value="8h" aria-label="8 hours">
-              <Typography variant="caption">8h</Typography>
-            </ToggleButton>
-            <ToggleButton value="1h" aria-label="1 hour">
-              <Typography variant="caption">1h</Typography>
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <Box sx={{ width: 120, mr: 1 }}>
+            <Slider
+              value={timeRangeIndex}
+              onChange={(_, val) => setTimeRangeIndex(val as number)}
+              min={0}
+              max={TIME_RANGES.length - 1}
+              step={1}
+              marks={TIME_RANGES.map((label, i) => ({ value: i, label }))}
+              track={false}
+              size="small"
+            />
+          </Box>
         </Box>
         {renderContent()}
       </CardContent>

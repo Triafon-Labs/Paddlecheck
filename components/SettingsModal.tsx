@@ -38,6 +38,9 @@ interface SettingsModalProps {
 const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const { themeMode, setThemeMode } = useAppTheme();
   const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">("");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationPermission, setNotificationPermission] =
+    useState<NotificationPermission>("default");
 
   useEffect(() => {
     const savedLevel = localStorage.getItem("paddlerLevel") as
@@ -47,7 +50,25 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setPaddlerLevel(savedLevel);
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNotificationsEnabled(
+      localStorage.getItem("notificationsEnabled") === "true"
+    );
+    if ("Notification" in window) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setNotificationPermission(Notification.permission);
+    }
   }, []);
+
+  const handleNotificationsChange = async (checked: boolean) => {
+    if (checked && Notification.permission !== "granted") {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+      if (permission !== "granted") return;
+    }
+    setNotificationsEnabled(checked);
+    localStorage.setItem("notificationsEnabled", String(checked));
+  };
 
   const handleLevelChange = (event: SelectChangeEvent<PaddlerType | "">) => {
     const level = event.target.value as PaddlerType | "";
@@ -133,6 +154,33 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <Button onClick={handleClearLevel} disabled={!paddlerLevel} fullWidth>
           Clear Selection
         </Button>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6" gutterBottom>
+          Notifications
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography>
+            Notify me when status changes
+          </Typography>
+          <MaterialSwitch
+            checked={notificationsEnabled}
+            onChange={(e) => handleNotificationsChange(e.target.checked)}
+            disabled={notificationPermission === "denied"}
+          />
+        </Box>
+        {notificationPermission === "denied" && (
+          <Typography variant="caption" color="error" sx={{ mt: 0.5, display: "block" }}>
+            Notifications are blocked in your browser settings.
+          </Typography>
+        )}
 
         <Divider sx={{ my: 2 }} />
 

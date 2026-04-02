@@ -9,6 +9,7 @@ import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
 import PredictedRagGraph from "@/components/PredictedRagGraph";
 import { useKayakContext } from "@/lib/KayakDataContext";
+import { useNotifications } from "@/lib/useNotifications";
 
 export default function HomePage() {
   const {
@@ -22,6 +23,8 @@ export default function HomePage() {
     riverChange8h,
     riverChange5d,
   } = useKayakContext();
+
+  useNotifications(conditions?.overallStatus, conditions?.riverLevel);
 
   return (
     <Container maxWidth="md">

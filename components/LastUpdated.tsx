@@ -1,36 +1,42 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Typography, Box } from "@mui/material";
-import { format, isToday, isYesterday } from "date-fns";
-import { enGB } from "date-fns/locale";
 
 interface LastUpdatedProps {
   date?: string;
 }
 
+const getRelativeTime = (date: Date): string => {
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return "just now";
+  if (diffMins === 1) return "1 minute ago";
+  if (diffMins < 60) return `${diffMins} minutes ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours === 1) return "1 hour ago";
+  return `${diffHours} hours ago`;
+};
+
 const LastUpdated: React.FC<LastUpdatedProps> = ({ date }) => {
-  if (!date) {
-    return null;
-  }
+  const [relativeTime, setRelativeTime] = useState<string>("");
 
-  const dateObj = new Date(date);
-  let formattedDate: string;
+  useEffect(() => {
+    if (!date) return;
+    const dateObj = new Date(date);
+    setRelativeTime(getRelativeTime(dateObj));
+    const interval = setInterval(() => {
+      setRelativeTime(getRelativeTime(dateObj));
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [date]);
 
-  if (isToday(dateObj)) {
-    formattedDate = `today at ${format(dateObj, "HH:mm")}`;
-  } else if (isYesterday(dateObj)) {
-    formattedDate = `yesterday at ${format(dateObj, "HH:mm")}`;
-  } else {
-    formattedDate = format(dateObj, "PPP 'at' HH:mm", {
-      locale: enGB,
-    });
-  }
+  if (!date || !relativeTime) return null;
 
   return (
     <Box sx={{ width: "100%", textAlign: "center" }}>
       <Typography variant="caption" color="text.secondary">
-        Last updated: {formattedDate}
+        Last updated: {relativeTime}
       </Typography>
     </Box>
   );

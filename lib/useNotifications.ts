@@ -1,6 +1,15 @@
 import { useEffect, useRef } from "react";
 import { Status } from "@/types";
 
+const STATUS_EMOJIS: Record<Status, string> = {
+  "Light Green": "✅",
+  "Dark Green": "📈",
+  Amber: "⚠️",
+  Red: "🚨",
+  "No Paddling": "⛔",
+  Unknown: "🤷",
+};
+
 export const useNotifications = (
   status: Status | undefined,
   riverLevel: number | undefined
@@ -23,9 +32,10 @@ export const useNotifications = (
     // Don't notify on first load, only on change
     if (prev === undefined || prev === status) return;
 
+    const emoji = STATUS_EMOJIS[status] ?? "";
     const levelText =
-      riverLevel !== undefined ? ` — River: ${riverLevel.toFixed(2)}m` : "";
-    new Notification("Paddlecheck", {
+      riverLevel !== undefined ? ` — 🛶 River: ${riverLevel.toFixed(2)}m` : "";
+    new Notification(`${emoji} Paddlecheck`, {
       body: `Status changed to ${status}${levelText}`,
       icon: "/web-app-manifest-192x192.png",
     });

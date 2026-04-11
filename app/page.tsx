@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Container, Stack, Box } from "@mui/material";
+import { Container, Stack, Box, Alert } from "@mui/material";
 import LastUpdated from "@/components/LastUpdated";
 import StatusCard from "@/components/StatusCard";
 import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";
@@ -23,6 +23,8 @@ export default function HomePage() {
     riverChange24h,
     riverChange8h,
     riverChange5d,
+    error,
+    isOffline,
   } = useKayakContext();
 
   useNotifications(conditions?.overallStatus, conditions?.riverLevel);
@@ -30,6 +32,16 @@ export default function HomePage() {
   return (
     <Container maxWidth="md">
       <Stack spacing={4} sx={{ py: 2, pb: 16 }}>
+        {isOffline && (
+          <Alert severity="warning" sx={{ borderRadius: 1 }}>
+            You&apos;re offline — showing cached data where available.
+          </Alert>
+        )}
+        {error && (
+          <Alert severity="error" sx={{ borderRadius: 1 }}>
+            {error}
+          </Alert>
+        )}
         <StatusCard conditions={conditions} loading={loading} />
         <PaddlingMatrixCard
           loading={loading}

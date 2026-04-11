@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   KayakConditions,
   ChartDataPoint,
@@ -32,6 +32,20 @@ import {
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+const withRetry = async <T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> => {
+  let delay = 500;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt === maxRetries) throw err;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      delay *= 2;
+    }
+  }
+  throw new Error("unreachable");
+};
+
 export const useKayakData = () => {
   const [conditions, setConditions] = useState<KayakConditions | null>(null);
   const [forecastDays, setForecastDays] = useState<DayForecast[] | null>(null);
@@ -45,19 +59,36 @@ export const useKayakData = () => {
   const [riverChange24h, setRiverChange24h] = useState<number | null>(null);
   const [riverChange8h, setRiverChange8h] = useState<number | null>(null);
   const [riverChange5d, setRiverChange5d] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
+  const isOfflineRef = useRef(false);
+
+  useEffect(() => {
+    setIsOffline(!navigator.onLine);
+    isOfflineRef.current = !navigator.onLine;
+    const handleOnline = () => { setIsOffline(false); isOfflineRef.current = false; };
+    const handleOffline = () => { setIsOffline(true); isOfflineRef.current = true; };
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setPredictLoading(true);
+      setError(null);
 
       // Fetch all data concurrently; Bewdley failure is non-fatal
       const [riverData, weatherData, futureWeatherData, bewdleyData] =
         await Promise.all([
-          fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS),
-          fetchWeatherData(LATITUDE, LONGITUDE),
-          fetchFutureWeatherData(LATITUDE, LONGITUDE),
-          fetchBewdleyForecast().catch(() => ({
+          withRetry(() => fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS)),
+          withRetry(() => fetchWeatherData(LATITUDE, LONGITUDE)),
+          withRetry(() => fetchFutureWeatherData(LATITUDE, LONGITUDE)),
+          withRetry(() => fetchBewdleyForecast()).catch(() => ({
             forecasts: [],
             observations: [],
             currentLevel: null,
@@ -235,8 +266,14 @@ export const useKayakData = () => {
 
       setForecastDays(days);
       setPredictionData(predictionPoints);
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
+    } catch (err) {
+      console.error("Failed to fetch data:", err);
+      const offline = isOfflineRef.current;
+      setError(
+        offline
+          ? "You're offline and no cached data is available. Connect to the internet and tap refresh."
+          : "Failed to load conditions. Check your connection and tap refresh to try again."
+      );
     } finally {
       setLoading(false);
       setPredictLoading(false);
@@ -258,6 +295,8 @@ export const useKayakData = () => {
     riverChange24h,
     riverChange8h,
     riverChange5d,
+    error,
+    isOffline,
     refetch: fetchData,
   };
 };

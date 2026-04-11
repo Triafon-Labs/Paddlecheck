@@ -95,7 +95,6 @@ export type PaddlerType =
   | "Beginner"
   | "Improver"
   | "Intermediate"
-  | "Junior"
   | "Independent";
 
 export type PaddlingStatusValue = "Yes" | "No" | "Discretion" | "Warning";

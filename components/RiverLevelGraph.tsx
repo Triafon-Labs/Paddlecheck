@@ -286,52 +286,62 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     if (timeRange === "pred" && combinedPredData) {
       const nowTs = new Date().getTime();
       return (
-        <ResponsiveContainer width="100%" height={200}>
-          <ComposedChart data={combinedPredData}>
-            <defs>
-              <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.8} />
-                <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
-            <XAxis
-              dataKey="ts"
-              type="number"
-              scale="time"
-              domain={["dataMin", "dataMax"]}
-              ticks={predTicks}
-              tickFormatter={formatPredTick}
+        <>
+          <ResponsiveContainer width="100%" height={200}>
+            <ComposedChart data={combinedPredData}>
+              <defs>
+                <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.8} />
+                  <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+              <XAxis
+                dataKey="ts"
+                type="number"
+                scale="time"
+                domain={["dataMin", "dataMax"]}
+                ticks={predTicks}
+                tickFormatter={formatPredTick}
 
-              interval={0}
-            />
-            <YAxis stroke={theme.palette.text.secondary} domain={[0, predYDomainMax]} />
-            <Tooltip content={CustomTooltip} />
-            <ReferenceLine
-              x={nowTs}
-              stroke={theme.palette.text.disabled}
-              strokeDasharray="3 3"
-            />
-            <Area
-              type="monotone"
-              dataKey="actual"
-              stroke={theme.palette.primary.main}
-              fillOpacity={1}
-              fill="url(#colorActual)"
-              connectNulls={false}
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="predicted"
-              stroke={theme.palette.primary.main}
-              strokeDasharray="5 5"
-              strokeOpacity={0.7}
-              dot={false}
-              connectNulls={false}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
+                interval={0}
+              />
+              <YAxis stroke={theme.palette.text.secondary} domain={[0, predYDomainMax]} />
+              <Tooltip content={CustomTooltip} />
+              <ReferenceLine
+                x={nowTs}
+                stroke={theme.palette.text.disabled}
+                strokeDasharray="3 3"
+              />
+              <Area
+                type="monotone"
+                dataKey="actual"
+                stroke={theme.palette.primary.main}
+                fillOpacity={1}
+                fill="url(#colorActual)"
+                connectNulls={false}
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="predicted"
+                stroke={theme.palette.primary.main}
+                strokeDasharray="5 5"
+                strokeOpacity={0.7}
+                dot={false}
+                connectNulls={false}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: "block", textAlign: "center", mt: 1 }}
+          >
+            Solid line uses Bewdley upstream forecast (~30h). Dashed line uses
+            local trend only. Both are experimental and may not be accurate.
+          </Typography>
+        </>
       );
     }
 

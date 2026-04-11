@@ -13,7 +13,7 @@ import { lightTheme, darkTheme } from "./themes";
 import CssBaseline from "@mui/material/CssBaseline";
 import { GlobalStyles } from "@mui/material";
 
-type ThemeMode = "light" | "dark";
+export type ThemeMode = "light" | "dark" | "system";
 
 interface ThemeContextType {
   themeMode: ThemeMode;
@@ -31,32 +31,38 @@ export const useAppTheme = () => {
 };
 
 export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [themeMode, setThemeMode] = useState<ThemeMode>("light");
+  const [themeMode, setThemeMode] = useState<ThemeMode>("system");
+  const [systemPrefersDark, setSystemPrefersDark] = useState(false);
 
   useEffect(() => {
+    // Restore saved preference
     const savedTheme = localStorage.getItem("themeMode") as ThemeMode | null;
-    if (savedTheme) {
+    if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeMode(savedTheme);
     }
+
+    // Detect and track system preference
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    setSystemPrefersDark(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setSystemPrefersDark(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, []);
 
   useEffect(() => {
     localStorage.setItem("themeMode", themeMode);
   }, [themeMode]);
 
+  const resolvedMode =
+    themeMode === "system" ? (systemPrefersDark ? "dark" : "light") : themeMode;
+
   const activeTheme = useMemo(() => {
-    return themeMode === "dark" ? darkTheme : lightTheme;
-  }, [themeMode]);
+    return resolvedMode === "dark" ? darkTheme : lightTheme;
+  }, [resolvedMode]);
 
   const contextValue = useMemo(
-    () => ({
-      themeMode,
-      setThemeMode: (mode: ThemeMode) => {
-        localStorage.setItem("themeMode", mode);
-        setThemeMode(mode);
-      },
-    }),
+    () => ({ themeMode, setThemeMode }),
     [themeMode]
   );
 

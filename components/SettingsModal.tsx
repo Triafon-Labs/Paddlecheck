@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
-import { useAppTheme } from "@/lib/ThemeContext";
+import { useAppTheme, ThemeMode } from "@/lib/ThemeContext";
 import { useEffect, useState } from "react";
 import { PaddlerType } from "@/types";
 
@@ -85,7 +85,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   };
 
   const paddlerTypes: PaddlerType[] = [
-    "Junior",
     "Beginner",
     "Improver",
     "Intermediate",
@@ -117,11 +116,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <ToggleButtonGroup
           value={themeMode}
           exclusive
-          onChange={(_, val) => { if (val) setThemeMode(val); }}
+          onChange={(_, val: ThemeMode | null) => { if (val) setThemeMode(val); }}
           fullWidth
           size="small"
         >
           <ToggleButton value="light">Light</ToggleButton>
+          <ToggleButton value="system">System</ToggleButton>
           <ToggleButton value="dark">Dark</ToggleButton>
         </ToggleButtonGroup>
 

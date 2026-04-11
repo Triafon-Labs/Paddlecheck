@@ -14,15 +14,15 @@ import {
 } from "@mui/material";
 import {
   ComposedChart,
-  Bar,
   Line,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
   Cell,
   TooltipContentProps,
-  ReferenceLine,
+  ReferenceLine,  // still used for sunrise/sunset
   LabelList,
 } from "recharts";
 import { DayForecast, PredictedGraphDataPoint } from "@/types";
@@ -54,6 +54,11 @@ const CustomTooltip = ({
         <Typography variant="body2">{`${data.status}`}</Typography>
         <Typography variant="body2" color="text.secondary">
           Predicted Level: {data.predictedLevel.toFixed(2)}m
+        </Typography>
+        <Typography variant="caption" color="text.disabled">
+          {data.predictionSource === "bewdley"
+            ? "Source: Bewdley upstream forecast"
+            : "Source: Local trend (linear)"}
         </Typography>
         {data.reasons && data.reasons.length > 0 && (
           <Box sx={{ mt: 1 }}>
@@ -179,10 +184,21 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
         ? parseInt(sunset.split("T")[1].split(":")[0], 10)
         : null;
 
-      const chartData = data.map((d) => ({
-        ...d,
-        scaledPredictedLevel: d.predictedLevel / 6.0,
-      }));
+      const chartData = data.map((d, i) => {
+        const scaled = d.predictedLevel / 6.0;
+        const isBewdley = d.predictionSource === "bewdley";
+        const prevSource = i > 0 ? data[i - 1].predictionSource : null;
+        const nextSource = i < data.length - 1 ? data[i + 1].predictionSource : null;
+        // Include the first linear point in the bewdley line so they connect visually
+        const inBewdleyLine = isBewdley || prevSource === "bewdley";
+        // Include the last bewdley point in the linear line so they connect visually
+        const inLinearLine = !isBewdley || nextSource === "linear";
+        return {
+          ...d,
+          bewdleyLevel: inBewdleyLine ? scaled : null,
+          linearLevel: inLinearLine ? scaled : null,
+        };
+      });
 
       return (
         <ResponsiveContainer width="100%" height={200}>
@@ -228,7 +244,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 }
               />
             )}
-            <Bar dataKey="value" isAnimationActive={true}>
+            <Bar dataKey="value" isAnimationActive={false}>
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
@@ -241,14 +257,24 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 position="top"
               />
             </Bar>
+            {/* Solid line = Bewdley-informed prediction (~30h); dashed = linear regression fallback */}
             <Line
               type="monotone"
-              dataKey="scaledPredictedLevel"
+              dataKey="bewdleyLevel"
               stroke={theme.palette.primary.main}
-              strokeDasharray="5 5"
               dot={false}
               strokeWidth={2}
-              isAnimationActive={true}
+              connectNulls={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="linearLevel"
+              stroke={theme.palette.primary.main}
+              dot={false}
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              strokeOpacity={0.5}
+              connectNulls={false}
             />
           </ComposedChart>
         </ResponsiveContainer>
@@ -288,8 +314,8 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
           color="text.secondary"
           sx={{ display: "block", textAlign: "center", mt: 2 }}
         >
-          This is an experimental prediction based on current trends and may not
-          be accurate.
+          Solid line uses Bewdley upstream forecast (~30h). Dashed line uses
+          local trend only. Both are experimental and may not be accurate.
         </Typography>
       </CardContent>
     </Card>

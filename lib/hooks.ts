@@ -11,7 +11,12 @@ import {
   RAG_STATUS_MAP,
   ragHeight,
 } from "@/lib/rag";
-import { fetchRiverData, predictRiverLevel } from "@/lib/river";
+import {
+  fetchRiverData,
+  predictRiverLevel,
+  fetchBewdleyForecast,
+  getBewdleyBasedWorcesterLevel,
+} from "@/lib/river";
 import {
   fetchWeatherData,
   getVisibilityDescription,
@@ -30,6 +35,7 @@ const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export const useKayakData = () => {
   const [conditions, setConditions] = useState<KayakConditions | null>(null);
   const [forecastDays, setForecastDays] = useState<DayForecast[] | null>(null);
+  const [predictionData, setPredictionData] = useState<ChartDataPoint[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [predictLoading, setPredictLoading] = useState(true);
   const [riverGraphData, setRiverGraphData] = useState<ChartDataPoint[] | null>(
@@ -45,12 +51,18 @@ export const useKayakData = () => {
       setLoading(true);
       setPredictLoading(true);
 
-      // Fetch all data concurrently
-      const [riverData, weatherData, futureWeatherData] = await Promise.all([
-        fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS),
-        fetchWeatherData(LATITUDE, LONGITUDE),
-        fetchFutureWeatherData(LATITUDE, LONGITUDE),
-      ]);
+      // Fetch all data concurrently; Bewdley failure is non-fatal
+      const [riverData, weatherData, futureWeatherData, bewdleyData] =
+        await Promise.all([
+          fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS),
+          fetchWeatherData(LATITUDE, LONGITUDE),
+          fetchFutureWeatherData(LATITUDE, LONGITUDE),
+          fetchBewdleyForecast().catch(() => ({
+            forecasts: [],
+            observations: [],
+            currentLevel: null,
+          })),
+        ]);
 
       // Process current conditions
       setRiverGraphData(riverData.historicalData);
@@ -103,6 +115,19 @@ export const useKayakData = () => {
       const now = new Date();
       const currentHour = now.getHours();
       const days: DayForecast[] = [];
+      const predictionPoints: ChartDataPoint[] = [];
+
+      // Pre-compute Worcester's linear trend slope (m/h) once so the fallback
+      // after the Bewdley window can continue smoothly from wherever Bewdley
+      // left off, rather than jumping back to the current level.
+      const worcesterSlopePerHour =
+        predictRiverLevel(riverData.latestLevel || 0, riverData.historicalData, 1) -
+        (riverData.latestLevel || 0);
+
+      // Tracks the last Bewdley-based prediction level and the hoursAhead at
+      // which the Bewdley data ran out, so linear regression is anchored there.
+      let lastBewdleyPrediction: number | null = null;
+      let transitionHoursAhead: number | null = null;
 
       for (let d = 0; d < 5; d++) {
         const dayStartIndex = d * 24;
@@ -124,11 +149,39 @@ export const useKayakData = () => {
 
           // Hours ahead from now for river level prediction
           const hoursAhead = d * 24 + h - currentHour + 1;
-          const predictedRiverLevel = predictRiverLevel(
-            riverData.latestLevel || 0,
-            riverData.historicalData,
-            hoursAhead
+          const targetWorcesterTime = new Date(
+            now.getTime() + hoursAhead * 3600 * 1000
           );
+
+          const bewdleyLevel =
+            bewdleyData.currentLevel !== null
+              ? getBewdleyBasedWorcesterLevel(
+                  riverData.latestLevel || 0,
+                  bewdleyData.forecasts,
+                  bewdleyData.observations,
+                  targetWorcesterTime,
+                  now
+                )
+              : null;
+
+          const predictionSource: "bewdley" | "linear" =
+            bewdleyLevel !== null ? "bewdley" : "linear";
+
+          let predictedRiverLevel: number;
+          if (bewdleyLevel !== null) {
+            predictedRiverLevel = bewdleyLevel;
+            lastBewdleyPrediction = bewdleyLevel;
+            transitionHoursAhead = hoursAhead;
+          } else {
+            // Anchor linear regression to the last Bewdley-predicted level so
+            // there's no jump at the transition point.
+            const baseLevel = lastBewdleyPrediction ?? (riverData.latestLevel || 0);
+            const baseHours = transitionHoursAhead ?? 0;
+            predictedRiverLevel = Math.max(
+              0,
+              baseLevel + worcesterSlopePerHour * (hoursAhead - baseHours)
+            );
+          }
 
           let dark;
           if (sunriseHour !== null && sunsetHour !== null) {
@@ -156,7 +209,16 @@ export const useKayakData = () => {
             reasons: predictedReasons,
             value: ragHeight[predictedStatus] || 0.1,
             predictedLevel: predictedRiverLevel,
+            predictionSource,
           });
+
+          // Only include Bewdley-backed points in the river level graph prediction
+          if (predictionSource === "bewdley") {
+            predictionPoints.push({
+              dateTime: futureWeatherData.hourly.time[index],
+              level: predictedRiverLevel,
+            });
+          }
         }
 
         const dayDateStr =
@@ -172,6 +234,7 @@ export const useKayakData = () => {
       }
 
       setForecastDays(days);
+      setPredictionData(predictionPoints);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -187,6 +250,7 @@ export const useKayakData = () => {
   return {
     conditions,
     forecastDays,
+    predictionData,
     loading,
     predictLoading,
     riverGraphData,

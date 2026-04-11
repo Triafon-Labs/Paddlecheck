@@ -52,6 +52,12 @@ export const LATITUDE = 52.2;
 export const LONGITUDE = -2.2;
 export const HISTORICAL_DAYS = 5;
 
+// Bewdley upstream station forecast (used to improve Worcester predictions)
+// The flood wave takes ~6 hours to travel from Bewdley to Worcester
+export const BEWDLEY_CSV_URL =
+  "https://check-for-flooding.service.gov.uk/station-csv/2001";
+export const BEWDLEY_TRAVEL_HOURS = 6;
+
 export const API_ENDPOINTS = {
   RIVER: `https://environment.data.gov.uk/flood-monitoring/id/stations`,
   WEATHER: `https://api.open-meteo.com/v1/forecast`,

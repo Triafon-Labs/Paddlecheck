@@ -22,13 +22,15 @@ import {
   ToggleButton,
 } from "@mui/material";
 import {
-  AreaChart,
+  ComposedChart,
   Area,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  ReferenceLine,
   TooltipContentProps,
 } from "recharts";
 import {
@@ -40,6 +42,7 @@ import { ChartDataPoint } from "@/types";
 
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
+  predictionData: ChartDataPoint[] | null;
   loading: boolean;
   change1h: number | null;
   change24h: number | null;
@@ -100,7 +103,8 @@ const CustomTooltip = ({
 }: TooltipContentProps<ValueType, NameType>) => {
   if (active && payload && payload.length && label) {
     const value = payload[0].value as number;
-    const date = new Date(label);
+    // label is either an ISO string (historical views) or a numeric timestamp (pred view)
+    const date = new Date(typeof label === "number" ? label : label);
     const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(
       date.getMonth() + 1
     )
@@ -122,6 +126,7 @@ const CustomTooltip = ({
 
 const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   data,
+  predictionData,
   loading,
   change1h,
   change24h,
@@ -144,7 +149,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   }, [timeRange]);
 
   const filteredData = useMemo(() => {
-    if (!data) return null;
+    if (!data || timeRange === "pred") return null;
 
     const now = new Date();
     let hoursToFilter;
@@ -163,20 +168,112 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return data.filter((d) => new Date(d.dateTime) > filterDate);
   }, [data, timeRange]);
 
+  // Map filteredData to numeric timestamps so the XAxis can use type="number"
+  const filteredDataWithTs = useMemo(
+    () => filteredData?.map((d) => ({ ts: new Date(d.dateTime).getTime(), level: d.level })) ?? null,
+    [filteredData]
+  );
+
   const yDomainMax = useMemo(() => {
-    if (!filteredData || filteredData.length === 0) return 6;
-    const maxLevel = Math.max(...filteredData.map((d) => d.level));
+    if (!filteredDataWithTs || filteredDataWithTs.length === 0) return 6;
+    const maxLevel = Math.max(...filteredDataWithTs.map((d) => d.level));
     const roundedMax = Math.ceil(maxLevel);
     return roundedMax > 0 ? roundedMax : 6;
-  }, [filteredData]);
+  }, [filteredDataWithTs]);
 
-  const formatXAxis = (tickItem: string) => {
+  // Generate evenly-spaced numeric ticks for a dataset given an interval in ms
+  const makeTicks = (pts: { ts: number }[], intervalMs: number): number[] => {
+    if (!pts.length) return [];
+    const start = pts[0].ts;
+    const end = pts[pts.length - 1].ts;
+    const ticks: number[] = [];
+    const cursor = new Date(start);
+    if (intervalMs >= 60 * 60 * 1000) {
+      const intervalHours = intervalMs / (60 * 60 * 1000);
+      cursor.setMinutes(0, 0, 0);
+      cursor.setHours(Math.ceil(cursor.getHours() / intervalHours) * intervalHours);
+    } else {
+      const intervalMins = intervalMs / (60 * 1000);
+      cursor.setSeconds(0, 0);
+      cursor.setMinutes(Math.ceil(cursor.getMinutes() / intervalMins) * intervalMins);
+    }
+    while (cursor.getTime() <= end) {
+      ticks.push(cursor.getTime());
+      cursor.setTime(cursor.getTime() + intervalMs);
+    }
+    return ticks;
+  };
+
+  const historicalTicks = useMemo(() => {
+    if (!filteredDataWithTs) return [];
+    const intervalMs =
+      timeRange === "5d" ? 24 * 60 * 60 * 1000 :
+      timeRange === "24h" ? 6 * 60 * 60 * 1000 :
+      timeRange === "8h"  ? 2 * 60 * 60 * 1000 :
+                            15 * 60 * 1000; // 1h → every 15 min
+    return makeTicks(filteredDataWithTs, intervalMs);
+  }, [filteredDataWithTs, timeRange]);
+
+  // Combined dataset for the "pred" view: last 24h of actual readings followed
+  // by the full prediction series, joined at the current level so the line is continuous.
+  const combinedPredData = useMemo(() => {
+    if (!data || !predictionData) return null;
+    const now = new Date();
+    const last24h = data.filter(
+      (d) => new Date(d.dateTime) > new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    );
+    const historical = last24h.map((d) => ({
+      ts: new Date(d.dateTime).getTime(),
+      actual: d.level,
+      predicted: null as number | null,
+    }));
+    const future = predictionData.map((d) => ({
+      ts: new Date(d.dateTime).getTime(),
+      actual: null as number | null,
+      predicted: d.level,
+    }));
+    if (last24h.length > 0) {
+      const latest = last24h[last24h.length - 1];
+      future.unshift({ ts: new Date(latest.dateTime).getTime(), actual: null, predicted: latest.level });
+    }
+    return [...historical, ...future];
+  }, [data, predictionData]);
+
+  const predYDomainMax = useMemo(() => {
+    if (!combinedPredData) return 6;
+    const allLevels = combinedPredData.flatMap((d) =>
+      [d.actual, d.predicted].filter((v): v is number => v !== null)
+    );
+    if (allLevels.length === 0) return 6;
+    return Math.max(Math.ceil(Math.max(...allLevels)), 1);
+  }, [combinedPredData]);
+
+  // One tick per calendar day (midnight) for the pred view
+  const predTicks = useMemo(() => {
+    if (!combinedPredData || combinedPredData.length === 0) return [];
+    const start = new Date(combinedPredData[0].ts);
+    const end = new Date(combinedPredData[combinedPredData.length - 1].ts);
+    const ticks: number[] = [];
+    const cursor = new Date(start);
+    cursor.setHours(0, 0, 0, 0);
+    cursor.setDate(cursor.getDate() + 1); // first midnight after start
+    while (cursor <= end) {
+      ticks.push(cursor.getTime());
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return ticks;
+  }, [combinedPredData]);
+
+  const formatXAxis = (tickItem: number) => {
     const date = new Date(tickItem);
     if (timeRange === "5d") {
       return date.toLocaleDateString([], { month: "short", day: "numeric" });
     }
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
+
+  const formatPredTick = (ts: number) =>
+    new Date(ts).toLocaleDateString([], { month: "short", day: "numeric" });
 
   const renderContent = () => {
     if (loading) {
@@ -186,11 +283,63 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
         </Box>
       );
     }
+    if (timeRange === "pred" && combinedPredData) {
+      const nowTs = new Date().getTime();
+      return (
+        <ResponsiveContainer width="100%" height={200}>
+          <ComposedChart data={combinedPredData}>
+            <defs>
+              <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.8} />
+                <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+            <XAxis
+              dataKey="ts"
+              type="number"
+              scale="time"
+              domain={["dataMin", "dataMax"]}
+              ticks={predTicks}
+              tickFormatter={formatPredTick}
+
+              interval={0}
+            />
+            <YAxis stroke={theme.palette.text.secondary} domain={[0, predYDomainMax]} />
+            <Tooltip content={CustomTooltip} />
+            <ReferenceLine
+              x={nowTs}
+              stroke={theme.palette.text.disabled}
+              strokeDasharray="3 3"
+            />
+            <Area
+              type="monotone"
+              dataKey="actual"
+              stroke={theme.palette.primary.main}
+              fillOpacity={1}
+              fill="url(#colorActual)"
+              connectNulls={false}
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="predicted"
+              stroke={theme.palette.primary.main}
+              strokeDasharray="5 5"
+              strokeOpacity={0.7}
+              dot={false}
+              connectNulls={false}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      );
+    }
+
     if (filteredData) {
       return (
         <>
           <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={filteredData}>
+            <ComposedChart data={filteredDataWithTs ?? undefined}>
               <defs>
                 <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
                   <stop
@@ -209,7 +358,15 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 strokeDasharray="3 3"
                 stroke={theme.palette.divider}
               />
-              <XAxis dataKey="dateTime" tickFormatter={formatXAxis} />
+              <XAxis
+                dataKey="ts"
+                type="number"
+                scale="time"
+                domain={["dataMin", "dataMax"]}
+                ticks={historicalTicks}
+                tickFormatter={formatXAxis}
+                interval={0}
+              />
               <YAxis
                 stroke={theme.palette.text.secondary}
                 domain={[0, yDomainMax]}
@@ -222,7 +379,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 fillOpacity={1}
                 fill="url(#colorLevel)"
               />
-            </AreaChart>
+            </ComposedChart>
           </ResponsiveContainer>
           <Box
             sx={{
@@ -273,14 +430,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             alignItems: "center",
           }}
         >
-          <div>
-            <Typography variant="h5" component="div">
-              River Level
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-              Last 5 Days
-            </Typography>
-          </div>
+          <Typography variant="h5" component="div">
+            River Level
+          </Typography>
           <ToggleButtonGroup
             value={timeRange}
             exclusive
@@ -291,6 +443,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             }}
             aria-label="time range"
           >
+            <ToggleButton value="pred" aria-label="prediction">
+              <Typography variant="caption">Pred</Typography>
+            </ToggleButton>
             <ToggleButton value="5d" aria-label="5 days">
               <Typography variant="caption">5d</Typography>
             </ToggleButton>

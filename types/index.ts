@@ -80,6 +80,7 @@ export interface PredictedGraphDataPoint {
   reasons: string[];
   value: number;
   predictedLevel: number;
+  predictionSource: "bewdley" | "linear";
 }
 
 export interface DayForecast {

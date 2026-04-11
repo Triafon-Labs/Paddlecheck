@@ -18,6 +18,8 @@ export const fetchBewdleyForecast = async (): Promise<{
   currentLevel: number | null;
 }> => {
   const response = await fetch(BEWDLEY_CSV_URL);
+  if (!response.ok)
+    throw new Error(`Bewdley CSV fetch failed: ${response.status}`);
   const text = await response.text();
   const lines = text.trim().split("\n");
 
@@ -105,6 +107,8 @@ export const fetchRiverData = async (
   const response = await fetch(
     `${API_ENDPOINTS.RIVER}/${stationId}/readings?since=${sinceDate}`
   );
+  if (!response.ok)
+    throw new Error(`River API fetch failed: ${response.status}`);
   const result: ApiResponse = await response.json();
   const sortedItems = result.items.sort(
     (a: RiverReading, b: RiverReading) =>

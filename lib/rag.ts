@@ -24,7 +24,7 @@ export const findLevelDescription = (level: number): string => {
     .map(parseFloat)
     .sort((a, b) => a - b);
   const nextLevelUp = allLevels.find((key) => key > level);
-  if (!nextLevelUp) return LEVEL_DESCRIPTIONS[allLevels[0]];
+  if (!nextLevelUp) return LEVEL_DESCRIPTIONS[allLevels[allLevels.length - 1]];
   const gap = nextLevelUp - level;
   const description = LEVEL_DESCRIPTIONS[nextLevelUp];
   return gap > 0.1

@@ -2,23 +2,25 @@
 
 Paddlecheck is a kayaking conditions dashboard that provides real-time information about river levels, weather, and other relevant data for kayakers.
 
-## ✨ Features
+> **Note:** This is primarily a hobby project, vibe coded for fun. Expect rough edges, and feel free to use it as inspiration for your own projects.
 
-- **Real-time Conditions**: Get up-to-date information on river status.
-- **PWA Support**: Installable as a mobile app for easy access.
+## Features
+
+- **Real-time Conditions**: Up-to-date river status pulled from live gauge data.
+- **PWA Support**: Installable as a mobile app for quick access on the water.
 - **Themeable**: Switch between light, dark, and system themes.
 - **Notifications**: Get notified about important changes in conditions.
 
-## 📊 Data Sources
+## Data Sources
 
-This application uses the following open data sources:
+This app uses the following open, free-to-use data sources:
 
-- **River Level Data**: Real-time river level information is sourced from the [Environment Agency's flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/api-reference.html).
-- **Weather Data**: Weather forecasts are provided by the [Open-Meteo API](https://open-meteo.com/).
+- **River Level Data**: [Environment Agency flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/api-reference.html)
+- **Weather Data**: [Open-Meteo API](https://open-meteo.com/)
 
-Both of these APIs are free to use for non-commercial purposes and do not require an API key.
+Neither API requires a key or account for non-commercial use.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -27,35 +29,33 @@ Both of these APIs are free to use for non-commercial purposes and do not requir
 
 ### Installation
 
-1.  Clone the repository:
-    ```bash
-    git clone <repository-url>
-    ```
-2.  Navigate to the project directory:
-    ```bash
-    cd paddlecheck
-    ```
-3.  Install the dependencies:
-    ```bash
-    npm install
-    ```
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd paddlecheck
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
 
 ### Running the Development Server
-
-To start the development server, run:
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Environment Variables
 
-Create a `.env.local` file for local development.
+Create a `.env.local` file for any local configuration needed.
 
-## 🛠️ Built With
+## Built With
 
-- [Next.js](https://nextjs.org/) - React Framework
-- [Material-UI (MUI)](https://mui.com/) - UI Component Library
+- [Next.js](https://nextjs.org/) - React framework
+- [Material-UI (MUI)](https://mui.com/) - UI component library
 - [TypeScript](https://www.typescriptlang.org/) - Typed JavaScript

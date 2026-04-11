@@ -277,14 +277,8 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  // At midnight show the day name; otherwise just show HH:mm
-  const formatPredTick = (ts: number) => {
-    const date = new Date(ts);
-    if (date.getHours() === 0) {
-      return date.toLocaleDateString([], { weekday: "short", day: "numeric" });
-    }
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
+  const formatPredTick = (ts: number) =>
+    new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   const renderContent = () => {
     if (loading) {

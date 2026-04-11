@@ -11,6 +11,8 @@ export const fetchWeatherData = async (
   const response = await fetch(
     `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,is_day,visibility,wind_speed_10m,wind_direction_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon`
   );
+  if (!response.ok)
+    throw new Error(`Weather API fetch failed: ${response.status}`);
   const data = await response.json();
 
   const current = data.current;
@@ -49,6 +51,8 @@ export const fetchFutureWeatherData = async (
   const response = await fetch(
     `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation,visibility,wind_speed_10m,weather_code,is_day&daily=sunrise,sunset&wind_speed_unit=mph&forecast_days=5&timezone=Europe%2FLondon`
   );
+  if (!response.ok)
+    throw new Error(`Future weather API fetch failed: ${response.status}`);
   const data = await response.json();
   return data;
 };

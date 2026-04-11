@@ -202,9 +202,7 @@ export const getPitchcroftPaddleability = (
   level: number
 ): string | undefined => {
   const allLevels = Object.keys(PITCHCROFT_PADDLEABILITY)
-
     .map(parseFloat)
-
     .sort((a, b) => b - a); // Sort descending
 
   const applicableLevel = allLevels.find((key) => level >= key);

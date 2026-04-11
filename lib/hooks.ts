@@ -115,15 +115,15 @@ export const useKayakData = () => {
       };
 
       const initialRagNumber = calculateInitialRagStatus(
-        currentConditions.riverLevel || 0
+        currentConditions.riverLevel ?? 0
       );
       const initialStatus = RAG_STATUS_MAP[initialRagNumber];
       const { status, reasons } = calculateFinalRagStatus(currentConditions);
       const visibilityDescription = getVisibilityDescription(
-        currentConditions.visibility || 0
+        currentConditions.visibility ?? 0
       );
       const pitchcroftPaddleability = getPitchcroftPaddleability(
-        currentConditions.riverLevel || 0
+        currentConditions.riverLevel ?? 0
       );
 
       setConditions({
@@ -132,10 +132,10 @@ export const useKayakData = () => {
         overallStatus: status,
         reasons: reasons,
         levelChange: {
-          value: riverData.change8h || 0,
+          value: riverData.change8h ?? 0,
           period: "8h",
         },
-        launchMessage: findLevelDescription(riverData.latestLevel || 0),
+        launchMessage: findLevelDescription(riverData.latestLevel ?? 0),
         lastUpdated: new Date().toISOString(),
         visibilityDescription,
         pitchcroftPaddleability,
@@ -152,8 +152,8 @@ export const useKayakData = () => {
       // after the Bewdley window can continue smoothly from wherever Bewdley
       // left off, rather than jumping back to the current level.
       const worcesterSlopePerHour =
-        predictRiverLevel(riverData.latestLevel || 0, riverData.historicalData, 1) -
-        (riverData.latestLevel || 0);
+        predictRiverLevel(riverData.latestLevel ?? 0, riverData.historicalData, 1) -
+        (riverData.latestLevel ?? 0);
 
       // Tracks the last Bewdley-based prediction level and the hoursAhead at
       // which the Bewdley data ran out, so linear regression is anchored there.
@@ -187,7 +187,7 @@ export const useKayakData = () => {
           const bewdleyLevel =
             bewdleyData.currentLevel !== null
               ? getBewdleyBasedWorcesterLevel(
-                  riverData.latestLevel || 0,
+                  riverData.latestLevel ?? 0,
                   bewdleyData.forecasts,
                   bewdleyData.observations,
                   targetWorcesterTime,

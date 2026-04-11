@@ -59,6 +59,7 @@ export const useKayakData = () => {
           fetchFutureWeatherData(LATITUDE, LONGITUDE),
           fetchBewdleyForecast().catch(() => ({
             forecasts: [],
+            observations: [],
             currentLevel: null,
           })),
         ]);

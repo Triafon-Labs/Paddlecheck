@@ -239,17 +239,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return [...historical, ...future];
   }, [data, predictionData]);
 
-  const predYDomain = useMemo(() => {
-    if (!combinedPredData) return [0, 6] as [number, number];
+  const predYDomainMax = useMemo(() => {
+    if (!combinedPredData) return 6;
     const allLevels = combinedPredData.flatMap((d) =>
       [d.actual, d.predicted].filter((v): v is number => v !== null)
     );
-    if (allLevels.length === 0) return [0, 6] as [number, number];
-    const minVal = Math.min(...allLevels);
-    const maxVal = Math.max(...allLevels);
-    const domainMin = Math.max(0, Math.floor((minVal - 0.2) * 10) / 10);
-    const domainMax = Math.max(Math.ceil(maxVal), domainMin + 1);
-    return [domainMin, domainMax] as [number, number];
+    if (allLevels.length === 0) return 6;
+    return Math.max(Math.ceil(Math.max(...allLevels)), 1);
   }, [combinedPredData]);
 
   // Numeric ticks every 12 hours for the pred view
@@ -310,7 +306,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
 
               interval={0}
             />
-            <YAxis stroke={theme.palette.text.secondary} domain={predYDomain} />
+            <YAxis stroke={theme.palette.text.secondary} domain={[0, predYDomainMax]} />
             <Tooltip content={CustomTooltip} />
             <ReferenceLine
               x={nowTs}

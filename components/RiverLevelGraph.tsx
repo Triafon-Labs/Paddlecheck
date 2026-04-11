@@ -252,7 +252,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return [domainMin, domainMax] as [number, number];
   }, [combinedPredData]);
 
-  // Numeric ticks every 6 hours — works with type="number" XAxis
+  // Numeric ticks every 12 hours for the pred view
   const predTicks = useMemo(() => {
     if (!combinedPredData || combinedPredData.length === 0) return [];
     const start = new Date(combinedPredData[0].ts);
@@ -260,10 +260,11 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     const ticks: number[] = [];
     const cursor = new Date(start);
     cursor.setMinutes(0, 0, 0);
-    cursor.setHours(Math.ceil(cursor.getHours() / 6) * 6);
+    // Snap to next 12h boundary (00:00 or 12:00)
+    cursor.setHours(Math.ceil(cursor.getHours() / 12) * 12);
     while (cursor <= end) {
       ticks.push(cursor.getTime());
-      cursor.setHours(cursor.getHours() + 6);
+      cursor.setHours(cursor.getHours() + 12);
     }
     return ticks;
   }, [combinedPredData]);
@@ -276,11 +277,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
+  // At midnight show the day name; otherwise just show HH:mm
   const formatPredTick = (ts: number) => {
     const date = new Date(ts);
-    const day = date.toLocaleDateString([], { weekday: "short", day: "numeric" });
-    const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    return `${day} ${time}`;
+    if (date.getHours() === 0) {
+      return date.toLocaleDateString([], { weekday: "short", day: "numeric" });
+    }
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   const renderContent = () => {

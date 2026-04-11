@@ -313,7 +313,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               domain={["dataMin", "dataMax"]}
               ticks={predTicks}
               tickFormatter={formatPredTick}
-              tick={{ fontSize: 10 }}
+
               interval={0}
             />
             <YAxis stroke={theme.palette.text.secondary} domain={predYDomain} />

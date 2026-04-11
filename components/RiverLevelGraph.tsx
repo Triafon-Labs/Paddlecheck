@@ -168,12 +168,51 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return data.filter((d) => new Date(d.dateTime) > filterDate);
   }, [data, timeRange]);
 
+  // Map filteredData to numeric timestamps so the XAxis can use type="number"
+  const filteredDataWithTs = useMemo(
+    () => filteredData?.map((d) => ({ ts: new Date(d.dateTime).getTime(), level: d.level })) ?? null,
+    [filteredData]
+  );
+
   const yDomainMax = useMemo(() => {
-    if (!filteredData || filteredData.length === 0) return 6;
-    const maxLevel = Math.max(...filteredData.map((d) => d.level));
+    if (!filteredDataWithTs || filteredDataWithTs.length === 0) return 6;
+    const maxLevel = Math.max(...filteredDataWithTs.map((d) => d.level));
     const roundedMax = Math.ceil(maxLevel);
     return roundedMax > 0 ? roundedMax : 6;
-  }, [filteredData]);
+  }, [filteredDataWithTs]);
+
+  // Generate evenly-spaced numeric ticks for a dataset given an interval in ms
+  const makeTicks = (pts: { ts: number }[], intervalMs: number): number[] => {
+    if (!pts.length) return [];
+    const start = pts[0].ts;
+    const end = pts[pts.length - 1].ts;
+    const ticks: number[] = [];
+    const cursor = new Date(start);
+    if (intervalMs >= 60 * 60 * 1000) {
+      const intervalHours = intervalMs / (60 * 60 * 1000);
+      cursor.setMinutes(0, 0, 0);
+      cursor.setHours(Math.ceil(cursor.getHours() / intervalHours) * intervalHours);
+    } else {
+      const intervalMins = intervalMs / (60 * 1000);
+      cursor.setSeconds(0, 0);
+      cursor.setMinutes(Math.ceil(cursor.getMinutes() / intervalMins) * intervalMins);
+    }
+    while (cursor.getTime() <= end) {
+      ticks.push(cursor.getTime());
+      cursor.setTime(cursor.getTime() + intervalMs);
+    }
+    return ticks;
+  };
+
+  const historicalTicks = useMemo(() => {
+    if (!filteredDataWithTs) return [];
+    const intervalMs =
+      timeRange === "5d" ? 24 * 60 * 60 * 1000 :
+      timeRange === "24h" ? 6 * 60 * 60 * 1000 :
+      timeRange === "8h"  ? 2 * 60 * 60 * 1000 :
+                            15 * 60 * 1000; // 1h → every 15 min
+    return makeTicks(filteredDataWithTs, intervalMs);
+  }, [filteredDataWithTs, timeRange]);
 
   // Combined dataset for the "pred" view: last 24h of actual readings followed
   // by the full prediction series, joined at the current level so the line is continuous.
@@ -200,13 +239,17 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return [...historical, ...future];
   }, [data, predictionData]);
 
-  const predYDomainMax = useMemo(() => {
-    if (!combinedPredData) return 6;
+  const predYDomain = useMemo(() => {
+    if (!combinedPredData) return [0, 6] as [number, number];
     const allLevels = combinedPredData.flatMap((d) =>
       [d.actual, d.predicted].filter((v): v is number => v !== null)
     );
-    if (allLevels.length === 0) return 6;
-    return Math.max(Math.ceil(Math.max(...allLevels)), 1);
+    if (allLevels.length === 0) return [0, 6] as [number, number];
+    const minVal = Math.min(...allLevels);
+    const maxVal = Math.max(...allLevels);
+    const domainMin = Math.max(0, Math.floor((minVal - 0.2) * 10) / 10);
+    const domainMax = Math.max(Math.ceil(maxVal), domainMin + 1);
+    return [domainMin, domainMax] as [number, number];
   }, [combinedPredData]);
 
   // Numeric ticks every 6 hours — works with type="number" XAxis
@@ -225,7 +268,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return ticks;
   }, [combinedPredData]);
 
-  const formatXAxis = (tickItem: string) => {
+  const formatXAxis = (tickItem: number) => {
     const date = new Date(tickItem);
     if (timeRange === "5d") {
       return date.toLocaleDateString([], { month: "short", day: "numeric" });
@@ -270,7 +313,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               tick={{ fontSize: 10 }}
               interval={0}
             />
-            <YAxis stroke={theme.palette.text.secondary} domain={[0, predYDomainMax]} />
+            <YAxis stroke={theme.palette.text.secondary} domain={predYDomain} />
             <Tooltip content={CustomTooltip} />
             <ReferenceLine
               x={nowTs}
@@ -304,7 +347,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
       return (
         <>
           <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart data={filteredData}>
+            <ComposedChart data={filteredDataWithTs}>
               <defs>
                 <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
                   <stop
@@ -323,7 +366,15 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 strokeDasharray="3 3"
                 stroke={theme.palette.divider}
               />
-              <XAxis dataKey="dateTime" tickFormatter={formatXAxis} />
+              <XAxis
+                dataKey="ts"
+                type="number"
+                scale="time"
+                domain={["dataMin", "dataMax"]}
+                ticks={historicalTicks}
+                tickFormatter={formatXAxis}
+                interval={0}
+              />
               <YAxis
                 stroke={theme.palette.text.secondary}
                 domain={[0, yDomainMax]}
@@ -387,14 +438,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             alignItems: "center",
           }}
         >
-          <div>
-            <Typography variant="h5" component="div">
-              River Level
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-              Last 5 Days
-            </Typography>
-          </div>
+          <Typography variant="h5" component="div">
+            River Level
+          </Typography>
           <ToggleButtonGroup
             value={timeRange}
             exclusive

@@ -248,19 +248,18 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return Math.max(Math.ceil(Math.max(...allLevels)), 1);
   }, [combinedPredData]);
 
-  // Numeric ticks every 12 hours for the pred view
+  // One tick per calendar day (midnight) for the pred view
   const predTicks = useMemo(() => {
     if (!combinedPredData || combinedPredData.length === 0) return [];
     const start = new Date(combinedPredData[0].ts);
     const end = new Date(combinedPredData[combinedPredData.length - 1].ts);
     const ticks: number[] = [];
     const cursor = new Date(start);
-    cursor.setMinutes(0, 0, 0);
-    // Snap to next 12h boundary (00:00 or 12:00)
-    cursor.setHours(Math.ceil(cursor.getHours() / 12) * 12);
+    cursor.setHours(0, 0, 0, 0);
+    cursor.setDate(cursor.getDate() + 1); // first midnight after start
     while (cursor <= end) {
       ticks.push(cursor.getTime());
-      cursor.setHours(cursor.getHours() + 12);
+      cursor.setDate(cursor.getDate() + 1);
     }
     return ticks;
   }, [combinedPredData]);
@@ -274,7 +273,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   };
 
   const formatPredTick = (ts: number) =>
-    new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    new Date(ts).toLocaleDateString([], { month: "short", day: "numeric" });
 
   const renderContent = () => {
     if (loading) {

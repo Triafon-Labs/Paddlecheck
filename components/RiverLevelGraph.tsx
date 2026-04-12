@@ -8,6 +8,7 @@ import {
   Update,
   CalendarToday,
   AccessTime,
+  Timeline,
 } from "@mui/icons-material";
 import React, { useState, useEffect, useMemo } from "react";
 import {
@@ -264,6 +265,21 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return ticks;
   }, [combinedPredData]);
 
+  // Predicted change over the next 24 hours: predicted level at now+24h minus current actual level
+  const predictedChange24h = useMemo(() => {
+    if (!predictionData || predictionData.length === 0 || !data || data.length === 0) return null;
+    const currentLevel = data[data.length - 1].level;
+    const target = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    let closest: ChartDataPoint | null = null;
+    let minDiff = Infinity;
+    for (const pt of predictionData) {
+      const diff = Math.abs(new Date(pt.dateTime).getTime() - target.getTime());
+      if (diff < minDiff) { minDiff = diff; closest = pt; }
+    }
+    if (!closest) return null;
+    return closest.level - currentLevel;
+  }, [predictionData, data]);
+
   const formatXAxis = (tickItem: number) => {
     const date = new Date(tickItem);
     if (timeRange === "5d") {
@@ -459,6 +475,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             period="5d Change"
             change={change5d}
             icon={<CalendarToday />}
+          />
+        </Box>
+        <Box sx={{ mt: 2 }}>
+          <ChangeIndicator
+            period="Predicted rise next 24h"
+            change={predictedChange24h}
+            icon={<Timeline />}
           />
         </Box>
       </CardContent>

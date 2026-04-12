@@ -21,7 +21,7 @@ export const lightTheme = createTheme({
   },
   typography: {
     fontFamily:
-      '"Plus Jakarta Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+      '"Roboto Flex", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
       fontWeight: 700,
     },
@@ -66,7 +66,7 @@ export const darkTheme = createTheme({
   },
   typography: {
     fontFamily:
-      '"Plus Jakarta Sans", "Roboto", "Helvetica", "Arial", sans-serif',
+      '"Roboto Flex", "Roboto", "Helvetica", "Arial", sans-serif',
     h1: {
       fontWeight: 700,
     },

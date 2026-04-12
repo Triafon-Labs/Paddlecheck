@@ -70,9 +70,8 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
           {conditions.reasons && conditions.reasons.length > 0 && (
             <Box
               sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "center",
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
                 gap: 2,
                 mt: 2,
               }}
@@ -89,10 +88,6 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                       alignItems: "center",
                       justifyContent: "center",
                       flexDirection: "column",
-                      height: "100%",
-                      flexBasis: "150px",
-                      flexGrow: 1,
-                      maxWidth: "calc(50% - 8px)",
                     }}
                   >
                     <Box

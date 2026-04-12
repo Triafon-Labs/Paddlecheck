@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import BottomNavBar from "@/components/BottomNavBar";
 import TopNavBar from "@/components/TopNavBar";
@@ -10,9 +10,24 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
+const plusJakartaSans = localFont({
+  src: [
+    {
+      path: "../node_modules/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-400-normal.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../node_modules/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-600-normal.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../node_modules/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-700-normal.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
 });
 
 import { Viewport } from "next";

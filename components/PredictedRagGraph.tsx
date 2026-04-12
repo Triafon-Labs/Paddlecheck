@@ -244,7 +244,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 }
               />
             )}
-            <Bar dataKey="value" isAnimationActive={false}>
+            <Bar dataKey="value">
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}

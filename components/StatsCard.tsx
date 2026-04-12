@@ -19,7 +19,6 @@ import NightsStay from "@mui/icons-material/NightsStay";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import Kayaking from "@mui/icons-material/Kayaking";
 import { KayakConditions } from "@/types";
-import { ragStatus } from "@/lib/rag";
 import { degreesToCompass } from "@/lib/weather";
 
 interface StatsCardProps {
@@ -63,11 +62,7 @@ const StatItem: React.FC<{
   </Tooltip>
 );
 
-const StatsCard: React.FC<StatsCardProps> = ({
-  conditions,
-  loading,
-  reasons,
-}) => {
+const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) => {
   if (loading) {
     return (
       <Card variant="outlined" sx={{ width: "100%", mt: 2, p: 2 }}>
@@ -75,29 +70,8 @@ const StatsCard: React.FC<StatsCardProps> = ({
           <Typography variant="h5" component="div" gutterBottom>
             Detailed Stats
           </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                md: "1fr 1fr",
-              },
-              gap: 2,
-              mt: 1,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                width: "100%",
-                minHeight: "200px",
-                gridColumn: "span 2",
-              }}
-            >
-              <CircularProgress />
-            </Box>
+          <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+            <CircularProgress />
           </Box>
         </CardContent>
       </Card>
@@ -108,143 +82,110 @@ const StatsCard: React.FC<StatsCardProps> = ({
     return null;
   }
 
-  const { icon: InitialStatusIcon } =
-    ragStatus[conditions.initialStatus!] || ragStatus.Unknown;
-
   return (
     <Card variant="outlined" sx={{ width: "100%", mt: 2, p: 2 }}>
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
           Detailed Stats
         </Typography>
-        <Box
-          sx={{
-            display: "grid",
-            gap: 2,
-            mt: 1,
-          }}
-        >
-          <Box>
-            <StatItem
-              icon={<Water />}
-              label="River Level"
-              value={
-                <>
-                  {conditions.riverLevel?.toFixed(2)}m
-                  {conditions.levelChange && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "text.secondary",
-                        fontStyle: "italic",
-                        ml: 0.5,
-                      }}
-                    >
-                      (
-                      {conditions.levelChange.value > 0.01
-                        ? "and rising"
-                        : conditions.levelChange.value < -0.01
-                          ? "and falling"
-                          : "and steady"}
-                      )
-                    </Typography>
-                  )}
-                </>
-              }
-              isInfluencing={reasons.some((r) => r.includes("river level"))}
-            />
-            <StatItem
-              icon={<Info />}
-              label="Launch Message"
-              value={
-                conditions.launchMessage &&
-                (() => {
-                  const match =
-                    conditions.launchMessage.match(/(.*?)\s*\((.*)\)/);
-                  if (match) {
-                    return (
-                      <>
-                        {match[1]}
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: "text.secondary",
-                            fontStyle: "italic",
-                            ml: 0.5,
-                          }}
-                        >
-                          ({match[2]})
-                        </Typography>
-                      </>
-                    );
-                  }
-                  return conditions.launchMessage;
-                })()
-              }
-            />
-          </Box>
-          <Box>
-            <StatItem
-              icon={<InitialStatusIcon />}
-              label="Initial Status"
-              value={conditions.initialStatus}
-            />
-            {conditions.pitchcroftPaddleability && (
-              <StatItem
-                icon={<Kayaking />}
-                label="Pitchcroft Paddleability"
-                value={
+        <Box sx={{ mt: 1 }}>
+          <StatItem
+            icon={<Water />}
+            label="River Level"
+            value={
+              <>
+                {conditions.riverLevel?.toFixed(2)}m
+                {conditions.levelChange && (
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontStyle: "italic", ml: 0.5 }}
+                  >
+                    (
+                    {conditions.levelChange.value > 0.01
+                      ? "and rising"
+                      : conditions.levelChange.value < -0.01
+                        ? "and falling"
+                        : "and steady"}
+                    )
+                  </Typography>
+                )}
+              </>
+            }
+            isInfluencing={reasons.some((r) => r.includes("river level"))}
+          />
+          <StatItem
+            icon={<Info />}
+            label="Launch Message"
+            value={(() => {
+              if (!conditions.launchMessage) return null;
+              const match = conditions.launchMessage.match(/(.*?)\s*\((.*)\)/);
+              if (match) {
+                return (
                   <>
-                    {conditions.pitchcroftPaddleability}
+                    {match[1]}
                     <Typography
                       variant="caption"
-                      sx={{
-                        color: "text.secondary",
-                        fontStyle: "italic",
-                        ml: 0.5,
-                      }}
+                      sx={{ color: "text.secondary", fontStyle: "italic", ml: 0.5 }}
                     >
-                      (at your own risk)
+                      ({match[2]})
                     </Typography>
                   </>
-                }
-              />
-            )}
+                );
+              }
+              return conditions.launchMessage;
+            })()}
+          />
+          {conditions.pitchcroftPaddleability && (
             <StatItem
-              icon={<Thermostat />}
-              label="Temperature"
-              value={`${conditions.temperature?.toFixed(1)}°C`}
-              isInfluencing={reasons.some((r) => r.includes("temperature"))}
+              icon={<Kayaking />}
+              label="Pitchcroft Paddleability"
+              value={
+                <>
+                  {conditions.pitchcroftPaddleability}
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontStyle: "italic", ml: 0.5 }}
+                  >
+                    (at your own risk)
+                  </Typography>
+                </>
+              }
             />
+          )}
+          <StatItem
+            icon={<Thermostat />}
+            label="Temperature"
+            value={`${conditions.temperature?.toFixed(1)}°C`}
+            isInfluencing={reasons.some((r) => r.includes("temperature"))}
+          />
+          <StatItem
+            icon={<Air />}
+            label="Wind Speed"
+            value={`${conditions.windSpeed?.toFixed(1)} mph${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`}
+            isInfluencing={reasons.includes("High winds")}
+          />
+          <StatItem
+            icon={<Visibility />}
+            label="Visibility"
+            value={conditions.visibilityDescription}
+            isInfluencing={reasons.includes("Foggy")}
+          />
+          {conditions.rain && (
             <StatItem
-              icon={<Air />}
-              label="Wind Speed"
-              value={`${conditions.windSpeed?.toFixed(1)} mph${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`}
-              isInfluencing={reasons.includes("High winds")}
+              icon={<WaterDrop />}
+              label="Rain"
+              value="Yes"
+              isInfluencing={reasons.includes("Rain")}
             />
+          )}
+          {conditions.dark && (
             <StatItem
-              icon={<Visibility />}
-              label="Visibility"
-              value={conditions.visibilityDescription}
-              isInfluencing={reasons.includes("Foggy")}
+              icon={<NightsStay />}
+              label="Dark"
+              value="Yes"
+              isInfluencing={reasons.includes("Dark")}
             />
-            {conditions.rain && (
-              <StatItem
-                icon={<WaterDrop />}
-                label="Rain"
-                value="Yes"
-                isInfluencing={reasons.includes("Rain")}
-              />
-            )}
-            {conditions.dark && (
-              <StatItem
-                icon={<NightsStay />}
-                label="Dark"
-                value="Yes"
-                isInfluencing={reasons.includes("Dark")}
-              />
-            )}
-          </Box>
+          )}
         </Box>
       </CardContent>
     </Card>

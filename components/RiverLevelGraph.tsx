@@ -8,6 +8,7 @@ import {
   Update,
   CalendarToday,
   AccessTime,
+  Timeline,
 } from "@mui/icons-material";
 import React, { useState, useEffect, useMemo } from "react";
 import {
@@ -134,15 +135,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   change5d,
 }) => {
   const theme = useTheme();
-  const [timeRange, setTimeRange] = useState("24h");
-
-  useEffect(() => {
-    const savedTimeRange = localStorage.getItem("riverGraphTimeRange");
-    if (savedTimeRange) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTimeRange(savedTimeRange);
-    }
-  }, []);
+  const [timeRange, setTimeRange] = useState(
+    () => localStorage.getItem("riverGraphTimeRange") ?? "24h"
+  );
 
   useEffect(() => {
     localStorage.setItem("riverGraphTimeRange", timeRange);
@@ -264,6 +259,22 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return ticks;
   }, [combinedPredData]);
 
+  // Predicted change over the next 24 hours: predicted level at now+24h minus current actual level
+  const predictedChange24h = useMemo(() => {
+    if (!predictionData || predictionData.length === 0 || !data || data.length === 0) return null;
+    const currentLevel = data[data.length - 1].level;
+    const latestTs = new Date(data[data.length - 1].dateTime).getTime();
+    const target = new Date(latestTs + 24 * 60 * 60 * 1000);
+    let closest: ChartDataPoint | null = null;
+    let minDiff = Infinity;
+    for (const pt of predictionData) {
+      const diff = Math.abs(new Date(pt.dateTime).getTime() - target.getTime());
+      if (diff < minDiff) { minDiff = diff; closest = pt; }
+    }
+    if (!closest) return null;
+    return closest.level - currentLevel;
+  }, [predictionData, data]);
+
   const formatXAxis = (tickItem: number) => {
     const date = new Date(tickItem);
     if (timeRange === "5d") {
@@ -346,80 +357,49 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
 
     if (filteredData) {
       return (
-        <>
-          <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart data={filteredDataWithTs ?? undefined}>
-              <defs>
-                <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor={theme.palette.primary.main}
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor={theme.palette.primary.main}
-                    stopOpacity={0}
-                  />
-                </linearGradient>
-              </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={theme.palette.divider}
-              />
-              <XAxis
-                dataKey="ts"
-                type="number"
-                scale="time"
-                domain={["dataMin", "dataMax"]}
-                ticks={historicalTicks}
-                tickFormatter={formatXAxis}
-                interval={0}
-              />
-              <YAxis
-                stroke={theme.palette.text.secondary}
-                domain={[0, yDomainMax]}
-              />
-              <Tooltip content={CustomTooltip} />
-              <Area
-                type="monotone"
-                dataKey="level"
-                stroke={theme.palette.primary.main}
-                fillOpacity={1}
-                fill="url(#colorLevel)"
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              gap: 2,
-              mt: 2,
-            }}
-          >
-            <ChangeIndicator
-              period="1h Change"
-              change={change1h}
-              icon={<AccessTime />}
+        <ResponsiveContainer width="100%" height={200}>
+          <ComposedChart data={filteredDataWithTs ?? undefined}>
+            <defs>
+              <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor={theme.palette.primary.main}
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={theme.palette.primary.main}
+                  stopOpacity={0}
+                />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={theme.palette.divider}
             />
-            <ChangeIndicator
-              period="8h Change"
-              change={change8h}
-              icon={<Schedule />}
+            <XAxis
+              dataKey="ts"
+              type="number"
+              scale="time"
+              domain={["dataMin", "dataMax"]}
+              ticks={historicalTicks}
+              tickFormatter={formatXAxis}
+              interval={0}
             />
-            <ChangeIndicator
-              period="24h Change"
-              change={change24h}
-              icon={<Update />}
+            <YAxis
+              stroke={theme.palette.text.secondary}
+              domain={[0, yDomainMax]}
             />
-            <ChangeIndicator
-              period="5d Change"
-              change={change5d}
-              icon={<CalendarToday />}
+            <Tooltip content={CustomTooltip} />
+            <Area
+              type="monotone"
+              dataKey="level"
+              stroke={theme.palette.primary.main}
+              fillOpacity={1}
+              fill="url(#colorLevel)"
             />
-          </Box>
-        </>
+          </ComposedChart>
+        </ResponsiveContainer>
       );
     }
     return (
@@ -432,44 +412,73 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   return (
     <Card variant="outlined" sx={{ width: "100%", mt: 2, p: 2 }}>
       <CardContent>
+        <Typography variant="h5" component="div">
+          River Level
+        </Typography>
+        <ToggleButtonGroup
+          value={timeRange}
+          exclusive
+          onChange={(event, newTimeRange) => {
+            if (newTimeRange) {
+              setTimeRange(newTimeRange);
+            }
+          }}
+          aria-label="time range"
+          sx={{ mt: 1, mb: 2, width: "100%" }}
+        >
+          <ToggleButton value="pred" aria-label="prediction" sx={{ flex: 1 }}>
+            <Typography variant="caption">Pred</Typography>
+          </ToggleButton>
+          <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
+            <Typography variant="caption">5d</Typography>
+          </ToggleButton>
+          <ToggleButton value="24h" aria-label="24 hours" sx={{ flex: 1 }}>
+            <Typography variant="caption">24h</Typography>
+          </ToggleButton>
+          <ToggleButton value="8h" aria-label="8 hours" sx={{ flex: 1 }}>
+            <Typography variant="caption">8h</Typography>
+          </ToggleButton>
+          <ToggleButton value="1h" aria-label="1 hour" sx={{ flex: 1 }}>
+            <Typography variant="caption">1h</Typography>
+          </ToggleButton>
+        </ToggleButtonGroup>
+        {renderContent()}
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: 2,
+            mt: 2,
           }}
         >
-          <Typography variant="h5" component="div">
-            River Level
-          </Typography>
-          <ToggleButtonGroup
-            value={timeRange}
-            exclusive
-            onChange={(event, newTimeRange) => {
-              if (newTimeRange) {
-                setTimeRange(newTimeRange);
-              }
-            }}
-            aria-label="time range"
-          >
-            <ToggleButton value="pred" aria-label="prediction">
-              <Typography variant="caption">Pred</Typography>
-            </ToggleButton>
-            <ToggleButton value="5d" aria-label="5 days">
-              <Typography variant="caption">5d</Typography>
-            </ToggleButton>
-            <ToggleButton value="24h" aria-label="24 hours">
-              <Typography variant="caption">24h</Typography>
-            </ToggleButton>
-            <ToggleButton value="8h" aria-label="8 hours">
-              <Typography variant="caption">8h</Typography>
-            </ToggleButton>
-            <ToggleButton value="1h" aria-label="1 hour">
-              <Typography variant="caption">1h</Typography>
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <ChangeIndicator
+            period="1h Change"
+            change={change1h}
+            icon={<AccessTime />}
+          />
+          <ChangeIndicator
+            period="8h Change"
+            change={change8h}
+            icon={<Schedule />}
+          />
+          <ChangeIndicator
+            period="24h Change"
+            change={change24h}
+            icon={<Update />}
+          />
+          <ChangeIndicator
+            period="5d Change"
+            change={change5d}
+            icon={<CalendarToday />}
+          />
         </Box>
-        {renderContent()}
+        <Box sx={{ mt: 2 }}>
+          <ChangeIndicator
+            period="Predicted rise next 24h"
+            change={predictedChange24h}
+            icon={<Timeline />}
+          />
+        </Box>
       </CardContent>
     </Card>
   );

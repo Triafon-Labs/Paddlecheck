@@ -413,21 +413,21 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             }
           }}
           aria-label="time range"
-          sx={{ mt: 1, mb: 2 }}
+          sx={{ mt: 1, mb: 2, width: "100%" }}
         >
-          <ToggleButton value="pred" aria-label="prediction">
+          <ToggleButton value="pred" aria-label="prediction" sx={{ flex: 1 }}>
             <Typography variant="caption">Pred</Typography>
           </ToggleButton>
-          <ToggleButton value="5d" aria-label="5 days">
+          <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
             <Typography variant="caption">5d</Typography>
           </ToggleButton>
-          <ToggleButton value="24h" aria-label="24 hours">
+          <ToggleButton value="24h" aria-label="24 hours" sx={{ flex: 1 }}>
             <Typography variant="caption">24h</Typography>
           </ToggleButton>
-          <ToggleButton value="8h" aria-label="8 hours">
+          <ToggleButton value="8h" aria-label="8 hours" sx={{ flex: 1 }}>
             <Typography variant="caption">8h</Typography>
           </ToggleButton>
-          <ToggleButton value="1h" aria-label="1 hour">
+          <ToggleButton value="1h" aria-label="1 hour" sx={{ flex: 1 }}>
             <Typography variant="caption">1h</Typography>
           </ToggleButton>
         </ToggleButtonGroup>

@@ -7,7 +7,10 @@ import {
   Typography,
   Box,
   CircularProgress,
-  Paper,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
 } from "@mui/material";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
@@ -68,47 +71,23 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
           )}
 
           {conditions.reasons && conditions.reasons.length > 0 && (
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: 2,
-                mt: 2,
-              }}
-            >
-              {conditions.reasons.map((reason, index) => {
-                const Icon = reasonIcons[reason];
-                return (
-                  <Paper
-                    key={index}
-                    variant="outlined"
-                    sx={{
-                      p: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        color: "text.secondary",
-                      }}
-                    >
-                      {Icon && <Icon sx={{ mr: 0.5 }} />}
-                      <Typography
-                        variant="subtitle2"
-                        sx={{ ml: 0.5, textAlign: "center" }}
-                      >
-                        {reason}
-                      </Typography>
-                    </Box>
-                  </Paper>
-                );
-              })}
-            </Box>
+            <Table size="small" sx={{ mt: 2 }}>
+              <TableBody>
+                {conditions.reasons.map((reason, index) => {
+                  const Icon = reasonIcons[reason];
+                  return (
+                    <TableRow key={index}>
+                      <TableCell sx={{ width: 32, pl: 0, color: "text.secondary" }}>
+                        {Icon && <Icon fontSize="small" />}
+                      </TableCell>
+                      <TableCell sx={{ pr: 0 }}>
+                        <Typography variant="body2">{reason}</Typography>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           )}
         </>
       );

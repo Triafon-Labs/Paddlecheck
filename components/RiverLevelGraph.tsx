@@ -140,7 +140,6 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   useEffect(() => {
     const savedTimeRange = localStorage.getItem("riverGraphTimeRange");
     if (savedTimeRange) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTimeRange(savedTimeRange);
     }
   }, []);
@@ -269,7 +268,8 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   const predictedChange24h = useMemo(() => {
     if (!predictionData || predictionData.length === 0 || !data || data.length === 0) return null;
     const currentLevel = data[data.length - 1].level;
-    const target = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const latestTs = new Date(data[data.length - 1].dateTime).getTime();
+    const target = new Date(latestTs + 24 * 60 * 60 * 1000);
     let closest: ChartDataPoint | null = null;
     let minDiff = Infinity;
     for (const pt of predictionData) {

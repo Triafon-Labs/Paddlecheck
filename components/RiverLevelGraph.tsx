@@ -135,14 +135,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   change5d,
 }) => {
   const theme = useTheme();
-  const [timeRange, setTimeRange] = useState("24h");
-
-  useEffect(() => {
-    const savedTimeRange = localStorage.getItem("riverGraphTimeRange");
-    if (savedTimeRange) {
-      setTimeRange(savedTimeRange);
-    }
-  }, []);
+  const [timeRange, setTimeRange] = useState(
+    () => localStorage.getItem("riverGraphTimeRange") ?? "24h"
+  );
 
   useEffect(() => {
     localStorage.setItem("riverGraphTimeRange", timeRange);

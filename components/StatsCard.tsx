@@ -8,6 +8,10 @@ import {
   Box,
   Tooltip,
   CircularProgress,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
 } from "@mui/material";
 import Thermostat from "@mui/icons-material/Thermostat";
 import Visibility from "@mui/icons-material/Visibility";
@@ -28,46 +32,36 @@ interface StatsCardProps {
   reasons: string[];
 }
 
-const StatItem: React.FC<{
+const StatRow: React.FC<{
   icon: React.ReactNode;
   label: string;
   value: React.ReactNode;
   tooltip?: string;
   isInfluencing?: boolean;
 }> = ({ icon, label, value, tooltip, isInfluencing }) => (
-  <Tooltip title={tooltip || label} placement="top">
-    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-      <Box sx={{ mr: 1.5, color: "primary.main" }}>{icon}</Box>
-      <Box>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ display: "flex", alignItems: "center" }}
-        >
-          {label}
+  <Tooltip title={tooltip || label} placement="left">
+    <TableRow>
+      <TableCell sx={{ width: 32, pl: 0, color: "primary.main" }}>
+        {icon}
+      </TableCell>
+      <TableCell sx={{ color: "text.secondary" }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Typography variant="caption">{label}</Typography>
           {isInfluencing && (
-            <Box
-              component="span"
-              sx={{ display: "inline-flex", alignItems: "center", ml: 0.5 }}
-            >
-              🚦
-              <ArrowUpward sx={{ fontSize: "inherit", color: "error.main" }} />
+            <Box component="span" sx={{ display: "inline-flex", alignItems: "center", ml: 0.5 }}>
+              🚦<ArrowUpward sx={{ fontSize: "inherit", color: "error.main" }} />
             </Box>
           )}
-        </Typography>
-        <Typography variant="body1" component="div">
-          {value}
-        </Typography>
-      </Box>
-    </Box>
+        </Box>
+      </TableCell>
+      <TableCell sx={{ pr: 0 }}>
+        <Typography variant="body2" component="div">{value}</Typography>
+      </TableCell>
+    </TableRow>
   </Tooltip>
 );
 
-const StatsCard: React.FC<StatsCardProps> = ({
-  conditions,
-  loading,
-  reasons,
-}) => {
+const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) => {
   if (loading) {
     return (
       <Card variant="outlined" sx={{ width: "100%", mt: 2, p: 2 }}>
@@ -75,29 +69,8 @@ const StatsCard: React.FC<StatsCardProps> = ({
           <Typography variant="h5" component="div" gutterBottom>
             Detailed Stats
           </Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                md: "1fr 1fr",
-              },
-              gap: 2,
-              mt: 1,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                width: "100%",
-                minHeight: "200px",
-                gridColumn: "span 2",
-              }}
-            >
-              <CircularProgress />
-            </Box>
+          <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+            <CircularProgress />
           </Box>
         </CardContent>
       </Card>
@@ -117,135 +90,101 @@ const StatsCard: React.FC<StatsCardProps> = ({
         <Typography variant="h5" component="div" gutterBottom>
           Detailed Stats
         </Typography>
-        <Box
-          sx={{
-            display: "grid",
-            gap: 2,
-            mt: 1,
-          }}
-        >
-          <Box>
-            <StatItem
-              icon={<Water />}
+        <Table size="small" sx={{ mt: 1 }}>
+          <TableBody>
+            <StatRow
+              icon={<Water fontSize="small" />}
               label="River Level"
               value={
                 <>
                   {conditions.riverLevel?.toFixed(2)}m
                   {conditions.levelChange && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "text.secondary",
-                        fontStyle: "italic",
-                        ml: 0.5,
-                      }}
-                    >
-                      (
-                      {conditions.levelChange.value > 0.01
-                        ? "and rising"
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic", ml: 0.5 }}>
+                      ({conditions.levelChange.value > 0.01
+                        ? "rising"
                         : conditions.levelChange.value < -0.01
-                          ? "and falling"
-                          : "and steady"}
-                      )
+                          ? "falling"
+                          : "steady"})
                     </Typography>
                   )}
                 </>
               }
               isInfluencing={reasons.some((r) => r.includes("river level"))}
             />
-            <StatItem
-              icon={<Info />}
+            <StatRow
+              icon={<Info fontSize="small" />}
               label="Launch Message"
-              value={
-                conditions.launchMessage &&
-                (() => {
-                  const match =
-                    conditions.launchMessage.match(/(.*?)\s*\((.*)\)/);
-                  if (match) {
-                    return (
-                      <>
-                        {match[1]}
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: "text.secondary",
-                            fontStyle: "italic",
-                            ml: 0.5,
-                          }}
-                        >
-                          ({match[2]})
-                        </Typography>
-                      </>
-                    );
-                  }
-                  return conditions.launchMessage;
-                })()
-              }
+              value={(() => {
+                if (!conditions.launchMessage) return null;
+                const match = conditions.launchMessage.match(/(.*?)\s*\((.*)\)/);
+                if (match) {
+                  return (
+                    <>
+                      {match[1]}
+                      <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic", ml: 0.5 }}>
+                        ({match[2]})
+                      </Typography>
+                    </>
+                  );
+                }
+                return conditions.launchMessage;
+              })()}
             />
-          </Box>
-          <Box>
-            <StatItem
-              icon={<InitialStatusIcon />}
+            <StatRow
+              icon={<InitialStatusIcon fontSize="small" />}
               label="Initial Status"
               value={conditions.initialStatus}
             />
             {conditions.pitchcroftPaddleability && (
-              <StatItem
-                icon={<Kayaking />}
+              <StatRow
+                icon={<Kayaking fontSize="small" />}
                 label="Pitchcroft Paddleability"
                 value={
                   <>
                     {conditions.pitchcroftPaddleability}
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "text.secondary",
-                        fontStyle: "italic",
-                        ml: 0.5,
-                      }}
-                    >
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic", ml: 0.5 }}>
                       (at your own risk)
                     </Typography>
                   </>
                 }
               />
             )}
-            <StatItem
-              icon={<Thermostat />}
+            <StatRow
+              icon={<Thermostat fontSize="small" />}
               label="Temperature"
               value={`${conditions.temperature?.toFixed(1)}°C`}
               isInfluencing={reasons.some((r) => r.includes("temperature"))}
             />
-            <StatItem
-              icon={<Air />}
+            <StatRow
+              icon={<Air fontSize="small" />}
               label="Wind Speed"
               value={`${conditions.windSpeed?.toFixed(1)} mph${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`}
               isInfluencing={reasons.includes("High winds")}
             />
-            <StatItem
-              icon={<Visibility />}
+            <StatRow
+              icon={<Visibility fontSize="small" />}
               label="Visibility"
               value={conditions.visibilityDescription}
               isInfluencing={reasons.includes("Foggy")}
             />
             {conditions.rain && (
-              <StatItem
-                icon={<WaterDrop />}
+              <StatRow
+                icon={<WaterDrop fontSize="small" />}
                 label="Rain"
                 value="Yes"
                 isInfluencing={reasons.includes("Rain")}
               />
             )}
             {conditions.dark && (
-              <StatItem
-                icon={<NightsStay />}
+              <StatRow
+                icon={<NightsStay fontSize="small" />}
                 label="Dark"
                 value="Yes"
                 isInfluencing={reasons.includes("Dark")}
               />
             )}
-          </Box>
-        </Box>
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );

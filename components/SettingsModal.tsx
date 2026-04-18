@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import {
-  SwipeableDrawer,
+  Drawer,
   Typography,
   FormControl,
   Select,
@@ -30,9 +30,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const [notificationPermission, setNotificationPermission] =
     useState<NotificationPermission>("default");
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const touchStartY = useRef(0);
-  const atBottom = useRef(false);
+  const handleDragStartY = useRef(0);
 
   useEffect(() => {
     const savedLevel = localStorage.getItem("paddlerLevel") as PaddlerType | undefined;
@@ -63,54 +61,43 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     localStorage.removeItem("paddlerLevel");
   };
 
-  const checkAtBottom = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    atBottom.current = el.scrollHeight - el.scrollTop <= el.clientHeight + 2;
+  const onHandleTouchStart = (e: React.TouchEvent) => {
+    handleDragStartY.current = e.touches[0].clientY;
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-    checkAtBottom();
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!atBottom.current) return;
-    if (e.touches[0].clientY - touchStartY.current > 50) onClose();
+  const onHandleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches[0].clientY - handleDragStartY.current > 60) onClose();
   };
 
   const paddlerTypes: PaddlerType[] = ["Beginner", "Improver", "Intermediate", "Independent"];
 
   return (
-    <SwipeableDrawer
+    <Drawer
       anchor="bottom"
       open={open}
       onClose={onClose}
-      onOpen={() => {}}
-      disableSwipeToOpen
-      swipeAreaWidth={0}
       PaperProps={{
         sx: {
           borderRadius: "16px 16px 0 0",
           maxHeight: "90vh",
           bgcolor: "background.paper",
+          backgroundImage: "none",
           display: "flex",
           flexDirection: "column",
         },
       }}
     >
-      {/* Drag handle */}
-      <Box sx={{ display: "flex", justifyContent: "center", pt: 1.5, pb: 0.5, flexShrink: 0 }}>
+      {/* Drag handle — swipe this to dismiss */}
+      <Box
+        onTouchStart={onHandleTouchStart}
+        onTouchMove={onHandleTouchMove}
+        sx={{ display: "flex", justifyContent: "center", pt: 1.5, pb: 0.5, flexShrink: 0, cursor: "grab" }}
+      >
         <Box sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: "divider" }} />
       </Box>
 
       {/* Scrollable content */}
-      <Box
-        ref={scrollRef}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        sx={{ overflowY: "auto", px: 2, pb: 3 }}
-      >
+      <Box sx={{ overflowY: "auto", px: 2, pb: 3 }}>
         <Typography variant="h5" gutterBottom sx={{ mt: 1 }}>
           Settings
         </Typography>
@@ -194,7 +181,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           </Link>
         </Typography>
       </Box>
-    </SwipeableDrawer>
+    </Drawer>
   );
 };
 

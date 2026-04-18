@@ -109,14 +109,18 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({
 const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }) => {
   const visKeys = Object.keys(VISIBILITY_DESCRIPTIONS) as (keyof typeof VISIBILITY_DESCRIPTIONS)[];
 
-  const handleDragStartY = useRef(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
+  const touchStartScrollTop = useRef(0);
 
-  const onHandleTouchStart = (e: React.TouchEvent) => {
-    handleDragStartY.current = e.touches[0].clientY;
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    touchStartScrollTop.current = scrollRef.current?.scrollTop ?? 0;
   };
 
-  const onHandleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches[0].clientY - handleDragStartY.current > 60) onClose();
+  const onTouchMove = (e: React.TouchEvent) => {
+    const dy = e.touches[0].clientY - touchStartY.current;
+    if (touchStartScrollTop.current === 0 && dy > 60) onClose();
   };
 
   return (
@@ -135,17 +139,22 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
         },
       }}
     >
-      {/* Drag handle — swipe this to dismiss */}
+      {/* Drag handle */}
       <Box
-        onTouchStart={onHandleTouchStart}
-        onTouchMove={onHandleTouchMove}
-        sx={{ display: "flex", justifyContent: "center", pt: 1.5, pb: 0.5, flexShrink: 0, cursor: "grab" }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        sx={{ display: "flex", justifyContent: "center", pt: 1.5, pb: 0.5, flexShrink: 0 }}
       >
         <Box sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: "divider" }} />
       </Box>
 
       {/* Scrollable content */}
-      <Box sx={{ overflowY: "auto", px: 2, pb: 3 }}>
+      <Box
+        ref={scrollRef}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        sx={{ overflowY: "auto", px: 2, pb: 3 }}
+      >
         <Typography variant="h5" gutterBottom sx={{ mt: 1 }}>
           Conditions Key
         </Typography>

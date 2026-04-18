@@ -1,16 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import {
-  Dialog,
-  DialogContent,
+  SwipeableDrawer,
   Typography,
   Box,
   Divider,
   Chip,
 } from "@mui/material";
-import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
 import {
   Air,
   Thermostat,
@@ -27,13 +24,6 @@ import {
 } from "@mui/icons-material";
 import { RAG_STATUS_UI, THRESHOLDS, VISIBILITY_DESCRIPTIONS } from "@/lib/config";
 import { Status } from "@/types";
-
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & { children: React.ReactElement },
-  ref: React.Ref<unknown>
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 interface WeatherLegendModalProps {
   open: boolean;
@@ -115,33 +105,69 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({
 const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }) => {
   const visKeys = Object.keys(VISIBILITY_DESCRIPTIONS) as (keyof typeof VISIBILITY_DESCRIPTIONS)[];
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
+  const atBottom = useRef(false);
+
+  const checkAtBottom = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    atBottom.current = el.scrollHeight - el.scrollTop <= el.clientHeight + 2;
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    checkAtBottom();
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!atBottom.current) return;
+    if (e.touches[0].clientY - touchStartY.current > 50) onClose();
+  };
+
   return (
-    <Dialog
+    <SwipeableDrawer
+      anchor="bottom"
       open={open}
       onClose={onClose}
-      TransitionComponent={Transition}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{ sx: { borderRadius: 1, bgcolor: "background.paper" } }}
+      onOpen={() => {}}
+      disableSwipeToOpen
+      swipeAreaWidth={0}
+      PaperProps={{
+        sx: {
+          borderRadius: "16px 16px 0 0",
+          maxHeight: "90vh",
+          bgcolor: "background.paper",
+          display: "flex",
+          flexDirection: "column",
+        },
+      }}
     >
-      <DialogContent sx={{ p: 2 }}>
-        <Typography variant="h5" gutterBottom>
+      {/* Drag handle */}
+      <Box sx={{ display: "flex", justifyContent: "center", pt: 1.5, pb: 0.5, flexShrink: 0 }}>
+        <Box sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: "divider" }} />
+      </Box>
+
+      {/* Scrollable content */}
+      <Box
+        ref={scrollRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        sx={{ overflowY: "auto", px: 2, pb: 3 }}
+      >
+        <Typography variant="h5" gutterBottom sx={{ mt: 1 }}>
           Conditions Key
         </Typography>
 
-        {/* --- Status colours --- */}
         <Typography variant="h6" sx={{ mt: 1 }}>
           Status Colours
         </Typography>
-        {(["Light Green", "Dark Green", "Amber", "Red", "No Paddling"] as Status[]).map(
-          (s) => (
-            <StatusRow key={s} status={s} />
-          )
-        )}
+        {(["Light Green", "Dark Green", "Amber", "Red", "No Paddling"] as Status[]).map((s) => (
+          <StatusRow key={s} status={s} />
+        ))}
 
         <Divider sx={{ my: 2 }} />
 
-        {/* --- River Level --- */}
         <Typography variant="h6" gutterBottom>
           River Level
         </Typography>
@@ -183,7 +209,6 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
 
         <Divider sx={{ my: 2 }} />
 
-        {/* --- Temperature --- */}
         <Typography variant="h6" gutterBottom>
           Temperature
         </Typography>
@@ -211,7 +236,6 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
 
         <Divider sx={{ my: 2 }} />
 
-        {/* --- Wind --- */}
         <Typography variant="h6" gutterBottom>
           Wind
         </Typography>
@@ -232,7 +256,6 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
 
         <Divider sx={{ my: 2 }} />
 
-        {/* --- Visibility --- */}
         <Typography variant="h6" gutterBottom>
           Visibility
         </Typography>
@@ -240,7 +263,9 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
           const { min, desc } = VISIBILITY_DESCRIPTIONS[key];
           const nextKey = visKeys[visKeys.indexOf(key) - 1];
           const max = nextKey ? VISIBILITY_DESCRIPTIONS[nextKey].min : null;
-          const range = max ? `${(min / 1000).toFixed(0)}–${(max / 1000).toFixed(0)} km` : `Over ${(min / 1000).toFixed(0)} km`;
+          const range = max
+            ? `${(min / 1000).toFixed(0)}–${(max / 1000).toFixed(0)} km`
+            : `Over ${(min / 1000).toFixed(0)} km`;
           const isBad = min < THRESHOLDS.VISIBILITY_POOR;
           const isAtLimit = min === THRESHOLDS.VISIBILITY_POOR;
           const chipColor: "error" | "warning" | "success" = isBad
@@ -268,7 +293,6 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
 
         <Divider sx={{ my: 2 }} />
 
-        {/* --- Other factors --- */}
         <Typography variant="h6" gutterBottom>
           Other Factors
         </Typography>
@@ -300,8 +324,8 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
           chipLabel="No Paddling"
           chipColor="error"
         />
-      </DialogContent>
-    </Dialog>
+      </Box>
+    </SwipeableDrawer>
   );
 };
 

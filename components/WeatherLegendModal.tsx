@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import {
   Drawer,
   Typography,
   Box,
   Divider,
   Chip,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Air,
   Thermostat,
@@ -109,20 +111,6 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({
 const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }) => {
   const visKeys = Object.keys(VISIBILITY_DESCRIPTIONS) as (keyof typeof VISIBILITY_DESCRIPTIONS)[];
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const touchStartY = useRef(0);
-  const touchStartScrollTop = useRef(0);
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-    touchStartScrollTop.current = scrollRef.current?.scrollTop ?? 0;
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    const dy = e.touches[0].clientY - touchStartY.current;
-    if (touchStartScrollTop.current === 0 && dy > 60) onClose();
-  };
-
   return (
     <Drawer
       anchor="bottom"
@@ -139,27 +127,17 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
         },
       }}
     >
-      {/* Drag handle */}
-      <Box
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        sx={{ display: "flex", justifyContent: "center", pt: 1.5, pb: 0.5, flexShrink: 0 }}
-      >
-        <Box sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: "divider" }} />
+      {/* Sticky header */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 2, pt: 2, pb: 1, flexShrink: 0 }}>
+        <Typography variant="h5">Conditions Key</Typography>
+        <IconButton onClick={onClose} edge="end" aria-label="close">
+          <CloseIcon />
+        </IconButton>
       </Box>
 
       {/* Scrollable content */}
-      <Box
-        ref={scrollRef}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        sx={{ overflowY: "auto", px: 2, pb: 3 }}
-      >
-        <Typography variant="h5" gutterBottom sx={{ mt: 1 }}>
-          Conditions Key
-        </Typography>
-
-        <Typography variant="h6" sx={{ mt: 1 }}>
+      <Box sx={{ overflowY: "auto", px: 2, pb: 3 }}>
+        <Typography variant="h6" sx={{ mb: 0.5 }}>
           Status Colours
         </Typography>
         {(["Light Green", "Dark Green", "Amber", "Red", "No Paddling"] as Status[]).map((s) => (

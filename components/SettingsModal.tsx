@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Drawer,
   Typography,
@@ -14,7 +14,9 @@ import {
   Link,
   ToggleButtonGroup,
   ToggleButton,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useAppTheme, ThemeMode } from "@/lib/ThemeContext";
 import { PaddlerType } from "@/types";
 
@@ -29,10 +31,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] =
     useState<NotificationPermission>("default");
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const touchStartY = useRef(0);
-  const touchStartScrollTop = useRef(0);
 
   useEffect(() => {
     const savedLevel = localStorage.getItem("paddlerLevel") as PaddlerType | undefined;
@@ -63,16 +61,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     localStorage.removeItem("paddlerLevel");
   };
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-    touchStartScrollTop.current = scrollRef.current?.scrollTop ?? 0;
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    const dy = e.touches[0].clientY - touchStartY.current;
-    if (touchStartScrollTop.current === 0 && dy > 60) onClose();
-  };
-
   const paddlerTypes: PaddlerType[] = ["Beginner", "Improver", "Intermediate", "Independent"];
 
   return (
@@ -91,25 +79,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         },
       }}
     >
-      {/* Drag handle */}
-      <Box
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        sx={{ display: "flex", justifyContent: "center", pt: 1.5, pb: 0.5, flexShrink: 0 }}
-      >
-        <Box sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: "divider" }} />
+      {/* Sticky header */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 2, pt: 2, pb: 1, flexShrink: 0 }}>
+        <Typography variant="h5">Settings</Typography>
+        <IconButton onClick={onClose} edge="end" aria-label="close">
+          <CloseIcon />
+        </IconButton>
       </Box>
 
       {/* Scrollable content */}
-      <Box
-        ref={scrollRef}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        sx={{ overflowY: "auto", px: 2, pb: 3 }}
-      >
-        <Typography variant="h5" gutterBottom sx={{ mt: 1 }}>
-          Settings
-        </Typography>
+      <Box sx={{ overflowY: "auto", px: 2, pb: 3 }}>
 
         <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
           Theme

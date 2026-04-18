@@ -132,7 +132,7 @@ export const RAG_STATUS_UI: Record<
 export const CRITERIA_TABLE: {
   [key: string]: { [key: string]: number[] };
 } = {
-  high: { calm: [0, 1, 2, 3], windy: [1, 2, 3, 3] },
+  high: { calm: [0, 1, 2, 3], windy: [1, 2, 2, 3] },
   moderate: { calm: [1, 2, 2, 3], windy: [2, 2, 2, 3], rainy: [2, 2, 2, 3] },
   low: { calm: [2, 2, 3, 3], windy: [2, 3, 3, 3], rainy: [2, 2, 3, 3] },
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Drawer,
   Typography,
@@ -27,17 +27,16 @@ interface SettingsModalProps {
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const { themeMode, setThemeMode } = useAppTheme();
-  const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">("");
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [notificationPermission, setNotificationPermission] =
-    useState<NotificationPermission>("default");
+  const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">(
+    () => (typeof window !== "undefined" ? (localStorage.getItem("paddlerLevel") as PaddlerType | null) ?? "" : "")
+  );
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(
+    () => typeof window !== "undefined" && localStorage.getItem("notificationsEnabled") === "true"
+  );
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
+    () => (typeof window !== "undefined" && "Notification" in window ? Notification.permission : "default")
+  );
 
-  useEffect(() => {
-    const savedLevel = localStorage.getItem("paddlerLevel") as PaddlerType | undefined;
-    if (savedLevel) setPaddlerLevel(savedLevel);
-    setNotificationsEnabled(localStorage.getItem("notificationsEnabled") === "true");
-    if ("Notification" in window) setNotificationPermission(Notification.permission);
-  }, []);
 
   const handleNotificationsChange = async (checked: boolean) => {
     if (checked && Notification.permission !== "granted") {

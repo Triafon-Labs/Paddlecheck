@@ -31,11 +31,15 @@ interface WeatherLegendModalProps {
 }
 
 const RAG_DESCRIPTIONS: Record<Status, string> = {
-  "Light Green": "Ideal conditions — suitable for all paddlers.",
-  "Dark Green": "Good conditions with minor elevated factors.",
-  Amber: "Use caution — consult a coach if unsure.",
-  Red: "Risky — not recommended for most paddlers.",
-  "No Paddling": "Dangerous — do not paddle.",
+  "Light Green":
+    "Ideal conditions. Beginners need coach supervision. Improvers may paddle as a group without a coach. Intermediates may paddle solo.",
+  "Dark Green":
+    "Good conditions. Beginners and improvers need coach supervision. Intermediates may paddle with at least one other intermediate.",
+  Amber:
+    "Coach's discretion required. Beginners and improvers may only paddle at coach's discretion. Intermediates need supervision by an independent paddler or coach.",
+  Red:
+    "Risky conditions. No paddling for beginners or improvers. Intermediates at coach's discretion only (not above 10 steps from car park). PFDs must be worn by all.",
+  "No Paddling": "Do not paddle. Triggered by thunderstorm risk or dangerously high river level.",
   Unknown: "Data unavailable.",
 };
 
@@ -173,36 +177,36 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
         </Typography>
         <ThresholdRow
           icon={<Water fontSize="small" />}
-          label={`Below ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} m`}
-          description="Low river — ideal launch conditions."
+          label={`Below ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} m — below the wooden landing stage`}
+          description="River is low. Good launch conditions."
           chipLabel="Light Green"
           chipColor="success"
         />
         <ThresholdRow
           icon={<Water fontSize="small" />}
-          label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} m`}
-          description="Slightly elevated — still good conditions."
+          label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} m — between landing stage and concrete step`}
+          description="Slightly elevated. Still paddleable with care."
           chipLabel="Dark Green"
           chipColor="success"
         />
         <ThresholdRow
           icon={<Waves fontSize="small" />}
-          label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m`}
-          description="Moderately elevated — increased caution needed."
+          label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m — above the concrete step`}
+          description="Moderately elevated. PFDs must be worn by all."
           chipLabel="Amber"
           chipColor="warning"
         />
         <ThresholdRow
           icon={<Tsunami fontSize="small" />}
-          label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m and above`}
-          description="Significantly elevated — risky conditions."
+          label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m and above — above 10 steps from the car park`}
+          description="Significantly elevated. PFDs must be worn by all. No paddling for intermediates and below."
           chipLabel="Red"
           chipColor="error"
         />
         <ThresholdRow
           icon={<Flood fontSize="small" />}
-          label={`${THRESHOLDS.RIVER_LEVEL_NO_PADDLING} m and above`}
-          description="Dangerously high — no paddling."
+          label={`${THRESHOLDS.RIVER_LEVEL_NO_PADDLING} m and above — boathouse flooding`}
+          description="Dangerously high river. No paddling under any circumstances."
           chipLabel="No Paddling"
           chipColor="error"
         />
@@ -215,21 +219,21 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
         <ThresholdRow
           icon={<Thermostat fontSize="small" />}
           label={`${THRESHOLDS.TEMP_HIGH} °C and above`}
-          description="Warm — no temperature penalty applied."
+          description="Warm. No temperature penalty applied."
           chipLabel="No penalty"
           chipColor="success"
         />
         <ThresholdRow
           icon={<Thermostat fontSize="small" />}
           label={`${THRESHOLDS.TEMP_MODERATE} – ${THRESHOLDS.TEMP_HIGH} °C`}
-          description="Moderate cold — slight increase in risk rating."
-          chipLabel="Moderate"
+          description="Cool. Raises the base risk rating. Rain also becomes a factor."
+          chipLabel="Raises rating"
           chipColor="warning"
         />
         <ThresholdRow
           icon={<AcUnit fontSize="small" />}
           label={`Below ${THRESHOLDS.TEMP_MODERATE} °C`}
-          description="Cold — cold water shock risk, significant rating increase."
+          description="Cold. Cold water shock risk. Significant increase in risk rating."
           chipLabel="Cold"
           chipColor="error"
         />
@@ -242,15 +246,15 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
         <ThresholdRow
           icon={<Air fontSize="small" />}
           label={`Below ${THRESHOLDS.WIND_HIGH} mph`}
-          description="Calm — no wind penalty applied."
+          description="Calm. No wind penalty applied."
           chipLabel="Calm"
           chipColor="success"
         />
         <ThresholdRow
           icon={<Air fontSize="small" />}
           label={`${THRESHOLDS.WIND_HIGH} mph and above`}
-          description="High winds — increases risk rating."
-          chipLabel="High winds"
+          description="Windy. Raises the risk rating at all temperatures."
+          chipLabel="Raises rating"
           chipColor="error"
         />
 
@@ -280,9 +284,9 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
               label={`${desc} (${range})`}
               description={
                 isBad
-                  ? "Fog detected — adds +1 to risk rating."
+                  ? "Fog conditions — raises Green to Amber, and Amber to Red."
                   : isAtLimit
-                  ? "Borderline poor — monitor conditions."
+                  ? "Poor visibility — borderline fog threshold."
                   : "Acceptable visibility."
               }
               chipLabel={desc}
@@ -299,28 +303,28 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
         <ThresholdRow
           icon={<WaterDrop fontSize="small" />}
           label="Rain"
-          description="Rain combined with cool temperatures increases risk rating."
+          description="Rain at cool temperatures (5–12°C) raises the risk rating."
           chipLabel="Raises rating"
           chipColor="warning"
         />
         <ThresholdRow
           icon={<NightsStay fontSize="small" />}
-          label="Dark"
-          description="Paddling after dark adds +1 to risk rating."
-          chipLabel="+1 rating"
+          label="Dark (streetlights on)"
+          description="Raises Green to Amber, and Amber to Red."
+          chipLabel="Raises rating"
           chipColor="warning"
         />
         <ThresholdRow
           icon={<Foggy fontSize="small" />}
           label="Fog"
-          description="Poor visibility adds +1 to risk rating."
-          chipLabel="+1 rating"
+          description="Raises Green to Amber, and Amber to Red."
+          chipLabel="Raises rating"
           chipColor="warning"
         />
         <ThresholdRow
           icon={<Thunderstorm fontSize="small" />}
           label="Thunderstorm"
-          description="Any thunderstorm risk overrides all — no paddling."
+          description="No paddling when thunder is near — overrides all other conditions."
           chipLabel="No Paddling"
           chipColor="error"
         />

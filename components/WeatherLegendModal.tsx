@@ -316,7 +316,7 @@ const WeatherLegendModal: React.FC<WeatherLegendModalProps> = ({ open, onClose }
           chipColor="error"
         />
       </Box>
-    </SwipeableDrawer>
+    </Drawer>
   );
 };
 

@@ -11,8 +11,10 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LinkIcon from "@mui/icons-material/Link";
 import ShareIcon from "@mui/icons-material/Share";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import SettingsModal from "./SettingsModal";
 import LinksPopover from "./LinksPopover";
+import WeatherLegendModal from "./WeatherLegendModal";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { degreesToCompass } from "@/lib/weather";
 import { ragStatus } from "@/lib/rag";
@@ -118,6 +120,7 @@ const buildShareText = (
 
 const BottomNavBar = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [legendOpen, setLegendOpen] = useState(false);
   const [linksAnchorEl, setLinksAnchorEl] = useState<null | HTMLElement>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const { refetch, conditions, forecastDays } = useKayakContext();
@@ -171,6 +174,11 @@ const BottomNavBar = () => {
             onClick={() => setSettingsOpen(true)}
           />
           <BottomNavigationAction
+            label="Legend"
+            icon={<InfoOutlinedIcon />}
+            onClick={() => setLegendOpen(true)}
+          />
+          <BottomNavigationAction
             label="Links"
             icon={<LinkIcon />}
             onClick={handleLinksClick}
@@ -183,6 +191,7 @@ const BottomNavBar = () => {
         </BottomNavigation>
       </Paper>
       <SettingsModal open={settingsOpen} onClose={handleSettingsClose} />
+      <WeatherLegendModal open={legendOpen} onClose={() => setLegendOpen(false)} />
       <LinksPopover
         open={linksOpen}
         anchorEl={linksAnchorEl}

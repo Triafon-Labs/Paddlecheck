@@ -73,53 +73,54 @@ const getPaddlingMatrix = (
   switch (overallStatus) {
     case "Light Green":
       beginner.status = "Yes";
-      beginner.details = "Supervised by a club coach. PFD required.";
+      beginner.details = "Must be supervised by a club coach. PFD required.";
       improver.status = "Yes";
       improver.details =
-        "Can paddle in a group without a coach. Must have phone, use familiar boat, and stay in designated area. PFD required.";
+        "Can paddle as a group without a coach, provided the group includes someone who can swim with ease, has a mobile phone, uses a familiar boat, and stays upstream of Sabrina Bridge. PFD required.";
       intermediate.status = "Yes";
       intermediate.details =
-        "Can paddle solo. Must have phone, use familiar boat, and stay in designated area. PFD required.";
+        "Can paddle solo. Carry a mobile phone, use a familiar boat, and stay upstream of Sabrina Bridge. PFD required.";
       independent.status = "Yes";
       independent.details = "No restrictions.";
       break;
-    case "Dark Green": // User said Green = Dark Green
+    case "Dark Green":
       beginner.status = "Yes";
-      beginner.details = "Supervised by a club coach. PFD required.";
+      beginner.details = "Must be supervised by a club coach. PFD required.";
       improver.status = "Yes";
-      improver.details = "Supervised by a club coach. PFD required.";
+      improver.details = "Must be supervised by a club coach. PFD required.";
       intermediate.status = "Yes";
       intermediate.details =
-        "Can paddle with at least one other intermediate. Must have phone, use familiar boat, and stay in designated area. PFD required.";
+        "Can paddle with at least one other intermediate without a coach. Carry a mobile phone, use a familiar boat, and stay upstream of Sabrina Bridge. PFD required.";
       independent.status = "Yes";
       independent.details = "No restrictions.";
       break;
     case "Amber":
       beginner.status = "Discretion";
-      beginner.details = "Coach's discretion. PFD required.";
+      beginner.details = "Coach's discretion only. PFD required.";
       improver.status = "Discretion";
-      improver.details = "Coach's discretion. PFD required.";
+      improver.details = "Coach's discretion only. PFD required.";
       intermediate.status = "Yes";
       intermediate.details =
-        "Supervised by an Independent paddler or club coach. PFD required.";
+        "Must be supervised by an independent paddler or club coach. PFD required.";
       independent.status = "Yes";
-      independent.details = "May supervise Intermediate paddlers.";
+      independent.details =
+        "Can paddle. May supervise intermediate paddlers. PFD required if river is above the concrete step.";
       break;
     case "Red":
       beginner.status = "No";
-      beginner.details = "No paddling.";
+      beginner.details = "No paddling in red conditions.";
       improver.status = "No";
-      improver.details = "No paddling.";
+      improver.details = "No paddling in red conditions.";
       if (riverLevel && riverLevel >= 2.75) {
         intermediate.status = "No";
         intermediate.details =
-          "No paddling when river is on or above 10th step from car park.";
+          "No paddling — river is above 10 steps from the car park.";
       } else {
         intermediate.status = "Discretion";
-        intermediate.details = "Coach's discretion. PFD required.";
+        intermediate.details = "Coach's discretion only. PFD required.";
       }
       independent.status = "Warning";
-      independent.details = "Do not paddle alone. PFD required.";
+      independent.details = "Strongly advised not to paddle alone. PFD required.";
       break;
     case "No Paddling":
     case "Unknown":

@@ -216,7 +216,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             ))}
           </Select>
         </FormControl>
-        <Button onClick={handleClearLevel} disabled={!paddlerLevel} fullWidth>
+        <Button onClick={handleClearLevel} disabled={!paddlerLevel} fullWidth variant="outlined">
           Clear Selection
         </Button>
 

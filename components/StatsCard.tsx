@@ -65,7 +65,7 @@ const StatItem: React.FC<{
 const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) => {
   if (loading) {
     return (
-      <Card variant="outlined" sx={{ width: "100%", mt: 2, p: 2 }}>
+      <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
         <CardContent>
           <Typography variant="h5" component="div" gutterBottom>
             Detailed Stats
@@ -83,7 +83,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) =
   }
 
   return (
-    <Card variant="outlined" sx={{ width: "100%", mt: 2, p: 2 }}>
+    <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
           Detailed Stats

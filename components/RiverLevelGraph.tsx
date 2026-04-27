@@ -413,7 +413,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   };
 
   return (
-    <Card variant="outlined" sx={{ width: "100%", mt: 2, p: 2 }}>
+    <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
         <Typography variant="h5" component="div">
           River Level

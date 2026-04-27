@@ -90,40 +90,46 @@ export const RAG_STATUS_UI: Record<
   }
 > = {
   Unknown: {
-    color: "#9E9E9E",
+    // M3 outline tone — neutral, de-emphasised
+    color: "#74777F",
     emoji: "🤷",
     icon: HelpOutline,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#E1E2EC",
   },
   "Light Green": {
-    color: "#4CBB17",
+    // M3 custom green T35 — recognisably green but tonal
+    color: "#2D7D0A",
     emoji: "✅",
     icon: Check,
-    backgroundColor: "#E8F5E9",
+    backgroundColor: "#D4EDBA",
   },
   "Dark Green": {
-    color: "#008000",
+    // M3 custom green T25 — darker tonal green
+    color: "#1A5E00",
     emoji: "📈",
     icon: TrendingUpOutlined,
-    backgroundColor: "#C8E6C9",
+    backgroundColor: "#BCDFA8",
   },
   Amber: {
-    color: "#FFBF00",
+    // M3 tertiary/amber T30 — dark gold; reads as caution on light containers
+    color: "#7A5700",
     emoji: "⚠️",
     icon: WarningAmberOutlined,
-    backgroundColor: "#FFF3E0",
+    backgroundColor: "#FFDF9D",
   },
   Red: {
-    color: "#FF0000",
+    // M3 error T40
+    color: "#BA1A1A",
     emoji: "🚨",
     icon: CrisisAlert,
-    backgroundColor: "#FFEBEE",
+    backgroundColor: "#FFDAD6",
   },
   "No Paddling": {
-    color: "#FF0000",
+    // M3 error T40 — same danger signal, neutral container
+    color: "#BA1A1A",
     emoji: "⛔",
     icon: DoNotDisturbOutlined,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: "#F0EEEE",
   },
 };
 

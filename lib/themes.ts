@@ -271,6 +271,21 @@ export const lightTheme = createTheme({
   components: makeComponents(m3Light),
 });
 
+// Blue-tinted dark surface tokens — keeps the original navy feel while
+// providing the M3 tonal elevation steps that the component overrides need.
+const m3DarkNavy: M3Palette = {
+  ...m3Dark,
+  surface: "#0A1929",         // original page background
+  onSurface: "#FFFFFF",
+  surfaceContainerLowest: "#061221",
+  surfaceContainerLow: "#132F4C",   // original paper / drawer / AppBar
+  surfaceContainer: "#193A5E",      // card background — one step lighter
+  surfaceContainerHigh: "#1E4168",
+  surfaceContainerHighest: "#254B75",
+  outlineVariant: "#2A4F73",
+  onSurfaceVariant: "#9EAAB8",
+};
+
 export const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -278,16 +293,16 @@ export const darkTheme = createTheme({
     secondary: { main: m3Dark.secondary, contrastText: m3Dark.onSecondary },
     error: { main: m3Dark.error, contrastText: m3Dark.onError },
     background: {
-      default: m3Dark.surface,
-      paper: m3Dark.surfaceContainerLow,
+      default: m3DarkNavy.surface,
+      paper: m3DarkNavy.surfaceContainerLow,
     },
     text: {
-      primary: m3Dark.onSurface,
-      secondary: m3Dark.onSurfaceVariant,
+      primary: "#FFFFFF",
+      secondary: "#BDBDBD",
     },
-    divider: m3Dark.outlineVariant,
+    divider: m3DarkNavy.outlineVariant,
   },
   shape: { borderRadius: 12 },
   typography: m3Typography,
-  components: makeComponents(m3Dark),
+  components: makeComponents(m3DarkNavy),
 });

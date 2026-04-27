@@ -133,7 +133,7 @@ const TopNavBar = () => {
               width={40}
               height={40}
             />
-            <Typography variant="h6" fontWeight={600}>Paddlecheck</Typography>
+            <Typography variant="h6" fontWeight={600} color="text.primary">Paddlecheck</Typography>
           </Box>
           <Box sx={{ display: "flex" }}>
             <IconButton onClick={handleShare} aria-label="share">

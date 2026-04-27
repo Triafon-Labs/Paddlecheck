@@ -93,15 +93,25 @@ const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
   );
 };
 
+// YIQ perceptual brightness — returns black or white for readable contrast
+const contrastText = (hex: string): string => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 128 ? "#000" : "#fff";
+};
+
 interface ThresholdRowProps {
   icon: React.ReactNode;
   label: string;
   description: string;
   chipLabel?: string;
   chipColor?: "success" | "warning" | "error" | "default";
+  // When set, overrides chipColor with the exact RAG hex colour
+  ragColor?: string;
 }
 
-const ThresholdRow: React.FC<ThresholdRowProps> = ({ icon, label, description, chipLabel, chipColor }) => (
+const ThresholdRow: React.FC<ThresholdRowProps> = ({ icon, label, description, chipLabel, chipColor, ragColor }) => (
   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.5 }}>
     <Box sx={{ color: "text.secondary", display: "flex", flexShrink: 0 }}>{icon}</Box>
     <Box sx={{ flex: 1 }}>
@@ -113,7 +123,15 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({ icon, label, description, c
       </Typography>
     </Box>
     {chipLabel && (
-      <Chip label={chipLabel} color={chipColor ?? "default"} size="small" />
+      ragColor ? (
+        <Chip
+          label={chipLabel}
+          size="small"
+          sx={{ backgroundColor: ragColor, color: contrastText(ragColor), fontWeight: 500 }}
+        />
+      ) : (
+        <Chip label={chipLabel} color={chipColor ?? "default"} size="small" />
+      )
     )}
   </Box>
 );
@@ -216,7 +234,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             ))}
           </Select>
         </FormControl>
-        <Button onClick={handleClearLevel} disabled={!paddlerLevel} fullWidth>
+        <Button onClick={handleClearLevel} disabled={!paddlerLevel} fullWidth variant="outlined">
           Clear Selection
         </Button>
 
@@ -290,35 +308,35 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               label={`Below ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} m`}
               description="Below the wooden landing stage. Good launch conditions."
               chipLabel="Light Green"
-              chipColor="success"
+              ragColor={RAG_STATUS_UI["Light Green"].color}
             />
             <ThresholdRow
               icon={<Water fontSize="small" />}
               label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} m`}
               description="Between landing stage and concrete step. Still paddleable with care."
               chipLabel="Dark Green"
-              chipColor="success"
+              ragColor={RAG_STATUS_UI["Dark Green"].color}
             />
             <ThresholdRow
               icon={<Waves fontSize="small" />}
               label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m`}
               description="Above the concrete step. PFDs must be worn by all."
               chipLabel="Amber"
-              chipColor="warning"
+              ragColor={RAG_STATUS_UI["Amber"].color}
             />
             <ThresholdRow
               icon={<Tsunami fontSize="small" />}
               label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m and above`}
               description="Above 10 steps from the car park. No paddling for intermediates and below."
               chipLabel="Red"
-              chipColor="error"
+              ragColor={RAG_STATUS_UI["Red"].color}
             />
             <ThresholdRow
               icon={<Flood fontSize="small" />}
               label={`${THRESHOLDS.RIVER_LEVEL_NO_PADDLING} m and above`}
               description="Boathouse flooding. No paddling under any circumstances."
               chipLabel="No Paddling"
-              chipColor="error"
+              ragColor={RAG_STATUS_UI["No Paddling"].color}
             />
 
             <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>

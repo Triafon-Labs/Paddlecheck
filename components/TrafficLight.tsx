@@ -4,6 +4,7 @@ import React from "react";
 import { Box, Typography, useTheme, Stack } from "@mui/material";
 import { Status } from "@/types";
 import { ragStatus } from "@/lib/rag";
+import { springEasing } from "@/lib/m3-palette";
 
 interface TrafficLightProps {
   status: Status;
@@ -47,13 +48,13 @@ const TrafficLight: React.FC<TrafficLightProps> = ({ status, disabled }) => {
                     ? `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(
                         color.slice(3, 5),
                         16
-                      )}, ${parseInt(color.slice(5, 7), 16)}, 0.2)`
+                      )}, ${parseInt(color.slice(5, 7), 16)}, 0.25)`
                     : ragStatus[s].backgroundColor
                   : "transparent",
                 border: `2px solid ${isActive ? color : theme.palette.divider}`,
-                transition: "all 0.3s ease-in-out",
-                opacity: isActive ? 1 : 0.5,
-                transform: isActive ? "scale(1.1)" : "scale(1)",
+                // M3 Expressive spring motion — slight overshoot on size change
+                transition: `all 0.4s ${springEasing}`,
+                opacity: isActive ? 1 : 0.45,
               }}
             >
               <Icon

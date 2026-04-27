@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { AppBar, Toolbar, IconButton, Box, Snackbar } from "@mui/material";
+import { AppBar, Toolbar, IconButton, Box, Snackbar, Typography } from "@mui/material";
 import Image from "next/image";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -126,12 +126,15 @@ const TopNavBar = () => {
     <>
       <AppBar position="static" color="inherit" elevation={0}>
         <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Image
-            src="/favicon.svg"
-            alt="Paddlecheck Logo"
-            width={40}
-            height={40}
-          />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Image
+              src="/favicon.svg"
+              alt="Paddlecheck Logo"
+              width={40}
+              height={40}
+            />
+            <Typography variant="h6" fontWeight={600}>Paddlecheck</Typography>
+          </Box>
           <Box sx={{ display: "flex", mr: -1 }}>
             <IconButton onClick={handleShare} aria-label="share">
               <ShareIcon />

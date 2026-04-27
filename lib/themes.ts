@@ -291,7 +291,7 @@ export const darkTheme = createTheme({
     mode: "dark",
     primary: { main: m3Dark.primary, contrastText: m3Dark.onPrimary },
     secondary: { main: m3Dark.secondary, contrastText: m3Dark.onSecondary },
-    error: { main: m3Dark.error, contrastText: m3Dark.onError },
+    error: { main: m3Light.error, contrastText: m3Light.onError },
     background: {
       default: m3DarkNavy.surface,
       paper: m3DarkNavy.surfaceContainerLow,

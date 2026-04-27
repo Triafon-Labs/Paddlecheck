@@ -132,14 +132,14 @@ const TopNavBar = () => {
             width={40}
             height={40}
           />
-          <Box sx={{ display: "flex", gap: 0.5 }}>
+          <Box sx={{ display: "flex", mr: -1 }}>
             <IconButton onClick={handleShare} aria-label="share">
               <ShareIcon />
             </IconButton>
             <IconButton onClick={() => setSettingsOpen(true)} aria-label="settings">
               <SettingsIcon />
             </IconButton>
-            <IconButton onClick={() => refetch()} aria-label="refresh">
+            <IconButton edge="end" onClick={() => refetch()} aria-label="refresh">
               <RefreshIcon />
             </IconButton>
           </Box>

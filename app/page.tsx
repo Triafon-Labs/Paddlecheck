@@ -31,7 +31,7 @@ export default function HomePage() {
 
   return (
     <Container maxWidth="md">
-      <Stack spacing={4} sx={{ py: 2 }}>
+      <Stack spacing={4}>
         {isOffline && (
           <Alert severity="warning" sx={{ borderRadius: 1 }}>
             You&apos;re offline — showing cached data where available.

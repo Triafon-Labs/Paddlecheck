@@ -244,6 +244,31 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
 
         <Divider sx={{ my: 2 }} />
 
+        <Typography variant="h6" gutterBottom>
+          Useful Links
+        </Typography>
+        <List disablePadding>
+          {USEFUL_LINKS.map((link) => (
+            <ListItem
+              key={link.name}
+              component={Link}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                pl: 0,
+                color: (theme) =>
+                  theme.palette.mode === "dark" ? "common.white" : "primary.main",
+              }}
+            >
+              <Typography sx={{ flexGrow: 1 }}>{link.name}</Typography>
+              <OpenInNewIcon fontSize="small" />
+            </ListItem>
+          ))}
+        </List>
+
+        <Divider sx={{ my: 2 }} />
+
         <Accordion disableGutters elevation={0} sx={{ "&:before": { display: "none" }, mx: -2 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 2 }}>
             <Typography variant="h6">Conditions Key</Typography>
@@ -403,31 +428,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             />
           </AccordionDetails>
         </Accordion>
-
-        <Divider sx={{ my: 2 }} />
-
-        <Typography variant="h6" gutterBottom>
-          Useful Links
-        </Typography>
-        <List disablePadding>
-          {USEFUL_LINKS.map((link) => (
-            <ListItem
-              key={link.name}
-              component={Link}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{
-                pl: 0,
-                color: (theme) =>
-                  theme.palette.mode === "dark" ? "common.white" : "primary.main",
-              }}
-            >
-              <Typography sx={{ flexGrow: 1 }}>{link.name}</Typography>
-              <OpenInNewIcon fontSize="small" />
-            </ListItem>
-          ))}
-        </List>
 
         <Divider sx={{ my: 2 }} />
 

@@ -1,5 +1,5 @@
 import { createTheme, type ThemeOptions } from "@mui/material/styles";
-import { m3Light, m3Dark } from "./m3-palette";
+import { m3Light, m3Dark, type M3Palette } from "./m3-palette";
 
 // M3 type scale mapped to MUI variants, exploiting Roboto Flex variable axes:
 //   wght (weight 100–900), wdth (width 25–151), opsz (optical size 8–144)
@@ -117,9 +117,7 @@ const m3Typography: ThemeOptions["typography"] = {
 // Using compound selectors (&.MuiPaper-outlined) ensures higher specificity
 // than MUI's own variant rules, reliably stripping the outlined border from
 // Cards while leaving other Paper components (e.g. chart tooltips) untouched.
-const makeComponents = (
-  m3: typeof m3Light
-): ThemeOptions["components"] => ({
+const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
   MuiCard: {
     styleOverrides: {
       root: {

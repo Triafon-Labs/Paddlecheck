@@ -57,6 +57,9 @@ export const m3Dark = {
   inversePrimary: "#005AC1",
 } as const;
 
+// Widened type — maps each key to string so both m3Light and m3Dark satisfy it.
+export type M3Palette = { [K in keyof typeof m3Light]: string };
+
 // CSS linear() spring approximation — spring(1, 100, 15, 0), duration ~400ms
 // Gives a slight overshoot for M3 Expressive's "springy" feel.
 // Falls back to a regular transition in older browsers.

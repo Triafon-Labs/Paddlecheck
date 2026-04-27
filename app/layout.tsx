@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
 import ThemeRegistry from "@/components/ThemeRegistry";
-import BottomNavBar from "@/components/BottomNavBar";
 import TopNavBar from "@/components/TopNavBar";
 import { Box } from "@mui/material";
 import { KayakDataProvider } from "@/lib/KayakDataContext";
@@ -64,12 +63,11 @@ export default function RootLayout({
                   alignItems: "center",
                   justifyContent: "flex-start",
                   pt: 4,
-                  pb: 16,
+                  pb: 4,
                 }}
               >
                 {children}
               </Box>
-              <BottomNavBar />
             </Box>
           </KayakDataProvider>
         </ThemeRegistry>

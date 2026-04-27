@@ -18,7 +18,11 @@ import {
   Chip,
   List,
   ListItem,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import {
@@ -240,161 +244,165 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
 
         <Divider sx={{ my: 2 }} />
 
-        <Typography variant="h6" gutterBottom>
-          Conditions Key
-        </Typography>
+        <Accordion disableGutters elevation={0} sx={{ "&:before": { display: "none" }, mx: -2 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 2 }}>
+            <Typography variant="h6">Conditions Key</Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ px: 2, pt: 0 }}>
 
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-          Status Colours
-        </Typography>
-        {(["Light Green", "Dark Green", "Amber", "Red", "No Paddling"] as Status[]).map((s) => (
-          <StatusRow key={s} status={s} />
-        ))}
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Status Colours
+            </Typography>
+            {(["Light Green", "Dark Green", "Amber", "Red", "No Paddling"] as Status[]).map((s) => (
+              <StatusRow key={s} status={s} />
+            ))}
 
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
-          River Level
-        </Typography>
-        <ThresholdRow
-          icon={<Water fontSize="small" />}
-          label={`Below ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} m`}
-          description="Below the wooden landing stage. Good launch conditions."
-          chipLabel="Light Green"
-          chipColor="success"
-        />
-        <ThresholdRow
-          icon={<Water fontSize="small" />}
-          label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} m`}
-          description="Between landing stage and concrete step. Still paddleable with care."
-          chipLabel="Dark Green"
-          chipColor="success"
-        />
-        <ThresholdRow
-          icon={<Waves fontSize="small" />}
-          label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m`}
-          description="Above the concrete step. PFDs must be worn by all."
-          chipLabel="Amber"
-          chipColor="warning"
-        />
-        <ThresholdRow
-          icon={<Tsunami fontSize="small" />}
-          label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m and above`}
-          description="Above 10 steps from the car park. No paddling for intermediates and below."
-          chipLabel="Red"
-          chipColor="error"
-        />
-        <ThresholdRow
-          icon={<Flood fontSize="small" />}
-          label={`${THRESHOLDS.RIVER_LEVEL_NO_PADDLING} m and above`}
-          description="Boathouse flooding. No paddling under any circumstances."
-          chipLabel="No Paddling"
-          chipColor="error"
-        />
-
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
-          Temperature
-        </Typography>
-        <ThresholdRow
-          icon={<Thermostat fontSize="small" />}
-          label={`${THRESHOLDS.TEMP_HIGH} °C and above`}
-          description="Warm. No temperature penalty applied."
-          chipLabel="No penalty"
-          chipColor="success"
-        />
-        <ThresholdRow
-          icon={<Thermostat fontSize="small" />}
-          label={`${THRESHOLDS.TEMP_MODERATE} – ${THRESHOLDS.TEMP_HIGH} °C`}
-          description="Cool. Raises the base risk rating. Rain also becomes a factor."
-          chipLabel="Raises rating"
-          chipColor="warning"
-        />
-        <ThresholdRow
-          icon={<AcUnit fontSize="small" />}
-          label={`Below ${THRESHOLDS.TEMP_MODERATE} °C`}
-          description="Cold. Cold water shock risk. Significant increase in risk rating."
-          chipLabel="Cold"
-          chipColor="error"
-        />
-
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
-          Wind
-        </Typography>
-        <ThresholdRow
-          icon={<Air fontSize="small" />}
-          label={`Below ${THRESHOLDS.WIND_HIGH} mph`}
-          description="Calm. No wind penalty applied."
-          chipLabel="Calm"
-          chipColor="success"
-        />
-        <ThresholdRow
-          icon={<Air fontSize="small" />}
-          label={`${THRESHOLDS.WIND_HIGH} mph and above`}
-          description="Windy. Raises the risk rating at all temperatures."
-          chipLabel="Raises rating"
-          chipColor="error"
-        />
-
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
-          Visibility
-        </Typography>
-        {visKeys.map((key) => {
-          const { min, desc } = VISIBILITY_DESCRIPTIONS[key];
-          const nextKey = visKeys[visKeys.indexOf(key) - 1];
-          const max = nextKey ? VISIBILITY_DESCRIPTIONS[nextKey].min : null;
-          const range = max
-            ? `${(min / 1000).toFixed(0)}–${(max / 1000).toFixed(0)} km`
-            : `Over ${(min / 1000).toFixed(0)} km`;
-          const isBad = min < THRESHOLDS.VISIBILITY_POOR;
-          const isAtLimit = min === THRESHOLDS.VISIBILITY_POOR;
-          const chipColor: "error" | "warning" | "success" = isBad ? "error" : isAtLimit ? "warning" : "success";
-          return (
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
+              River Level
+            </Typography>
             <ThresholdRow
-              key={key}
-              icon={<Visibility fontSize="small" />}
-              label={`${desc} (${range})`}
-              description={
-                isBad
-                  ? "Fog conditions — raises Green to Amber, and Amber to Red."
-                  : isAtLimit
-                  ? "Poor visibility — borderline fog threshold."
-                  : "Acceptable visibility."
-              }
-              chipLabel={desc}
-              chipColor={chipColor}
+              icon={<Water fontSize="small" />}
+              label={`Below ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} m`}
+              description="Below the wooden landing stage. Good launch conditions."
+              chipLabel="Light Green"
+              chipColor="success"
             />
-          );
-        })}
+            <ThresholdRow
+              icon={<Water fontSize="small" />}
+              label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} m`}
+              description="Between landing stage and concrete step. Still paddleable with care."
+              chipLabel="Dark Green"
+              chipColor="success"
+            />
+            <ThresholdRow
+              icon={<Waves fontSize="small" />}
+              label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m`}
+              description="Above the concrete step. PFDs must be worn by all."
+              chipLabel="Amber"
+              chipColor="warning"
+            />
+            <ThresholdRow
+              icon={<Tsunami fontSize="small" />}
+              label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m and above`}
+              description="Above 10 steps from the car park. No paddling for intermediates and below."
+              chipLabel="Red"
+              chipColor="error"
+            />
+            <ThresholdRow
+              icon={<Flood fontSize="small" />}
+              label={`${THRESHOLDS.RIVER_LEVEL_NO_PADDLING} m and above`}
+              description="Boathouse flooding. No paddling under any circumstances."
+              chipLabel="No Paddling"
+              chipColor="error"
+            />
 
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
-          Other Factors
-        </Typography>
-        <ThresholdRow
-          icon={<WaterDrop fontSize="small" />}
-          label="Rain"
-          description="Rain at cool temperatures (5–12°C) raises the risk rating."
-          chipLabel="Raises rating"
-          chipColor="warning"
-        />
-        <ThresholdRow
-          icon={<NightsStay fontSize="small" />}
-          label="Dark (streetlights on)"
-          description="Raises Green to Amber, and Amber to Red."
-          chipLabel="Raises rating"
-          chipColor="warning"
-        />
-        <ThresholdRow
-          icon={<Foggy fontSize="small" />}
-          label="Fog"
-          description="Raises Green to Amber, and Amber to Red."
-          chipLabel="Raises rating"
-          chipColor="warning"
-        />
-        <ThresholdRow
-          icon={<Thunderstorm fontSize="small" />}
-          label="Thunderstorm"
-          description="No paddling when thunder is near — overrides all other conditions."
-          chipLabel="No Paddling"
-          chipColor="error"
-        />
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
+              Temperature
+            </Typography>
+            <ThresholdRow
+              icon={<Thermostat fontSize="small" />}
+              label={`${THRESHOLDS.TEMP_HIGH} °C and above`}
+              description="Warm. No temperature penalty applied."
+              chipLabel="No penalty"
+              chipColor="success"
+            />
+            <ThresholdRow
+              icon={<Thermostat fontSize="small" />}
+              label={`${THRESHOLDS.TEMP_MODERATE} – ${THRESHOLDS.TEMP_HIGH} °C`}
+              description="Cool. Raises the base risk rating. Rain also becomes a factor."
+              chipLabel="Raises rating"
+              chipColor="warning"
+            />
+            <ThresholdRow
+              icon={<AcUnit fontSize="small" />}
+              label={`Below ${THRESHOLDS.TEMP_MODERATE} °C`}
+              description="Cold. Cold water shock risk. Significant increase in risk rating."
+              chipLabel="Cold"
+              chipColor="error"
+            />
+
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
+              Wind
+            </Typography>
+            <ThresholdRow
+              icon={<Air fontSize="small" />}
+              label={`Below ${THRESHOLDS.WIND_HIGH} mph`}
+              description="Calm. No wind penalty applied."
+              chipLabel="Calm"
+              chipColor="success"
+            />
+            <ThresholdRow
+              icon={<Air fontSize="small" />}
+              label={`${THRESHOLDS.WIND_HIGH} mph and above`}
+              description="Windy. Raises the risk rating at all temperatures."
+              chipLabel="Raises rating"
+              chipColor="error"
+            />
+
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
+              Visibility
+            </Typography>
+            {visKeys.map((key) => {
+              const { min, desc } = VISIBILITY_DESCRIPTIONS[key];
+              const nextKey = visKeys[visKeys.indexOf(key) - 1];
+              const max = nextKey ? VISIBILITY_DESCRIPTIONS[nextKey].min : null;
+              const range = max
+                ? `${(min / 1000).toFixed(0)}–${(max / 1000).toFixed(0)} km`
+                : `Over ${(min / 1000).toFixed(0)} km`;
+              const isBad = min < THRESHOLDS.VISIBILITY_POOR;
+              const isAtLimit = min === THRESHOLDS.VISIBILITY_POOR;
+              const chipColor: "error" | "warning" | "success" = isBad ? "error" : isAtLimit ? "warning" : "success";
+              return (
+                <ThresholdRow
+                  key={key}
+                  icon={<Visibility fontSize="small" />}
+                  label={`${desc} (${range})`}
+                  description={
+                    isBad
+                      ? "Fog conditions — raises Green to Amber, and Amber to Red."
+                      : isAtLimit
+                      ? "Poor visibility — borderline fog threshold."
+                      : "Acceptable visibility."
+                  }
+                  chipLabel={desc}
+                  chipColor={chipColor}
+                />
+              );
+            })}
+
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
+              Other Factors
+            </Typography>
+            <ThresholdRow
+              icon={<WaterDrop fontSize="small" />}
+              label="Rain"
+              description="Rain at cool temperatures (5–12°C) raises the risk rating."
+              chipLabel="Raises rating"
+              chipColor="warning"
+            />
+            <ThresholdRow
+              icon={<NightsStay fontSize="small" />}
+              label="Dark (streetlights on)"
+              description="Raises Green to Amber, and Amber to Red."
+              chipLabel="Raises rating"
+              chipColor="warning"
+            />
+            <ThresholdRow
+              icon={<Foggy fontSize="small" />}
+              label="Fog"
+              description="Raises Green to Amber, and Amber to Red."
+              chipLabel="Raises rating"
+              chipColor="warning"
+            />
+            <ThresholdRow
+              icon={<Thunderstorm fontSize="small" />}
+              label="Thunderstorm"
+              description="No paddling when thunder is near — overrides all other conditions."
+              chipLabel="No Paddling"
+              chipColor="error"
+            />
+          </AccordionDetails>
+        </Accordion>
 
         <Divider sx={{ my: 2 }} />
 

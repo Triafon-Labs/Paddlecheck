@@ -1,5 +1,5 @@
 import {
-  HelpOutline,
+  HelpOutlined,
   Check,
   WarningAmberOutlined,
   DoNotDisturbOutlined,
@@ -92,7 +92,7 @@ export const RAG_STATUS_UI: Record<
   Unknown: {
     color: "#9E9E9E",
     emoji: "🤷",
-    icon: HelpOutline,
+    icon: HelpOutlined,
     backgroundColor: "#F5F5F5",
   },
   "Light Green": {

@@ -16,10 +16,10 @@ import {
   CircularProgress,
 } from "@mui/material";
 import {
-  CheckCircleOutline,
+  CheckCircleOutlined,
   CancelOutlined,
   WarningAmberOutlined,
-  HelpOutline,
+  HelpOutlined,
   KeyboardArrowDown,
   KeyboardArrowUp,
 } from "@mui/icons-material";
@@ -42,7 +42,9 @@ const getStatusIcon = (status: PaddlingStatusValue) => {
   switch (status) {
     case "Yes":
       return (
-        <CheckCircleOutline style={{ color: ragStatus["Light Green"].color }} />
+        <CheckCircleOutlined
+          style={{ color: ragStatus["Light Green"].color }}
+        />
       );
     case "No":
       return <CancelOutlined style={{ color: ragStatus["Red"].color }} />;
@@ -55,7 +57,7 @@ const getStatusIcon = (status: PaddlingStatusValue) => {
         <WarningAmberOutlined style={{ color: ragStatus["Amber"].color }} />
       );
     default:
-      return <HelpOutline style={{ color: ragStatus["Unknown"].color }} />;
+      return <HelpOutlined style={{ color: ragStatus["Unknown"].color }} />;
   }
 };
 
@@ -276,7 +278,12 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                         <TableCell align="center">
                           {statusInfo && (
                             <Tooltip title={statusInfo.status} placement="top">
-                              <Box display="flex" justifyContent="center">
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "center",
+                                }}
+                              >
                                 {getStatusIcon(statusInfo.status)}
                               </Box>
                             </Tooltip>

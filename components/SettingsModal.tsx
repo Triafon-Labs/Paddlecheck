@@ -82,7 +82,7 @@ const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
         <Icon sx={{ color: "#fff", fontSize: 16 }} />
       </Box>
       <Box>
-        <Typography variant="body2" fontWeight={600}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
           {status}
         </Typography>
         <Typography variant="caption" color="text.secondary">
@@ -115,7 +115,7 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({ icon, label, description, c
   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.5 }}>
     <Box sx={{ color: "text.secondary", display: "flex", flexShrink: 0 }}>{icon}</Box>
     <Box sx={{ flex: 1 }}>
-      <Typography variant="body2" fontWeight={600}>
+      <Typography variant="body2" sx={{ fontWeight: 600 }}>
         {label}
       </Typography>
       <Typography variant="caption" color="text.secondary">
@@ -179,14 +179,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       anchor="bottom"
       open={open}
       onClose={onClose}
-      PaperProps={{
-        sx: {
-          borderRadius: "16px 16px 0 0",
-          maxHeight: "90vh",
-          bgcolor: "background.paper",
-          backgroundImage: "none",
-          display: "flex",
-          flexDirection: "column",
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: "16px 16px 0 0",
+            maxHeight: "90vh",
+            bgcolor: "background.paper",
+            backgroundImage: "none",
+            display: "flex",
+            flexDirection: "column",
+          },
         },
       }}
     >

@@ -18,9 +18,9 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "date-fns": "^4.1.0",
-    "next": "^16.2.3",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "recharts": "^3.8.1"
   },
   "devDependencies": {
@@ -30,11 +30,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9.7",
-    "eslint-config-next": "^16.2.2",
+    "eslint-config-next": "^16.2.6",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.3",
     "typescript": "^6",
-    "workbox-webpack-plugin": "^7.3.0"
+    "workbox-webpack-plugin": "^7.4.1"
   }
 }

@@ -7,6 +7,13 @@ const eslintConfig = [
   ...nextTypescript,
   prettierConfig,
   {
+    settings: {
+      react: {
+        version: "19",
+      },
+    },
+  },
+  {
     ignores: [
       "node_modules/**",
       ".next/**",

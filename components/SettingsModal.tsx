@@ -40,6 +40,7 @@ import {
   Foggy,
 } from "@mui/icons-material";
 import { useAppTheme, ThemeMode } from "@/lib/ThemeContext";
+import { showNotification } from "@/lib/showNotification";
 import { PaddlerType, Status } from "@/types";
 import { RAG_STATUS_UI, THRESHOLDS, VISIBILITY_DESCRIPTIONS, USEFUL_LINKS } from "@/lib/config";
 
@@ -161,7 +162,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   };
 
   const handleTestNotification = () => {
-    new Notification("✅ Paddlecheck", {
+    showNotification("✅ Paddlecheck", {
       body: "Test notification — notifications are working!",
       icon: "/web-app-manifest-192x192.png",
     });

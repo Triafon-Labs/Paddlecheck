@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Status } from "@/types";
+import { showNotification } from "@/lib/showNotification";
 
 const STATUS_EMOJIS: Record<Status, string> = {
   "Light Green": "✅",
@@ -35,7 +36,7 @@ export const useNotifications = (
     const emoji = STATUS_EMOJIS[status] ?? "";
     const levelText =
       riverLevel !== undefined ? ` — 🛶 River: ${riverLevel.toFixed(2)}m` : "";
-    new Notification(`${emoji} Paddlecheck`, {
+    showNotification(`${emoji} Paddlecheck`, {
       body: `Status changed to ${status}${levelText}`,
       icon: "/web-app-manifest-192x192.png",
     });

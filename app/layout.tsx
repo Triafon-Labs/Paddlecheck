@@ -7,7 +7,6 @@ import { Box } from "@mui/material";
 import { KayakDataProvider } from "@/lib/KayakDataContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 const robotoFlex = localFont({
   src: "../node_modules/@fontsource-variable/roboto-flex/files/roboto-flex-latin-full-normal.woff2",
@@ -73,7 +72,6 @@ export default function RootLayout({
         </ThemeRegistry>
         <Analytics />
         <SpeedInsights />
-        <ServiceWorkerRegistration />
       </body>
     </html>
   );

@@ -141,24 +141,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">(
     () => (typeof window !== "undefined" ? (localStorage.getItem("paddlerLevel") as PaddlerType | null) ?? "" : "")
   );
-  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(
-    () => typeof window !== "undefined" && localStorage.getItem("notificationsEnabled") === "true"
-  );
-  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(
-    () => (typeof window !== "undefined" && "Notification" in window ? Notification.permission : "default")
-  );
-
   const visKeys = Object.keys(VISIBILITY_DESCRIPTIONS) as (keyof typeof VISIBILITY_DESCRIPTIONS)[];
-
-  const handleNotificationsChange = async (checked: boolean) => {
-    if (checked && Notification.permission !== "granted") {
-      const permission = await Notification.requestPermission();
-      setNotificationPermission(permission);
-      if (permission !== "granted") return;
-    }
-    setNotificationsEnabled(checked);
-    localStorage.setItem("notificationsEnabled", String(checked));
-  };
 
   const handleLevelChange = (event: SelectChangeEvent<PaddlerType | "">) => {
     const level = event.target.value as PaddlerType | "";
@@ -239,28 +222,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <Button onClick={handleClearLevel} disabled={!paddlerLevel} fullWidth variant="outlined">
           Clear Selection
         </Button>
-
-        <Divider sx={{ my: 2 }} />
-
-        <Typography variant="h6" gutterBottom>
-          Notifications
-        </Typography>
-        <ToggleButtonGroup
-          value={notificationsEnabled ? "on" : "off"}
-          exclusive
-          onChange={(_, val) => { if (val) handleNotificationsChange(val === "on"); }}
-          fullWidth
-          size="small"
-          disabled={notificationPermission === "denied"}
-        >
-          <ToggleButton value="off">Off</ToggleButton>
-          <ToggleButton value="on">On</ToggleButton>
-        </ToggleButtonGroup>
-        {notificationPermission === "denied" && (
-          <Typography variant="caption" color="error" sx={{ mt: 0.5, display: "block" }}>
-            Notifications are blocked in your browser settings.
-          </Typography>
-        )}
 
         <Divider sx={{ my: 2 }} />
 

@@ -160,6 +160,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     localStorage.setItem("notificationsEnabled", String(checked));
   };
 
+  const handleTestNotification = () => {
+    new Notification("✅ Paddlecheck", {
+      body: "Test notification — notifications are working!",
+      icon: "/web-app-manifest-192x192.png",
+    });
+  };
+
   const handleLevelChange = (event: SelectChangeEvent<PaddlerType | "">) => {
     const level = event.target.value as PaddlerType | "";
     setPaddlerLevel(level);
@@ -260,6 +267,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           <Typography variant="caption" color="error" sx={{ mt: 0.5, display: "block" }}>
             Notifications are blocked in your browser settings.
           </Typography>
+        )}
+        {notificationsEnabled && notificationPermission === "granted" && (
+          <Button
+            onClick={handleTestNotification}
+            fullWidth
+            variant="outlined"
+            size="small"
+            sx={{ mt: 1 }}
+          >
+            Send test notification
+          </Button>
         )}
 
         <Divider sx={{ my: 2 }} />

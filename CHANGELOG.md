@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.3.0...paddlecheck-v1.3.1) (2026-06-06)
+
+
+### Bug Fixes
+
+* prevent duplicate release PRs from rapid successive merges ([5df0b30](https://github.com/dylanr97/Paddlecheck/commit/5df0b307a53aae74f7e592ec5efcd6c55a7f1870))
+* prevent duplicate release PRs from rapid successive merges ([ba19d58](https://github.com/dylanr97/Paddlecheck/commit/ba19d581dde80e1eb3cfc8efddba656e0be3ba4d))
+* upgrade postcss to 8.5.15 via npm overrides to patch CVE-2026-41305 ([f325c55](https://github.com/dylanr97/Paddlecheck/commit/f325c55868ff89e6251a9ec10442c395e8c2d079))
+* upgrade postcss to 8.5.15 via npm overrides to patch CVE-2026-41305 ([f1e4528](https://github.com/dylanr97/Paddlecheck/commit/f1e45287e0b57c59bf96c9151ec6dea5414f07fc))
+
 ## [1.3.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.2.0...paddlecheck-v1.3.0) (2026-06-06)
 
 

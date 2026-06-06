@@ -112,6 +112,8 @@
 * disable react/display-name rule for app metadata files ([da91f44](https://github.com/dylanr97/Paddlecheck/commit/da91f443011da892c77a3f1578f21d7a1d0bfe47))
 * drawer background, swipe-to-close, and matrix text clarity ([8a7dffe](https://github.com/dylanr97/Paddlecheck/commit/8a7dffe2fe690ca06a02cda5d6712da966f6d54e))
 * **eslint:** downgrade to eslint ^9.7 and use prettier flat config ([29c081a](https://github.com/dylanr97/Paddlecheck/commit/29c081a96f5e42ea595fdf9a0f12a3fa0d42624d))
+* **eslint:** upgrade to ESLint 10 and fix react plugin compatibility ([f6e4a28](https://github.com/dylanr97/Paddlecheck/commit/f6e4a286e44cea0a8ff490d9f133f19731fcdcd4))
+* **eslint:** upgrade to ESLint 10 and fix react plugin compatibility ([aaaa3c5](https://github.com/dylanr97/Paddlecheck/commit/aaaa3c55e12d3fba4408e03a1c50c1c85c2c740c)), closes [#186](https://github.com/dylanr97/Paddlecheck/issues/186)
 * Improve level description retrieval logic for better accuracy ([71d156c](https://github.com/dylanr97/Paddlecheck/commit/71d156ce9b8cf17c36687076048cde930b5f6464))
 * include observations in Bewdley fetch fallback ([f7e9ac5](https://github.com/dylanr97/Paddlecheck/commit/f7e9ac5c7007d055ac634c2df796c4fd868fc5e4))
 * init settings state with lazy useState to satisfy lint rule ([b1e4e87](https://github.com/dylanr97/Paddlecheck/commit/b1e4e871c34f8b418dc939b5b41020d2d8fa8416))

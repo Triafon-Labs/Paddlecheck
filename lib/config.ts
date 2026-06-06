@@ -26,10 +26,17 @@ import { Status } from "@/types";
 // It is currently set up for Worcester Canoe Club (UK) on the River Severn.
 // If you are forking this repo for another club, you will need to update
 // the values below to match your location and river conditions.
+// See README.md for a full adaptation guide.
 // ============================================================================
 
+// --- Club Identity ---
+// Update these to reflect your own club.
+export const CLUB_NAME = "Worcester Canoe Club";
+export const CONTACT_EMAIL = "REDACTED";
+
 // --- Club Information & Links ---
-// Links displayed in the "Useful Links" popover
+// Links displayed in the "Useful Links" section of the settings drawer.
+// Replace or extend these with links relevant to your venue.
 export const USEFUL_LINKS = [
   {
     name: "River Severn level at Worcester (Barbourne)",
@@ -46,14 +53,19 @@ export const USEFUL_LINKS = [
 ];
 
 // --- River and Weather Service ---
-// Station ID for the Environment Agency Flood Monitoring API
-export const RIVER_STATION_ID = "2642"; // Diglis
+// Station ID for the Environment Agency Flood Monitoring API.
+// Browse available stations at: https://environment.data.gov.uk/flood-monitoring/id/stations
+// Find your nearest station, then copy the numeric ID from the URL (e.g. "2642").
+export const RIVER_STATION_ID = "2642"; // Diglis, Worcester
 export const LATITUDE = 52.2;
 export const LONGITUDE = -2.2;
 export const HISTORICAL_DAYS = 5;
 
-// Bewdley upstream station forecast (used to improve Worcester predictions)
-// The flood wave takes ~6 hours to travel from Bewdley to Worcester
+// Upstream station forecast — used to improve near-future level predictions.
+// The app fetches CSV data from an upstream gauge and shifts it forward by
+// BEWDLEY_TRAVEL_HOURS to estimate when a flood wave will arrive.
+// CSV URLs follow the pattern: https://check-for-flooding.service.gov.uk/station-csv/<station-id>
+// Set both to null / 0 if you don't have a useful upstream station.
 export const BEWDLEY_CSV_URL =
   "https://check-for-flooding.service.gov.uk/station-csv/2001";
 export const BEWDLEY_TRAVEL_HOURS = 6;
@@ -150,6 +162,33 @@ export const THRESHOLDS = {
   RIVER_LEVEL_INITIAL_RAG_3: 2.2,
 };
 
+// --- Conditions Key Descriptions ---
+// These appear in the Settings drawer "Conditions Key" section.
+// Update them to describe your own venue's landmarks and club guidelines.
+
+export const RAG_DESCRIPTIONS: Record<Status, string> = {
+  "Light Green":
+    "Ideal conditions. Beginners need coach supervision. Improvers may paddle as a group without a coach. Intermediates may paddle solo.",
+  "Dark Green":
+    "Good conditions. Beginners and improvers need coach supervision. Intermediates may paddle with at least one other intermediate.",
+  Amber:
+    "Coach's discretion required. Beginners and improvers may only paddle at coach's discretion. Intermediates need supervision by an independent paddler or coach.",
+  Red: "Risky conditions. No paddling for beginners or improvers. Intermediates at coach's discretion only (not above 10 steps from car park). PFDs must be worn by all.",
+  "No Paddling":
+    "Do not paddle. Triggered by thunderstorm risk or dangerously high river level.",
+  Unknown: "Data unavailable.",
+};
+
+// Descriptions for each river level band in the conditions key.
+// Rewrite these to describe your own launch point landmarks.
+export const RIVER_LEVEL_BAND_DESCRIPTIONS = {
+  belowRag1: "Below the wooden landing stage. Good launch conditions.",
+  rag1ToRag2: "Between landing stage and concrete step. Still paddleable with care.",
+  rag2ToRag3: "Above the concrete step. PFDs must be worn by all.",
+  rag3Plus: "Above 10 steps from the car park. No paddling for intermediates and below.",
+  noPaddling: "Boathouse flooding. No paddling under any circumstances.",
+};
+
 // --- UI Text and Icons ---
 export const REASON_ICONS: Record<string, React.ElementType> = {
   [`Slightly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1}m)`]:
@@ -169,7 +208,11 @@ export const REASON_ICONS: Record<string, React.ElementType> = {
 };
 
 // Descriptions of river levels at specific local landmarks.
-// The key is the river level in meters.
+// The key is the river level in metres as read from your gauge station.
+// Build this list by visiting your venue at different water levels and
+// recording the gauge reading alongside what you observe (e.g. "water over
+// the bottom step", "launching from grass verge"). You can leave this empty
+// if you don't have location-specific observations yet.
 export const LEVEL_DESCRIPTIONS: Record<number, string> = {
   1.0: "Able to launch from the landing stage – OK",
   1.15: "Water over one end of the landing stage",
@@ -191,7 +234,9 @@ export const LEVEL_DESCRIPTIONS: Record<number, string> = {
   5.55: "Boathouse inaccessible, dangerous flow, no paddling advised",
 };
 
-// Specific to Pitchcroft race course paddleability
+// Venue-specific flood-plain paddleability map — Worcester's Pitchcroft race
+// course becomes paddleable when the river overtops its banks at high levels.
+// Replace or remove this if your venue doesn't have a similar feature.
 export const PITCHCROFT_PADDLEABILITY: Record<number, string> = {
   4.0: "Variable",
   4.5: "Good",

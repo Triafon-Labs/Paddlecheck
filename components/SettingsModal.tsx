@@ -41,25 +41,21 @@ import {
 } from "@mui/icons-material";
 import { useAppTheme, ThemeMode } from "@/lib/ThemeContext";
 import { PaddlerType, Status } from "@/types";
-import { RAG_STATUS_UI, THRESHOLDS, VISIBILITY_DESCRIPTIONS, USEFUL_LINKS } from "@/lib/config";
+import {
+  RAG_STATUS_UI,
+  THRESHOLDS,
+  VISIBILITY_DESCRIPTIONS,
+  USEFUL_LINKS,
+  RAG_DESCRIPTIONS,
+  RIVER_LEVEL_BAND_DESCRIPTIONS,
+  CONTACT_EMAIL,
+} from "@/lib/config";
 
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-const RAG_DESCRIPTIONS: Record<Status, string> = {
-  "Light Green":
-    "Ideal conditions. Beginners need coach supervision. Improvers may paddle as a group without a coach. Intermediates may paddle solo.",
-  "Dark Green":
-    "Good conditions. Beginners and improvers need coach supervision. Intermediates may paddle with at least one other intermediate.",
-  Amber:
-    "Coach's discretion required. Beginners and improvers may only paddle at coach's discretion. Intermediates need supervision by an independent paddler or coach.",
-  Red:
-    "Risky conditions. No paddling for beginners or improvers. Intermediates at coach's discretion only (not above 10 steps from car park). PFDs must be worn by all.",
-  "No Paddling": "Do not paddle. Triggered by thunderstorm risk or dangerously high river level.",
-  Unknown: "Data unavailable.",
-};
 
 const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
   const ui = RAG_STATUS_UI[status];
@@ -269,35 +265,35 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             <ThresholdRow
               icon={<Water fontSize="small" />}
               label={`Below ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} m`}
-              description="Below the wooden landing stage. Good launch conditions."
+              description={RIVER_LEVEL_BAND_DESCRIPTIONS.belowRag1}
               chipLabel="Light Green"
               ragColor={RAG_STATUS_UI["Light Green"].color}
             />
             <ThresholdRow
               icon={<Water fontSize="small" />}
               label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} m`}
-              description="Between landing stage and concrete step. Still paddleable with care."
+              description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag1ToRag2}
               chipLabel="Dark Green"
               ragColor={RAG_STATUS_UI["Dark Green"].color}
             />
             <ThresholdRow
               icon={<Waves fontSize="small" />}
               label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m`}
-              description="Above the concrete step. PFDs must be worn by all."
+              description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag2ToRag3}
               chipLabel="Amber"
               ragColor={RAG_STATUS_UI["Amber"].color}
             />
             <ThresholdRow
               icon={<Tsunami fontSize="small" />}
               label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m and above`}
-              description="Above 10 steps from the car park. No paddling for intermediates and below."
+              description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag3Plus}
               chipLabel="Red"
               ragColor={RAG_STATUS_UI["Red"].color}
             />
             <ThresholdRow
               icon={<Flood fontSize="small" />}
               label={`${THRESHOLDS.RIVER_LEVEL_NO_PADDLING} m and above`}
-              description="Boathouse flooding. No paddling under any circumstances."
+              description={RIVER_LEVEL_BAND_DESCRIPTIONS.noPaddling}
               chipLabel="No Paddling"
               ragColor={RAG_STATUS_UI["No Paddling"].color}
             />
@@ -423,7 +419,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           This is a hobby project, so there might be mistakes. Always check
           conditions yourself and talk to coaches or experienced paddlers before
           heading out.{" "}
-          <Link href="mailto:REDACTED" color="inherit">
+          <Link href={`mailto:${CONTACT_EMAIL}`} color="inherit">
             Feedback welcome here!
           </Link>
         </Typography>

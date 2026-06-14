@@ -11,6 +11,30 @@ const isDarkOnly = (reasons: string[]) =>
 const slotAtHour = (graphData: DayForecast["graphData"], hour: number) =>
   graphData.find((pt) => hourOf(pt.time) === hour);
 
+// Describe how temperature moves across the day. Directional ("rising from X
+// to Y") only when the extremes are meaningfully apart and ordered in time;
+// otherwise "steady around X".
+function describeTemperature(slots: DayForecast["graphData"]): string | null {
+  const points = slots
+    .map((s) => ({ hour: hourOf(s.time), temp: s.temperature }))
+    .filter((p): p is { hour: number; temp: number } => typeof p.temp === "number");
+  if (points.length === 0) return null;
+
+  let lo = points[0];
+  let hi = points[0];
+  for (const p of points) {
+    if (p.temp < lo.temp) lo = p;
+    if (p.temp > hi.temp) hi = p;
+  }
+  const loT = Math.round(lo.temp);
+  const hiT = Math.round(hi.temp);
+
+  if (hiT - loT < 2) return `air temperature steady around ${loT}°C`;
+  if (hi.hour > lo.hour) return `air temperature rising from ${loT}°C to ${hiT}°C`;
+  if (hi.hour < lo.hour) return `air temperature falling from ${hiT}°C to ${loT}°C`;
+  return `air temperature between ${loT}°C and ${hiT}°C`;
+}
+
 interface Window {
   startHour: number;
   endHour: number;
@@ -148,27 +172,21 @@ export function buildNextDaytimeOutlook(
     dayIndex === 0 ? "later today" : dayIndex === 1 ? "tomorrow" : day.label.toLowerCase();
 
   const levels = daySlots.map((s) => s.predictedLevel);
-  const levelRange = `${Math.min(...levels).toFixed(2)}–${Math.max(...levels).toFixed(2)}m`;
+  const minL = Math.min(...levels);
+  const maxL = Math.max(...levels);
+  const levelText =
+    maxL - minL < 0.02
+      ? `river level steady around ${minL.toFixed(2)}m`
+      : `river level between ${minL.toFixed(2)}m and ${maxL.toFixed(2)}m`;
 
-  const temps = daySlots
-    .map((s) => s.temperature)
-    .filter((t): t is number => typeof t === "number");
-  const tempRange = temps.length
-    ? `${Math.round(Math.min(...temps))}–${Math.round(Math.max(...temps))}°C`
-    : null;
+  const tempText = describeTemperature(daySlots);
 
   const winds = daySlots
     .map((s) => s.windSpeed)
     .filter((w): w is number => typeof w === "number");
-  const windText = winds.length ? `up to ${Math.round(Math.max(...winds))} mph` : null;
+  const windText = winds.length ? `wind up to ${Math.round(Math.max(...winds))} mph` : null;
 
-  const rangesText = [
-    `river level ${levelRange}`,
-    tempRange ? `air temperature ${tempRange}` : null,
-    windText ? `wind ${windText}` : null,
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const rangesText = [levelText, tempText, windText].filter(Boolean).join(", ");
 
   const { bestStatus, windows } = findGreenWindows(daySlots);
   let bestTimes: string | null = null;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Alert, Box, Typography } from "@mui/material";
+import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { KayakConditions } from "@/types";
 import { useKayakContext } from "@/lib/KayakDataContext";
@@ -69,7 +69,7 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL, 
               </Box>
             </>
           ) : loading && !text
-            ? "…"
+            ? <CircularProgress size={14} thickness={5} sx={{ color: "text.secondary", verticalAlign: "middle" }} />
             : text}
           {loading && text && (
             <Box component="span" sx={{ opacity: 0.35 }}>▋</Box>

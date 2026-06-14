@@ -30,13 +30,17 @@ export default function ConditionsBriefing({ conditions }: Props) {
     setFailed(false);
 
     const todayForecast = forecastDays?.[0] ?? null;
-    const bestTimes = buildBestPaddlingTimes(todayForecast);
+    const currentlyDark = conditions.dark ?? false;
+    const bestTimes = currentlyDark ? null : buildBestPaddlingTimes(todayForecast);
+    const sunset = todayForecast?.sunset
+      ? todayForecast.sunset.split("T")[1]?.slice(0, 5)
+      : null;
 
     try {
       const res = await fetch("/api/briefing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conditions, bestTimes }),
+        body: JSON.stringify({ conditions, bestTimes, sunset, currentlyDark }),
       });
 
       if (!res.ok || !res.body) {

@@ -12,8 +12,17 @@ export async function POST(request: Request) {
   }
 
   const client = new Groq();
-  const { conditions, bestTimes }: { conditions: KayakConditions; bestTimes?: string | null } =
-    await request.json();
+  const {
+    conditions,
+    bestTimes,
+    sunset,
+    currentlyDark,
+  }: {
+    conditions: KayakConditions;
+    bestTimes?: string | null;
+    sunset?: string | null;
+    currentlyDark?: boolean;
+  } = await request.json();
 
   const windDir =
     conditions.windDirection !== undefined
@@ -48,7 +57,9 @@ export async function POST(request: Request) {
     conditions.pitchcroftPaddleability
       ? `Pitchcroft: ${conditions.pitchcroftPaddleability}`
       : null,
+    !currentlyDark && sunset ? `Sunset today: ${sunset}` : null,
     bestTimes ?? null,
+    currentlyDark ? `Currently dark — best conditions will be tomorrow` : null,
   ]
     .filter(Boolean)
     .join("\n");

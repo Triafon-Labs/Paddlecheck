@@ -44,6 +44,11 @@ export function buildBestPaddlingTimes(todayForecast: DayForecast | null): strin
   if (windows.length === 0) return null;
 
   const label = bestStatus === "Light Green" ? "light green" : "dark green";
-  const ranges = windows.map((w) => `${w.start}–${w.end}`).join(", ");
+  const ranges = windows
+    .map((w, i) => {
+      const start = i === 0 && w.start === currentHH ? "now" : w.start;
+      return `${start}–${w.end}`;
+    })
+    .join(", ");
   return `Best conditions today: ${ranges} (${label})`;
 }

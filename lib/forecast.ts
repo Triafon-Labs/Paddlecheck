@@ -1,5 +1,13 @@
 import { DayForecast, Status } from "@/types";
 
+const isDarkOnly = (reasons: string[]) =>
+  reasons.length === 1 && reasons[0] === "Dark";
+
+const slotAtHour = (graphData: DayForecast["graphData"], hour: number) =>
+  graphData.find((pt) => pt.time === `${String(hour).padStart(2, "0")}:00`);
+
+const hhmm = (iso: string) => iso.split("T")[1]?.slice(0, 5) ?? null;
+
 export function buildBestPaddlingTimes(todayForecast: DayForecast | null): string | null {
   if (!todayForecast) return null;
 
@@ -43,14 +51,37 @@ export function buildBestPaddlingTimes(todayForecast: DayForecast | null): strin
 
   if (windows.length === 0) return null;
 
+  const { graphData, sunrise, sunset } = todayForecast;
+  const sunriseHHMM = sunrise ? hhmm(sunrise) : null;
+  const sunsetHHMM = sunset ? hhmm(sunset) : null;
+
   const label = bestStatus === "Light Green" ? "light green" : "dark green";
   const ranges = windows
     .map((w, i) => {
-      const start = i === 0 && w.start === currentHH ? "now" : w.start;
-      const endHour = (parseInt(w.end.split(":")[0], 10) + 1) % 24;
-      const end = `${String(endHour).padStart(2, "0")}:00`;
+      // Start: use "now" for current hour, or sunrise if the preceding slot was dark-only
+      let start: string;
+      if (i === 0 && w.start === currentHH) {
+        start = "now";
+      } else {
+        const startHour = parseInt(w.start.split(":")[0], 10);
+        const prevSlot = slotAtHour(graphData, startHour - 1);
+        start =
+          sunriseHHMM && prevSlot && isDarkOnly(prevSlot.reasons)
+            ? sunriseHHMM
+            : w.start;
+      }
+
+      // End: extend to sunset if the slot immediately after is dark-only
+      const endHour = parseInt(w.end.split(":")[0], 10);
+      const nextSlot = slotAtHour(graphData, endHour + 1);
+      const end =
+        sunsetHHMM && nextSlot && isDarkOnly(nextSlot.reasons)
+          ? sunsetHHMM
+          : `${String((endHour + 1) % 24).padStart(2, "0")}:00`;
+
       return `${start}–${end}`;
     })
     .join(", ");
+
   return `Best conditions today: ${ranges} (${label})`;
 }

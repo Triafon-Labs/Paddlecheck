@@ -51,7 +51,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                 p: 2,
                 borderRadius: 1,
                 backgroundColor: noPaddlingStatusInfo.backgroundColor,
-                border: `2px solid ${noPaddlingStatusInfo.color}`,
+                border: `1px solid ${noPaddlingStatusInfo.color}`,
               }}
             >
               <NoPaddlingIcon

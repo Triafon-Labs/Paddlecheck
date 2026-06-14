@@ -61,7 +61,7 @@ const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
   const ui = RAG_STATUS_UI[status];
   const Icon = ui.icon;
   return (
-    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, py: 0.75 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1 }}>
       <Box
         sx={{
           width: 28,
@@ -72,7 +72,6 @@ const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
-          mt: 0.1,
         }}
       >
         <Icon sx={{ color: "#fff", fontSize: 16 }} />

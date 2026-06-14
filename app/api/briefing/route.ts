@@ -1,7 +1,5 @@
-import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 import { KayakConditions } from "@/types";
-
-const client = new Anthropic();
 
 function degreesToCompass(deg: number): string {
   const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
@@ -9,10 +7,11 @@ function degreesToCompass(deg: number): string {
 }
 
 export async function POST(request: Request) {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GROQ_API_KEY) {
     return new Response("API key not configured", { status: 503 });
   }
 
+  const client = new Groq();
   const conditions: KayakConditions = await request.json();
 
   const windDir =
@@ -54,9 +53,10 @@ export async function POST(request: Request) {
     .filter(Boolean)
     .join("\n");
 
-  const stream = await client.messages.stream({
-    model: "claude-haiku-4-5-20251001",
+  const stream = await client.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
     max_tokens: 120,
+    stream: true,
     messages: [
       {
         role: "user",
@@ -73,12 +73,8 @@ Write only the summary. No headings, no bullet points, no preamble.`,
   const readable = new ReadableStream({
     async start(controller) {
       for await (const chunk of stream) {
-        if (
-          chunk.type === "content_block_delta" &&
-          chunk.delta.type === "text_delta"
-        ) {
-          controller.enqueue(encoder.encode(chunk.delta.text));
-        }
+        const text = chunk.choices[0]?.delta?.content ?? "";
+        if (text) controller.enqueue(encoder.encode(text));
       }
       controller.close();
     },

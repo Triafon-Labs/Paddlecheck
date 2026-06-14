@@ -4,9 +4,11 @@ export function buildBestPaddlingTimes(todayForecast: DayForecast | null): strin
   if (!todayForecast) return null;
 
   const now = new Date();
-  const currentHHMM = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const currentHH = `${String(now.getHours()).padStart(2, "0")}:00`;
 
-  const futureSlots = todayForecast.graphData.filter((pt) => pt.time >= currentHHMM);
+  const futureSlots = todayForecast.graphData.filter(
+    (pt) => pt.time >= currentHH && !pt.reasons.includes("Dark")
+  );
   if (futureSlots.length === 0) return null;
 
   const preferredStatuses: Status[] = ["Light Green", "Dark Green"];

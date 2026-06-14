@@ -65,8 +65,8 @@ export async function POST(request: Request) {
     .join("\n");
 
   const stream = await client.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    max_tokens: 120,
+    model: "openai/gpt-oss-120b",
+    max_tokens: 180,
     stream: true,
     messages: [
       {

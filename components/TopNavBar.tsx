@@ -10,7 +10,7 @@ import SettingsModal from "./SettingsModal";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { degreesToCompass } from "@/lib/weather";
 import { ragStatus } from "@/lib/rag";
-import { buildBestPaddlingTimes } from "@/lib/forecast";
+import { buildBestPaddlingTimes, buildNextDaytimeOutlook, hasDaylightRemaining } from "@/lib/forecast";
 
 
 
@@ -54,10 +54,23 @@ const buildShareText = (
   if (weatherLine) lines.push(weatherLine);
 
   const todayForecast = forecastDays?.[0] ?? null;
-  const bestTimes = buildBestPaddlingTimes(todayForecast);
-  if (bestTimes) {
-    lines.push("");
-    lines.push(`🟢 *${bestTimes}*`);
+  if (hasDaylightRemaining(todayForecast)) {
+    const bestTimes = buildBestPaddlingTimes(todayForecast);
+    if (bestTimes) {
+      lines.push("");
+      lines.push(`🟢 *${bestTimes}*`);
+    }
+  } else {
+    const outlook = buildNextDaytimeOutlook(forecastDays);
+    if (outlook) {
+      const label = outlook.dayLabel.charAt(0).toUpperCase() + outlook.dayLabel.slice(1);
+      lines.push("");
+      lines.push(`🌙 _It's currently dark._`);
+      lines.push(`*${label}:* ${outlook.rangesText}`);
+      if (outlook.bestTimes) {
+        lines.push(`🟢 *Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}*`);
+      }
+    }
   }
 
   return lines.join("\n");

@@ -17,12 +17,20 @@ export async function POST(request: Request) {
     bestTimes,
     sunset,
     currentlyDark,
+    currentTime,
+    model,
+    outlook,
   }: {
     conditions: KayakConditions;
     bestTimes?: string | null;
     sunset?: string | null;
     currentlyDark?: boolean;
+    currentTime?: string;
+    model?: string;
+    outlook?: { dayLabel: string; bestTimes: string | null; rangesText: string } | null;
   } = await request.json();
+
+  const selectedModel = model ?? "qwen/qwen3-32b";
 
   const windDir =
     conditions.windDirection !== undefined
@@ -30,6 +38,7 @@ export async function POST(request: Request) {
       : null;
 
   const parts = [
+    currentTime ? `Current time: ${currentTime}` : null,
     `Overall status: ${conditions.overallStatus}`,
     conditions.riverLevel !== undefined
       ? `River level: ${conditions.riverLevel.toFixed(2)}m`
@@ -58,20 +67,29 @@ export async function POST(request: Request) {
       ? `Pitchcroft: ${conditions.pitchcroftPaddleability}`
       : null,
     !currentlyDark && sunset ? `Sunset today: ${sunset}` : null,
-    bestTimes ?? null,
-    currentlyDark ? `Currently dark — best conditions will be tomorrow` : null,
+    !currentlyDark ? (bestTimes ?? null) : null,
+    currentlyDark && outlook
+      ? `It is currently dark, so do not summarise the current conditions. Instead, the outlook for ${outlook.dayLabel} is: ${outlook.rangesText}.`
+      : null,
+    currentlyDark && outlook?.bestTimes
+      ? `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`
+      : null,
+    currentlyDark && !outlook ? `It is currently dark and no daytime forecast is available.` : null,
   ]
     .filter(Boolean)
     .join("\n");
 
   const stream = await client.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    max_tokens: 120,
+    model: selectedModel,
+    temperature: 0.7,
+    top_p: 0.9,
     stream: true,
     messages: [
       {
         role: "user",
-        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Given the data below, write 2–3 plain-English sentences summarising today's paddling situation. Use the specific figures from the data — river level in metres, temperature in °C, wind speed in mph, and the exact time window if best conditions are provided. Focus on the most important factors driving the status. Don't repeat the status label verbatim or add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
+        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Refer to yourself as I. Given the data below, write 2–3 plain-English sentences summarising today's paddling situation. Use the specific figures from the data — river level in metres, temperature in °C, wind speed in mph, and the exact time window if best conditions are provided. Always use 24-hour time (e.g. 14:00, not 2pm). Weave the figures into natural, flowing sentences rather than listing them or copying the data's wording word-for-word. When describing a temperature range for a future day, phrase it as "between X°C and Y°C" rather than implying a direction — it is the range across the day, not a progression from now. Focus on the most important factors driving the status. Don't repeat the status label verbatim or add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
+
+If the data indicates it is currently dark, say that I won't summarise the current conditions because it's dark, then give the outlook for the next paddling day (tomorrow, or later today) using the figures provided.
 
 ${parts}
 
@@ -83,10 +101,31 @@ Write only the summary. No headings, no bullet points, no preamble.`,
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
+      let inThink = false;
+      let buf = "";
+
       for await (const chunk of stream) {
-        const text = chunk.choices[0]?.delta?.content ?? "";
-        if (text) controller.enqueue(encoder.encode(text));
+        buf += chunk.choices[0]?.delta?.content ?? "";
+
+        let out = "";
+        while (buf.length > 0) {
+          if (inThink) {
+            const end = buf.indexOf("</think>");
+            if (end === -1) { buf = ""; break; }
+            buf = buf.slice(end + 8);
+            inThink = false;
+          } else {
+            const start = buf.indexOf("<think>");
+            if (start === -1) { out += buf; buf = ""; break; }
+            out += buf.slice(0, start);
+            buf = buf.slice(start + 7);
+            inThink = true;
+          }
+        }
+
+        if (out) controller.enqueue(encoder.encode(out));
       }
+      if (!inThink && buf) controller.enqueue(encoder.encode(buf));
       controller.close();
     },
   });

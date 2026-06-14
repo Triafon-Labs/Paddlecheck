@@ -241,6 +241,8 @@ export const useKayakData = () => {
             value: ragHeight[predictedStatus] || 0.1,
             predictedLevel: predictedRiverLevel,
             predictionSource,
+            temperature: futureWeatherData.hourly.temperature_2m[index],
+            windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
           });
 
           // Only include Bewdley-backed points in the river level graph prediction

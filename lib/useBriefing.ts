@@ -2,24 +2,29 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
-import { buildBestPaddlingTimes } from "@/lib/forecast";
+import { buildBestPaddlingTimes, buildNextDaytimeOutlook } from "@/lib/forecast";
 
 async function streamBriefing(
   conditions: KayakConditions,
   forecastDays: DayForecast[] | null,
+  model: string,
   onChunk: (chunk: string) => void
 ): Promise<void> {
   const todayForecast = forecastDays?.[0] ?? null;
-  const currentlyDark = conditions.dark ?? false;
-  const bestTimes = currentlyDark ? null : buildBestPaddlingTimes(todayForecast);
+  const now = new Date();
+  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   const sunset = todayForecast?.sunset
     ? todayForecast.sunset.split("T")[1]?.slice(0, 5)
     : null;
+  const currentlyDark =
+    (conditions.dark ?? false) || (sunset !== null && currentTime >= sunset);
+  const bestTimes = currentlyDark ? null : buildBestPaddlingTimes(todayForecast);
+  const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
   const res = await fetch("/api/briefing", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ conditions, bestTimes, sunset, currentlyDark }),
+    body: JSON.stringify({ conditions, bestTimes, sunset, currentlyDark, currentTime, model, outlook }),
   });
 
   if (!res.ok || !res.body) throw new Error("Failed");
@@ -36,7 +41,8 @@ async function streamBriefing(
 export function useBriefing(
   conditions: KayakConditions | null,
   forecastDays: DayForecast[] | null,
-  auto: boolean
+  auto: boolean,
+  model: string
 ) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,7 +52,7 @@ export function useBriefing(
 
   const doFetch = useCallback(async () => {
     if (!conditions) return;
-    const key = conditions.lastUpdated ?? JSON.stringify(conditions);
+    const key = (conditions.lastUpdated ?? JSON.stringify(conditions)) + model;
     if (fetchedForRef.current === key) return;
     fetchedForRef.current = key;
 
@@ -56,15 +62,17 @@ export function useBriefing(
     setTriggered(true);
 
     try {
-      await streamBriefing(conditions, forecastDays, (chunk) =>
+      await streamBriefing(conditions, forecastDays, model, (chunk) =>
         setText((prev) => prev + chunk)
       );
-    } catch {
+    } catch (e) {
+      console.error("Briefing fetch failed:", e);
+      fetchedForRef.current = null;
       setFailed(true);
     } finally {
       setLoading(false);
     }
-  }, [conditions, forecastDays]);
+  }, [conditions, forecastDays, model]);
 
   useEffect(() => {
     if (auto && conditions) doFetch();

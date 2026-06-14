@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.4.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.3.2...paddlecheck-v1.4.0) (2026-06-14)
+
+
+### Features
+
+* add AI conditions briefing to status card ([e318c82](https://github.com/dylanr97/Paddlecheck/commit/e318c82c08687ea71501bab77afcfb9c7f98688b))
+* add auto-summarise setting and on-demand trigger ([7c54d13](https://github.com/dylanr97/Paddlecheck/commit/7c54d134d092c975d2173e533f60babf6cf97923))
+* finalise AI summary as Alert with action.hover background ([3883cd0](https://github.com/dylanr97/Paddlecheck/commit/3883cd0121e0facdd42ba7b12cfeee8715263998))
+* include best paddling times in AI briefing, fix air temperature label ([143a9f8](https://github.com/dylanr97/Paddlecheck/commit/143a9f818739661cbc4c19c35771501f0849fac0))
+* replace AI summary accordion with chip trigger ([d77650c](https://github.com/dylanr97/Paddlecheck/commit/d77650cc92c0877b2a1efec66dde468c9e70af88))
+* show both AI summary UI variants for comparison ([4de40c9](https://github.com/dylanr97/Paddlecheck/commit/4de40c9bbd4c488641253cffeec0490101f8fc74))
+
+
+### Bug Fixes
+
+* best conditions end time shows end of slot not start ([841a6c6](https://github.com/dylanr97/Paddlecheck/commit/841a6c636686d8af1b79329f51775cf779cb07e4))
+* best conditions ignoring current hour and including dark slots ([4e1c0d9](https://github.com/dylanr97/Paddlecheck/commit/4e1c0d90b1acf05721fcf576f25a2843bf6090ed))
+* format river level to 2dp in AI briefing prompt ([e329972](https://github.com/dylanr97/Paddlecheck/commit/e3299728ce81641da3fbef9c5ebd96eacea1e89a))
+* give AI briefing sunset context and handle currently-dark case ([57ed771](https://github.com/dylanr97/Paddlecheck/commit/57ed771ee380365ccd5351828d91317235c889aa))
+* tighten AI briefing prompt for specificity and cleaner data ([324b16c](https://github.com/dylanr97/Paddlecheck/commit/324b16ce720ec5f1f910aff49540dffe96faddd9))
+* use actual sunset/sunrise times at dark boundary hours ([5deb7e1](https://github.com/dylanr97/Paddlecheck/commit/5deb7e16665e2f1798e5b6a2c3e6f34520a38642))
+
 ## [1.3.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.3.1...paddlecheck-v1.3.2) (2026-06-14)
 
 

@@ -81,6 +81,8 @@ export interface PredictedGraphDataPoint {
   value: number;
   predictedLevel: number;
   predictionSource: "bewdley" | "linear";
+  temperature?: number;
+  windSpeed?: number;
 }
 
 export interface DayForecast {

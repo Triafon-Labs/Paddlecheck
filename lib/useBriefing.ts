@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
-import { buildBestPaddlingTimes } from "@/lib/forecast";
+import { buildBestPaddlingTimes, buildNextDaytimeOutlook } from "@/lib/forecast";
 
 async function streamBriefing(
   conditions: KayakConditions,
@@ -19,11 +19,12 @@ async function streamBriefing(
   const currentlyDark =
     (conditions.dark ?? false) || (sunset !== null && currentTime >= sunset);
   const bestTimes = currentlyDark ? null : buildBestPaddlingTimes(todayForecast);
+  const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
   const res = await fetch("/api/briefing", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ conditions, bestTimes, sunset, currentlyDark, currentTime, model }),
+    body: JSON.stringify({ conditions, bestTimes, sunset, currentlyDark, currentTime, model, outlook }),
   });
 
   if (!res.ok || !res.body) throw new Error("Failed");

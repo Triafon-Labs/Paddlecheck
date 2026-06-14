@@ -65,3 +65,25 @@ export type M3Palette = { [K in keyof typeof m3Light]: string };
 // Falls back to a regular transition in older browsers.
 export const springEasing =
   "linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.057 20.8%, 1.099, 1.115 24.6%, 1.121, 1.109 29.2%, 1.063 33.3%, 1.039, 1.019 40%, 0.997 43.8%, 0.985, 0.979 50%, 0.988 54.2%, 1 63.8%, 1.007 70%, 1.009 78.5%, 1.003 85.4%, 1)";
+
+// M3 motion easing curves
+export const m3Easing = {
+  // Standard: everyday transitions — color, opacity, small layout shifts
+  standard: "cubic-bezier(0.2, 0, 0, 1)",
+  // Decelerate: elements entering the screen (slide in, expand)
+  decelerate: "cubic-bezier(0, 0, 0, 1)",
+  // Accelerate: elements leaving the screen (slide out, collapse)
+  accelerate: "cubic-bezier(0.3, 0, 1, 1)",
+} as const;
+
+// M3 motion duration tokens (milliseconds)
+export const m3Duration = {
+  short1: 50,
+  short2: 100,
+  short3: 150,
+  short4: 200,
+  medium1: 250,
+  medium2: 300,
+  medium3: 350,
+  medium4: 400,
+} as const;

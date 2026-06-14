@@ -53,7 +53,7 @@ const TrafficLight: React.FC<TrafficLightProps> = ({ status, disabled }) => {
                   : "transparent",
                 border: `1px solid ${isActive ? color : theme.palette.divider}`,
                 // M3 Expressive spring motion — slight overshoot on size change
-                transition: `all 0.4s ${springEasing}`,
+                transition: `width 0.4s ${springEasing}, height 0.4s ${springEasing}, background-color 0.4s ${springEasing}, border-color 0.4s ${springEasing}, opacity 0.4s ${springEasing}`,
                 opacity: isActive ? 1 : 0.45,
               }}
             >

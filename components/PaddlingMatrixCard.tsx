@@ -20,8 +20,7 @@ import {
   CancelOutlined,
   WarningAmberOutlined,
   HelpOutlined,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
+  ExpandMore,
 } from "@mui/icons-material";
 import {
   Status,
@@ -265,11 +264,12 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                             size="small"
                             onClick={() => handleToggle(paddler)}
                           >
-                            {open[paddler] ? (
-                              <KeyboardArrowUp />
-                            ) : (
-                              <KeyboardArrowDown />
-                            )}
+                            <ExpandMore
+                              sx={{
+                                transform: open[paddler] ? "rotate(180deg)" : "rotate(0deg)",
+                                transition: "transform 200ms cubic-bezier(0.2, 0, 0, 1)",
+                              }}
+                            />
                           </IconButton>
                         </TableCell>
                         <TableCell component="th" scope="row" align="center">

@@ -1,5 +1,5 @@
 import { createTheme, type ThemeOptions } from "@mui/material/styles";
-import { m3Light, m3Dark, type M3Palette } from "./m3-palette";
+import { m3Light, m3Dark, type M3Palette, m3Easing, m3Duration } from "./m3-palette";
 
 // M3 type scale mapped to MUI variants, exploiting Roboto Flex variable axes:
 //   wght (weight 100–900), wdth (width 25–151), opsz (optical size 8–144)
@@ -165,6 +165,7 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
         "&.Mui-focusVisible": {
           outline: `3px solid ${m3.primary}`,
           outlineOffset: 2,
+          transition: `outline ${m3Duration.short2}ms ${m3Easing.standard}`,
         },
       },
     },
@@ -211,7 +212,7 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
             borderRadius: "inherit",
             backgroundColor: m3.onPrimary,
             opacity: 0,
-            transition: "opacity 0.2s",
+            transition: `opacity ${m3Duration.short2}ms ${m3Easing.standard}`,
             pointerEvents: "none",
           },
           "&:hover::after": { opacity: 0.08 },
@@ -247,6 +248,7 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
     styleOverrides: {
       root: {
         "&:last-child td, &:last-child th": { border: 0 },
+        transition: `background-color ${m3Duration.short2}ms ${m3Easing.standard}`,
         // M3 hover state layer at 4% onSurface
         "&:hover": {
           backgroundColor: `${m3.onSurface}0A`,
@@ -272,6 +274,26 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
   },
 });
 
+// M3-compliant MUI transitions config — propagates to all MUI components
+// that use theme.transitions.create() (Drawer, Accordion, Collapse, Fade…)
+const m3Transitions: ThemeOptions["transitions"] = {
+  easing: {
+    easeInOut: m3Easing.standard,    // everyday state transitions
+    easeOut: m3Easing.decelerate,    // elements entering the screen
+    easeIn: m3Easing.accelerate,     // elements leaving the screen
+    sharp: m3Easing.standard,        // quick discrete changes
+  },
+  duration: {
+    shortest: m3Duration.short1,
+    shorter: m3Duration.short3,
+    short: m3Duration.short4,
+    standard: m3Duration.medium2,
+    complex: m3Duration.medium4,
+    enteringScreen: m3Duration.medium3,
+    leavingScreen: m3Duration.short4,
+  },
+};
+
 export const lightTheme = createTheme({
   palette: {
     mode: "light",
@@ -290,6 +312,7 @@ export const lightTheme = createTheme({
   },
   shape: { borderRadius: 12 },
   typography: m3Typography,
+  transitions: m3Transitions,
   components: makeComponents(m3Light),
 });
 
@@ -326,5 +349,6 @@ export const darkTheme = createTheme({
   },
   shape: { borderRadius: 12 },
   typography: m3Typography,
+  transitions: m3Transitions,
   components: makeComponents(m3DarkNavy),
 });

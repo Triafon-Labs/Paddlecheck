@@ -11,9 +11,13 @@ export const SETTINGS_CHANGED_EVENT = "paddlecheck:settings-changed";
 
 interface Props {
   conditions: KayakConditions;
+  model?: string;
+  label?: string;
 }
 
-export default function ConditionsBriefing({ conditions }: Props) {
+const DEFAULT_MODEL = "openai/gpt-oss-120b";
+
+export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL, label }: Props) {
   const { forecastDays } = useKayakContext();
   const [auto, setAuto] = useState(
     () => typeof window !== "undefined" && localStorage.getItem("autoSummarise") === "true"
@@ -25,7 +29,7 @@ export default function ConditionsBriefing({ conditions }: Props) {
     return () => window.removeEventListener(SETTINGS_CHANGED_EVENT, handler);
   }, []);
 
-  const { text, loading, failed, triggered, trigger } = useBriefing(conditions, forecastDays, auto);
+  const { text, loading, failed, triggered, trigger } = useBriefing(conditions, forecastDays, auto, model);
 
   return (
     <Alert
@@ -33,6 +37,11 @@ export default function ConditionsBriefing({ conditions }: Props) {
       severity="info"
       sx={{ mt: 2, backgroundColor: "action.hover" }}
     >
+      {label && (
+        <Typography variant="caption" color="text.disabled" display="block" sx={{ mb: 0.5 }}>
+          {label}
+        </Typography>
+      )}
       {!triggered ? (
         <Typography
           variant="body2"

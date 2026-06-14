@@ -18,13 +18,17 @@ export async function POST(request: Request) {
     sunset,
     currentlyDark,
     currentTime,
+    model,
   }: {
     conditions: KayakConditions;
     bestTimes?: string | null;
     sunset?: string | null;
     currentlyDark?: boolean;
     currentTime?: string;
+    model?: string;
   } = await request.json();
+
+  const selectedModel = model ?? "openai/gpt-oss-120b";
 
   const windDir =
     conditions.windDirection !== undefined
@@ -68,7 +72,9 @@ export async function POST(request: Request) {
     .join("\n");
 
   const stream = await client.chat.completions.create({
-    model: "openai/gpt-oss-120b",
+    model: selectedModel,
+    temperature: 0.4,
+    top_p: 0.9,
     stream: true,
     messages: [
       {

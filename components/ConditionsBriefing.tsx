@@ -35,7 +35,11 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL, 
     <Alert
       icon={<AutoAwesomeIcon fontSize="small" />}
       severity="info"
-      sx={{ mt: 2, backgroundColor: "action.hover" }}
+      sx={{
+        mt: 2,
+        backgroundColor: "action.hover",
+        "& .MuiAlert-icon": { color: "text.secondary" },
+      }}
     >
       {label && (
         <Typography variant="caption" color="text.disabled" display="block" sx={{ mb: 0.5 }}>
@@ -49,7 +53,7 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL, 
           onClick={trigger}
           sx={{ cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted" }}
         >
-          Generate AI summary
+          Generate AI Summary
         </Typography>
       ) : (
         <Typography variant="body2" sx={{ lineHeight: 1.65 }}>

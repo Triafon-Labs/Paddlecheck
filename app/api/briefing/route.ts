@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     !currentlyDark && sunset ? `Sunset today: ${sunset}` : null,
     !currentlyDark ? (bestTimes ?? null) : null,
     currentlyDark && outlook
-      ? `It is currently dark, so members have most likely finished paddling for today. Outlook for ${outlook.dayLabel}: ${outlook.rangesText}.`
+      ? `It is currently dark, so do not summarise the current conditions. Instead, the outlook for ${outlook.dayLabel} is: ${outlook.rangesText}.`
       : null,
     currentlyDark && outlook?.bestTimes
       ? `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
         role: "user",
         content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Given the data below, write 2–3 plain-English sentences summarising today's paddling situation. Use the specific figures from the data — river level in metres, temperature in °C, wind speed in mph, and the exact time window if best conditions are provided. Focus on the most important factors driving the status. Don't repeat the status label verbatim or add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
 
-If the data indicates it is currently dark, briefly acknowledge that it's likely too dark to paddle now, then give the outlook for the next paddling day using the figures provided.
+If the data indicates it is currently dark, say that you won't summarise the current conditions because it's dark, then give the outlook for the next paddling day (tomorrow, or later today) using the figures provided.
 
 ${parts}
 

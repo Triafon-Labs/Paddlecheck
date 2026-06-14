@@ -65,7 +65,7 @@ const buildShareText = (
     if (outlook) {
       const label = outlook.dayLabel.charAt(0).toUpperCase() + outlook.dayLabel.slice(1);
       lines.push("");
-      lines.push(`🌙 _Likely too dark to paddle now._`);
+      lines.push(`🌙 _It's currently dark._`);
       lines.push(`*${label}:* ${outlook.rangesText}`);
       if (outlook.bestTimes) {
         lines.push(`🟢 *Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}*`);

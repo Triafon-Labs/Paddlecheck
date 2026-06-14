@@ -21,6 +21,8 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
@@ -40,6 +42,7 @@ import {
   Foggy,
 } from "@mui/icons-material";
 import { useAppTheme, ThemeMode } from "@/lib/ThemeContext";
+import { SETTINGS_CHANGED_EVENT } from "@/components/ConditionsBriefing";
 import { PaddlerType, Status } from "@/types";
 import {
   RAG_STATUS_UI,
@@ -136,6 +139,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">(
     () => (typeof window !== "undefined" ? (localStorage.getItem("paddlerLevel") as PaddlerType | null) ?? "" : "")
   );
+  const [autoSummarise, setAutoSummarise] = useState(
+    () => typeof window !== "undefined" && localStorage.getItem("autoSummarise") === "true"
+  );
+
+  const handleAutoSummariseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.checked;
+    setAutoSummarise(val);
+    localStorage.setItem("autoSummarise", val ? "true" : "false");
+    window.dispatchEvent(new Event(SETTINGS_CHANGED_EVENT));
+  };
   const visKeys = Object.keys(VISIBILITY_DESCRIPTIONS) as (keyof typeof VISIBILITY_DESCRIPTIONS)[];
 
   const handleLevelChange = (event: SelectChangeEvent<PaddlerType | "">) => {
@@ -217,6 +230,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <Button onClick={handleClearLevel} disabled={!paddlerLevel} fullWidth variant="outlined">
           Clear Selection
         </Button>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6" gutterBottom>
+          AI Summary
+        </Typography>
+        <FormControlLabel
+          control={<Switch checked={autoSummarise} onChange={handleAutoSummariseChange} />}
+          label="Auto-summarise conditions on load"
+        />
+        <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+          When off, tap &ldquo;Generate AI summary&rdquo; inside the status card to generate one on demand.
+        </Typography>
 
         <Divider sx={{ my: 2 }} />
 

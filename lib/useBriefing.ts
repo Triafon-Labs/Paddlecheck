@@ -10,16 +10,19 @@ async function streamBriefing(
   onChunk: (chunk: string) => void
 ): Promise<void> {
   const todayForecast = forecastDays?.[0] ?? null;
-  const currentlyDark = conditions.dark ?? false;
-  const bestTimes = currentlyDark ? null : buildBestPaddlingTimes(todayForecast);
+  const now = new Date();
+  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   const sunset = todayForecast?.sunset
     ? todayForecast.sunset.split("T")[1]?.slice(0, 5)
     : null;
+  const currentlyDark =
+    (conditions.dark ?? false) || (sunset !== null && currentTime >= sunset);
+  const bestTimes = currentlyDark ? null : buildBestPaddlingTimes(todayForecast);
 
   const res = await fetch("/api/briefing", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ conditions, bestTimes, sunset, currentlyDark }),
+    body: JSON.stringify({ conditions, bestTimes, sunset, currentlyDark, currentTime }),
   });
 
   if (!res.ok || !res.body) throw new Error("Failed");

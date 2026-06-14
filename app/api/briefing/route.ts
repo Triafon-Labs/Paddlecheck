@@ -17,11 +17,13 @@ export async function POST(request: Request) {
     bestTimes,
     sunset,
     currentlyDark,
+    currentTime,
   }: {
     conditions: KayakConditions;
     bestTimes?: string | null;
     sunset?: string | null;
     currentlyDark?: boolean;
+    currentTime?: string;
   } = await request.json();
 
   const windDir =
@@ -30,6 +32,7 @@ export async function POST(request: Request) {
       : null;
 
   const parts = [
+    currentTime ? `Current time: ${currentTime}` : null,
     `Overall status: ${conditions.overallStatus}`,
     conditions.riverLevel !== undefined
       ? `River level: ${conditions.riverLevel.toFixed(2)}m`

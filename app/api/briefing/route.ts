@@ -34,19 +34,17 @@ export async function POST(request: Request) {
     conditions.windSpeed !== undefined
       ? `Wind: ${conditions.windSpeed} mph${windDir ? ` from the ${windDir}` : ""}`
       : null,
-    conditions.rain !== undefined ? `Rain: ${conditions.rain ? "yes" : "no"}` : null,
+    conditions.rain ? `Rain: yes` : null,
     conditions.visibilityDescription
       ? `Visibility: ${conditions.visibilityDescription}`
       : conditions.visibility !== undefined
         ? `Visibility: ${conditions.visibility}m`
         : null,
-    conditions.dark !== undefined
-      ? `Currently dark: ${conditions.dark ? "yes" : "no"}`
-      : null,
+    conditions.dark ? `Currently dark: yes` : null,
     conditions.reasons?.length
       ? `Reasons for status: ${conditions.reasons.join("; ")}`
       : null,
-    conditions.launchMessage ? `Launch area: ${conditions.launchMessage}` : null,
+    conditions.launchMessage ? `Launch message: ${conditions.launchMessage}` : null,
     conditions.pitchcroftPaddleability
       ? `Pitchcroft: ${conditions.pitchcroftPaddleability}`
       : null,
@@ -62,7 +60,7 @@ export async function POST(request: Request) {
     messages: [
       {
         role: "user",
-        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Given the data below, write 2–3 plain-English sentences summarising today's paddling situation. Focus on the most important factors driving the status. Don't repeat the status label verbatim or add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
+        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Given the data below, write 2–3 plain-English sentences summarising today's paddling situation. Use the specific figures from the data — river level in metres, temperature in °C, wind speed in mph, and the exact time window if best conditions are provided. Focus on the most important factors driving the status. Don't repeat the status label verbatim or add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
 
 ${parts}
 

@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Box, Collapse, IconButton, Typography } from "@mui/material";
+import { Box, Chip, Collapse, Typography } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { KayakConditions } from "@/types";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { buildBestPaddlingTimes } from "@/lib/forecast";
@@ -70,54 +69,43 @@ export default function ConditionsBriefing({ conditions }: Props) {
   };
 
   return (
-    <Box sx={{ mt: 2, borderTop: "1px solid", borderColor: "divider", pt: 1 }}>
-      <Box
-        role="button"
-        tabIndex={0}
-        onClick={handleToggle}
-        onKeyDown={(e) => e.key === "Enter" && handleToggle()}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          cursor: "pointer",
-          userSelect: "none",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-          <AutoAwesomeIcon sx={{ fontSize: 13, color: "text.disabled" }} />
-          <Typography variant="caption" color="text.disabled">
-            AI summary
-          </Typography>
-        </Box>
-        <IconButton size="small" sx={{ color: "text.disabled", p: 0.25 }}>
-          <ExpandMoreIcon
-            sx={{
-              fontSize: 16,
-              transition: "transform 0.2s",
-              transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-            }}
-          />
-        </IconButton>
-      </Box>
+    <Box sx={{ mt: 2 }}>
+      {!expanded && (
+        <Chip
+          icon={<AutoAwesomeIcon />}
+          label="Summarise conditions"
+          variant="outlined"
+          onClick={handleToggle}
+          size="small"
+          sx={{ cursor: "pointer" }}
+        />
+      )}
 
       <Collapse in={expanded}>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ mt: 1, lineHeight: 1.65 }}
-        >
-          {failed
-            ? "Summary unavailable."
-            : loading && !text
-              ? "…"
-              : text}
-          {loading && text && (
-            <Box component="span" sx={{ opacity: 0.35 }}>
-              ▋
-            </Box>
-          )}
-        </Typography>
+        <Box sx={{ borderTop: "1px solid", borderColor: "divider", pt: 1.5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1 }}>
+            <AutoAwesomeIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+            <Typography variant="caption" color="text.secondary">
+              AI summary
+            </Typography>
+          </Box>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ lineHeight: 1.65 }}
+          >
+            {failed
+              ? "Summary unavailable."
+              : loading && !text
+                ? "…"
+                : text}
+            {loading && text && (
+              <Box component="span" sx={{ opacity: 0.35 }}>
+                ▋
+              </Box>
+            )}
+          </Typography>
+        </Box>
       </Collapse>
     </Box>
   );

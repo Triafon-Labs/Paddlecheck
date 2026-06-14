@@ -65,7 +65,9 @@ export function useBriefing(
       await streamBriefing(conditions, forecastDays, model, (chunk) =>
         setText((prev) => prev + chunk)
       );
-    } catch {
+    } catch (e) {
+      console.error("Briefing fetch failed:", e);
+      fetchedForRef.current = null;
       setFailed(true);
     } finally {
       setLoading(false);

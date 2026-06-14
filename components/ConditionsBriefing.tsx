@@ -57,11 +57,20 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL, 
         </Typography>
       ) : (
         <Typography variant="body2" sx={{ lineHeight: 1.65 }}>
-          {failed
-            ? "Summary unavailable."
-            : loading && !text
-              ? "…"
-              : text}
+          {failed ? (
+            <>
+              Summary unavailable.{" "}
+              <Box
+                component="span"
+                onClick={trigger}
+                sx={{ cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted" }}
+              >
+                Try again?
+              </Box>
+            </>
+          ) : loading && !text
+            ? "…"
+            : text}
           {loading && text && (
             <Box component="span" sx={{ opacity: 0.35 }}>▋</Box>
           )}

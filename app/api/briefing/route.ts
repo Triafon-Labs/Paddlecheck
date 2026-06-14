@@ -87,9 +87,9 @@ export async function POST(request: Request) {
     messages: [
       {
         role: "user",
-        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Given the data below, write 2–3 plain-English sentences summarising today's paddling situation. Use the specific figures from the data — river level in metres, temperature in °C, wind speed in mph, and the exact time window if best conditions are provided. Weave the figures into natural, flowing sentences rather than listing them or copying the data's wording word-for-word. Focus on the most important factors driving the status. Don't repeat the status label verbatim or add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
+        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Refer to yourself as I. Given the data below, write 2–3 plain-English sentences summarising today's paddling situation. Use the specific figures from the data — river level in metres, temperature in °C, wind speed in mph, and the exact time window if best conditions are provided. Always use 24-hour time (e.g. 14:00, not 2pm). Weave the figures into natural, flowing sentences rather than listing them or copying the data's wording word-for-word. When describing a temperature range for a future day, phrase it as "between X°C and Y°C" rather than implying a direction — it is the range across the day, not a progression from now. Focus on the most important factors driving the status. Don't repeat the status label verbatim or add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
 
-If the data indicates it is currently dark, say that you won't summarise the current conditions because it's dark, then give the outlook for the next paddling day (tomorrow, or later today) using the figures provided.
+If the data indicates it is currently dark, say that I won't summarise the current conditions because it's dark, then give the outlook for the next paddling day (tomorrow, or later today) using the figures provided.
 
 ${parts}
 

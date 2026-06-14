@@ -179,7 +179,17 @@ export function buildNextDaytimeOutlook(
       ? `river level steady around ${minL.toFixed(2)}m`
       : `river level between ${minL.toFixed(2)}m and ${maxL.toFixed(2)}m`;
 
-  const tempText = describeTemperature(daySlots);
+  const temps = daySlots
+    .map((s) => s.temperature)
+    .filter((t): t is number => typeof t === "number");
+  const minTemp = temps.length ? Math.round(Math.min(...temps)) : null;
+  const maxTemp = temps.length ? Math.round(Math.max(...temps)) : null;
+  const tempText =
+    minTemp !== null && maxTemp !== null
+      ? maxTemp - minTemp < 2
+        ? `air temperature steady around ${minTemp}°C`
+        : `air temperature between ${minTemp}°C and ${maxTemp}°C`
+      : null;
 
   const winds = daySlots
     .map((s) => s.windSpeed)

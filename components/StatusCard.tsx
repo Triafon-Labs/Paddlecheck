@@ -15,7 +15,7 @@ import {
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import { ragStatus, reasonIcons } from "@/lib/rag";
-import { ConditionsBriefingPaper, ConditionsBriefingAlert } from "./ConditionsBriefing";
+import ConditionsBriefing from "./ConditionsBriefing";
 
 interface StatusCardProps {
   conditions: KayakConditions | null;
@@ -90,8 +90,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               </TableBody>
             </Table>
           )}
-          <ConditionsBriefingPaper conditions={conditions} />
-          <ConditionsBriefingAlert conditions={conditions} />
+          <ConditionsBriefing conditions={conditions} />
         </>
       );
     }

@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.3.1...paddlecheck-v1.3.2) (2026-06-14)
+
+
+### Bug Fixes
+
+* add M3-compliant motion system ([2fb255e](https://github.com/dylanr97/Paddlecheck/commit/2fb255e7fa4e6c6f34d2240c794fb903ccc8c4c8))
+* complete Material Design 3 compliance for non-colour elements ([2f3ecb5](https://github.com/dylanr97/Paddlecheck/commit/2f3ecb51f30be55e1eade780859a75b821d57dff))
+* complete Material Design 3 compliance for non-colour elements ([2d142ad](https://github.com/dylanr97/Paddlecheck/commit/2d142add8cf84f1479865be8f5661df15e9976fc))
+
 ## [1.3.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.3.0...paddlecheck-v1.3.1) (2026-06-06)
 
 

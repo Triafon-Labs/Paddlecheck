@@ -81,13 +81,13 @@ export async function POST(request: Request) {
 
   const stream = await client.chat.completions.create({
     model: selectedModel,
-    temperature: 0.4,
+    temperature: 0.7,
     top_p: 0.9,
     stream: true,
     messages: [
       {
         role: "user",
-        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Given the data below, write 2–3 plain-English sentences summarising today's paddling situation. Use the specific figures from the data — river level in metres, temperature in °C, wind speed in mph, and the exact time window if best conditions are provided. Focus on the most important factors driving the status. Don't repeat the status label verbatim or add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
+        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Given the data below, write 2–3 plain-English sentences summarising today's paddling situation. Use the specific figures from the data — river level in metres, temperature in °C, wind speed in mph, and the exact time window if best conditions are provided. Weave the figures into natural, flowing sentences rather than listing them or copying the data's wording word-for-word. Focus on the most important factors driving the status. Don't repeat the status label verbatim or add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
 
 If the data indicates it is currently dark, say that you won't summarise the current conditions because it's dark, then give the outlook for the next paddling day (tomorrow, or later today) using the figures provided.
 

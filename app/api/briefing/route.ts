@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   const parts = [
     `Overall status: ${conditions.overallStatus}`,
     conditions.riverLevel !== undefined
-      ? `River level: ${conditions.riverLevel}m`
+      ? `River level: ${conditions.riverLevel.toFixed(2)}m`
       : null,
     conditions.levelChange
       ? `River trend: ${conditions.levelChange.value >= 0 ? "+" : ""}${conditions.levelChange.value}m over ${conditions.levelChange.period}`

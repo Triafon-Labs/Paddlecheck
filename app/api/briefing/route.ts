@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       : null,
     !currentlyDark && sunset ? `Sunset today: ${sunset}` : null,
     bestTimes ?? null,
-    currentlyDark ? `Currently dark — best conditions will be tomorrow` : null,
+    currentlyDark ? `Currently dark — do not describe or predict tomorrow's conditions. Just summarise current conditions briefly and end by telling members to check back tomorrow.` : null,
   ]
     .filter(Boolean)
     .join("\n");
@@ -91,10 +91,31 @@ Write only the summary. No headings, no bullet points, no preamble.`,
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
+      let inThink = false;
+      let buf = "";
+
       for await (const chunk of stream) {
-        const text = chunk.choices[0]?.delta?.content ?? "";
-        if (text) controller.enqueue(encoder.encode(text));
+        buf += chunk.choices[0]?.delta?.content ?? "";
+
+        let out = "";
+        while (buf.length > 0) {
+          if (inThink) {
+            const end = buf.indexOf("</think>");
+            if (end === -1) { buf = ""; break; }
+            buf = buf.slice(end + 8);
+            inThink = false;
+          } else {
+            const start = buf.indexOf("<think>");
+            if (start === -1) { out += buf; buf = ""; break; }
+            out += buf.slice(0, start);
+            buf = buf.slice(start + 7);
+            inThink = true;
+          }
+        }
+
+        if (out) controller.enqueue(encoder.encode(out));
       }
+      if (!inThink && buf) controller.enqueue(encoder.encode(buf));
       controller.close();
     },
   });

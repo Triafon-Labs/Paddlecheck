@@ -15,7 +15,7 @@ interface Props {
   label?: string;
 }
 
-const DEFAULT_MODEL = "openai/gpt-oss-120b";
+const DEFAULT_MODEL = "qwen/qwen3-32b";
 
 export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL, label }: Props) {
   const { forecastDays } = useKayakContext();

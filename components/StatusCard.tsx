@@ -90,9 +90,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               </TableBody>
             </Table>
           )}
-          <ConditionsBriefing conditions={conditions} model="openai/gpt-oss-120b" label="gpt-oss-120b" />
-          <ConditionsBriefing conditions={conditions} model="llama-3.3-70b-versatile" label="llama-3.3-70b" />
-          <ConditionsBriefing conditions={conditions} model="qwen/qwen3-32b" label="qwen3-32b" />
+          <ConditionsBriefing conditions={conditions} />
         </>
       );
     }

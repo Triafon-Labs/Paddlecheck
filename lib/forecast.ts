@@ -79,7 +79,16 @@ export function buildBestPaddlingTimes(todayForecast: DayForecast | null): strin
           ? sunsetHHMM
           : `${String((endHour + 1) % 24).padStart(2, "0")}:00`;
 
-      return `${start}–${end}`;
+      let durationNote = "";
+      if (start === "now") {
+        const [endH, endM] = end.split(":").map(Number);
+        const remaining = endH * 60 + endM - (now.getHours() * 60 + now.getMinutes());
+        if (remaining > 0 && remaining < 60) {
+          durationNote = ` — only ~${remaining} mins remaining`;
+        }
+      }
+
+      return `${start}–${end}${durationNote}`;
     })
     .join(", ");
 

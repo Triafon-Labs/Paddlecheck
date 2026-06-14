@@ -12,7 +12,8 @@ export async function POST(request: Request) {
   }
 
   const client = new Groq();
-  const conditions: KayakConditions = await request.json();
+  const { conditions, bestTimes }: { conditions: KayakConditions; bestTimes?: string | null } =
+    await request.json();
 
   const windDir =
     conditions.windDirection !== undefined
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
       ? `River trend: ${conditions.levelChange.value >= 0 ? "+" : ""}${conditions.levelChange.value}m over ${conditions.levelChange.period}`
       : null,
     conditions.temperature !== undefined
-      ? `Water temperature: ${conditions.temperature}°C`
+      ? `Air temperature: ${conditions.temperature}°C`
       : null,
     conditions.windSpeed !== undefined
       ? `Wind: ${conditions.windSpeed} mph${windDir ? ` from the ${windDir}` : ""}`
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
     conditions.pitchcroftPaddleability
       ? `Pitchcroft: ${conditions.pitchcroftPaddleability}`
       : null,
+    bestTimes ?? null,
   ]
     .filter(Boolean)
     .join("\n");

@@ -5,12 +5,15 @@ import { Box, Collapse, IconButton, Typography } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { KayakConditions } from "@/types";
+import { useKayakContext } from "@/lib/KayakDataContext";
+import { buildBestPaddlingTimes } from "@/lib/forecast";
 
 interface Props {
   conditions: KayakConditions;
 }
 
 export default function ConditionsBriefing({ conditions }: Props) {
+  const { forecastDays } = useKayakContext();
   const [expanded, setExpanded] = useState(false);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,11 +29,14 @@ export default function ConditionsBriefing({ conditions }: Props) {
     setLoading(true);
     setFailed(false);
 
+    const todayForecast = forecastDays?.[0] ?? null;
+    const bestTimes = buildBestPaddlingTimes(todayForecast);
+
     try {
       const res = await fetch("/api/briefing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(conditions),
+        body: JSON.stringify({ conditions, bestTimes }),
       });
 
       if (!res.ok || !res.body) {

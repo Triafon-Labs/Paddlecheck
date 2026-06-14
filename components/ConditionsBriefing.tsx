@@ -1,0 +1,59 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { Alert, Box, Typography } from "@mui/material";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import { KayakConditions } from "@/types";
+import { useKayakContext } from "@/lib/KayakDataContext";
+import { useBriefing } from "@/lib/useBriefing";
+
+export const SETTINGS_CHANGED_EVENT = "paddlecheck:settings-changed";
+
+interface Props {
+  conditions: KayakConditions;
+}
+
+export default function ConditionsBriefing({ conditions }: Props) {
+  const { forecastDays } = useKayakContext();
+  const [auto, setAuto] = useState(
+    () => typeof window !== "undefined" && localStorage.getItem("autoSummarise") === "true"
+  );
+
+  useEffect(() => {
+    const handler = () => setAuto(localStorage.getItem("autoSummarise") === "true");
+    window.addEventListener(SETTINGS_CHANGED_EVENT, handler);
+    return () => window.removeEventListener(SETTINGS_CHANGED_EVENT, handler);
+  }, []);
+
+  const { text, loading, failed, triggered, trigger } = useBriefing(conditions, forecastDays, auto);
+
+  return (
+    <Alert
+      icon={<AutoAwesomeIcon fontSize="small" />}
+      severity="info"
+      sx={{ mt: 2, backgroundColor: "action.hover" }}
+    >
+      {!triggered ? (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          onClick={trigger}
+          sx={{ cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted" }}
+        >
+          Generate AI summary
+        </Typography>
+      ) : (
+        <Typography variant="body2" sx={{ lineHeight: 1.65 }}>
+          {failed
+            ? "Summary unavailable."
+            : loading && !text
+              ? "…"
+              : text}
+          {loading && text && (
+            <Box component="span" sx={{ opacity: 0.35 }}>▋</Box>
+          )}
+        </Typography>
+      )}
+    </Alert>
+  );
+}

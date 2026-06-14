@@ -65,8 +65,7 @@ export async function POST(request: Request) {
     .join("\n");
 
   const stream = await client.chat.completions.create({
-    model: "qwen/qwen3-32b",
-    max_tokens: 180,
+    model: "openai/gpt-oss-120b",
     stream: true,
     messages: [
       {

@@ -51,7 +51,7 @@ const TrafficLight: React.FC<TrafficLightProps> = ({ status, disabled }) => {
                       )}, ${parseInt(color.slice(5, 7), 16)}, 0.25)`
                     : ragStatus[s].backgroundColor
                   : "transparent",
-                border: `2px solid ${isActive ? color : theme.palette.divider}`,
+                border: `1px solid ${isActive ? color : theme.palette.divider}`,
                 // M3 Expressive spring motion — slight overshoot on size change
                 transition: `all 0.4s ${springEasing}`,
                 opacity: isActive ? 1 : 0.45,

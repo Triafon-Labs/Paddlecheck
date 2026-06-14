@@ -161,6 +161,11 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
     styleOverrides: {
       root: {
         borderRadius: 9999,
+        // M3 focus indicator — thin primary outline on keyboard focus
+        "&.Mui-focusVisible": {
+          outline: `3px solid ${m3.primary}`,
+          outlineOffset: 2,
+        },
       },
     },
   },
@@ -196,10 +201,23 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
         "&.Mui-selected": {
           backgroundColor: m3.primary,
           color: m3.onPrimary,
-          "&:hover": {
-            backgroundColor: m3.primary,
-            opacity: 0.92,
+          // M3 state layers via pseudo-element overlay
+          position: "relative",
+          overflow: "hidden",
+          "&::after": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            borderRadius: "inherit",
+            backgroundColor: m3.onPrimary,
+            opacity: 0,
+            transition: "opacity 0.2s",
+            pointerEvents: "none",
           },
+          "&:hover::after": { opacity: 0.08 },
+          "&.Mui-focusVisible::after": { opacity: 0.12 },
+          "&:active::after": { opacity: 0.12 },
+          "&:hover": { backgroundColor: m3.primary },
         },
       },
     },
@@ -229,6 +247,10 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
     styleOverrides: {
       root: {
         "&:last-child td, &:last-child th": { border: 0 },
+        // M3 hover state layer at 4% onSurface
+        "&:hover": {
+          backgroundColor: `${m3.onSurface}0A`,
+        },
       },
     },
   },

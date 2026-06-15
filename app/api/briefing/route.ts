@@ -17,7 +17,8 @@ export async function POST(request: Request) {
   const client = new Groq();
   const {
     conditions,
-    bestTimes,
+    hourlyForecast,
+    sunrise,
     sunset,
     currentlyDark,
     currentTime,
@@ -25,7 +26,8 @@ export async function POST(request: Request) {
     outlook,
   }: {
     conditions: KayakConditions;
-    bestTimes?: string | null;
+    hourlyForecast?: string | null;
+    sunrise?: string | null;
     sunset?: string | null;
     currentlyDark?: boolean;
     currentTime?: string;
@@ -61,7 +63,6 @@ export async function POST(request: Request) {
       : conditions.visibility !== undefined
         ? `Visibility: ${conditions.visibility}m`
         : null,
-    conditions.dark ? `Currently dark: yes` : null,
     conditions.reasons?.length
       ? `Reasons for status: ${conditions.reasons.join("; ")}`
       : null,
@@ -69,8 +70,11 @@ export async function POST(request: Request) {
     conditions.pitchcroftPaddleability
       ? `Pitchcroft: ${conditions.pitchcroftPaddleability}`
       : null,
-    !currentlyDark && sunset ? `Sunset today: ${sunset}` : null,
-    !currentlyDark ? (bestTimes ?? null) : null,
+    !currentlyDark && sunrise ? `Sunrise: ${sunrise}` : null,
+    !currentlyDark && sunset ? `Sunset: ${sunset}` : null,
+    !currentlyDark && hourlyForecast
+      ? `Hour-by-hour forecast for today's remaining daylight:\n${hourlyForecast}`
+      : null,
     currentlyDark && outlook
       ? `It is currently dark, so do not summarise the current conditions. Instead, the outlook for ${outlook.dayLabel} is: ${outlook.rangesText}.`
       : null,
@@ -90,9 +94,15 @@ export async function POST(request: Request) {
     messages: [
       {
         role: "user",
-        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Refer to yourself as I. Given the data below, write 2–3 plain-English sentences summarising today's paddling situation. Use the specific figures from the data — river level in metres, temperature in °C, wind speed in mph, and the exact time window if best conditions are provided. Always use 24-hour time (e.g. 14:00, not 2pm). Weave the figures into natural, flowing sentences rather than listing them or copying the data's wording word-for-word. When describing a temperature range for a future day, phrase it as "between X°C and Y°C" rather than implying a direction — it is the range across the day, not a progression from now. Focus on the most important factors driving the status. Don't repeat the status label verbatim or add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
+        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Refer to yourself as I. You are given current conditions and an hour-by-hour forecast for today's remaining daylight hours.
 
-If the data indicates it is currently dark, say that I won't summarise the current conditions because it's dark, then give the outlook for the next paddling day (tomorrow, or later today) using the figures provided.
+Each hour has a status. The statuses, from best to worst, are: Light Green, Dark Green, Amber, Red, and No Paddling. Note that Light Green is better than Dark Green. The best window is the run of hours sharing the highest-ranked status that appears that day: if any hours are Light Green, the best window is those Light Green hours; only if there are no Light Green hours does Dark Green become the best window, and so on. Don't merge hours of different statuses into a single window.
+
+The hour-by-hour list covers daylight hours only. Each entry describes conditions for that hour onward, and the final entry's conditions hold until sunset — later hours are omitted purely because it becomes dark. So if the last daylight hour belongs to the best window, extend that window's end time to sunset rather than stopping at the last listed hour.
+
+Write 2–3 plain-English sentences that: (1) describe how conditions look for the next hour or two, and (2) identify the best window for paddling today and name its status colour (e.g. "Light Green from 09:00 until sunset") — or note if there are no green conditions. Use the specific figures — river level in metres, temperature in °C, wind speed in mph, and time ranges in 24-hour format (e.g. 14:00, not 2pm). Weave the figures into natural, flowing sentences. Do name the best window's status colour, but don't restate the current overall status label verbatim; don't list the data; and don't add safety advice beyond what the data already shows. Write in British English throughout — use UK spellings (e.g. metres, colour, favourable, summarise) and UK phrasing. Keep it friendly and accessible — members range from beginners to experienced paddlers.
+
+If the data indicates it is currently dark, say that I won't summarise the current conditions because it's dark, then give the outlook for the next paddling day (tomorrow, or later today) using the figures provided. When describing a temperature range for a future day, phrase it as "between X°C and Y°C" — it is the range across the day, not a progression from now.
 
 ${parts}
 

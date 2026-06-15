@@ -28,6 +28,7 @@ import {
   LONGITUDE,
   HISTORICAL_DAYS,
   getPitchcroftPaddleability,
+  isRainy,
 } from "@/lib/config";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -225,7 +226,7 @@ export const useKayakData = () => {
             riverLevel: predictedRiverLevel,
             temperature: futureWeatherData.hourly.temperature_2m[index],
             windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
-            rain: futureWeatherData.hourly.precipitation[index] > 0,
+            rain: isRainy(futureWeatherData.hourly.weather_code[index]),
             dark,
             visibility: futureWeatherData.hourly.visibility[index],
             weatherCode: futureWeatherData.hourly.weather_code[index],
@@ -234,15 +235,28 @@ export const useKayakData = () => {
           const { status: predictedStatus, reasons: predictedReasons } =
             calculateFinalRagStatus(predictedConditions);
 
+          // The "now" point should mirror the live status shown at the top of
+          // the app rather than the backward-looking hourly forecast bucket,
+          // so the graph and the headline status never disagree.
+          const isCurrentHour = d === 0 && h === currentHour;
+          const slotStatus = isCurrentHour ? status : predictedStatus;
+          const slotReasons = isCurrentHour ? reasons : predictedReasons;
+
           graphData.push({
             time: `${h}:00`,
-            status: predictedStatus,
-            reasons: predictedReasons,
-            value: ragHeight[predictedStatus] || 0.1,
-            predictedLevel: predictedRiverLevel,
+            status: slotStatus,
+            reasons: slotReasons,
+            value: ragHeight[slotStatus] || 0.1,
+            predictedLevel: isCurrentHour
+              ? riverData.latestLevel ?? predictedRiverLevel
+              : predictedRiverLevel,
             predictionSource,
-            temperature: futureWeatherData.hourly.temperature_2m[index],
-            windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
+            temperature: isCurrentHour
+              ? weatherData.temperature
+              : futureWeatherData.hourly.temperature_2m[index],
+            windSpeed: isCurrentHour
+              ? weatherData.windSpeed
+              : futureWeatherData.hourly.wind_speed_10m[index],
           });
 
           // Only include Bewdley-backed points in the river level graph prediction

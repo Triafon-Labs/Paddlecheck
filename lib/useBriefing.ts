@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
-import { buildBestPaddlingTimes, buildNextDaytimeOutlook } from "@/lib/forecast";
+import { buildHourlyForecastText, buildNextDaytimeOutlook } from "@/lib/forecast";
 
 async function streamBriefing(
   conditions: KayakConditions,
@@ -13,18 +13,25 @@ async function streamBriefing(
   const todayForecast = forecastDays?.[0] ?? null;
   const now = new Date();
   const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-  const sunset = todayForecast?.sunset
-    ? todayForecast.sunset.split("T")[1]?.slice(0, 5)
+  const sunrise = todayForecast?.sunrise
+    ? todayForecast.sunrise.split("T")[1]?.slice(0, 5) ?? null
     : null;
-  const currentlyDark =
-    (conditions.dark ?? false) || (sunset !== null && currentTime >= sunset);
-  const bestTimes = currentlyDark ? null : buildBestPaddlingTimes(todayForecast);
+  const sunset = todayForecast?.sunset
+    ? todayForecast.sunset.split("T")[1]?.slice(0, 5) ?? null
+    : null;
+  // Derive dark from sunrise/sunset times rather than conditions.dark, which can be stale
+  const currentlyDark = todayForecast
+    ? (sunrise !== null && currentTime < sunrise) || (sunset !== null && currentTime >= sunset)
+    : (conditions.dark ?? false);
+  const hourlyForecast = !currentlyDark && todayForecast
+    ? buildHourlyForecastText(todayForecast)
+    : null;
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
   const res = await fetch("/api/briefing", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ conditions, bestTimes, sunset, currentlyDark, currentTime, model, outlook }),
+    body: JSON.stringify({ conditions, hourlyForecast, sunrise, sunset, currentlyDark, currentTime, model, outlook }),
   });
 
   if (!res.ok || !res.body) throw new Error("Failed");

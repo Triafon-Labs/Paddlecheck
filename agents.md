@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that provides real-time kayaking conditions on the River Severn. It presents a RAG (Red-Amber-Green) traffic light safety status, detailed weather and river statistics, a skill-level paddling matrix, and a 5-day hourly forecast. There is no backend — all data is fetched client-side from public APIs.
+Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that provides real-time kayaking conditions on the River Severn. It presents a RAG (Red-Amber-Green) traffic light safety status, detailed weather and river statistics, a skill-level paddling matrix, and a 5-day hourly forecast. There is no backend — all data is fetched client-side from public APIs, with some proxying through Next.js API routes.
 
-**Current version:** 1.3.0  
+**Current version:** 1.5.1
 **Deployed on:** Vercel  
 **Location hardcoded to:** Worcester, UK (lat 52.2, lon -2.2)
 
@@ -15,10 +15,12 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 | Layer | Technology |
 |---|---|
 | Framework | Next.js 16 (App Router) |
+| Library | React 19 |
 | Language | TypeScript 6 (strict mode) |
 | UI Library | Material UI (MUI) 7 + Emotion |
 | Charts | Recharts 3 |
 | Date handling | date-fns 4 |
+| AI | Groq SDK (Briefing feature) |
 | Analytics | Vercel Analytics + Speed Insights |
 | PWA | Workbox 7 (service worker) |
 | Linting | ESLint 10, Prettier 3 |
@@ -28,10 +30,36 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 
 ---
 
+## Important Development Notes
+
+### Conventional Commits
+**Conventional commits are strictly enforced.** This is required for `release-please` to correctly categorize changes, update the `CHANGELOG.md`, and bump the version.
+- Use prefixes like `feat:`, `fix:`, `chore:`, `docs:`, etc.
+- If hooks are not working, ensure you have run `npm install` to activate Husky.
+
+### Build Requirements
+Due to the use of `workbox-webpack-plugin` for PWA service worker generation, production builds **must** use Webpack.
+- Production builds should use `next build --webpack`.
+- Development server uses Turbopack by default.
+
+### Timezone & Localization
+- All time-based logic and comparisons with external API data must use the **`Europe/London`** timezone to ensure consistency with the Worcester location.
+- The project adheres to **UK English** spelling conventions (e.g., 'Licence', 'Customise', 'Colour').
+
+### AI Briefing
+- The AI summary feature uses the Groq SDK.
+- There is a hard limit of `max_tokens: 2048` in the API route to handle reasoning blocks and prevent truncation.
+
+---
+
 ## Directory Structure
 
 ```
 app/
+  api/
+    briefing/           AI briefing generation endpoint
+    river/              EA API proxy
+    weather/            Open-Meteo API proxy
   layout.tsx            Root layout — ThemeRegistry, Analytics
   page.tsx              Home page (client component, renders all cards)
   globals.css           Global resets and Roboto Flex font
@@ -49,6 +77,7 @@ components/
   LastUpdated.tsx        Relative "last updated" timestamp (refreshes every 30 s)
   MaterialSwitch.tsx     Styled MUI switch used in settings
   ThemeRegistry.tsx      Emotion cache + AppThemeProvider for SSR
+  PaddlingLoader.tsx     Custom PWA loading indicator
 
 lib/
   config.ts              All thresholds, station IDs, descriptions, coordinates
@@ -196,13 +225,21 @@ Conventional commits are enforced by commitlint. Pre-commit lint runs via Husky.
 
 ---
 
+## Troubleshooting Husky Hooks
+
+If Git hooks are not firing:
+1. Run `npm install`.
+2. Check if `.husky/_` exists and contains the hook wrappers.
+3. Verify `git config core.hooksPath` is set to `.husky/_`.
+
+---
+
 ## What This Project Does Not Have
 
-- No backend or API routes
 - No database
 - No authentication
 - No automated tests (Jest/Vitest/Playwright)
-- No environment variables required
+- No environment variables required for core functionality
 - No multi-location support (hardcoded to Worcester)
 
 ---

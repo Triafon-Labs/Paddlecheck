@@ -72,10 +72,10 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL, 
                 Try again?
               </Box>
             </>
-          ) : loading && !text
+          ) : loading && !text.trim()
             ? <CircularProgress size={14} thickness={5} sx={{ color: "text.secondary", verticalAlign: "middle" }} />
             : text}
-          {loading && text && (
+          {loading && text.trim() && (
             <Box component="span" sx={{ opacity: 0.35 }}>▋</Box>
           )}
         </Typography>

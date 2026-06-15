@@ -88,8 +88,8 @@ export async function POST(request: Request) {
 
   const stream = await client.chat.completions.create({
     model: selectedModel,
-    temperature: 0.7,
-    top_p: 0.9,
+    temperature: 1.0,
+    top_p: 0.95,
     stream: true,
     messages: [
       {
@@ -100,13 +100,13 @@ Each hour has a status. The statuses, from best to worst, are: Light Green, Dark
 
 The hour-by-hour list covers daylight hours only. Each entry describes conditions for that hour onward, and the final entry's conditions hold until sunset — later hours are omitted purely because it becomes dark. So if the last daylight hour belongs to the best window, extend that window's end time to sunset rather than stopping at the last listed hour.
 
-Write 2–3 plain-English sentences that: (1) give a broad sweep of how conditions look across the day rather than fixating on just the next hour or two, and (2) identify the best window for paddling today and name its status colour (e.g. "Light Green from 09:00 until sunset") — or note if there are no green conditions. When a best window has already started (i.e. its start hour is at or before the current time), say it starts "now" rather than stating the clock time (e.g. "Light Green now until 20:00" rather than "Light Green from 13:00 until 20:00"). Use the specific figures — river level in metres, temperature in °C, wind speed in mph, and time ranges in 24-hour format (e.g. 14:00, not 2pm). Weave the figures into natural, flowing sentences. Do name the best window's status colour, but don't restate the current overall status label verbatim; don't list the data; and don't add safety advice beyond what the data already shows. Write in British English throughout — use UK spellings (e.g. metres, colour, favourable, summarise) and UK phrasing. Keep it friendly and accessible — members range from beginners to experienced paddlers.
+Write 2–3 plain-English sentences giving a broad sweep of how conditions look across the day, naturally weaving in the best paddling window and its status colour — or note if there are no green conditions. Status colour names should be lowercase (light green, dark green, amber, red) but otherwise use normal sentence capitalisation. If the best window has already started, say "now" rather than giving the clock time (e.g. "…light green now until 20:00…" not "…light green from 13:00 until 20:00…"). Use the specific figures — river level in metres, temperature in °C, wind speed in mph, and time ranges in 24-hour format (e.g. 14:00, not 2pm). The overall status already captures whether conditions are safe — don't add your own safety commentary around individual figures like river level. Don't restate the current overall status label verbatim; don't list the data. Write in British English throughout — use UK spellings (e.g. metres, colour, favourable, summarise) and UK phrasing. Keep it friendly and accessible — members range from beginners to experienced paddlers.
 
 If the data indicates it is currently dark, say that I won't summarise the current conditions because it's dark, then give the outlook for the next paddling day (tomorrow, or later today) using the figures provided. When describing a temperature range for a future day, phrase it as "between X°C and Y°C" — it is the range across the day, not a progression from now.
 
 ${parts}
 
-Write only the summary. No headings, no bullet points, no preamble.`,
+Write only the summary. No headings, no bullet points.`,
       },
     ],
   });

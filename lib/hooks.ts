@@ -105,8 +105,12 @@ export const useKayakData = () => {
 
       const todaySunrise = futureWeatherData.daily.sunrise[0] ?? null;
       const todaySunset = futureWeatherData.daily.sunset[0] ?? null;
-      const nowForDark = new Date();
-      const currentTimeHHMM = `${String(nowForDark.getHours()).padStart(2, "0")}:${String(nowForDark.getMinutes()).padStart(2, "0")}`;
+      const currentTimeHHMM = new Date().toLocaleTimeString("en-GB", {
+        timeZone: "Europe/London",
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+      });
       const sunriseHHMM = todaySunrise ? todaySunrise.split("T")[1]?.slice(0, 5) ?? null : null;
       const sunsetHHMM = todaySunset ? todaySunset.split("T")[1]?.slice(0, 5) ?? null : null;
       const currentDark = sunriseHHMM !== null && sunsetHHMM !== null
@@ -154,8 +158,15 @@ export const useKayakData = () => {
       setLoading(false);
 
       // Build 5-day forecast (today + 4 days ahead)
+      const currentHour = parseInt(
+        new Date().toLocaleTimeString("en-GB", {
+          timeZone: "Europe/London",
+          hour12: false,
+          hour: "2-digit",
+        }),
+        10
+      );
       const now = new Date();
-      const currentHour = now.getHours();
       const days: DayForecast[] = [];
       const predictionPoints: ChartDataPoint[] = [];
 
@@ -178,14 +189,8 @@ export const useKayakData = () => {
         const sunriseHour = sunrise
           ? parseInt(sunrise.split("T")[1].split(":")[0], 10)
           : null;
-        const sunriseMinute = sunrise
-          ? parseInt(sunrise.split("T")[1].split(":")[1], 10)
-          : null;
         const sunsetHour = sunset
           ? parseInt(sunset.split("T")[1].split(":")[0], 10)
-          : null;
-        const sunsetMinute = sunset
-          ? parseInt(sunset.split("T")[1].split(":")[1], 10)
           : null;
 
         const hourStart = d === 0 ? currentHour : 0;
@@ -231,10 +236,8 @@ export const useKayakData = () => {
             );
           }
 
-          const darkBeforeSunrise = sunriseHour !== null && sunriseMinute !== null
-            && (h < sunriseHour || (h === sunriseHour && sunriseMinute > 30));
-          const darkAfterSunset = sunsetHour !== null && sunsetMinute !== null
-            && (h > sunsetHour || (h === sunsetHour && sunsetMinute < 30));
+          const darkBeforeSunrise = sunriseHour !== null && h < sunriseHour;
+          const darkAfterSunset = sunsetHour !== null && h > sunsetHour;
           const dark = darkBeforeSunrise || darkAfterSunset;
 
           const predictedConditions: Partial<KayakConditions> = {

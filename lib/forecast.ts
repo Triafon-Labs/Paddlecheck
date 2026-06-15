@@ -77,7 +77,14 @@ export function buildBestPaddlingTimes(todayForecast: DayForecast | null): strin
   if (!todayForecast) return null;
 
   const now = new Date();
-  const nowHour = now.getHours();
+  const nowHour = parseInt(
+    new Date().toLocaleTimeString("en-GB", {
+      timeZone: "Europe/London",
+      hour12: false,
+      hour: "2-digit",
+    }),
+    10
+  );
   const futureSlots = todayForecast.graphData.filter(
     (pt) => hourOf(pt.time) >= nowHour && !pt.reasons.includes("Dark")
   );
@@ -145,7 +152,14 @@ export function buildHourlyForecastText(todayForecast: DayForecast): string | nu
 // True if there are any non-dark slots still to come today.
 export function hasDaylightRemaining(todayForecast: DayForecast | null): boolean {
   if (!todayForecast) return false;
-  const nowHour = new Date().getHours();
+  const nowHour = parseInt(
+    new Date().toLocaleTimeString("en-GB", {
+      timeZone: "Europe/London",
+      hour12: false,
+      hour: "2-digit",
+    }),
+    10
+  );
   return todayForecast.graphData.some(
     (pt) => hourOf(pt.time) >= nowHour && !pt.reasons.includes("Dark")
   );

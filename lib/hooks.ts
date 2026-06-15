@@ -103,6 +103,16 @@ export const useKayakData = () => {
       setRiverChange8h(riverData.change8h);
       setRiverChange5d(riverData.change5d);
 
+      const todaySunrise = futureWeatherData.daily.sunrise[0] ?? null;
+      const todaySunset = futureWeatherData.daily.sunset[0] ?? null;
+      const nowForDark = new Date();
+      const currentTimeHHMM = `${String(nowForDark.getHours()).padStart(2, "0")}:${String(nowForDark.getMinutes()).padStart(2, "0")}`;
+      const sunriseHHMM = todaySunrise ? todaySunrise.split("T")[1]?.slice(0, 5) ?? null : null;
+      const sunsetHHMM = todaySunset ? todaySunset.split("T")[1]?.slice(0, 5) ?? null : null;
+      const currentDark = sunriseHHMM !== null && sunsetHHMM !== null
+        ? currentTimeHHMM < sunriseHHMM || currentTimeHHMM >= sunsetHHMM
+        : false;
+
       const currentConditions: Partial<KayakConditions> = {
         riverLevel:
           riverData.latestLevel === null ? undefined : riverData.latestLevel,
@@ -110,7 +120,7 @@ export const useKayakData = () => {
         windSpeed: weatherData.windSpeed,
         windDirection: weatherData.windDirection,
         rain: weatherData.rain,
-        dark: weatherData.dark,
+        dark: currentDark,
         visibility: weatherData.visibility,
         weatherCode: weatherData.weatherCode,
       };
@@ -168,8 +178,14 @@ export const useKayakData = () => {
         const sunriseHour = sunrise
           ? parseInt(sunrise.split("T")[1].split(":")[0], 10)
           : null;
+        const sunriseMinute = sunrise
+          ? parseInt(sunrise.split("T")[1].split(":")[1], 10)
+          : null;
         const sunsetHour = sunset
           ? parseInt(sunset.split("T")[1].split(":")[0], 10)
+          : null;
+        const sunsetMinute = sunset
+          ? parseInt(sunset.split("T")[1].split(":")[1], 10)
           : null;
 
         const hourStart = d === 0 ? currentHour : 0;
@@ -215,12 +231,11 @@ export const useKayakData = () => {
             );
           }
 
-          let dark;
-          if (sunriseHour !== null && sunsetHour !== null) {
-            dark = h < sunriseHour || h >= sunsetHour;
-          } else {
-            dark = !futureWeatherData.hourly.is_day[index];
-          }
+          const darkBeforeSunrise = sunriseHour !== null && sunriseMinute !== null
+            && (h < sunriseHour || (h === sunriseHour && sunriseMinute > 30));
+          const darkAfterSunset = sunsetHour !== null && sunsetMinute !== null
+            && (h > sunsetHour || (h === sunsetHour && sunsetMinute < 30));
+          const dark = darkBeforeSunrise || darkAfterSunset;
 
           const predictedConditions: Partial<KayakConditions> = {
             riverLevel: predictedRiverLevel,

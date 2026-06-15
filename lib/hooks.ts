@@ -168,8 +168,14 @@ export const useKayakData = () => {
         const sunriseHour = sunrise
           ? parseInt(sunrise.split("T")[1].split(":")[0], 10)
           : null;
+        const sunriseMinute = sunrise
+          ? parseInt(sunrise.split("T")[1].split(":")[1], 10)
+          : null;
         const sunsetHour = sunset
           ? parseInt(sunset.split("T")[1].split(":")[0], 10)
+          : null;
+        const sunsetMinute = sunset
+          ? parseInt(sunset.split("T")[1].split(":")[1], 10)
           : null;
 
         const hourStart = d === 0 ? currentHour : 0;
@@ -216,8 +222,10 @@ export const useKayakData = () => {
           }
 
           let dark;
-          if (sunriseHour !== null && sunsetHour !== null) {
-            dark = h < sunriseHour || h >= sunsetHour;
+          if (sunriseHour !== null && sunriseMinute !== null && sunsetHour !== null && sunsetMinute !== null) {
+            const darkBeforeSunrise = h < sunriseHour || (h === sunriseHour && sunriseMinute > 30);
+            const darkAfterSunset = h > sunsetHour || (h === sunsetHour && sunsetMinute < 30);
+            dark = darkBeforeSunrise || darkAfterSunset;
           } else {
             dark = !futureWeatherData.hourly.is_day[index];
           }

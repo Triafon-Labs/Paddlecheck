@@ -17,6 +17,8 @@ interface Props {
 
 const DEFAULT_MODEL = "qwen/qwen3-32b";
 
+const AI_SUMMARY_ENABLED = process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY !== "false";
+
 export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL, label }: Props) {
   const { forecastDays } = useKayakContext();
   const [auto, setAuto] = useState(
@@ -30,6 +32,8 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL, 
   }, []);
 
   const { text, loading, failed, triggered, trigger } = useBriefing(conditions, forecastDays, auto, model);
+
+  if (!AI_SUMMARY_ENABLED) return null;
 
   return (
     <Alert

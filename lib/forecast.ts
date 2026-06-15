@@ -59,15 +59,20 @@ function formatWindow(
   nowHour: number | null
 ): { start: string; end: string } {
   let start: string;
+  const prev = slotAtHour(graphData, w.startHour - 1);
+  const isSunrise = sunriseHHMM && prev && isDarkOnly(prev.reasons);
+
   if (nowHour !== null && w.startHour === nowHour) {
     start = "now";
+  } else if (isSunrise) {
+    start = "sunrise";
   } else {
-    const prev = slotAtHour(graphData, w.startHour - 1);
-    start = sunriseHHMM && prev && isDarkOnly(prev.reasons) ? sunriseHHMM : fmtHour(w.startHour);
+    start = fmtHour(w.startHour);
   }
 
   const next = slotAtHour(graphData, w.endHour + 1);
-  const end = sunsetHHMM && next && isDarkOnly(next.reasons) ? sunsetHHMM : fmtHour(w.endHour + 1);
+  const isSunset = sunsetHHMM && next && isDarkOnly(next.reasons);
+  const end = isSunset ? "sunset" : fmtHour(w.endHour + 1);
 
   return { start, end };
 }

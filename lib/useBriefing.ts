@@ -11,8 +11,12 @@ async function streamBriefing(
   onChunk: (chunk: string) => void
 ): Promise<void> {
   const todayForecast = forecastDays?.[0] ?? null;
-  const now = new Date();
-  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const currentTime = new Date().toLocaleTimeString("en-GB", {
+    timeZone: "Europe/London",
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   const sunrise = todayForecast?.sunrise
     ? todayForecast.sunrise.split("T")[1]?.slice(0, 5) ?? null
     : null;

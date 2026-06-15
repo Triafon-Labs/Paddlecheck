@@ -90,6 +90,7 @@ export async function POST(request: Request) {
     model: selectedModel,
     temperature: 1.0,
     top_p: 0.95,
+    max_tokens: 2048,
     stream: true,
     messages: [
       {

@@ -59,15 +59,20 @@ function formatWindow(
   nowHour: number | null
 ): { start: string; end: string } {
   let start: string;
+  const prev = slotAtHour(graphData, w.startHour - 1);
+  const isSunrise = sunriseHHMM && prev && isDarkOnly(prev.reasons);
+
   if (nowHour !== null && w.startHour === nowHour) {
     start = "now";
+  } else if (isSunrise) {
+    start = "sunrise";
   } else {
-    const prev = slotAtHour(graphData, w.startHour - 1);
-    start = sunriseHHMM && prev && isDarkOnly(prev.reasons) ? sunriseHHMM : fmtHour(w.startHour);
+    start = fmtHour(w.startHour);
   }
 
   const next = slotAtHour(graphData, w.endHour + 1);
-  const end = sunsetHHMM && next && isDarkOnly(next.reasons) ? sunsetHHMM : fmtHour(w.endHour + 1);
+  const isSunset = sunsetHHMM && next && isDarkOnly(next.reasons);
+  const end = isSunset ? "sunset" : fmtHour(w.endHour + 1);
 
   return { start, end };
 }
@@ -77,7 +82,14 @@ export function buildBestPaddlingTimes(todayForecast: DayForecast | null): strin
   if (!todayForecast) return null;
 
   const now = new Date();
-  const nowHour = now.getHours();
+  const nowHour = parseInt(
+    new Date().toLocaleTimeString("en-GB", {
+      timeZone: "Europe/London",
+      hour12: false,
+      hour: "2-digit",
+    }),
+    10
+  );
   const futureSlots = todayForecast.graphData.filter(
     (pt) => hourOf(pt.time) >= nowHour && !pt.reasons.includes("Dark")
   );
@@ -145,7 +157,14 @@ export function buildHourlyForecastText(todayForecast: DayForecast): string | nu
 // True if there are any non-dark slots still to come today.
 export function hasDaylightRemaining(todayForecast: DayForecast | null): boolean {
   if (!todayForecast) return false;
-  const nowHour = new Date().getHours();
+  const nowHour = parseInt(
+    new Date().toLocaleTimeString("en-GB", {
+      timeZone: "Europe/London",
+      hour12: false,
+      hour: "2-digit",
+    }),
+    10
+  );
   return todayForecast.graphData.some(
     (pt) => hourOf(pt.time) >= nowHour && !pt.reasons.includes("Dark")
   );

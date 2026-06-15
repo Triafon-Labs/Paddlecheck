@@ -162,6 +162,12 @@ export const THRESHOLDS = {
   RIVER_LEVEL_INITIAL_RAG_3: 2.2,
 };
 
+// WMO weather interpretation codes 50–99 cover drizzle, rain, snow, showers
+// and thunderstorms. Used as the single source of truth for "is it raining?"
+// across both live conditions and the hourly forecast.
+const RAIN_CODES = new Set(Array.from({ length: 50 }, (_, i) => i + 50));
+export const isRainy = (weatherCode: number): boolean => RAIN_CODES.has(weatherCode);
+
 // --- Conditions Key Descriptions ---
 // These appear in the Settings drawer "Conditions Key" section.
 // Update them to describe your own venue's landmarks and club guidelines.

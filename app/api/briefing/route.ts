@@ -17,7 +17,8 @@ export async function POST(request: Request) {
   const client = new Groq();
   const {
     conditions,
-    bestTimes,
+    hourlyForecast,
+    sunrise,
     sunset,
     currentlyDark,
     currentTime,
@@ -25,7 +26,8 @@ export async function POST(request: Request) {
     outlook,
   }: {
     conditions: KayakConditions;
-    bestTimes?: string | null;
+    hourlyForecast?: string | null;
+    sunrise?: string | null;
     sunset?: string | null;
     currentlyDark?: boolean;
     currentTime?: string;
@@ -61,7 +63,6 @@ export async function POST(request: Request) {
       : conditions.visibility !== undefined
         ? `Visibility: ${conditions.visibility}m`
         : null,
-    conditions.dark ? `Currently dark: yes` : null,
     conditions.reasons?.length
       ? `Reasons for status: ${conditions.reasons.join("; ")}`
       : null,
@@ -69,8 +70,11 @@ export async function POST(request: Request) {
     conditions.pitchcroftPaddleability
       ? `Pitchcroft: ${conditions.pitchcroftPaddleability}`
       : null,
-    !currentlyDark && sunset ? `Sunset today: ${sunset}` : null,
-    !currentlyDark ? (bestTimes ?? null) : null,
+    !currentlyDark && sunrise ? `Sunrise: ${sunrise}` : null,
+    !currentlyDark && sunset ? `Sunset: ${sunset}` : null,
+    !currentlyDark && hourlyForecast
+      ? `Hour-by-hour forecast for today's remaining daylight:\n${hourlyForecast}`
+      : null,
     currentlyDark && outlook
       ? `It is currently dark, so do not summarise the current conditions. Instead, the outlook for ${outlook.dayLabel} is: ${outlook.rangesText}.`
       : null,
@@ -90,9 +94,9 @@ export async function POST(request: Request) {
     messages: [
       {
         role: "user",
-        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Refer to yourself as I. Given the data below, write 2–3 plain-English sentences summarising today's paddling situation. Use the specific figures from the data — river level in metres, temperature in °C, wind speed in mph, and the exact time window if best conditions are provided. Always use 24-hour time (e.g. 14:00, not 2pm). Weave the figures into natural, flowing sentences rather than listing them or copying the data's wording word-for-word. When describing a temperature range for a future day, phrase it as "between X°C and Y°C" rather than implying a direction — it is the range across the day, not a progression from now. Focus on the most important factors driving the status. Don't repeat the status label verbatim or add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
+        content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Refer to yourself as I. You are given current conditions and an hour-by-hour forecast for today's remaining daylight hours. Write 2–3 plain-English sentences that: (1) describe how conditions look for the next hour or two, and (2) identify the best window(s) for paddling today — or note if there are no green conditions. Use the specific figures — river level in metres, temperature in °C, wind speed in mph, and time ranges in 24-hour format (e.g. 14:00, not 2pm). Weave the figures into natural, flowing sentences. Don't repeat the status label verbatim, don't list the data, and don't add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
 
-If the data indicates it is currently dark, say that I won't summarise the current conditions because it's dark, then give the outlook for the next paddling day (tomorrow, or later today) using the figures provided.
+If the data indicates it is currently dark, say that I won't summarise the current conditions because it's dark, then give the outlook for the next paddling day (tomorrow, or later today) using the figures provided. When describing a temperature range for a future day, phrase it as "between X°C and Y°C" — it is the range across the day, not a progression from now.
 
 ${parts}
 

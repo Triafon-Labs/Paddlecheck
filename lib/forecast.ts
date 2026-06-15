@@ -114,6 +114,26 @@ export function buildBestPaddlingTimes(todayForecast: DayForecast | null): strin
   return `Best conditions today: ${ranges} (${label})`;
 }
 
+// Hour-by-hour forecast text for today's remaining daylight, for the AI briefing.
+export function buildHourlyForecastText(todayForecast: DayForecast): string | null {
+  const slots = todayForecast.graphData.filter((pt) => !pt.reasons.includes("Dark"));
+  if (slots.length === 0) return null;
+
+  const lines = slots.map((pt) => {
+    const h = hourOf(pt.time);
+    const timeStr = `${String(h).padStart(2, "0")}:00`;
+    const level = `river ${pt.predictedLevel.toFixed(2)}m`;
+    const temp = pt.temperature !== undefined ? `${Math.round(pt.temperature)}°C` : null;
+    const wind = pt.windSpeed !== undefined ? `${Math.round(pt.windSpeed)} mph wind` : null;
+    const stats = [level, temp, wind].filter(Boolean).join(", ");
+    const nonDarkReasons = pt.reasons.filter((r) => r !== "Dark");
+    const note = nonDarkReasons.length > 0 ? ` [${nonDarkReasons.join(", ")}]` : "";
+    return `${timeStr} ${pt.status} – ${stats}${note}`;
+  });
+
+  return lines.join("\n");
+}
+
 // True if there are any non-dark slots still to come today.
 export function hasDaylightRemaining(todayForecast: DayForecast | null): boolean {
   if (!todayForecast) return false;

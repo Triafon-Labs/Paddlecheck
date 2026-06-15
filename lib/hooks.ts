@@ -231,12 +231,11 @@ export const useKayakData = () => {
             );
           }
 
-          let dark;
           const darkBeforeSunrise = sunriseHour !== null && sunriseMinute !== null
             && (h < sunriseHour || (h === sunriseHour && sunriseMinute > 30));
           const darkAfterSunset = sunsetHour !== null && sunsetMinute !== null
             && (h > sunsetHour || (h === sunsetHour && sunsetMinute < 30));
-          dark = darkBeforeSunrise || darkAfterSunset;
+          const dark = darkBeforeSunrise || darkAfterSunset;
 
           const predictedConditions: Partial<KayakConditions> = {
             riverLevel: predictedRiverLevel,

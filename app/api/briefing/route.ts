@@ -7,6 +7,9 @@ function degreesToCompass(deg: number): string {
 }
 
 export async function POST(request: Request) {
+  if (process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY === "false") {
+    return new Response("AI Summary is disabled", { status: 503 });
+  }
   if (!process.env.GROQ_API_KEY) {
     return new Response("API key not configured", { status: 503 });
   }

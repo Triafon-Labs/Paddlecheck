@@ -25,7 +25,7 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 | PWA | Workbox 7 (service worker) |
 | Linting | ESLint 10, Prettier 3 |
 | Git hooks | Husky 9 + Commitlint |
-| CI | GitHub Actions (lint + build on PR/push to main) |
+| CI | GitHub Actions (lint + build + commit-lint on PR) |
 | Releases | release-please (conventional commits → auto changelog) |
 
 ---
@@ -34,8 +34,9 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 
 ### Conventional Commits
 **Conventional commits are strictly enforced.** This is required for `release-please` to correctly categorize changes, update the `CHANGELOG.md`, and bump the version.
-- Use prefixes like `feat:`, `fix:`, `chore:`, `docs:`, etc.
-- If hooks are not working, ensure you have run `npm install` to activate Husky.
+- **Local Enforcement:** Husky and commitlint run on the `commit-msg` hook. If hooks are not firing, run `npm install`.
+- **CI Enforcement:** The `Commit Lint` GitHub Action validates all commits in a Pull Request. PRs with non-compliant commit messages will fail CI.
+- Use prefixes like `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `style:`, `test:`, `perf:`, `ci:`.
 
 ### Build Requirements
 Due to the use of `workbox-webpack-plugin` for PWA service worker generation, production builds **must** use Webpack.
@@ -221,6 +222,7 @@ Conventional commits are enforced by commitlint. Pre-commit lint runs via Husky.
 ## CI / Release Pipeline
 
 - **ci.yml** — runs `lint` then `build` on every push/PR to `main` (Node 20)
+- **commit-lint.yml** — enforces Conventional Commits on all PRs to `main`
 - **release-please.yml** — on merge to `main`, bumps version and updates `CHANGELOG.md` automatically based on conventional commit types (`feat`, `fix`, `chore`, etc.)
 
 ---

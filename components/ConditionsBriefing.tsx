@@ -75,13 +75,10 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL, 
           ) : loading && !text.trim()
             ? <Box component="span" sx={{
                 fontStyle: "italic",
-                display: "inline-block",
                 animation: "thinking 2s ease-in-out infinite",
                 "@keyframes thinking": {
-                  "0%":   { opacity: 0.1, transform: "translateX(-6px)" },
-                  "25%":  { opacity: 0.55, transform: "translateX(0)" },
-                  "75%":  { opacity: 0.55, transform: "translateX(0)" },
-                  "100%": { opacity: 0.1, transform: "translateX(6px)" },
+                  "0%, 100%": { opacity: 0.15 },
+                  "50%":      { opacity: 0.65 },
                 },
               }}>Thinking…</Box>
             : text}

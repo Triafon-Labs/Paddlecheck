@@ -96,7 +96,7 @@ export async function POST(request: Request) {
         role: "user",
         content: `You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. Refer to yourself as I. You are given current conditions and an hour-by-hour forecast for today's remaining daylight hours.
 
-Each hour has a status. The statuses, from best to worst, are: Light Green (ideal conditions), Dark Green (good conditions), Amber (paddle at a coach's discretion), Red (risky — experienced paddlers only), and No Paddling (do not paddle). Note that Light Green is better than Dark Green. The "best" window means the hours with the highest-ranked status available.
+Each hour has a status. The statuses, from best to worst, are: Light Green, Dark Green, Amber, Red, and No Paddling. Note that Light Green is better than Dark Green. The "best" window means the hours with the highest-ranked status available.
 
 Write 2–3 plain-English sentences that: (1) describe how conditions look for the next hour or two, and (2) identify the best window(s) for paddling today — or note if there are no green conditions. Use the specific figures — river level in metres, temperature in °C, wind speed in mph, and time ranges in 24-hour format (e.g. 14:00, not 2pm). Weave the figures into natural, flowing sentences. Don't repeat the status label verbatim, don't list the data, and don't add safety advice beyond what the data already shows. Keep it friendly and accessible — members range from beginners to experienced paddlers.
 

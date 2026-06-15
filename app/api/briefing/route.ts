@@ -88,8 +88,8 @@ export async function POST(request: Request) {
 
   const stream = await client.chat.completions.create({
     model: selectedModel,
-    temperature: 0.7,
-    top_p: 0.9,
+    temperature: 1.0,
+    top_p: 0.95,
     stream: true,
     messages: [
       {

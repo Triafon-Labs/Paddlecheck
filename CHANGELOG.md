@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.5.1...paddlecheck-v1.6.0) (2026-06-15)
+
+
+### Features
+
+* enforce conventional commits via CI and update agents documentation ([44f07a7](https://github.com/dylanr97/Paddlecheck/commit/44f07a753bd276da5b5fcf12823b7766f0a0143b))
+
 ## [1.5.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.5.0...paddlecheck-v1.5.1) (2026-06-15)
 
 

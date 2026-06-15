@@ -119,7 +119,9 @@ export function buildHourlyForecastText(todayForecast: DayForecast): string | nu
   const slots = todayForecast.graphData.filter((pt) => !pt.reasons.includes("Dark"));
   if (slots.length === 0) return null;
 
-  const lines = slots.map((pt) => {
+  const sunsetHHMM = todayForecast.sunset ? hhmmOf(todayForecast.sunset) : null;
+
+  const lines = slots.map((pt, i) => {
     const h = hourOf(pt.time);
     const timeStr = `${String(h).padStart(2, "0")}:00`;
     const level = `river ${pt.predictedLevel.toFixed(2)}m`;
@@ -128,7 +130,13 @@ export function buildHourlyForecastText(todayForecast: DayForecast): string | nu
     const stats = [level, temp, wind].filter(Boolean).join(", ");
     const nonDarkReasons = pt.reasons.filter((r) => r !== "Dark");
     const note = nonDarkReasons.length > 0 ? ` [${nonDarkReasons.join(", ")}]` : "";
-    return `${timeStr} ${pt.status} – ${stats}${note}`;
+    // The final daylight hour's conditions persist until sunset; later hours
+    // are omitted only because it gets dark.
+    const sunsetNote =
+      i === slots.length - 1 && sunsetHHMM
+        ? ` (these conditions hold until sunset at ${sunsetHHMM})`
+        : "";
+    return `${timeStr} ${pt.status} – ${stats}${note}${sunsetNote}`;
   });
 
   return lines.join("\n");

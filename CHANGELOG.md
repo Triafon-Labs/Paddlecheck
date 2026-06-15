@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.5.0...paddlecheck-v1.5.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* **briefing:** annotate final daylight hour with sunset time ([59bb6e2](https://github.com/dylanr97/Paddlecheck/commit/59bb6e2c69038f1d44ebc1c19eccba9bb70f83c5))
+* **briefing:** fix dark detection bug and switch to hour-by-hour forecast ([fc1c024](https://github.com/dylanr97/Paddlecheck/commit/fc1c024e026ab92fe0880ecceef64fb0c186a278))
+* **briefing:** instruct the model to write in British English ([8f2f656](https://github.com/dylanr97/Paddlecheck/commit/8f2f656b8a19390115536a3486fe30baf9c36a4c))
+* **briefing:** name the best window's status colour ([234c350](https://github.com/dylanr97/Paddlecheck/commit/234c3507b6c0118042d604e1fca674ff1f25bffd))
+* **briefing:** pin best window to top-tier status and extend to sunset ([96e9563](https://github.com/dylanr97/Paddlecheck/commit/96e95636c6a8bdc6c4ac8672c7d8fa06cdaeb2ab))
+* **briefing:** strip descriptions from status legend ([5a719c2](https://github.com/dylanr97/Paddlecheck/commit/5a719c282737e76246b963e89ff69dca48918df8))
+* **briefing:** tell the model the status ranking ([fa12fea](https://github.com/dylanr97/Paddlecheck/commit/fa12fea5ea833647a6dd14e248f19be6511e12b7))
+* **forecast:** unify rain detection and pin current-hour graph point ([79ba34b](https://github.com/dylanr97/Paddlecheck/commit/79ba34bc3697fdcc73fb67b3b73edfb87b0b981f))
+
 ## [1.5.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.4.0...paddlecheck-v1.5.0) (2026-06-15)
 
 

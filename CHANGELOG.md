@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.5.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.4.0...paddlecheck-v1.5.0) (2026-06-15)
+
+
+### Features
+
+* AI conditions briefing ([ac44fdb](https://github.com/dylanr97/Paddlecheck/commit/ac44fdb31a86d539088e2aca0d47d50783cadbc8))
+* feature flag AI Summary behind NEXT_PUBLIC_FEATURE_AI_SUMMARY ([46688de](https://github.com/dylanr97/Paddlecheck/commit/46688de64ed7e983f797807162361642f2d9d0f4))
+* feature flag AI Summary behind NEXT_PUBLIC_FEATURE_AI_SUMMARY ([578f3c6](https://github.com/dylanr97/Paddlecheck/commit/578f3c6da183e9f4b7ae4a5af473e9d9d3b48992))
+* give next-daytime outlook when dark, in briefing and share dialog ([edbd836](https://github.com/dylanr97/Paddlecheck/commit/edbd836c0e65a54286f133acc59422195ccfb437))
+
+
+### Bug Fixes
+
+* move AI_SUMMARY_ENABLED guard after hooks to satisfy rules-of-hooks ([dfbfb92](https://github.com/dylanr97/Paddlecheck/commit/dfbfb92aef569011a8b7d78886fa3670085e938c))
+* natural phrasing for dark outlook ranges ([10d124b](https://github.com/dylanr97/Paddlecheck/commit/10d124bf606705bc3e6e51926618812d3c179935))
+* neutral after-dark wording, match icon colour, capitalise label ([40893e0](https://github.com/dylanr97/Paddlecheck/commit/40893e038b589d8d4040bd49bd7c54849c890b0f))
+* raise model temperature and prompt for natural prose ([b1694a8](https://github.com/dylanr97/Paddlecheck/commit/b1694a876c904a995a0629fc613e58a9e53f6482))
+
 ## [1.4.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.3.2...paddlecheck-v1.4.0) (2026-06-14)
 
 

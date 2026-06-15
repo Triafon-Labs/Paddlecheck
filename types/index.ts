@@ -49,7 +49,6 @@ export interface WeatherData {
   windSpeed: number;
   windDirection: number;
   rain: boolean;
-  dark: boolean;
   visibility: number;
   weatherCode: number;
 }
@@ -61,7 +60,6 @@ export interface HourlyData {
   visibility: number[];
   wind_speed_10m: number[];
   weather_code: number[];
-  is_day: number[];
 }
 
 export interface DailyData {

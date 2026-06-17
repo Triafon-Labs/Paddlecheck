@@ -174,7 +174,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) =
             <StatItem
               icon={<WaterDrop />}
               label="Rain"
-              value="Yes"
+              value={conditions.weatherDescription || "Yes"}
               isInfluencing={reasons.includes("Rain")}
             />
           )}

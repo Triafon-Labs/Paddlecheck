@@ -57,7 +57,9 @@ export async function POST(request: Request) {
     conditions.windSpeed !== undefined
       ? `Wind: ${conditions.windSpeed} mph${windDir ? ` from the ${windDir}` : ""}`
       : null,
-    conditions.rain ? `Rain: yes` : null,
+    conditions.rain
+      ? `Rain: ${conditions.weatherDescription || "yes"}`
+      : null,
     conditions.visibilityDescription
       ? `Visibility: ${conditions.visibilityDescription}`
       : conditions.visibility !== undefined

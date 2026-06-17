@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     outlook?: { dayLabel: string; bestTimes: string | null; rangesText: string } | null;
   } = await request.json();
 
-  const selectedModel = model ?? "qwen/qwen3-32b";
+  const selectedModel = model ?? "llama-3.3-70b-versatile";
 
   const windDir =
     conditions.windDirection !== undefined

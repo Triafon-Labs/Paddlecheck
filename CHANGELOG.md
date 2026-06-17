@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.7.0...paddlecheck-v1.8.0) (2026-06-17)
+
+
+### Features
+
+* **briefing:** round river trend and refine AI prompt for brevity ([24e164c](https://github.com/dylanr97/Paddlecheck/commit/24e164c41bd9768ddfa2bd6c474af4952753e1ab))
+
 ## [1.7.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.6.0...paddlecheck-v1.7.0) (2026-06-17)
 
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.7.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.6.0...paddlecheck-v1.7.0) (2026-06-17)
+
+
+### Features
+
+* replace "Rain: Yes" with detailed weather descriptions ([5bed809](https://github.com/dylanr97/Paddlecheck/commit/5bed809806159098baac0fbd52f4e16f90a0b600))
+* update AI model to llama-3.3-70b-versatile and refine prompt ([3ddde07](https://github.com/dylanr97/Paddlecheck/commit/3ddde079373184db18937f0d709db0728caeab19))
+* update default AI model to llama-3.3-70b-versatile ([2d147a0](https://github.com/dylanr97/Paddlecheck/commit/2d147a02fa2b650c45bc5cc5fab14fa9e8ccec28))
+
 ## [1.6.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.5.1...paddlecheck-v1.6.0) (2026-06-15)
 
 

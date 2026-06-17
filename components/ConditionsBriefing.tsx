@@ -15,7 +15,7 @@ interface Props {
   label?: string;
 }
 
-const DEFAULT_MODEL = "qwen/qwen3-32b";
+const DEFAULT_MODEL = "llama-3.3-70b-versatile";
 
 const AI_SUMMARY_ENABLED = process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY !== "false";
 

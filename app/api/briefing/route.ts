@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     outlook?: { dayLabel: string; bestTimes: string | null; rangesText: string } | null;
   } = await request.json();
 
-  const selectedModel = model ?? "qwen/qwen3-32b";
+  const selectedModel = model ?? "llama-3.3-70b-versatile";
 
   const windDir =
     conditions.windDirection !== undefined
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       ? `Hour-by-hour forecast for today's remaining daylight:\n${hourlyForecast}`
       : null,
     currentlyDark && outlook
-      ? `It is currently dark, so do not summarise the current conditions. Instead, the outlook for ${outlook.dayLabel} is: ${outlook.rangesText}.`
+      ? `It is currently dark. The outlook for ${outlook.dayLabel} is: ${outlook.rangesText}.`
       : null,
     currentlyDark && outlook?.bestTimes
       ? `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`
@@ -107,7 +107,7 @@ Write 2–3 sentences giving a broad sweep of how conditions look across the day
 
 Status colour names are always lowercase (light green, dark green, amber, red). If a status colour would fall at the very start of a sentence, rephrase to avoid leading with it. Use specific figures: river level in metres, temperature in °C, wind speed in mph, time in 24-hour format (e.g. 14:00). If the best window is already under way, say "now" rather than giving the start time (e.g. "…light green now until 20:00…"). The overall status already captures safety — don't add your own commentary on individual figures like river level. Don't mention or speculate about any dates or periods for which no data has been provided. Weave in the launch message naturally when it contains meaningful detail beyond "Normal conditions." However, avoid mentioning technical thresholds (like the 1.00m landing stage limit) if the river level is well below that limit (e.g. under 0.8m) as it is unremarkable. Do not repeat technical thresholds verbatim; instead, summarize their meaning if relevant to current safety or club access. Mention the river trend if it is notable — i.e. a meaningful rise or fall, not a negligible or zero change.
 
-If it is currently dark, write one sentence using first person (e.g. "I won't summarise current conditions as it's dark."), then give the outlook for the next available paddling window (later today or tomorrow) using the figures provided. When giving a temperature range across a future day, phrase it as "between X°C and Y°C."
+If it is currently dark, do not summarise current conditions. Directly provide the outlook for the next available paddling window (later today or tomorrow) using the figures provided. When giving a temperature range across a future day, phrase it as "between X°C and Y°C."
 
 Write only the summary — no headings, bullet points, or introductory labels. Use British English throughout (metres, colour, favourable, summarise, etc.). Keep the tone friendly and accessible; members range from beginners to experienced paddlers.
 

@@ -20,6 +20,7 @@ import {
 import {
   fetchWeatherData,
   getVisibilityDescription,
+  getWeatherDescription,
   fetchFutureWeatherData,
 } from "@/lib/weather";
 import {
@@ -137,6 +138,9 @@ export const useKayakData = () => {
       const visibilityDescription = getVisibilityDescription(
         currentConditions.visibility ?? 0
       );
+      const weatherDescription = getWeatherDescription(
+        currentConditions.weatherCode ?? 0
+      );
       const pitchcroftPaddleability = getPitchcroftPaddleability(
         currentConditions.riverLevel ?? 0
       );
@@ -153,6 +157,7 @@ export const useKayakData = () => {
         launchMessage: findLevelDescription(riverData.latestLevel ?? 0),
         lastUpdated: new Date().toISOString(),
         visibilityDescription,
+        weatherDescription,
         pitchcroftPaddleability,
       });
       setLoading(false);

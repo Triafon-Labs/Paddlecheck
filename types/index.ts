@@ -23,6 +23,7 @@ export interface KayakConditions {
   visibility?: number;
   visibilityDescription?: string;
   weatherCode?: number;
+  weatherDescription?: string;
   pitchcroftPaddleability?: string;
   overallStatus: Status;
   reasons?: string[];

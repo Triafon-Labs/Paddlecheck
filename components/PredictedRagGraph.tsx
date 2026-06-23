@@ -326,7 +326,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
             <Divider sx={{ mb: 1.5 }} />
             <Stack spacing={1}>
               {dailyWarnings.map((w, i) => {
-                const color = ragStatus[w.severity]?.color || theme.palette.warning.main;
+                const color = w.severity === "Red" ? ragStatus["Red"].color : ragStatus["Amber"].color;
                 return (
                   <Box key={i} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
                     <WarningIcon sx={{ color, fontSize: 16, mt: 0.2 }} />

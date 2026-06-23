@@ -75,6 +75,20 @@ export const getWeatherDescription = (code: number): string => {
   return WMO_WEATHER_CODES[code] || "Unknown";
 };
 
+/**
+ * Formats Met Office validity string "HHmm Day DD Mon" to "Day DD Mon, HH:mm"
+ * e.g. "0800 Wed 24 Jun" -> "Wed 24 Jun, 08:00"
+ */
+export const formatMetTime = (timeStr: string) => {
+  if (!timeStr) return "";
+  const match = timeStr.match(/^(\d{2})(\d{2})\s+(.*)$/);
+  if (match) {
+    const [, hh, mm, date] = match;
+    return `${date}, ${hh}:${mm}`;
+  }
+  return timeStr;
+};
+
 export const fetchFutureWeatherData = async (
   latitude: number,
   longitude: number

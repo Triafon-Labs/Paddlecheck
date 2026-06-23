@@ -27,7 +27,22 @@ export interface KayakConditions {
   pitchcroftPaddleability?: string;
   overallStatus: Status;
   reasons?: string[];
+  warnings?: WeatherWarning[];
   lastUpdated?: string;
+}
+
+export type WarningSeverity = "Yellow" | "Amber" | "Red";
+
+export interface WeatherWarning {
+  severity: WarningSeverity;
+  type: string; // e.g., "Extreme Heat", "Wind", "Rain"
+  headline: string;
+  description: string;
+  link: string;
+  validFrom: string;
+  validTo: string;
+  validFromISO?: string;
+  validToISO?: string;
 }
 
 // From RiverLevelGraph.tsx

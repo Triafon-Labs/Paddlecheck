@@ -1,5 +1,6 @@
 import Groq from "groq-sdk";
 import { KayakConditions } from "@/types";
+import { formatMetTime } from "@/lib/weather";
 
 function degreesToCompass(deg: number): string {
   const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
     ? `Active Met Office weather warnings for Worcestershire:\n${conditions.warnings
         .map(
           (w) =>
-            `- ${w.severity} ${w.type}: ${w.headline}. ${w.description}`
+            `- ${w.severity} ${w.type}: ${w.headline}. Valid: ${formatMetTime(w.validFrom)} to ${formatMetTime(w.validTo)}`
         )
         .join("\n")}`
     : null;

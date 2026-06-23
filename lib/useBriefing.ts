@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
 import { buildHourlyForecastText, buildNextDaytimeOutlook } from "@/lib/forecast";
+import { isWithinInterval, parseISO } from "date-fns";
 
 async function streamBriefing(
   conditions: KayakConditions,
@@ -32,10 +33,38 @@ async function streamBriefing(
     : null;
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
+  // Filter for warnings active right now to ensure AI only summarizes current threats
+  const now = new Date();
+  const activeWarnings = conditions.warnings?.filter((w) => {
+    if (!w.validFromISO || !w.validToISO) return true;
+    try {
+      return isWithinInterval(now, {
+        start: parseISO(w.validFromISO),
+        end: parseISO(w.validToISO),
+      });
+    } catch {
+      return true;
+    }
+  }) || [];
+
+  const conditionsWithActiveWarnings = {
+    ...conditions,
+    warnings: activeWarnings,
+  };
+
   const res = await fetch("/api/briefing", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ conditions, hourlyForecast, sunrise, sunset, currentlyDark, currentTime, model, outlook }),
+    body: JSON.stringify({
+      conditions: conditionsWithActiveWarnings,
+      hourlyForecast,
+      sunrise,
+      sunset,
+      currentlyDark,
+      currentTime,
+      model,
+      outlook
+    }),
   });
 
   if (!res.ok || !res.body) throw new Error("Failed");

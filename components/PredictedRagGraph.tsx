@@ -35,6 +35,7 @@ import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
 import { isSameDay, parseISO } from "date-fns";
+import { formatMetTime } from "@/lib/weather";
 
 interface PredictedRagGraphProps {
   forecastDays: DayForecast[] | null;
@@ -336,10 +337,10 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                       </Typography>
                       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <Typography variant="caption" color="text.secondary">
-                          {w.validFrom} — {w.validTo}
+                          {formatMetTime(w.validFrom)} — {formatMetTime(w.validTo)}
                         </Typography>
                         <Link href={w.link} target="_blank" rel="noopener" sx={{ fontSize: "0.7rem", fontWeight: "bold" }}>
-                          Link
+                          UK Met Office
                         </Link>
                       </Box>
                     </Box>

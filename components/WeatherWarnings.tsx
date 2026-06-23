@@ -3,6 +3,7 @@ import { Alert, Stack, Typography, Link, Box, Divider } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import { WeatherWarning, WarningSeverity } from "@/types";
 import { isWithinInterval, parseISO } from "date-fns";
+import { formatMetTime } from "@/lib/weather";
 
 interface Props {
   warnings?: WeatherWarning[];
@@ -12,20 +13,6 @@ const severityToColor: Record<WarningSeverity, "warning" | "error" | "info"> = {
   Yellow: "warning",
   Amber: "warning",
   Red: "error",
-};
-
-/**
- * Formats Met Office validity string "HHmm Day DD Mon" to "Day DD Mon HH:mm"
- * e.g. "0800 Wed 24 Jun" -> "Wed 24 Jun, 08:00"
- */
-const formatMetTime = (timeStr: string) => {
-  if (!timeStr) return "";
-  const match = timeStr.match(/^(\d{2})(\d{2})\s+(.*)$/);
-  if (match) {
-    const [, hh, mm, date] = match;
-    return `${date}, ${hh}:${mm}`;
-  }
-  return timeStr;
 };
 
 const WeatherWarnings: React.FC<Props> = ({ warnings }) => {

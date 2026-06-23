@@ -84,8 +84,8 @@ export const useKayakData = () => {
       setPredictLoading(true);
       setError(null);
 
-      // Fetch all data concurrently; Bewdley failure is non-fatal
-      const [riverData, weatherData, futureWeatherData, bewdleyData] =
+      // Fetch all data concurrently; Bewdley and Warnings failure is non-fatal
+      const [riverData, weatherData, futureWeatherData, bewdleyData, warningsData] =
         await Promise.all([
           withRetry(() => fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS)),
           withRetry(() => fetchWeatherData(LATITUDE, LONGITUDE)),
@@ -95,6 +95,7 @@ export const useKayakData = () => {
             observations: [],
             currentLevel: null,
           })),
+          fetch("/api/weather/warnings").then(res => res.ok ? res.json() : []).catch(() => []),
         ]);
 
       // Process current conditions
@@ -150,6 +151,7 @@ export const useKayakData = () => {
         initialStatus,
         overallStatus: status,
         reasons: reasons,
+        warnings: warningsData,
         levelChange: {
           value: riverData.change8h ?? 0,
           period: "8h",

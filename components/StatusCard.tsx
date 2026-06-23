@@ -16,6 +16,7 @@ import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import { ragStatus, reasonIcons } from "@/lib/rag";
 import ConditionsBriefing from "./ConditionsBriefing";
+import WeatherWarnings from "./WeatherWarnings";
 
 interface StatusCardProps {
   conditions: KayakConditions | null;
@@ -90,6 +91,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               </TableBody>
             </Table>
           )}
+          <WeatherWarnings warnings={conditions.warnings} />
           <ConditionsBriefing conditions={conditions} />
         </>
       );

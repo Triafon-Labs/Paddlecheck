@@ -35,6 +35,15 @@ export async function POST(request: Request) {
     outlook?: { dayLabel: string; bestTimes: string | null; rangesText: string } | null;
   } = await request.json();
 
+  const weatherWarningsText = conditions.warnings?.length
+    ? `Active Met Office weather warnings for Worcestershire:\n${conditions.warnings
+        .map(
+          (w) =>
+            `- ${w.severity} ${w.type}: ${w.headline}. ${w.description}`
+        )
+        .join("\n")}`
+    : null;
+
   const selectedModel = model ?? "llama-3.3-70b-versatile";
 
   const windDir =
@@ -84,6 +93,7 @@ export async function POST(request: Request) {
       ? `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`
       : null,
     currentlyDark && !outlook ? `It is currently dark and no daytime forecast is available.` : null,
+    weatherWarningsText,
   ]
     .filter(Boolean)
     .join("\n");
@@ -105,7 +115,7 @@ The best window is the longest contiguous run of hours sharing the highest-ranke
 
 Each hour-by-hour entry covers conditions from that hour until the next entry begins. The list covers daylight hours only — later hours are omitted because it gets dark. If the data indicates that the last listed hour's conditions extend to sunset, use that sunset time as the window's end.
 
-Write 1–2 concise sentences giving a broad sweep of how conditions look across the day, naturally weaving in the best window and its status colour. If there are no green conditions (i.e. the best available status is amber, red, or no paddling), note this instead of highlighting a best window. Be punchy and avoid verbosity.
+Write 1–2 concise sentences giving a broad sweep of how conditions look across the day, naturally weaving in the best window and its status colour. If there are no green conditions (i.e. the best available status is amber, red, or no paddling), note this instead of highlighting a best window. If there are active Met Office weather warnings, briefly mention the most severe one and how it might impact paddling (e.g. "be aware of the red heat warning"). Be punchy and avoid verbosity.
 
 Status colour names are always lowercase (light green, dark green, amber, red). If a status colour would fall at the very start of a sentence, rephrase to avoid leading with it. Use specific figures: river level in metres, temperature in °C, wind speed in mph, time in 24-hour format (e.g. 14:00). If the best window is already under way, say "now" rather than giving the start time (e.g. "…light green now until 20:00…"). The overall status already captures safety — don't add your own commentary on individual figures like river level. Don't mention or speculate about any dates or periods for which no data has been provided. Weave in the launch message naturally when it contains meaningful detail beyond "Normal conditions." However, avoid mentioning technical thresholds (like the 1.00m landing stage limit) if the river level is well below that limit (e.g. under 0.8m) as it is unremarkable. Do not repeat technical thresholds verbatim; instead, summarize their meaning if relevant to current safety or club access. Mention the river trend if it is notable — i.e. a meaningful rise or fall, not a negligible or zero change.
 

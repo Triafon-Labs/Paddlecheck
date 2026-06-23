@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.9.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.8.0...paddlecheck-v1.9.0) (2026-06-23)
+
+
+### Features
+
+* add active weather warnings from Met Office RSS ([a2efc2f](https://github.com/dylanr97/Paddlecheck/commit/a2efc2f59fa610f2cd4d479a040032d159595ecc))
+* add active weather warnings from Met Office RSS ([dc7d260](https://github.com/dylanr97/Paddlecheck/commit/dc7d260c91a02fd24ce642ffd5a44233bbc059b5))
+* refine weather warnings UI and grouping ([f13a20b](https://github.com/dylanr97/Paddlecheck/commit/f13a20bddfae60727eddb156a7a4a0ce6259be8b))
+* time-aware weather warnings and UI refinements ([6587da7](https://github.com/dylanr97/Paddlecheck/commit/6587da77f14acb7883962ee482eb2d7cfe80410e))
+* weather warnings integration and UI refinements ([7daa72d](https://github.com/dylanr97/Paddlecheck/commit/7daa72d838bbbac51e8afe95ee84acf4819b6a4f))
+
+
+### Bug Fixes
+
+* refine weather warnings AI integration and UI formatting ([5070303](https://github.com/dylanr97/Paddlecheck/commit/50703039dec83b0cae57558898788c3e3444eb4c))
+* reposition forecast warnings and refine AI launch messaging ([f471889](https://github.com/dylanr97/Paddlecheck/commit/f471889f5ca43213c0fa8ab89fd21ddee7589f7b))
+
 ## [1.8.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.7.0...paddlecheck-v1.8.0) (2026-06-17)
 
 

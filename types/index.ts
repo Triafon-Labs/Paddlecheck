@@ -41,6 +41,8 @@ export interface WeatherWarning {
   link: string;
   validFrom: string;
   validTo: string;
+  validFromISO?: string;
+  validToISO?: string;
 }
 
 // From RiverLevelGraph.tsx

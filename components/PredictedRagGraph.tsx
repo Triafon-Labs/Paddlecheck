@@ -11,6 +11,9 @@ import {
   useTheme,
   ToggleButtonGroup,
   ToggleButton,
+  Divider,
+  Link,
+  Stack,
 } from "@mui/material";
 import {
   ComposedChart,
@@ -22,17 +25,20 @@ import {
   ResponsiveContainer,
   Cell,
   TooltipContentProps,
-  ReferenceLine,  // still used for sunrise/sunset
+  ReferenceLine,
   LabelList,
 } from "recharts";
-import { DayForecast, PredictedGraphDataPoint } from "@/types";
+import { DayForecast, PredictedGraphDataPoint, WeatherWarning } from "@/types";
 import { ragStatus } from "@/lib/rag";
 import { REASON_ICONS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
+import WarningIcon from "@mui/icons-material/Warning";
+import { isSameDay, parseISO } from "date-fns";
 
 interface PredictedRagGraphProps {
   forecastDays: DayForecast[] | null;
+  warnings?: WeatherWarning[];
   loading?: boolean;
 }
 
@@ -157,6 +163,7 @@ const BarLabel = (props: BarLabelProps) => {
 
 const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
   forecastDays,
+  warnings,
   loading,
 }) => {
   const theme = useTheme();
@@ -167,6 +174,22 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
   const data = currentDay?.graphData ?? null;
   const sunrise = currentDay?.sunrise ?? null;
   const sunset = currentDay?.sunset ?? null;
+
+  // Find warnings active on the selected day
+  const dailyWarnings = warnings?.filter((w) => {
+    if (!w.validFromISO || !w.validToISO || !currentDay?.date) return false;
+    const dayDate = parseISO(currentDay.date);
+    const start = parseISO(w.validFromISO);
+    const end = parseISO(w.validToISO);
+
+    // Check if the warning overlaps with the selected day
+    // Met Office warnings can span multiple days
+    return (
+      isSameDay(dayDate, start) ||
+      isSameDay(dayDate, end) ||
+      (dayDate > start && dayDate < end)
+    );
+  }) || [];
 
   const renderChart = () => {
     if (loading) {
@@ -189,9 +212,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
         const isBewdley = d.predictionSource === "bewdley";
         const prevSource = i > 0 ? data[i - 1].predictionSource : null;
         const nextSource = i < data.length - 1 ? data[i + 1].predictionSource : null;
-        // Include the first linear point in the bewdley line so they connect visually
         const inBewdleyLine = isBewdley || prevSource === "bewdley";
-        // Include the last bewdley point in the linear line so they connect visually
         const inLinearLine = !isBewdley || nextSource === "linear";
         return {
           ...d,
@@ -215,12 +236,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                   <IconLabel
                     icon={<WbSunny fontSize="small" fill={lineColor} />}
                     time={sunrise}
-                    viewBox={{
-                      x: 0,
-                      y: 0,
-                      width: 0,
-                      height: 0,
-                    }}
+                    viewBox={{ x: 0, y: 0, width: 0, height: 0 }}
                   />
                 }
               />
@@ -234,12 +250,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                   <IconLabel
                     icon={<NightsStay fontSize="small" fill={lineColor} />}
                     time={sunset}
-                    viewBox={{
-                      x: 0,
-                      y: 0,
-                      width: 0,
-                      height: 0,
-                    }}
+                    viewBox={{ x: 0, y: 0, width: 0, height: 0 }}
                   />
                 }
               />
@@ -257,7 +268,6 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 position="top"
               />
             </Bar>
-            {/* Solid line = Bewdley-informed prediction (~30h); dashed = linear regression fallback */}
             <Line
               type="monotone"
               dataKey="bewdleyLevel"
@@ -309,6 +319,37 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
           </Box>
         )}
         {renderChart()}
+
+        {/* Daily warnings display */}
+        {dailyWarnings.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            <Divider sx={{ mb: 1.5 }} />
+            <Stack spacing={1}>
+              {dailyWarnings.map((w, i) => {
+                const color = ragStatus[w.severity]?.color || theme.palette.warning.main;
+                return (
+                  <Box key={i} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                    <WarningIcon sx={{ color, fontSize: 16, mt: 0.2 }} />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="caption" sx={{ fontWeight: "bold", display: "block" }}>
+                        {w.headline}
+                      </Typography>
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Typography variant="caption" color="text.secondary">
+                          {w.validFrom} — {w.validTo}
+                        </Typography>
+                        <Link href={w.link} target="_blank" rel="noopener" sx={{ fontSize: "0.7rem", fontWeight: "bold" }}>
+                          Link
+                        </Link>
+                      </Box>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Stack>
+          </Box>
+        )}
+
         <Typography
           variant="caption"
           color="text.secondary"

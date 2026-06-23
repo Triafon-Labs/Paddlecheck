@@ -61,6 +61,7 @@ export default function HomePage() {
         />
         <PredictedRagGraph
           forecastDays={forecastDays}
+          warnings={conditions?.warnings}
           loading={predictLoading}
         />
         <Box sx={{ width: "100%", textAlign: "center" }}>

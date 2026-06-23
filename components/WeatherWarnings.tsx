@@ -2,6 +2,7 @@ import React from "react";
 import { Alert, Stack, Typography, Link, Box, Divider } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import { WeatherWarning, WarningSeverity } from "@/types";
+import { isWithinInterval, parseISO } from "date-fns";
 
 interface Props {
   warnings?: WeatherWarning[];
@@ -30,8 +31,25 @@ const formatMetTime = (timeStr: string) => {
 const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
   if (!warnings || warnings.length === 0) return null;
 
-  // Group warnings by severity
-  const grouped = warnings.reduce((acc, w) => {
+  const now = new Date();
+
+  // Filter for warnings active right now
+  const activeWarnings = warnings.filter((w) => {
+    if (!w.validFromISO || !w.validToISO) return true; // Fallback if parsing failed
+    try {
+      return isWithinInterval(now, {
+        start: parseISO(w.validFromISO),
+        end: parseISO(w.validToISO),
+      });
+    } catch {
+      return true;
+    }
+  });
+
+  if (activeWarnings.length === 0) return null;
+
+  // Group active warnings by severity
+  const grouped = activeWarnings.reduce((acc, w) => {
     if (!acc[w.severity]) acc[w.severity] = [];
     acc[w.severity].push(w);
     return acc;
@@ -55,7 +73,7 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
             icon={<WarningIcon />}
             sx={{
               borderRadius: 2,
-              backgroundColor: isRed ? "#d32f2f" : undefined,
+              backgroundColor: isRed ? "#B71C1C" : undefined, // Darker Red
               color: isRed ? "#fff" : undefined,
               "& .MuiAlert-icon": {
                 color: isRed ? "#fff" : undefined,

@@ -126,13 +126,13 @@ export const RAG_STATUS_UI: Record<
     backgroundColor: "#FFF3E0",
   },
   Red: {
-    color: "#FF0000",
+    color: "#B71C1C",
     emoji: "🚨",
     icon: CrisisAlert,
     backgroundColor: "#FFEBEE",
   },
   "No Paddling": {
-    color: "#FF0000",
+    color: "#B71C1C",
     emoji: "⛔",
     icon: DoNotDisturbOutlined,
     backgroundColor: "#E0E0E0",

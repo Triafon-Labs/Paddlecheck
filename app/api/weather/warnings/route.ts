@@ -1,8 +1,27 @@
 import { NextResponse } from "next/server";
 import { parseStringPromise } from "xml2js";
 import { WeatherWarning, WarningSeverity } from "@/types";
+import { parse, formatISO } from "date-fns";
 
 const MET_OFFICE_RSS_URL = "https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm";
+
+/**
+ * Parses Met Office time string "HHmm Day DD Mon" into ISO string
+ * e.g. "0800 Wed 24 Jun" -> "2026-06-24T08:00:00Z" (assuming current year)
+ */
+const parseMetTimeToISO = (timeStr: string, baseDate: Date) => {
+  if (!timeStr) return "";
+  try {
+    // Format is "HHmm EEE d MMM"
+    // We need to append the year because the Met Office RSS doesn't include it
+    const year = baseDate.getFullYear();
+    const parsed = parse(`${timeStr} ${year}`, "HHmm EEE d MMM yyyy", new Date());
+    return formatISO(parsed);
+  } catch (e) {
+    console.error("Failed to parse Met Office time:", timeStr, e);
+    return "";
+  }
+};
 
 export async function GET() {
   try {
@@ -18,6 +37,9 @@ export async function GET() {
     const result = await parseStringPromise(xml);
 
     const items = result?.rss?.channel?.[0]?.item || [];
+    const pubDateStr = result?.rss?.channel?.[0]?.pubDate?.[0];
+    const pubDate = pubDateStr ? new Date(pubDateStr) : new Date();
+
     const warnings: WeatherWarning[] = [];
 
     for (const item of items) {
@@ -30,12 +52,9 @@ export async function GET() {
         const severityMatch = title.match(/^(Yellow|Amber|Red)/i);
         const severity = (severityMatch ? severityMatch[0] : "Yellow") as WarningSeverity;
 
-        // Extract type: e.g. "extreme heat" from "Red warning of extreme heat affecting West Midlands"
         const typeMatch = title.match(/warning of (.*) affecting/i);
         const type = typeMatch ? typeMatch[1].trim() : "Weather Warning";
 
-        // Try to extract validity
-        // Format: "valid from 0800 Wed 24 Jun to 2000 Thu 25 Jun"
         const validMatch = description.match(/valid from (.*) to (.*)$/i);
         const validFrom = validMatch ? validMatch[1].trim() : "";
         const validTo = validMatch ? validMatch[2].trim() : "";
@@ -48,11 +67,12 @@ export async function GET() {
           link,
           validFrom,
           validTo,
+          validFromISO: parseMetTimeToISO(validFrom, pubDate),
+          validToISO: parseMetTimeToISO(validTo, pubDate),
         });
       }
     }
 
-    // Sort by severity: Red > Amber > Yellow
     const severityOrder: Record<WarningSeverity, number> = {
       Red: 0,
       Amber: 1,

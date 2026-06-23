@@ -319,12 +319,10 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
             </ToggleButtonGroup>
           </Box>
         )}
-        {renderChart()}
 
-        {/* Daily warnings display */}
+        {/* Daily warnings display - moved above chart */}
         {dailyWarnings.length > 0 && (
-          <Box sx={{ mt: 2 }}>
-            <Divider sx={{ mb: 1.5 }} />
+          <Box sx={{ mb: 2 }}>
             <Stack spacing={1}>
               {dailyWarnings.map((w, i) => {
                 const color = w.severity === "Red" ? ragStatus["Red"].color : ragStatus["Amber"].color;
@@ -348,8 +346,11 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 );
               })}
             </Stack>
+            <Divider sx={{ mt: 1.5 }} />
           </Box>
         )}
+
+        {renderChart()}
 
         <Typography
           variant="caption"

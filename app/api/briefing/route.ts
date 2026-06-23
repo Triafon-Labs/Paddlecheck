@@ -78,7 +78,9 @@ export async function POST(request: Request) {
     conditions.reasons?.length
       ? `Reasons for status: ${conditions.reasons.join("; ")}`
       : null,
-    conditions.launchMessage ? `Launch message: ${conditions.launchMessage}` : null,
+    conditions.launchMessage && (conditions.riverLevel ?? 0) >= 1.0
+      ? `Launch message: ${conditions.launchMessage}`
+      : null,
     conditions.pitchcroftPaddleability
       ? `Pitchcroft: ${conditions.pitchcroftPaddleability}`
       : null,

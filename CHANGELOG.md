@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.9.0...paddlecheck-v1.9.1) (2026-06-24)
+
+
+### Bug Fixes
+
+* use London timezone for weather warnings display ([cb1aebd](https://github.com/dylanr97/Paddlecheck/commit/cb1aebd8a81c453f9e13b69751c0ddb27bd1e0b0))
+
 ## [1.9.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.8.0...paddlecheck-v1.9.0) (2026-06-23)
 
 

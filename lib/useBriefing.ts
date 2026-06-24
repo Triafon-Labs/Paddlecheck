@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
 import { buildHourlyForecastText, buildNextDaytimeOutlook } from "@/lib/forecast";
-import { isWithinInterval, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
 import { tz, TZDate } from "@date-fns/tz";
 
 async function streamBriefing(
@@ -34,30 +34,28 @@ async function streamBriefing(
     : null;
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
-  // Filter for warnings active right now to ensure AI only summarizes current threats
+  // Filter for warnings that are active or upcoming (i.e. haven't expired yet)
   const now = new TZDate(new Date(), "Europe/London");
-  const activeWarnings = conditions.warnings?.filter((w) => {
-    if (!w.validFromISO || !w.validToISO) return true;
+  const relevantWarnings = conditions.warnings?.filter((w) => {
+    if (!w.validToISO) return true;
     try {
-      return isWithinInterval(now, {
-        start: parseISO(w.validFromISO, { in: tz("Europe/London") }),
-        end: parseISO(w.validToISO, { in: tz("Europe/London") }),
-      });
+      const expiry = parseISO(w.validToISO, { in: tz("Europe/London") });
+      return expiry > now;
     } catch {
       return true;
     }
   }) || [];
 
-  const conditionsWithActiveWarnings = {
+  const conditionsWithRelevantWarnings = {
     ...conditions,
-    warnings: activeWarnings,
+    warnings: relevantWarnings,
   };
 
   const res = await fetch("/api/briefing", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      conditions: conditionsWithActiveWarnings,
+      conditions: conditionsWithRelevantWarnings,
       hourlyForecast,
       sunrise,
       sunset,

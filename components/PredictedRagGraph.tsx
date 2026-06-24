@@ -35,6 +35,7 @@ import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
 import { isSameDay, parseISO } from "date-fns";
+import { tz } from "@date-fns/tz";
 import { formatMetTime } from "@/lib/weather";
 
 interface PredictedRagGraphProps {
@@ -179,15 +180,15 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
   // Find warnings active on the selected day
   const dailyWarnings = warnings?.filter((w) => {
     if (!w.validFromISO || !w.validToISO || !currentDay?.date) return false;
-    const dayDate = parseISO(currentDay.date);
-    const start = parseISO(w.validFromISO);
-    const end = parseISO(w.validToISO);
+    const dayDate = parseISO(currentDay.date, { in: tz("Europe/London") });
+    const start = parseISO(w.validFromISO, { in: tz("Europe/London") });
+    const end = parseISO(w.validToISO, { in: tz("Europe/London") });
 
     // Check if the warning overlaps with the selected day
     // Met Office warnings can span multiple days
     return (
-      isSameDay(dayDate, start) ||
-      isSameDay(dayDate, end) ||
+      isSameDay(dayDate, start, { in: tz("Europe/London") }) ||
+      isSameDay(dayDate, end, { in: tz("Europe/London") }) ||
       (dayDate > start && dayDate < end)
     );
   }) || [];

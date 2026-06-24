@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { parseStringPromise } from "xml2js";
 import { WeatherWarning, WarningSeverity } from "@/types";
 import { parse, formatISO } from "date-fns";
+import { tz } from "@date-fns/tz";
 
 const MET_OFFICE_RSS_URL = "https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm";
 
 /**
  * Parses Met Office time string "HHmm Day DD Mon" into ISO string
- * e.g. "0800 Wed 24 Jun" -> "2026-06-24T08:00:00Z" (assuming current year)
+ * e.g. "0800 Wed 24 Jun" -> "2026-06-24T08:00:00+01:00" (assuming current year, BST)
  */
 const parseMetTimeToISO = (timeStr: string, baseDate: Date) => {
   if (!timeStr) return "";
@@ -15,7 +16,9 @@ const parseMetTimeToISO = (timeStr: string, baseDate: Date) => {
     // Format is "HHmm EEE d MMM"
     // We need to append the year because the Met Office RSS doesn't include it
     const year = baseDate.getFullYear();
-    const parsed = parse(`${timeStr} ${year}`, "HHmm EEE d MMM yyyy", new Date());
+    const parsed = parse(`${timeStr} ${year}`, "HHmm EEE d MMM yyyy", new Date(), {
+      in: tz("Europe/London"),
+    });
     return formatISO(parsed);
   } catch (e) {
     console.error("Failed to parse Met Office time:", timeStr, e);

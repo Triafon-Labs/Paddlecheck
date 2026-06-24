@@ -3,6 +3,7 @@ import { Alert, Stack, Typography, Link, Box, Divider } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import { WeatherWarning, WarningSeverity } from "@/types";
 import { isWithinInterval, parseISO } from "date-fns";
+import { tz, TZDate } from "@date-fns/tz";
 import { formatMetTime } from "@/lib/weather";
 
 interface Props {
@@ -18,15 +19,15 @@ const severityToColor: Record<WarningSeverity, "warning" | "error" | "info"> = {
 const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
   if (!warnings || warnings.length === 0) return null;
 
-  const now = new Date();
+  const now = new TZDate(new Date(), "Europe/London");
 
   // Filter for warnings active right now
   const activeWarnings = warnings.filter((w) => {
     if (!w.validFromISO || !w.validToISO) return true; // Fallback if parsing failed
     try {
       return isWithinInterval(now, {
-        start: parseISO(w.validFromISO),
-        end: parseISO(w.validToISO),
+        start: parseISO(w.validFromISO, { in: tz("Europe/London") }),
+        end: parseISO(w.validToISO, { in: tz("Europe/London") }),
       });
     } catch {
       return true;

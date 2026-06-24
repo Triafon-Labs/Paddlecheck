@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
 import { buildHourlyForecastText, buildNextDaytimeOutlook } from "@/lib/forecast";
 import { isWithinInterval, parseISO } from "date-fns";
+import { tz, TZDate } from "@date-fns/tz";
 
 async function streamBriefing(
   conditions: KayakConditions,
@@ -34,13 +35,13 @@ async function streamBriefing(
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
   // Filter for warnings active right now to ensure AI only summarizes current threats
-  const now = new Date();
+  const now = new TZDate(new Date(), "Europe/London");
   const activeWarnings = conditions.warnings?.filter((w) => {
     if (!w.validFromISO || !w.validToISO) return true;
     try {
       return isWithinInterval(now, {
-        start: parseISO(w.validFromISO),
-        end: parseISO(w.validToISO),
+        start: parseISO(w.validFromISO, { in: tz("Europe/London") }),
+        end: parseISO(w.validToISO, { in: tz("Europe/London") }),
       });
     } catch {
       return true;

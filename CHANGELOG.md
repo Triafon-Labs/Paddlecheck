@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.9.1...paddlecheck-v1.9.2) (2026-06-24)
+
+
+### Bug Fixes
+
+* include future weather warnings in AI briefing context ([fc98b90](https://github.com/dylanr97/Paddlecheck/commit/fc98b9065d5d0d815f67d4da0dd1f285ca10075f))
+
 ## [1.9.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.9.0...paddlecheck-v1.9.1) (2026-06-24)
 
 

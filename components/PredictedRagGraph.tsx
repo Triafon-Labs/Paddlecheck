@@ -341,7 +341,11 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 const isAmber = severity === "Amber";
 
                 const styles = {
-                  Red: { color: "#fff", bg: ragStatus["Red"].color, border: ragStatus["Red"].color },
+                  Red: {
+                    color: ragStatus["Red"].color,
+                    bg: ragStatus["Red"].backgroundColor,
+                    border: ragStatus["Red"].color,
+                  },
                   Amber: { color: "#E65100", bg: "#FFF3E0", border: "#FF8F00" },
                   Yellow: { color: "#F57F17", bg: "#FFFDE7", border: "#FBC02D" },
                 }[severity as "Red" | "Amber" | "Yellow"];
@@ -399,7 +403,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                               variant="caption"
                               sx={{
                                 color: isRed
-                                  ? "rgba(255, 255, 255, 0.9)"
+                                  ? "rgba(183, 28, 28, 0.85)"
                                   : isAmber
                                     ? "rgba(230, 81, 0, 0.85)"
                                     : "rgba(245, 127, 23, 0.85)",
@@ -416,7 +420,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                                 sx={{
                                   typography: "caption",
                                   fontWeight: "bold",
-                                  color: isRed ? "inherit" : "primary.main",
+                                  color: "primary.main",
                                 }}
                               >
                                 Met Office

@@ -16,10 +16,10 @@ const severityStyles: Record<
   { color: string; backgroundColor: string; borderColor: string; dividerColor: string }
 > = {
   Red: {
-    color: "#fff",
-    backgroundColor: ragStatus["Red"].color,
+    color: ragStatus["Red"].color,
+    backgroundColor: ragStatus["Red"].backgroundColor,
     borderColor: ragStatus["Red"].color,
-    dividerColor: "rgba(255, 255, 255, 0.2)",
+    dividerColor: "rgba(183, 28, 28, 0.2)",
   },
   Amber: {
     color: "#E65100",

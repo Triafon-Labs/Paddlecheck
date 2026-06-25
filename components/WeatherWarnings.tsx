@@ -20,12 +20,12 @@ const severityStyles: Record<
     borderColor: "#B71C1C",
   },
   Amber: {
-    color: "#FF8F00",
+    color: "#E65100",
     backgroundColor: "#FFF3E0",
     borderColor: "#FF8F00",
   },
   Yellow: {
-    color: "#FBC02D",
+    color: "#F57F17",
     backgroundColor: "#FFFDE7",
     borderColor: "#FBC02D",
   },

@@ -185,13 +185,21 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
     const end = parseISO(w.validToISO, { in: tz("Europe/London") });
 
     // Check if the warning overlaps with the selected day
-    // Met Office warnings can span multiple days
     return (
       isSameDay(dayDate, start, { in: tz("Europe/London") }) ||
       isSameDay(dayDate, end, { in: tz("Europe/London") }) ||
       (dayDate > start && dayDate < end)
     );
   }) || [];
+
+  // Group daily warnings by severity then headline
+  const groupedWarnings = dailyWarnings.reduce((acc, w) => {
+    if (!acc[w.severity]) acc[w.severity] = [];
+    acc[w.severity].push(w);
+    return acc;
+  }, {} as Record<string, WeatherWarning[]>);
+
+  const severityOrder = ["Red", "Amber", "Yellow"];
 
   const renderChart = () => {
     if (loading) {
@@ -321,29 +329,73 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
           </Box>
         )}
 
-        {/* Daily warnings display - moved above chart */}
+        {/* Daily warnings display */}
         {dailyWarnings.length > 0 && (
           <Box sx={{ mb: 2 }}>
             <Stack spacing={1}>
-              {dailyWarnings.map((w, i) => {
-                const color = w.severity === "Red" ? ragStatus["Red"].color : ragStatus["Amber"].color;
-                return (
-                  <Box key={i} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                    <WarningIcon sx={{ color, fontSize: 16, mt: 0.2 }} />
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="caption" sx={{ fontWeight: "bold", display: "block" }}>
-                        {w.headline}
-                      </Typography>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Typography variant="caption" color="text.secondary">
-                          {formatMetTime(w.validFrom)} — {formatMetTime(w.validTo)}
+              {severityOrder.map((severity) => {
+                const group = groupedWarnings[severity];
+                if (!group) return null;
+
+                const color =
+                  severity === "Red"
+                    ? "#B71C1C"
+                    : severity === "Amber"
+                      ? "#E65100"
+                      : "#F57F17";
+
+                const headlineGroups = group.reduce((acc, w) => {
+                  if (!acc[w.headline]) acc[w.headline] = [];
+                  acc[w.headline].push(w);
+                  return acc;
+                }, {} as Record<string, WeatherWarning[]>);
+
+                return Object.entries(headlineGroups).map(
+                  ([headline, ws], hIdx) => (
+                    <Box
+                      key={`${severity}-${hIdx}`}
+                      sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}
+                    >
+                      <WarningIcon sx={{ color, fontSize: 16, mt: 0.2 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ fontWeight: "bold", display: "block", color }}
+                        >
+                          {headline}
                         </Typography>
-                        <Link href={w.link} target="_blank" rel="noopener" sx={{ fontSize: "0.7rem", fontWeight: "bold" }}>
-                          UK Met Office
-                        </Link>
+                        {ws.map((w, wIdx) => (
+                          <Box
+                            key={wIdx}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ fontSize: "0.65rem" }}
+                            >
+                              {formatMetTime(w.validFrom)} —{" "}
+                              {formatMetTime(w.validTo)}
+                            </Typography>
+                            {wIdx === 0 && (
+                              <Link
+                                href={w.link}
+                                target="_blank"
+                                rel="noopener"
+                                sx={{ fontSize: "0.65rem", fontWeight: "bold" }}
+                              >
+                                Met Office
+                              </Link>
+                            )}
+                          </Box>
+                        ))}
                       </Box>
                     </Box>
-                  </Box>
+                  )
                 );
               })}
             </Stack>

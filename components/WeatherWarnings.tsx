@@ -5,6 +5,7 @@ import { WeatherWarning, WarningSeverity } from "@/types";
 import { parseISO } from "date-fns";
 import { tz, TZDate } from "@date-fns/tz";
 import { formatMetTime } from "@/lib/weather";
+import { ragStatus } from "@/lib/rag";
 
 interface Props {
   warnings?: WeatherWarning[];
@@ -12,22 +13,25 @@ interface Props {
 
 const severityStyles: Record<
   WarningSeverity,
-  { color: string; backgroundColor: string; borderColor: string }
+  { color: string; backgroundColor: string; borderColor: string; dividerColor: string }
 > = {
   Red: {
-    color: "#B71C1C",
-    backgroundColor: "#FFEBEE",
-    borderColor: "#B71C1C",
+    color: "#fff",
+    backgroundColor: ragStatus["Red"].color,
+    borderColor: ragStatus["Red"].color,
+    dividerColor: "rgba(255, 255, 255, 0.2)",
   },
   Amber: {
     color: "#E65100",
     backgroundColor: "#FFF3E0",
     borderColor: "#FF8F00",
+    dividerColor: "rgba(230, 81, 0, 0.2)",
   },
   Yellow: {
     color: "#F57F17",
     backgroundColor: "#FFFDE7",
     borderColor: "#FBC02D",
+    dividerColor: "rgba(245, 127, 23, 0.2)",
   },
 };
 
@@ -97,8 +101,7 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
                     <Divider
                       sx={{
                         my: 1,
-                        opacity: 0.2,
-                        borderColor: style.color,
+                        borderColor: style.dividerColor,
                       }}
                     />
                   )}

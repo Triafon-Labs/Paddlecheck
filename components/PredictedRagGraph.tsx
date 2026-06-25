@@ -337,12 +337,14 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                 const group = groupedWarnings[severity];
                 if (!group) return null;
 
-                const color =
-                  severity === "Red"
-                    ? "#B71C1C"
-                    : severity === "Amber"
-                      ? "#E65100"
-                      : "#F57F17";
+                const isRed = severity === "Red";
+                const isAmber = severity === "Amber";
+
+                const styles = {
+                  Red: { color: "#fff", bg: ragStatus["Red"].color, border: ragStatus["Red"].color },
+                  Amber: { color: "#E65100", bg: "#FFF3E0", border: "#FF8F00" },
+                  Yellow: { color: "#F57F17", bg: "#FFFDE7", border: "#FBC02D" },
+                }[severity as "Red" | "Amber" | "Yellow"];
 
                 const headlineGroups = group.reduce((acc, w) => {
                   if (!acc[w.headline]) acc[w.headline] = [];
@@ -354,13 +356,33 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                   ([headline, ws], hIdx) => (
                     <Box
                       key={`${severity}-${hIdx}`}
-                      sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 1,
+                        backgroundColor: styles.bg,
+                        p: 1,
+                        borderRadius: 1,
+                        border: `1px solid ${styles.border}`,
+                      }}
                     >
-                      <WarningIcon sx={{ color, fontSize: 16, mt: 0.2 }} />
+                      <WarningIcon
+                        sx={{
+                          color: styles.color,
+                          fontSize: 16,
+                          mt: 0.2,
+                        }}
+                      />
                       <Box sx={{ flex: 1 }}>
                         <Typography
                           variant="caption"
-                          sx={{ fontWeight: "bold", display: "block", color }}
+                          sx={{
+                            fontWeight: "bold",
+                            display: "block",
+                            color: styles.color,
+                            lineHeight: 1.2,
+                            mb: 0.25
+                          }}
                         >
                           {headline}
                         </Typography>
@@ -375,8 +397,13 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                           >
                             <Typography
                               variant="caption"
-                              color="text.secondary"
-                              sx={{ fontSize: "0.65rem" }}
+                              sx={{
+                                color: isRed
+                                  ? "rgba(255, 255, 255, 0.9)"
+                                  : isAmber
+                                    ? "rgba(230, 81, 0, 0.85)"
+                                    : "rgba(245, 127, 23, 0.85)",
+                              }}
                             >
                               {formatMetTime(w.validFrom)} —{" "}
                               {formatMetTime(w.validTo)}
@@ -386,7 +413,11 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                                 href={w.link}
                                 target="_blank"
                                 rel="noopener"
-                                sx={{ fontSize: "0.65rem", fontWeight: "bold" }}
+                                sx={{
+                                  typography: "caption",
+                                  fontWeight: "bold",
+                                  color: isRed ? "inherit" : "primary.main",
+                                }}
                               >
                                 Met Office
                               </Link>

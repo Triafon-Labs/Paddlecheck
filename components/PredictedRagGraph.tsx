@@ -30,7 +30,7 @@ import {
 } from "recharts";
 import { DayForecast, PredictedGraphDataPoint, WeatherWarning } from "@/types";
 import { ragStatus } from "@/lib/rag";
-import { REASON_ICONS } from "@/lib/config";
+import { REASON_ICONS, WARNING_COLORS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -325,22 +325,38 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
         {dailyWarnings.length > 0 && (
           <Box sx={{ mb: 2 }}>
             <Stack spacing={1}>
-              {dailyWarnings.map((w, i) => {
-                const color = w.severity === "Red" ? ragStatus["Red"].color : ragStatus["Amber"].color;
+              {Object.entries(
+                dailyWarnings.reduce((acc, w) => {
+                  if (!acc[w.headline]) acc[w.headline] = [];
+                  acc[w.headline].push(w);
+                  return acc;
+                }, {} as Record<string, WeatherWarning[]>)
+              ).map(([headline, warnings], i) => {
+                const firstWarning = warnings[0];
+                const color =
+                  firstWarning.severity === "Red"
+                    ? WARNING_COLORS.Red
+                    : firstWarning.severity === "Amber"
+                    ? WARNING_COLORS.Amber
+                    : WARNING_COLORS.Yellow;
                 return (
-                  <Box key={i} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                    <WarningIcon sx={{ color, fontSize: 16, mt: 0.2 }} />
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="caption" sx={{ fontWeight: "bold", display: "block" }}>
-                        {w.headline}
-                      </Typography>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Typography variant="caption" color="text.secondary">
-                          {formatMetTime(w.validFrom)} — {formatMetTime(w.validTo)}
+                  <Box key={i}>
+                    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                      <WarningIcon sx={{ color, fontSize: 16, mt: 0.2 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="caption" sx={{ fontWeight: "bold", display: "block" }}>
+                          {headline}
                         </Typography>
-                        <Link href={w.link} target="_blank" rel="noopener" sx={{ fontSize: "0.7rem", fontWeight: "bold" }}>
-                          UK Met Office
-                        </Link>
+                        {warnings.map((w, wIdx) => (
+                          <Box key={wIdx} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <Typography variant="caption" color="text.secondary">
+                              {formatMetTime(w.validFrom)} — {formatMetTime(w.validTo)}
+                            </Typography>
+                            <Link href={w.link} target="_blank" rel="noopener" sx={{ fontSize: "0.7rem", fontWeight: "bold" }}>
+                              UK Met Office
+                            </Link>
+                          </Box>
+                        ))}
                       </Box>
                     </Box>
                   </Box>

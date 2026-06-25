@@ -116,7 +116,7 @@ export const useKayakData = () => {
       const sunriseHHMM = todaySunrise ? todaySunrise.split("T")[1]?.slice(0, 5) ?? null : null;
       const sunsetHHMM = todaySunset ? todaySunset.split("T")[1]?.slice(0, 5) ?? null : null;
       const currentDark = sunriseHHMM !== null && sunsetHHMM !== null
-        ? currentTimeHHMM < sunriseHHMM || currentTimeHHMM >= sunsetHHMM
+        ? currentTimeHHMM <= sunriseHHMM || currentTimeHHMM >= sunsetHHMM
         : false;
 
       const currentConditions: Partial<KayakConditions> = {
@@ -243,8 +243,8 @@ export const useKayakData = () => {
             );
           }
 
-          const darkBeforeSunrise = sunriseHour !== null && h < sunriseHour;
-          const darkAfterSunset = sunsetHour !== null && h > sunsetHour;
+          const darkBeforeSunrise = sunriseHour !== null && h <= sunriseHour;
+          const darkAfterSunset = sunsetHour !== null && h >= sunsetHour;
           const dark = darkBeforeSunrise || darkAfterSunset;
 
           const predictedConditions: Partial<KayakConditions> = {

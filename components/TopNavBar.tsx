@@ -42,6 +42,15 @@ const buildShareText = (
     lines.push("");
   }
 
+  if (conditions.warnings && conditions.warnings.length > 0) {
+    lines.push("⚠️ *Weather Warnings:*");
+    const uniqueWarnings = Array.from(new Set(conditions.warnings.map(w => `${w.severity} Warning: ${w.headline}`)));
+    uniqueWarnings.forEach((w) => {
+      lines.push(`• ${w}`);
+    });
+    lines.push("");
+  }
+
   const tempStr =
     conditions.temperature !== undefined
       ? `🌡️ *Temperature:* ${conditions.temperature.toFixed(1)}°C`

@@ -352,11 +352,9 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
                             <Typography variant="caption" color="text.secondary">
                               {formatMetTime(w.validFrom)} — {formatMetTime(w.validTo)}
                             </Typography>
-                            {wIdx === 0 && (
-                              <Link href={w.link} target="_blank" rel="noopener" sx={{ fontSize: "0.7rem", fontWeight: "bold" }}>
-                                UK Met Office
-                              </Link>
-                            )}
+                            <Link href={w.link} target="_blank" rel="noopener" sx={{ fontSize: "0.7rem", fontWeight: "bold" }}>
+                              UK Met Office
+                            </Link>
                           </Box>
                         ))}
                       </Box>

@@ -100,22 +100,20 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
                         {formatMetTime(warning.validFrom)} —{" "}
                         {formatMetTime(warning.validTo)}
                       </Typography>
-                      {wIdx === 0 && (
-                        <Link
-                          href={warning.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          color="inherit"
-                          sx={{
-                            typography: "caption",
-                            textDecoration: "underline",
-                            fontWeight: "bold",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          UK Met Office
-                        </Link>
-                      )}
+                      <Link
+                        href={warning.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        color="inherit"
+                        sx={{
+                          typography: "caption",
+                          textDecoration: "underline",
+                          fontWeight: "bold",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        UK Met Office
+                      </Link>
                     </Box>
                   ))}
                 </Box>

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.10.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.9.2...paddlecheck-v1.10.0) (2026-06-25)
+
+
+### Features
+
+* enhance weather warning grouping and UI consistency ([08e36e3](https://github.com/dylanr97/Paddlecheck/commit/08e36e3da36a3fa978e4b8047ea51b7e461a339a))
+* ui consistency and weather warning enhancements ([82fb72f](https://github.com/dylanr97/Paddlecheck/commit/82fb72f3856b35545070cd9e794d3a21e76cf06e))
+
+
+### Bug Fixes
+
+* improve weather warning UI, nesting logic, and dark hours definition ([d84da54](https://github.com/dylanr97/Paddlecheck/commit/d84da543bafeb068b138dc61cf02f1d44fef90de))
+* refine weather warnings UI and paddling matrix styling ([4b06bd3](https://github.com/dylanr97/Paddlecheck/commit/4b06bd3b6c435e0a1c59bcc2d171cffdbca35e5a))
+
 ## [1.9.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.9.1...paddlecheck-v1.9.2) (2026-06-24)
 
 

@@ -120,7 +120,7 @@ export const RAG_STATUS_UI: Record<
     backgroundColor: "#C8E6C9",
   },
   Amber: {
-    color: "#FFBF00",
+    color: "#FF8F00",
     emoji: "⚠️",
     icon: WarningAmberOutlined,
     backgroundColor: "#FFF3E0",

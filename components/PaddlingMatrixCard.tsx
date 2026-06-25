@@ -243,7 +243,10 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
           </Box>
         ) : (
           <TableContainer>
-            <Table size="small">
+            <Table
+              size="small"
+              sx={{ "& .MuiTableCell-root": { borderBottom: "none" } }}
+            >
               <TableHead>
                 <TableRow>
                   <TableCell />

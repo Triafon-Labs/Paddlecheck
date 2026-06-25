@@ -2,7 +2,7 @@ import React from "react";
 import { Alert, Stack, Typography, Link, Box, Divider } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import { WeatherWarning, WarningSeverity } from "@/types";
-import { isWithinInterval, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
 import { tz, TZDate } from "@date-fns/tz";
 import { formatMetTime } from "@/lib/weather";
 
@@ -10,10 +10,25 @@ interface Props {
   warnings?: WeatherWarning[];
 }
 
-const severityToColor: Record<WarningSeverity, "warning" | "error" | "info"> = {
-  Yellow: "warning",
-  Amber: "warning",
-  Red: "error",
+const severityStyles: Record<
+  WarningSeverity,
+  { color: string; backgroundColor: string; borderColor: string }
+> = {
+  Red: {
+    color: "#B71C1C",
+    backgroundColor: "#FFEBEE",
+    borderColor: "#B71C1C",
+  },
+  Amber: {
+    color: "#FF8F00",
+    backgroundColor: "#FFF3E0",
+    borderColor: "#FF8F00",
+  },
+  Yellow: {
+    color: "#FBC02D",
+    backgroundColor: "#FFFDE7",
+    borderColor: "#FBC02D",
+  },
 };
 
 const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
@@ -21,23 +36,21 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
 
   const now = new TZDate(new Date(), "Europe/London");
 
-  // Filter for warnings active right now
-  const activeWarnings = warnings.filter((w) => {
-    if (!w.validFromISO || !w.validToISO) return true; // Fallback if parsing failed
+  // Filter for unexpired warnings (active or upcoming)
+  const relevantWarnings = warnings.filter((w) => {
+    if (!w.validToISO) return true;
     try {
-      return isWithinInterval(now, {
-        start: parseISO(w.validFromISO, { in: tz("Europe/London") }),
-        end: parseISO(w.validToISO, { in: tz("Europe/London") }),
-      });
+      const end = parseISO(w.validToISO, { in: tz("Europe/London") });
+      return end > now;
     } catch {
       return true;
     }
   });
 
-  if (activeWarnings.length === 0) return null;
+  if (relevantWarnings.length === 0) return null;
 
-  // Group active warnings by severity
-  const grouped = activeWarnings.reduce((acc, w) => {
+  // Group warnings by severity
+  const groupedBySeverity = relevantWarnings.reduce((acc, w) => {
     if (!acc[w.severity]) acc[w.severity] = [];
     acc[w.severity].push(w);
     return acc;
@@ -48,23 +61,21 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
   return (
     <Stack spacing={1.5} sx={{ mt: 2 }}>
       {severityOrder.map((severity) => {
-        const group = grouped[severity];
+        const group = groupedBySeverity[severity];
         if (!group || group.length === 0) return null;
 
-        const alertSeverity = severityToColor[severity];
-        const isRed = severity === "Red";
+        const style = severityStyles[severity];
 
         return (
           <Alert
             key={severity}
-            severity={alertSeverity}
-            icon={<WarningIcon />}
+            severity="info" // Use info as base to avoid MUI's default colors
+            icon={<WarningIcon sx={{ color: style.color }} />}
             sx={{
-              borderRadius: 2,
-              backgroundColor: isRed ? "#B71C1C" : undefined, // Darker Red
-              color: isRed ? "#fff" : undefined,
+              backgroundColor: style.backgroundColor,
+              color: style.color,
+              border: `1px solid ${style.borderColor}`,
               "& .MuiAlert-icon": {
-                color: isRed ? "#fff" : undefined,
                 alignItems: "center",
               },
               "& .MuiAlert-message": {
@@ -74,42 +85,62 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
             }}
           >
             <Stack spacing={1} sx={{ py: 0.5 }}>
-              {group.map((warning, idx) => (
-                <Box key={idx}>
-                  {idx > 0 && <Divider sx={{ my: 1, opacity: 0.2, borderColor: isRed ? "white" : "inherit" }} />}
+              {Object.entries(
+                group.reduce((acc, w) => {
+                  if (!acc[w.headline]) acc[w.headline] = [];
+                  acc[w.headline].push(w);
+                  return acc;
+                }, {} as Record<string, WeatherWarning[]>)
+              ).map(([headline, warnings], hIdx) => (
+                <Box key={headline}>
+                  {hIdx > 0 && (
+                    <Divider
+                      sx={{
+                        my: 1,
+                        opacity: 0.2,
+                        borderColor: style.color,
+                      }}
+                    />
+                  )}
                   <Typography
                     variant="subtitle2"
                     sx={{ fontWeight: "bold", lineHeight: 1.2, mb: 0.5 }}
                   >
-                    {warning.headline}
+                    {headline}
                   </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-end",
-                      gap: 1,
-                    }}
-                  >
-                    <Typography variant="caption" sx={{ opacity: 0.9 }}>
-                      Valid: {formatMetTime(warning.validFrom)} —{" "}
-                      {formatMetTime(warning.validTo)}
-                    </Typography>
-                    <Link
-                      href={warning.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      color="inherit"
+                  {warnings.map((warning, wIdx) => (
+                    <Box
+                      key={wIdx}
                       sx={{
-                        typography: "caption",
-                        textDecoration: "underline",
-                        fontWeight: "bold",
-                        whiteSpace: "nowrap",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-end",
+                        gap: 1,
+                        mt: wIdx > 0 ? 0.5 : 0,
                       }}
                     >
-                      UK Met Office
-                    </Link>
-                  </Box>
+                      <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                        {formatMetTime(warning.validFrom)} —{" "}
+                        {formatMetTime(warning.validTo)}
+                      </Typography>
+                      {wIdx === 0 && (
+                        <Link
+                          href={warning.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          color="inherit"
+                          sx={{
+                            typography: "caption",
+                            textDecoration: "underline",
+                            fontWeight: "bold",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          UK Met Office
+                        </Link>
+                      )}
+                    </Box>
+                  ))}
                 </Box>
               ))}
             </Stack>

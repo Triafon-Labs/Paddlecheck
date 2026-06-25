@@ -75,6 +75,13 @@ export const API_ENDPOINTS = {
   WEATHER: `https://api.open-meteo.com/v1/forecast`,
 };
 
+// --- Weather Warning Colors ---
+export const WARNING_COLORS = {
+  Red: "#B71C1C",
+  Amber: "#FF8F00",
+  Yellow: "#FBC02D",
+};
+
 // --- RAG Status Definitions ---
 export const RAG_STATUS_MAP: Record<number, Status> = {
   0: "Light Green",
@@ -120,19 +127,19 @@ export const RAG_STATUS_UI: Record<
     backgroundColor: "#C8E6C9",
   },
   Amber: {
-    color: "#FF8F00",
+    color: WARNING_COLORS.Amber,
     emoji: "⚠️",
     icon: WarningAmberOutlined,
     backgroundColor: "#FFF3E0",
   },
   Red: {
-    color: "#B71C1C",
+    color: WARNING_COLORS.Red,
     emoji: "🚨",
     icon: CrisisAlert,
     backgroundColor: "#FFEBEE",
   },
   "No Paddling": {
-    color: "#B71C1C",
+    color: WARNING_COLORS.Red,
     emoji: "⛔",
     icon: DoNotDisturbOutlined,
     backgroundColor: "#E0E0E0",

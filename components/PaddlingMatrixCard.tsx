@@ -243,10 +243,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
           </Box>
         ) : (
           <TableContainer>
-            <Table
-              size="small"
-              sx={{ "& .MuiTableCell-root": { borderBottom: "none" } }}
-            >
+            <Table size="small">
               <TableHead>
                 <TableRow>
                   <TableCell />
@@ -260,7 +257,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                   const statusInfo = paddlingMatrix[paddler];
                   return (
                     <React.Fragment key={paddler}>
-                      <TableRow>
+                      <TableRow sx={{ "& .MuiTableCell-root": { borderBottom: "none" } }}>
                         <TableCell>
                           <IconButton
                             aria-label="expand row"
@@ -293,7 +290,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                           )}
                         </TableCell>
                       </TableRow>
-                      <TableRow>
+                      <TableRow sx={{ "& .MuiTableCell-root": { borderBottom: "none" } }}>
                         <TableCell
                           style={{ paddingBottom: 0, paddingTop: 0 }}
                           colSpan={3}

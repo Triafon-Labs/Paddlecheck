@@ -2,84 +2,71 @@ import React from "react";
 import { Alert, Stack, Typography, Link, Box, Divider } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import { WeatherWarning, WarningSeverity } from "@/types";
-import { parseISO } from "date-fns";
+import { isWithinInterval, parseISO } from "date-fns";
 import { tz, TZDate } from "@date-fns/tz";
 import { formatMetTime } from "@/lib/weather";
-import { ragStatus } from "@/lib/rag";
+import { WARNING_COLORS } from "@/lib/config";
 
 interface Props {
   warnings?: WeatherWarning[];
 }
-
-const severityStyles: Record<
-  WarningSeverity,
-  { color: string; backgroundColor: string; borderColor: string; dividerColor: string }
-> = {
-  Red: {
-    color: ragStatus["Red"].color,
-    backgroundColor: ragStatus["Red"].backgroundColor,
-    borderColor: ragStatus["Red"].color,
-    dividerColor: "rgba(183, 28, 28, 0.2)",
-  },
-  Amber: {
-    color: "#E65100",
-    backgroundColor: "#FFF3E0",
-    borderColor: "#FF8F00",
-    dividerColor: "rgba(230, 81, 0, 0.2)",
-  },
-  Yellow: {
-    color: "#F57F17",
-    backgroundColor: "#FFFDE7",
-    borderColor: "#FBC02D",
-    dividerColor: "rgba(245, 127, 23, 0.2)",
-  },
-};
 
 const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
   if (!warnings || warnings.length === 0) return null;
 
   const now = new TZDate(new Date(), "Europe/London");
 
-  // Filter for unexpired warnings (active or upcoming)
-  const relevantWarnings = warnings.filter((w) => {
-    if (!w.validToISO) return true;
+  // Filter for warnings active right now
+  const activeWarnings = warnings.filter((w) => {
+    if (!w.validFromISO || !w.validToISO) return true; // Fallback if parsing failed
     try {
-      const end = parseISO(w.validToISO, { in: tz("Europe/London") });
-      return end > now;
+      return isWithinInterval(now, {
+        start: parseISO(w.validFromISO, { in: tz("Europe/London") }),
+        end: parseISO(w.validToISO, { in: tz("Europe/London") }),
+      });
     } catch {
       return true;
     }
   });
 
-  if (relevantWarnings.length === 0) return null;
+  if (activeWarnings.length === 0) return null;
 
-  // Group warnings by severity
-  const groupedBySeverity = relevantWarnings.reduce((acc, w) => {
-    if (!acc[w.severity]) acc[w.severity] = [];
-    acc[w.severity].push(w);
+  // Group active warnings by severity and headline to nest similar warnings
+  const grouped = activeWarnings.reduce((acc, w) => {
+    if (!acc[w.severity]) acc[w.severity] = {};
+    if (!acc[w.severity][w.headline]) acc[w.severity][w.headline] = [];
+    acc[w.severity][w.headline].push(w);
     return acc;
-  }, {} as Record<WarningSeverity, WeatherWarning[]>);
+  }, {} as Record<WarningSeverity, Record<string, WeatherWarning[]>>);
 
   const severityOrder: WarningSeverity[] = ["Red", "Amber", "Yellow"];
 
   return (
     <Stack spacing={1.5} sx={{ mt: 2 }}>
       {severityOrder.map((severity) => {
-        const group = groupedBySeverity[severity];
-        if (!group || group.length === 0) return null;
+        const group = grouped[severity];
+        if (!group || (Object.keys(group).length === 0)) return null;
 
-        const style = severityStyles[severity];
+        const isRed = severity === "Red";
+        const isAmber = severity === "Amber";
+
+        // Map severity to specific colors matching RAG system where possible
+        const alertColors = isRed
+          ? { text: "#fff", bg: WARNING_COLORS.Red }
+          : isAmber
+          ? { text: "#fff", bg: WARNING_COLORS.Amber }
+          : { text: "rgba(0, 0, 0, 0.87)", bg: WARNING_COLORS.Yellow }; // Yellow - use dark text for contrast
 
         return (
           <Alert
             key={severity}
-            severity="info" // Use info as base to avoid MUI's default colors
-            icon={<WarningIcon sx={{ color: style.color }} />}
+            variant="filled"
+            icon={<WarningIcon sx={{ color: alertColors.text }} />}
             sx={{
-              backgroundColor: style.backgroundColor,
-              color: style.color,
-              border: `1px solid ${style.borderColor}`,
+              backgroundColor: alertColors.bg,
+              color: alertColors.text,
               "& .MuiAlert-icon": {
+                color: alertColors.text,
                 alignItems: "center",
               },
               "& .MuiAlert-message": {
@@ -89,22 +76,9 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
             }}
           >
             <Stack spacing={1} sx={{ py: 0.5 }}>
-              {Object.entries(
-                group.reduce((acc, w) => {
-                  if (!acc[w.headline]) acc[w.headline] = [];
-                  acc[w.headline].push(w);
-                  return acc;
-                }, {} as Record<string, WeatherWarning[]>)
-              ).map(([headline, warnings], hIdx) => (
+              {Object.entries(group).map(([headline, warnings], idx) => (
                 <Box key={headline}>
-                  {hIdx > 0 && (
-                    <Divider
-                      sx={{
-                        my: 1,
-                        borderColor: style.dividerColor,
-                      }}
-                    />
-                  )}
+                  {idx > 0 && <Divider sx={{ my: 1, opacity: 0.3, borderColor: alertColors.text }} />}
                   <Typography
                     variant="subtitle2"
                     sx={{ fontWeight: "bold", lineHeight: 1.2, mb: 0.5 }}
@@ -119,7 +93,7 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
                         justifyContent: "space-between",
                         alignItems: "flex-end",
                         gap: 1,
-                        mt: wIdx > 0 ? 0.5 : 0,
+                        mb: wIdx < warnings.length - 1 ? 0.5 : 0,
                       }}
                     >
                       <Typography variant="caption" sx={{ opacity: 0.9 }}>

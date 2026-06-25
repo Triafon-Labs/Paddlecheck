@@ -42,6 +42,15 @@ const buildShareText = (
     lines.push("");
   }
 
+  if (conditions.warnings && conditions.warnings.length > 0) {
+    lines.push("⚠️ *Weather Warnings:*");
+    const uniqueWarnings = Array.from(new Set(conditions.warnings.map(w => `${w.severity} Warning: ${w.headline}`)));
+    uniqueWarnings.forEach((w) => {
+      lines.push(`• ${w}`);
+    });
+    lines.push("");
+  }
+
   const tempStr =
     conditions.temperature !== undefined
       ? `🌡️ *Temperature:* ${conditions.temperature.toFixed(1)}°C`
@@ -52,22 +61,6 @@ const buildShareText = (
       : null;
   const weatherLine = [tempStr, windStr].filter(Boolean).join(" | ");
   if (weatherLine) lines.push(weatherLine);
-
-  if (conditions.warnings && conditions.warnings.length > 0) {
-    const now = new Date();
-    const activeWarnings = conditions.warnings.filter((w) => {
-      if (!w.validToISO) return true;
-      return new Date(w.validToISO) > now;
-    });
-
-    if (activeWarnings.length > 0) {
-      lines.push("");
-      const uniqueHeadlines = Array.from(
-        new Set(activeWarnings.map((w) => `${w.severity} Warning: ${w.headline}`))
-      );
-      uniqueHeadlines.forEach((h) => lines.push(`⚠️ ${h}`));
-    }
-  }
 
   const todayForecast = forecastDays?.[0] ?? null;
   if (hasDaylightRemaining(todayForecast)) {

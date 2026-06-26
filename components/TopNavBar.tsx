@@ -10,6 +10,7 @@ import SettingsModal from "./SettingsModal";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { degreesToCompass } from "@/lib/weather";
 import { ragStatus } from "@/lib/rag";
+import { THRESHOLDS } from "@/lib/config";
 import { buildBestPaddlingTimes, buildNextDaytimeOutlook, hasDaylightRemaining } from "@/lib/forecast";
 
 
@@ -30,7 +31,7 @@ const buildShareText = (
     let riverLine = `🛶 *River Level:* ${conditions.riverLevel.toFixed(2)}m`;
     if (conditions.levelChange !== undefined) {
       const { value, period } = conditions.levelChange;
-      const arrow = value > 0.01 ? "⬆️" : value < -0.01 ? "⬇️" : "➡️";
+      const arrow = value > THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD ? "⬆️" : value < -THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD ? "⬇️" : "➡️";
       riverLine += ` _(${arrow} ${Math.abs(value).toFixed(2)}m in ${period})_`;
     }
     lines.push(riverLine);

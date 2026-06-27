@@ -20,6 +20,7 @@ import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import Kayaking from "@mui/icons-material/Kayaking";
 import { KayakConditions } from "@/types";
 import { degreesToCompass } from "@/lib/weather";
+import { THRESHOLDS } from "@/lib/config";
 
 interface StatsCardProps {
   conditions: KayakConditions | null;
@@ -101,9 +102,9 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) =
                     sx={{ color: "text.secondary", fontStyle: "italic", ml: 0.5 }}
                   >
                     (
-                    {conditions.levelChange.value > 0.01
+                    {conditions.levelChange.value > THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
                       ? "and rising"
-                      : conditions.levelChange.value < -0.01
+                      : conditions.levelChange.value < -THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
                         ? "and falling"
                         : "and steady"}
                     )

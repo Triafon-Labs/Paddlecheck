@@ -1,4 +1,5 @@
 import { DayForecast, Status } from "@/types";
+import { THRESHOLDS } from "@/lib/config";
 
 const PREFERRED: Status[] = ["Light Green", "Dark Green"];
 
@@ -199,7 +200,7 @@ export function buildNextDaytimeOutlook(
   const minL = Math.min(...levels);
   const maxL = Math.max(...levels);
   const levelText =
-    maxL - minL < 0.02
+    maxL - minL < THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
       ? `river level steady around ${minL.toFixed(2)}m`
       : `river level between ${minL.toFixed(2)}m and ${maxL.toFixed(2)}m`;
 

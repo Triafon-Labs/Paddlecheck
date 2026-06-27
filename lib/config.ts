@@ -167,6 +167,7 @@ export const THRESHOLDS = {
   RIVER_LEVEL_INITIAL_RAG_1: 1.0,
   RIVER_LEVEL_INITIAL_RAG_2: 1.4,
   RIVER_LEVEL_INITIAL_RAG_3: 2.2,
+  RIVER_LEVEL_TREND_THRESHOLD: 0.1,
 };
 
 // WMO weather interpretation codes 50–99 cover drizzle, rain, snow, showers

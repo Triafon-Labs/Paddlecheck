@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.10.0...paddlecheck-v1.11.0) (2026-06-27)
+
+
+### Features
+
+* unify river level trend threshold at 0.1m ([f54fe3b](https://github.com/dylanr97/Paddlecheck/commit/f54fe3b399b381e321b1d223098fd97883ee9350))
+
 ## [1.10.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.9.2...paddlecheck-v1.10.0) (2026-06-25)
 
 

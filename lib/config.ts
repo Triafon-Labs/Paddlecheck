@@ -61,7 +61,7 @@ export const LATITUDE = 52.2;
 export const LONGITUDE = -2.2;
 export const HISTORICAL_DAYS = 5;
 
-// Upstream station forecast - used to improve near-future level predictions.
+// Upstream station forecast - used to improve near-future level forecasts.
 // The app fetches CSV data from an upstream gauge and shifts it forward by
 // BEWDLEY_TRAVEL_HOURS to estimate when a flood wave will arrive.
 // CSV URLs follow the pattern: https://check-for-flooding.service.gov.uk/station-csv/<station-id>

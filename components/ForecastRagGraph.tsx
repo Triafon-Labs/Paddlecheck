@@ -28,7 +28,7 @@ import {
   ReferenceLine,
   LabelList,
 } from "recharts";
-import { DayForecast, PredictedGraphDataPoint, WeatherWarning } from "@/types";
+import { DayForecast, ForecastGraphDataPoint, WeatherWarning } from "@/types";
 import { ragStatus } from "@/lib/rag";
 import { REASON_ICONS, WARNING_COLORS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
@@ -38,7 +38,7 @@ import { isSameDay, parseISO } from "date-fns";
 import { tz } from "@date-fns/tz";
 import { formatMetTime } from "@/lib/weather";
 
-interface PredictedRagGraphProps {
+interface ForecastRagGraphProps {
   forecastDays: DayForecast[] | null;
   warnings?: WeatherWarning[];
   loading?: boolean;
@@ -55,16 +55,16 @@ const CustomTooltip = ({
   label,
 }: TooltipContentProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload as PredictedGraphDataPoint;
+    const data = payload[0].payload as ForecastGraphDataPoint;
     return (
       <Paper sx={{ p: 2 }}>
         <Typography variant="body1">{`${label}`}</Typography>
         <Typography variant="body2">{`${data.status}`}</Typography>
         <Typography variant="body2" color="text.secondary">
-          Predicted Level: {data.predictedLevel.toFixed(2)}m
+          Forecast Level: {data.forecastLevel.toFixed(2)}m
         </Typography>
         <Typography variant="caption" color="text.disabled">
-          {data.predictionSource === "bewdley"
+          {data.forecastSource === "bewdley"
             ? "Source: Bewdley upstream forecast"
             : "Source: Local trend (linear)"}
         </Typography>
@@ -124,7 +124,7 @@ interface BarLabelProps {
   y?: number;
   width?: number;
   index?: number;
-  data: PredictedGraphDataPoint[];
+  data: ForecastGraphDataPoint[];
 }
 
 const BarLabel = (props: BarLabelProps) => {
@@ -163,7 +163,7 @@ const BarLabel = (props: BarLabelProps) => {
   return null;
 };
 
-const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
+const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   forecastDays,
   warnings,
   loading,
@@ -210,10 +210,10 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
         : null;
 
       const chartData = data.map((d, i) => {
-        const scaled = d.predictedLevel / 6.0;
-        const isBewdley = d.predictionSource === "bewdley";
-        const prevSource = i > 0 ? data[i - 1].predictionSource : null;
-        const nextSource = i < data.length - 1 ? data[i + 1].predictionSource : null;
+        const scaled = d.forecastLevel / 6.0;
+        const isBewdley = d.forecastSource === "bewdley";
+        const prevSource = i > 0 ? data[i - 1].forecastSource : null;
+        const nextSource = i < data.length - 1 ? data[i + 1].forecastSource : null;
         const inBewdleyLine = isBewdley || prevSource === "bewdley";
         const inLinearLine = !isBewdley || nextSource === "linear";
         return {
@@ -294,7 +294,7 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
     }
     return (
       <Typography variant="body1" sx={{ mt: 1, textAlign: "center" }}>
-        Not enough data to predict.
+        Not enough data to forecast.
       </Typography>
     );
   };
@@ -374,12 +374,12 @@ const PredictedRagGraph: React.FC<PredictedRagGraphProps> = ({
           color="text.secondary"
           sx={{ display: "block", textAlign: "center", mt: 2 }}
         >
-          Solid line uses Bewdley upstream forecast (~30h). Dashed line uses
-          local trend only. Both are experimental and may not be accurate.
+          Solid line uses Bewdley upstream forecast (24h). Dashed line uses
+          local trend only. Both are experimental.
         </Typography>
       </CardContent>
     </Card>
   );
 };
 
-export default PredictedRagGraph;
+export default ForecastRagGraph;

@@ -7,16 +7,16 @@ import StatusCard from "@/components/StatusCard";
 import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";
 import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
-import PredictedRagGraph from "@/components/PredictedRagGraph";
+import ForecastRagGraph from "@/components/ForecastRagGraph";
 import { useKayakContext } from "@/lib/KayakDataContext";
 
 export default function HomePage() {
   const {
     conditions,
     forecastDays,
-    predictionData,
+    forecastData,
     loading,
-    predictLoading,
+    forecastLoading,
     riverGraphData,
     riverChange1h,
     riverChange24h,
@@ -46,17 +46,17 @@ export default function HomePage() {
         />
         <RiverLevelGraph
           data={riverGraphData}
-          predictionData={predictionData}
+          forecastData={forecastData}
           loading={loading}
           change1h={riverChange1h}
           change24h={riverChange24h}
           change8h={riverChange8h}
           change5d={riverChange5d}
         />
-        <PredictedRagGraph
+        <ForecastRagGraph
           forecastDays={forecastDays}
           warnings={conditions?.warnings}
-          loading={predictLoading}
+          loading={forecastLoading}
         />
         <Box sx={{ width: "100%", textAlign: "center" }}>
           <LastUpdated date={conditions?.lastUpdated} />

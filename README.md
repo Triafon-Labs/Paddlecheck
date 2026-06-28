@@ -7,7 +7,7 @@ A kayaking conditions dashboard providing real-time river levels, weather, and a
 ## Features
 
 - **RAG status** - Red/Amber/Green paddling safety rating based on river level, temperature, wind, visibility, and time of day
-- **River level graph** - historical readings plus a near-future prediction using an upstream gauge
+- **River level graph** - historical readings plus a near-future forecast using an upstream gauge
 - **5-day forecast** - hourly RAG status for the coming days
 - **Skill-level matrix** - paddling guidance broken down by paddler level (Beginner → Independent)
 - **PWA** - installable as a mobile app for quick access on the water
@@ -20,7 +20,7 @@ The app fetches live data from two public APIs (no authentication or API keys re
 - **River levels** - [Environment Agency flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/api-reference.html)
 - **Weather** - [Open-Meteo API](https://open-meteo.com/)
 
-River level, temperature, wind speed, visibility, weather codes, and time of day are combined into a RAG status using a configurable threshold table. An optional upstream gauge reading is shifted forward by a configurable number of hours to improve near-future level predictions.
+River level, temperature, wind speed, visibility, weather codes, and time of day are combined into a RAG status using a configurable threshold table. An optional upstream gauge reading is shifted forward by a configurable number of hours to improve near-future level forecasts.
 
 ## Tech Stack
 
@@ -122,7 +122,7 @@ export const LEVEL_DESCRIPTIONS: Record<number, string> = {
 
 ### 8. Upstream station (optional)
 
-The app can use an upstream gauge to improve near-future level predictions. The upstream reading is shifted forward by `BEWDLEY_TRAVEL_HOURS` to estimate when a flood wave will arrive at your location.
+The app can use an upstream gauge to improve near-future level forecasts. The upstream reading is shifted forward by `BEWDLEY_TRAVEL_HOURS` to estimate when a flood wave will arrive at your location.
 
 ```ts
 export const BEWDLEY_CSV_URL =
@@ -130,7 +130,7 @@ export const BEWDLEY_CSV_URL =
 export const BEWDLEY_TRAVEL_HOURS = 6;
 ```
 
-CSV export URLs follow the pattern `https://check-for-flooding.service.gov.uk/station-csv/<station-id>`. If you don't have a useful upstream station, the prediction feature will simply not show.
+CSV export URLs follow the pattern `https://check-for-flooding.service.gov.uk/station-csv/<station-id>`. If you don't have a useful upstream station, the forecast feature will simply not show.
 
 ### 9. Venue-specific flood plain (optional)
 

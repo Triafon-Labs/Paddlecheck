@@ -12,6 +12,10 @@ export interface BewdleyForecastPoint {
   level: number;
 }
 
+/**
+ * Fetches the upstream Bewdley river level forecast and observations.
+ * The forecast is limited to 24 hours ahead from the current time.
+ */
 export const fetchBewdleyForecast = async (): Promise<{
   forecasts: BewdleyForecastPoint[];
   observations: BewdleyForecastPoint[];
@@ -25,6 +29,9 @@ export const fetchBewdleyForecast = async (): Promise<{
 
   const forecasts: BewdleyForecastPoint[] = [];
   const observations: BewdleyForecastPoint[] = [];
+
+  const now = new Date();
+  const twentyFourHoursAhead = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
   // Skip header row (index 0)
   for (let i = 1; i < lines.length; i++) {
@@ -43,7 +50,10 @@ export const fetchBewdleyForecast = async (): Promise<{
     if (isNaN(level) || isNaN(timestamp.getTime())) continue;
 
     if (type === "forecast") {
-      forecasts.push({ timestamp, level });
+      // Only retrieve up to 24 hours ahead
+      if (timestamp <= twentyFourHoursAhead) {
+        forecasts.push({ timestamp, level });
+      }
     } else if (type === "observed") {
       observations.push({ timestamp, level });
     }
@@ -55,14 +65,18 @@ export const fetchBewdleyForecast = async (): Promise<{
     null
   );
 
-  return { forecasts, observations, currentLevel: latestObserved?.level ?? null };
+  return {
+    forecasts,
+    observations,
+    currentLevel: latestObserved?.level ?? null,
+  };
 };
 
-// Apply a delta-transfer from Bewdley's data to predict Worcester's level.
+// Apply a delta-transfer from Bewdley's data to forecast Worcester's level.
 // Worcester's current level already reflects what Bewdley was doing 6 hours
 // ago, so the reference baseline is Bewdley at (now - 6h), not Bewdley now.
 // delta = bewdley(targetWorcesterTime - 6h) - bewdley(now - 6h)
-// worcesterPredicted = worcesterCurrentLevel + delta
+// worcesterForecasted = worcesterCurrentLevel + delta
 export const getBewdleyBasedWorcesterLevel = (
   worcesterCurrentLevel: number,
   bewdleyForecasts: BewdleyForecastPoint[],
@@ -172,7 +186,7 @@ export const fetchRiverData = async (
   };
 };
 
-export const predictRiverLevel = (
+export const forecastRiverLevel = (
   latestLevel: number,
   historicalData: ChartDataPoint[],
   hoursInFuture: number
@@ -222,8 +236,8 @@ export const predictRiverLevel = (
 
   // 6. Predict future level
   const slopePerHour = slope * 3600; // convert from seconds to hours
-  const predictedLevel = latestLevel + slopePerHour * hoursInFuture;
+  const forecastedLevel = latestLevel + slopePerHour * hoursInFuture;
 
-  // 7. Ensure prediction doesn't go below a sensible minimum (e.g., 0)
-  return Math.max(0, predictedLevel);
+  // 7. Ensure forecast doesn't go below a sensible minimum (e.g., 0)
+  return Math.max(0, forecastedLevel);
 };

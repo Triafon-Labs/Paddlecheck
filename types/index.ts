@@ -88,13 +88,13 @@ export interface FutureWeatherData {
   daily: DailyData;
 }
 
-export interface PredictedGraphDataPoint {
+export interface ForecastGraphDataPoint {
   time: string;
   status: Status;
   reasons: string[];
   value: number;
-  predictedLevel: number;
-  predictionSource: "bewdley" | "linear";
+  forecastLevel: number;
+  forecastSource: "bewdley" | "linear";
   temperature?: number;
   windSpeed?: number;
 }
@@ -102,7 +102,7 @@ export interface PredictedGraphDataPoint {
 export interface DayForecast {
   date: string; // "YYYY-MM-DD"
   label: string; // "Today", "Mon 1", etc.
-  graphData: PredictedGraphDataPoint[];
+  graphData: ForecastGraphDataPoint[];
   sunrise: string | null;
   sunset: string | null;
 }

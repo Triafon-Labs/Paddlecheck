@@ -280,7 +280,7 @@ export const useKayakData = () => {
           );
 
           const bewdleyLevel =
-            bewdleyData.currentLevel !== null
+            bewdleyData.currentLevel !== null && hoursAhead <= 24
               ? getBewdleyBasedWorcesterLevel(
                   riverData.latestLevel ?? 0,
                   bewdleyData.forecasts,

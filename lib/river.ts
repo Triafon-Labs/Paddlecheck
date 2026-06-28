@@ -12,6 +12,10 @@ export interface BewdleyForecastPoint {
   level: number;
 }
 
+/**
+ * Fetches the upstream Bewdley river level forecast and observations.
+ * The forecast is limited to 24 hours ahead from the current time.
+ */
 export const fetchBewdleyForecast = async (): Promise<{
   forecasts: BewdleyForecastPoint[];
   observations: BewdleyForecastPoint[];
@@ -25,6 +29,11 @@ export const fetchBewdleyForecast = async (): Promise<{
 
   const forecasts: BewdleyForecastPoint[] = [];
   const observations: BewdleyForecastPoint[] = [];
+
+  const now = new Date();
+  const twentyFourHoursAhead = new Date(
+    now.getTime() + 24 * 60 * 60 * 1000
+  );
 
   // Skip header row (index 0)
   for (let i = 1; i < lines.length; i++) {
@@ -43,7 +52,10 @@ export const fetchBewdleyForecast = async (): Promise<{
     if (isNaN(level) || isNaN(timestamp.getTime())) continue;
 
     if (type === "forecast") {
-      forecasts.push({ timestamp, level });
+      // Only retrieve up to 24 hours ahead
+      if (timestamp <= twentyFourHoursAhead) {
+        forecasts.push({ timestamp, level });
+      }
     } else if (type === "observed") {
       observations.push({ timestamp, level });
     }

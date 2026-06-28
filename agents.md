@@ -122,7 +122,7 @@ public/                  Static assets - icons, favicon
 | Data                             | API                                                                          | Notes                                          |
 | -------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
 | River level readings             | Environment Agency Flood-Monitoring API - station `2642` (Diglis, Worcester) | Historical readings                            |
-| Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)               | Used for 0–30 h prediction with 6 h travel lag |
+| Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)               | Used for 0–24 h prediction with 6 h travel lag |
 | Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                  | No API key required                            |
 
 There are no environment variables required for local development.
@@ -158,7 +158,7 @@ The word "raises" means incrementing one step up the severity scale.
 
 Two sources are combined transparently:
 
-- **Bewdley delta transfer** (primary, 0–~30 h): Upstream Bewdley readings are shifted 6 h forward and applied as a delta to the current Diglis level. Displayed as solid lines in graphs.
+- **Bewdley delta transfer** (primary, 0–24 h prediction): Upstream Bewdley readings are shifted 6 h forward and applied as a delta to the current Diglis level. Displayed as solid lines in graphs.
 - **Linear regression** (fallback, beyond Bewdley horizon): Uses the last 8 h of Diglis readings to extrapolate a trend. Displayed as dashed lines.
 
 Bewdley data failure is non-fatal - the app falls back to linear regression silently.

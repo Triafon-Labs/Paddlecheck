@@ -147,7 +147,7 @@ export function buildHourlyForecastText(
   const lines = slots.map((pt, i) => {
     const h = hourOf(pt.time);
     const timeStr = `${String(h).padStart(2, "0")}:00`;
-    const level = `river ${pt.predictedLevel.toFixed(2)}m`;
+    const level = `river ${pt.forecastLevel.toFixed(2)}m`;
     const temp =
       pt.temperature !== undefined ? `${Math.round(pt.temperature)}°C` : null;
     const wind =
@@ -217,7 +217,7 @@ export function buildNextDaytimeOutlook(
         ? "tomorrow"
         : day.label.toLowerCase();
 
-  const levels = daySlots.map((s) => s.predictedLevel);
+  const levels = daySlots.map((s) => s.forecastLevel);
   const minL = Math.min(...levels);
   const maxL = Math.max(...levels);
   const levelText =

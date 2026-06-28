@@ -6,19 +6,19 @@ A kayaking conditions dashboard providing real-time river levels, weather, and a
 
 ## Features
 
-- **RAG status** — Red/Amber/Green paddling safety rating based on river level, temperature, wind, visibility, and time of day
-- **River level graph** — historical readings plus a near-future prediction using an upstream gauge
-- **5-day forecast** — hourly RAG status for the coming days
-- **Skill-level matrix** — paddling guidance broken down by paddler level (Beginner → Independent)
-- **PWA** — installable as a mobile app for quick access on the water
+- **RAG status** - Red/Amber/Green paddling safety rating based on river level, temperature, wind, visibility, and time of day
+- **River level graph** - historical readings plus a near-future prediction using an upstream gauge
+- **5-day forecast** - hourly RAG status for the coming days
+- **Skill-level matrix** - paddling guidance broken down by paddler level (Beginner → Independent)
+- **PWA** - installable as a mobile app for quick access on the water
 - **Light/dark/system theme**
 
 ## How It Works
 
 The app fetches live data from two public APIs (no authentication or API keys required):
 
-- **River levels** — [Environment Agency flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/api-reference.html)
-- **Weather** — [Open-Meteo API](https://open-meteo.com/)
+- **River levels** - [Environment Agency flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/api-reference.html)
+- **Weather** - [Open-Meteo API](https://open-meteo.com/)
 
 River level, temperature, wind speed, visibility, weather codes, and time of day are combined into a RAG status using a configurable threshold table. An optional upstream gauge reading is shifted forward by a configurable number of hours to improve near-future level predictions.
 
@@ -27,8 +27,8 @@ River level, temperature, wind speed, visibility, weather codes, and time of day
 - [Next.js](https://nextjs.org/) (App Router)
 - [Material UI (MUI)](https://mui.com/)
 - [TypeScript](https://www.typescriptlang.org/)
-- [Recharts](https://recharts.org/) — graphs
-- [Workbox](https://developer.chrome.com/docs/workbox/) — PWA / service worker
+- [Recharts](https://recharts.org/) - graphs
+- [Workbox](https://developer.chrome.com/docs/workbox/) - PWA / service worker
 
 ## Getting Started
 
@@ -73,7 +73,7 @@ Replace or extend with links relevant to your venue (e.g. your own station page,
 
 The app uses the Environment Agency flood-monitoring API. To find your station:
 
-1. Browse stations at [https://environment.data.gov.uk/flood-monitoring/id/stations](https://environment.data.gov.uk/flood-monitoring/id/stations) — you can filter by `?label=<river name>` or `?town=<town>`.
+1. Browse stations at [https://environment.data.gov.uk/flood-monitoring/id/stations](https://environment.data.gov.uk/flood-monitoring/id/stations) - you can filter by `?label=<river name>` or `?town=<town>`.
 2. Copy the numeric station ID from the URL (e.g. `2642` from `.../stations/2642`).
 
 ```ts
@@ -93,15 +93,15 @@ export const LONGITUDE = -2.2;
 
 `THRESHOLDS` controls when the status escalates between Green, Amber, Red, and No Paddling. Adjust these to match your club's safety guidelines:
 
-| Key | Meaning |
-|-----|---------|
-| `RIVER_LEVEL_INITIAL_RAG_1` | Level (m) at which status moves from Light Green → Dark Green |
-| `RIVER_LEVEL_INITIAL_RAG_2` | Level (m) at which status moves to Amber |
-| `RIVER_LEVEL_INITIAL_RAG_3` | Level (m) at which status moves to Red |
-| `RIVER_LEVEL_NO_PADDLING` | Level (m) above which paddling is forbidden |
-| `TEMP_HIGH` | Temperature (°C) above which cold water is not a factor |
-| `TEMP_MODERATE` | Temperature (°C) below which cold water raises the risk rating |
-| `WIND_HIGH` | Wind speed (mph) above which wind raises the risk rating |
+| Key                         | Meaning                                                        |
+| --------------------------- | -------------------------------------------------------------- |
+| `RIVER_LEVEL_INITIAL_RAG_1` | Level (m) at which status moves from Light Green → Dark Green  |
+| `RIVER_LEVEL_INITIAL_RAG_2` | Level (m) at which status moves to Amber                       |
+| `RIVER_LEVEL_INITIAL_RAG_3` | Level (m) at which status moves to Red                         |
+| `RIVER_LEVEL_NO_PADDLING`   | Level (m) above which paddling is forbidden                    |
+| `TEMP_HIGH`                 | Temperature (°C) above which cold water is not a factor        |
+| `TEMP_MODERATE`             | Temperature (°C) below which cold water raises the risk rating |
+| `WIND_HIGH`                 | Wind speed (mph) above which wind raises the risk rating       |
 
 ### 6. River level descriptions
 
@@ -125,7 +125,8 @@ export const LEVEL_DESCRIPTIONS: Record<number, string> = {
 The app can use an upstream gauge to improve near-future level predictions. The upstream reading is shifted forward by `BEWDLEY_TRAVEL_HOURS` to estimate when a flood wave will arrive at your location.
 
 ```ts
-export const BEWDLEY_CSV_URL = "https://check-for-flooding.service.gov.uk/station-csv/2001";
+export const BEWDLEY_CSV_URL =
+  "https://check-for-flooding.service.gov.uk/station-csv/2001";
 export const BEWDLEY_TRAVEL_HOURS = 6;
 ```
 
@@ -137,7 +138,7 @@ CSV export URLs follow the pattern `https://check-for-flooding.service.gov.uk/st
 
 ## Deployment
 
-The app is a standard Next.js application. [Vercel](https://vercel.com) is the simplest deployment option — connect your fork and it deploys automatically on every push to `main`. No environment variables are required.
+The app is a standard Next.js application. [Vercel](https://vercel.com) is the simplest deployment option - connect your fork and it deploys automatically on every push to `main`. No environment variables are required.
 
 ## Built With
 

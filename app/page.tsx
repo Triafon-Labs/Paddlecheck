@@ -23,18 +23,12 @@ export default function HomePage() {
     riverChange8h,
     riverChange5d,
     error,
-    isOffline,
   } = useKayakContext();
 
   return (
     <Container maxWidth="md">
       <Stack spacing={4}>
-        {isOffline && (
-          <Alert severity="warning" sx={{ borderRadius: 1 }}>
-            You&apos;re offline — showing cached data where available.
-          </Alert>
-        )}
-        {error && (
+        {error && error !== "Offline - no cached data (reconnect and refresh)" && (
           <Alert severity="error" sx={{ borderRadius: 1 }}>
             {error}
           </Alert>

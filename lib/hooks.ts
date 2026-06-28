@@ -423,7 +423,7 @@ export const useKayakData = () => {
         offline
           ? hasCache
             ? null
-            : "Offline - no cached data (reconnect and refresh)"
+            : "Offline – no cached data (reconnect and refresh)"
           : "Failed to load conditions. Check your connection and tap refresh to try again."
       );
     } finally {

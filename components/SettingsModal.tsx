@@ -90,7 +90,7 @@ const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
   );
 };
 
-// YIQ perceptual brightness - returns black or white for readable contrast
+// YIQ perceptual brightness – returns black or white for readable contrast
 const contrastText = (hex: string): string => {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -369,14 +369,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             />
             <ThresholdRow
               icon={<Water fontSize="small" />}
-              label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} m`}
+              label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1}–${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} m`}
               description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag1ToRag2}
               chipLabel="Dark Green"
               ragColor={RAG_STATUS_UI["Dark Green"].color}
             />
             <ThresholdRow
               icon={<Waves fontSize="small" />}
-              label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} – ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m`}
+              label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2}–${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m`}
               description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag2ToRag3}
               chipLabel="Amber"
               ragColor={RAG_STATUS_UI["Amber"].color}
@@ -413,7 +413,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             />
             <ThresholdRow
               icon={<Thermostat fontSize="small" />}
-              label={`${THRESHOLDS.TEMP_MODERATE} – ${THRESHOLDS.TEMP_HIGH} °C`}
+              label={`${THRESHOLDS.TEMP_MODERATE}–${THRESHOLDS.TEMP_HIGH} °C`}
               description="Cool. Raises the base risk rating. Rain also becomes a factor."
               chipLabel="Raises rating"
               chipColor="warning"
@@ -478,9 +478,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   label={`${desc} (${range})`}
                   description={
                     isBad
-                      ? "Fog conditions - raises Green to Amber, and Amber to Red."
+                      ? "Fog conditions – raises Green to Amber, and Amber to Red."
                       : isAtLimit
-                        ? "Poor visibility - borderline fog threshold."
+                        ? "Poor visibility – borderline fog threshold."
                         : "Acceptable visibility."
                   }
                   chipLabel={desc}
@@ -521,7 +521,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             <ThresholdRow
               icon={<Thunderstorm fontSize="small" />}
               label="Thunderstorm"
-              description="No paddling when thunder is near - overrides all other conditions."
+              description="No paddling when thunder is near – overrides all other conditions."
               chipLabel="No Paddling"
               chipColor="error"
             />

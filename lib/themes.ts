@@ -11,7 +11,7 @@ import {
 //   wght (weight 100–900), wdth (width 25–151), opsz (optical size 8–144)
 const m3Typography: ThemeOptions["typography"] = {
   fontFamily: '"Roboto Flex", "Roboto", "Helvetica", "Arial", sans-serif',
-  // Display Large - rarely used in app, included for completeness
+  // Display Large – rarely used in app, included for completeness
   h1: {
     fontSize: "3.5625rem",
     fontWeight: 400,
@@ -43,7 +43,7 @@ const m3Typography: ThemeOptions["typography"] = {
     letterSpacing: "0em",
     fontVariationSettings: '"wght" 400, "wdth" 106, "opsz" 32',
   },
-  // Headline Small - used for card titles ("Paddling Status", "Detailed Stats")
+  // Headline Small – used for card titles ("Paddling Status", "Detailed Stats")
   h5: {
     fontSize: "1.5rem",
     fontWeight: 600,
@@ -51,7 +51,7 @@ const m3Typography: ThemeOptions["typography"] = {
     letterSpacing: "0em",
     fontVariationSettings: '"wght" 600, "wdth" 110, "opsz" 24',
   },
-  // Title Large - used for settings section headings
+  // Title Large – used for settings section headings
   h6: {
     fontSize: "1.375rem",
     fontWeight: 500,
@@ -108,7 +108,7 @@ const m3Typography: ThemeOptions["typography"] = {
     textTransform: "uppercase",
     fontVariationSettings: '"wght" 500, "wdth" 90, "opsz" 11',
   },
-  // Label Large - button text
+  // Label Large – button text
   button: {
     fontSize: "0.875rem",
     fontWeight: 500,
@@ -167,7 +167,7 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
     styleOverrides: {
       root: {
         borderRadius: 9999,
-        // M3 focus indicator - thin primary outline on keyboard focus
+        // M3 focus indicator – thin primary outline on keyboard focus
         "&.Mui-focusVisible": {
           outline: `3px solid ${m3.primary}`,
           outlineOffset: 2,
@@ -181,7 +181,7 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
       root: { borderRadius: 8 },
     },
   },
-  // Segmented pill control - container + individual pill buttons
+  // Segmented pill control – container + individual pill buttons
   MuiToggleButtonGroup: {
     styleOverrides: {
       root: {
@@ -280,7 +280,7 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
   },
 });
 
-// M3-compliant MUI transitions config - propagates to all MUI components
+// M3-compliant MUI transitions config – propagates to all MUI components
 // that use theme.transitions.create() (Drawer, Accordion, Collapse, Fade…)
 const m3Transitions: ThemeOptions["transitions"] = {
   easing: {
@@ -322,7 +322,7 @@ export const lightTheme = createTheme({
   components: makeComponents(m3Light),
 });
 
-// Blue-tinted dark surface tokens - keeps the original navy feel while
+// Blue-tinted dark surface tokens – keeps the original navy feel while
 // providing the M3 tonal elevation steps that the component overrides need.
 const m3DarkNavy: M3Palette = {
   ...m3Dark,
@@ -330,7 +330,7 @@ const m3DarkNavy: M3Palette = {
   onSurface: "#FFFFFF",
   surfaceContainerLowest: "#061221",
   surfaceContainerLow: "#132F4C", // original paper / drawer / AppBar
-  surfaceContainer: "#193A5E", // card background - one step lighter
+  surfaceContainer: "#193A5E", // card background – one step lighter
   surfaceContainerHigh: "#1E4168",
   surfaceContainerHighest: "#254B75",
   outlineVariant: "#2A4F73",

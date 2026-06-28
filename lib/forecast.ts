@@ -123,7 +123,7 @@ export function buildBestPaddlingTimes(
         const remaining =
           endH * 60 + endM - (now.getHours() * 60 + now.getMinutes());
         if (remaining > 0 && remaining < 60) {
-          note = ` - only ~${remaining} mins remaining`;
+          note = ` – only ~${remaining} mins remaining`;
         }
       }
       return `${start}–${end}${note}`;
@@ -194,7 +194,7 @@ export interface DaytimeOutlook {
   rangesText: string; // "river level 0.55–0.62m, air temperature 11–18°C, wind up to 14 mph"
 }
 
-// Outlook for the next daytime period - used when it's currently dark.
+// Outlook for the next daytime period – used when it's currently dark.
 // Picks the first forecast day that still has daylight hours.
 export function buildNextDaytimeOutlook(
   forecastDays: DayForecast[] | null

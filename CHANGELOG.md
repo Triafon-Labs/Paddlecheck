@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.13.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.12.0...paddlecheck-v1.13.0) (2026-06-28)
+
+
+### Features
+
+* cap Bewdley forecast at 24h and fix terminology standardization ([0713d7d](https://github.com/dylanr97/Paddlecheck/commit/0713d7d48848510bf7333a23a939164a19e4f3f7))
+* cap Bewdley forecast at 24h and standardize terminology to 'forecast' ([b53a899](https://github.com/dylanr97/Paddlecheck/commit/b53a89922a7919e7393639d49708708edc00ae62))
+* explicitly cap Bewdley-based prediction at 24 hours ([544b04a](https://github.com/dylanr97/Paddlecheck/commit/544b04a072b32de718a8c66551f1390e6a91c1af))
+* explicitly cap Bewdley-based prediction at 24 hours ([d8c02b0](https://github.com/dylanr97/Paddlecheck/commit/d8c02b069e59dfbf653d96694546f70b87b7d39e))
+* standardize on 'forecast' and shorten disclaimers ([b6f4ff2](https://github.com/dylanr97/Paddlecheck/commit/b6f4ff274693f85796364ab1caf51bb86e19a443))
+
 ## [1.12.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.11.0...paddlecheck-v1.12.0) (2026-06-28)
 
 

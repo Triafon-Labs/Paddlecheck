@@ -91,7 +91,6 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
                       sx={{
                         my: 1,
                         opacity: 0.3,
-                        borderColor: alertColors.text,
                       }}
                     />
                   )}

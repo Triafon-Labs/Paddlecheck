@@ -31,9 +31,7 @@ export const fetchBewdleyForecast = async (): Promise<{
   const observations: BewdleyForecastPoint[] = [];
 
   const now = new Date();
-  const twentyFourHoursAhead = new Date(
-    now.getTime() + 24 * 60 * 60 * 1000
-  );
+  const twentyFourHoursAhead = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
   // Skip header row (index 0)
   for (let i = 1; i < lines.length; i++) {
@@ -67,7 +65,11 @@ export const fetchBewdleyForecast = async (): Promise<{
     null
   );
 
-  return { forecasts, observations, currentLevel: latestObserved?.level ?? null };
+  return {
+    forecasts,
+    observations,
+    currentLevel: latestObserved?.level ?? null,
+  };
 };
 
 // Apply a delta-transfer from Bewdley's data to predict Worcester's level.

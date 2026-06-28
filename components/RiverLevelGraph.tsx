@@ -352,7 +352,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             color="text.secondary"
             sx={{ display: "block", textAlign: "center", mt: 1 }}
           >
-            Dashed line uses Bewdley upstream forecast (24h prediction). Experimental and may not be accurate.
+            Dashed line uses Bewdley upstream forecast (24h). Experimental.
           </Typography>
         </>
       );

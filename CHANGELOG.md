@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.12.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.11.0...paddlecheck-v1.12.0) (2026-06-28)
+
+
+### Features
+
+* enhance briefing prompt and condition handling in POST request ([b3b9657](https://github.com/dylanr97/Paddlecheck/commit/b3b96575a9dc6d170589d57adf0c9c9dea62b91c))
+* enhance briefing prompt and condition handling in POST request ([66592ac](https://github.com/dylanr97/Paddlecheck/commit/66592acf68d5ddff0b1252b99555e10e0159512a))
+
+
+### Bug Fixes
+
+* improve warnings handling and display logic in WeatherWarnings component ([21660a9](https://github.com/dylanr97/Paddlecheck/commit/21660a9584d7d1aa1c24e68d78a571fd79338641))
+* remove unused borderColor property from alert styling in WeatherWarnings component ([230f54b](https://github.com/dylanr97/Paddlecheck/commit/230f54b1265508762844a216f3015458d356bf08))
+
 ## [1.11.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.10.0...paddlecheck-v1.11.0) (2026-06-27)
 
 

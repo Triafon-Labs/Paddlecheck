@@ -115,7 +115,7 @@ const getPaddlingMatrix = (
       if (riverLevel && riverLevel >= 2.75) {
         intermediate.status = "No";
         intermediate.details =
-          "No paddling — river is above 10 steps from the car park.";
+          "No paddling - river is above 10 steps from the car park.";
       } else {
         intermediate.status = "Discretion";
         intermediate.details = "Coach's discretion only. PFD required.";

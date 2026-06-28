@@ -59,7 +59,6 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
-
 const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
   const ui = RAG_STATUS_UI[status];
   const Icon = ui.icon;
@@ -91,7 +90,7 @@ const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
   );
 };
 
-// YIQ perceptual brightness — returns black or white for readable contrast
+// YIQ perceptual brightness - returns black or white for readable contrast
 const contrastText = (hex: string): string => {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -109,9 +108,18 @@ interface ThresholdRowProps {
   ragColor?: string;
 }
 
-const ThresholdRow: React.FC<ThresholdRowProps> = ({ icon, label, description, chipLabel, chipColor, ragColor }) => (
+const ThresholdRow: React.FC<ThresholdRowProps> = ({
+  icon,
+  label,
+  description,
+  chipLabel,
+  chipColor,
+  ragColor,
+}) => (
   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.5 }}>
-    <Box sx={{ color: "text.secondary", display: "flex", flexShrink: 0 }}>{icon}</Box>
+    <Box sx={{ color: "text.secondary", display: "flex", flexShrink: 0 }}>
+      {icon}
+    </Box>
     <Box sx={{ flex: 1 }}>
       <Typography variant="body2" sx={{ fontWeight: 600 }}>
         {label}
@@ -120,36 +128,47 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({ icon, label, description, c
         {description}
       </Typography>
     </Box>
-    {chipLabel && (
-      ragColor ? (
+    {chipLabel &&
+      (ragColor ? (
         <Chip
           label={chipLabel}
           size="small"
-          sx={{ backgroundColor: ragColor, color: contrastText(ragColor), fontWeight: 500 }}
+          sx={{
+            backgroundColor: ragColor,
+            color: contrastText(ragColor),
+            fontWeight: 500,
+          }}
         />
       ) : (
         <Chip label={chipLabel} color={chipColor ?? "default"} size="small" />
-      )
-    )}
+      ))}
   </Box>
 );
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const { themeMode, setThemeMode } = useAppTheme();
-  const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">(
-    () => (typeof window !== "undefined" ? (localStorage.getItem("paddlerLevel") as PaddlerType | null) ?? "" : "")
+  const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">(() =>
+    typeof window !== "undefined"
+      ? ((localStorage.getItem("paddlerLevel") as PaddlerType | null) ?? "")
+      : ""
   );
   const [autoSummarise, setAutoSummarise] = useState(
-    () => typeof window !== "undefined" && localStorage.getItem("autoSummarise") === "true"
+    () =>
+      typeof window !== "undefined" &&
+      localStorage.getItem("autoSummarise") === "true"
   );
 
-  const handleAutoSummariseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAutoSummariseChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const val = e.target.checked;
     setAutoSummarise(val);
     localStorage.setItem("autoSummarise", val ? "true" : "false");
     window.dispatchEvent(new Event(SETTINGS_CHANGED_EVENT));
   };
-  const visKeys = Object.keys(VISIBILITY_DESCRIPTIONS) as (keyof typeof VISIBILITY_DESCRIPTIONS)[];
+  const visKeys = Object.keys(
+    VISIBILITY_DESCRIPTIONS
+  ) as (keyof typeof VISIBILITY_DESCRIPTIONS)[];
 
   const handleLevelChange = (event: SelectChangeEvent<PaddlerType | "">) => {
     const level = event.target.value as PaddlerType | "";
@@ -163,7 +182,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     localStorage.removeItem("paddlerLevel");
   };
 
-  const paddlerTypes: PaddlerType[] = ["Beginner", "Improver", "Intermediate", "Independent"];
+  const paddlerTypes: PaddlerType[] = [
+    "Beginner",
+    "Improver",
+    "Intermediate",
+    "Independent",
+  ];
 
   return (
     <Drawer
@@ -183,7 +207,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         },
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 2, pt: 2, pb: 1, flexShrink: 0 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 2,
+          pt: 2,
+          pb: 1,
+          flexShrink: 0,
+        }}
+      >
         <Typography variant="h5">Settings</Typography>
         <IconButton onClick={onClose} edge="end" aria-label="close">
           <CloseIcon />
@@ -191,14 +225,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       </Box>
 
       <Box sx={{ overflowY: "auto", px: 2, pb: 3 }}>
-
         <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
           Theme
         </Typography>
         <ToggleButtonGroup
           value={themeMode}
           exclusive
-          onChange={(_, val: ThemeMode | null) => { if (val) setThemeMode(val); }}
+          onChange={(_, val: ThemeMode | null) => {
+            if (val) setThemeMode(val);
+          }}
           fullWidth
           size="small"
         >
@@ -227,7 +262,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             ))}
           </Select>
         </FormControl>
-        <Button onClick={handleClearLevel} disabled={!paddlerLevel} fullWidth variant="outlined">
+        <Button
+          onClick={handleClearLevel}
+          disabled={!paddlerLevel}
+          fullWidth
+          variant="outlined"
+        >
           Clear Selection
         </Button>
 
@@ -239,11 +279,22 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               AI Summary
             </Typography>
             <FormControlLabel
-              control={<Switch checked={autoSummarise} onChange={handleAutoSummariseChange} />}
+              control={
+                <Switch
+                  checked={autoSummarise}
+                  onChange={handleAutoSummariseChange}
+                />
+              }
               label="Auto-summarise conditions on load"
             />
-            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
-              When off, tap &ldquo;Generate AI Summary&rdquo; inside the status card to generate one on demand.
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+              sx={{ mt: 0.5 }}
+            >
+              When off, tap &ldquo;Generate AI Summary&rdquo; inside the status
+              card to generate one on demand.
             </Typography>
           </>
         )}
@@ -264,7 +315,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               sx={{
                 pl: 0,
                 color: (theme) =>
-                  theme.palette.mode === "dark" ? "common.white" : "primary.main",
+                  theme.palette.mode === "dark"
+                    ? "common.white"
+                    : "primary.main",
               }}
             >
               <Typography sx={{ flexGrow: 1 }}>{link.name}</Typography>
@@ -275,20 +328,36 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
 
         <Divider sx={{ my: 2 }} />
 
-        <Accordion disableGutters elevation={0} sx={{ "&:before": { display: "none" }, mx: -2 }}>
+        <Accordion
+          disableGutters
+          elevation={0}
+          sx={{ "&:before": { display: "none" }, mx: -2 }}
+        >
           <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 2 }}>
             <Typography variant="h6">Conditions Key</Typography>
           </AccordionSummary>
           <AccordionDetails sx={{ px: 2, pt: 0 }}>
-
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
               Status Colours
             </Typography>
-            {(["Light Green", "Dark Green", "Amber", "Red", "No Paddling"] as Status[]).map((s) => (
+            {(
+              [
+                "Light Green",
+                "Dark Green",
+                "Amber",
+                "Red",
+                "No Paddling",
+              ] as Status[]
+            ).map((s) => (
               <StatusRow key={s} status={s} />
             ))}
 
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              gutterBottom
+              sx={{ mt: 2 }}
+            >
               River Level
             </Typography>
             <ThresholdRow
@@ -327,7 +396,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               ragColor={RAG_STATUS_UI["No Paddling"].color}
             />
 
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              gutterBottom
+              sx={{ mt: 2 }}
+            >
               Temperature
             </Typography>
             <ThresholdRow
@@ -352,7 +426,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               chipColor="error"
             />
 
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              gutterBottom
+              sx={{ mt: 2 }}
+            >
               Wind
             </Typography>
             <ThresholdRow
@@ -370,7 +449,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               chipColor="error"
             />
 
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              gutterBottom
+              sx={{ mt: 2 }}
+            >
               Visibility
             </Typography>
             {visKeys.map((key) => {
@@ -382,7 +466,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 : `Over ${(min / 1000).toFixed(0)} km`;
               const isBad = min < THRESHOLDS.VISIBILITY_POOR;
               const isAtLimit = min === THRESHOLDS.VISIBILITY_POOR;
-              const chipColor: "error" | "warning" | "success" = isBad ? "error" : isAtLimit ? "warning" : "success";
+              const chipColor: "error" | "warning" | "success" = isBad
+                ? "error"
+                : isAtLimit
+                  ? "warning"
+                  : "success";
               return (
                 <ThresholdRow
                   key={key}
@@ -390,10 +478,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   label={`${desc} (${range})`}
                   description={
                     isBad
-                      ? "Fog conditions — raises Green to Amber, and Amber to Red."
+                      ? "Fog conditions - raises Green to Amber, and Amber to Red."
                       : isAtLimit
-                      ? "Poor visibility — borderline fog threshold."
-                      : "Acceptable visibility."
+                        ? "Poor visibility - borderline fog threshold."
+                        : "Acceptable visibility."
                   }
                   chipLabel={desc}
                   chipColor={chipColor}
@@ -401,7 +489,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               );
             })}
 
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ mt: 2 }}>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              gutterBottom
+              sx={{ mt: 2 }}
+            >
               Other Factors
             </Typography>
             <ThresholdRow
@@ -428,7 +521,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             <ThresholdRow
               icon={<Thunderstorm fontSize="small" />}
               label="Thunderstorm"
-              description="No paddling when thunder is near — overrides all other conditions."
+              description="No paddling when thunder is near - overrides all other conditions."
               chipLabel="No Paddling"
               chipColor="error"
             />
@@ -440,11 +533,23 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <Typography variant="h6" gutterBottom>
           About
         </Typography>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Typography>Paddlecheck Version</Typography>
-          <Typography>{process.env.NEXT_PUBLIC_APP_VERSION || "N/A"}</Typography>
+          <Typography>
+            {process.env.NEXT_PUBLIC_APP_VERSION || "N/A"}
+          </Typography>
         </Box>
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: "block" }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mt: 2, display: "block" }}
+        >
           This is a hobby project, so there might be mistakes. Always check
           conditions yourself and talk to coaches or experienced paddlers before
           heading out.{" "}

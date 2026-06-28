@@ -61,7 +61,7 @@ export const LATITUDE = 52.2;
 export const LONGITUDE = -2.2;
 export const HISTORICAL_DAYS = 5;
 
-// Upstream station forecast — used to improve near-future level predictions.
+// Upstream station forecast - used to improve near-future level predictions.
 // The app fetches CSV data from an upstream gauge and shifts it forward by
 // BEWDLEY_TRAVEL_HOURS to estimate when a flood wave will arrive.
 // CSV URLs follow the pattern: https://check-for-flooding.service.gov.uk/station-csv/<station-id>
@@ -174,7 +174,8 @@ export const THRESHOLDS = {
 // and thunderstorms. Used as the single source of truth for "is it raining?"
 // across both live conditions and the hourly forecast.
 const RAIN_CODES = new Set(Array.from({ length: 50 }, (_, i) => i + 50));
-export const isRainy = (weatherCode: number): boolean => RAIN_CODES.has(weatherCode);
+export const isRainy = (weatherCode: number): boolean =>
+  RAIN_CODES.has(weatherCode);
 
 // --- Conditions Key Descriptions ---
 // These appear in the Settings drawer "Conditions Key" section.
@@ -197,9 +198,11 @@ export const RAG_DESCRIPTIONS: Record<Status, string> = {
 // Rewrite these to describe your own launch point landmarks.
 export const RIVER_LEVEL_BAND_DESCRIPTIONS = {
   belowRag1: "Below the wooden landing stage. Good launch conditions.",
-  rag1ToRag2: "Between landing stage and concrete step. Still paddleable with care.",
+  rag1ToRag2:
+    "Between landing stage and concrete step. Still paddleable with care.",
   rag2ToRag3: "Above the concrete step. PFDs must be worn by all.",
-  rag3Plus: "Above 10 steps from the car park. No paddling for intermediates and below.",
+  rag3Plus:
+    "Above 10 steps from the car park. No paddling for intermediates and below.",
   noPaddling: "Boathouse flooding. No paddling under any circumstances.",
 };
 
@@ -248,7 +251,7 @@ export const LEVEL_DESCRIPTIONS: Record<number, string> = {
   5.55: "Boathouse inaccessible, dangerous flow, no paddling advised",
 };
 
-// Venue-specific flood-plain paddleability map — Worcester's Pitchcroft race
+// Venue-specific flood-plain paddleability map - Worcester's Pitchcroft race
 // course becomes paddleable when the river overtops its banks at high levels.
 // Replace or remove this if your venue doesn't have a similar feature.
 export const PITCHCROFT_PADDLEABILITY: Record<number, string> = {

@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  KayakConditions,
-  ChartDataPoint,
-  DayForecast,
-} from "@/types";
+import { KayakConditions, ChartDataPoint, DayForecast } from "@/types";
 import {
   calculateFinalRagStatus,
   findLevelDescription,
@@ -34,7 +30,10 @@ import {
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const withRetry = async <T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> => {
+const withRetry = async <T>(
+  fn: () => Promise<T>,
+  maxRetries = 2
+): Promise<T> => {
   let delay = 500;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -51,7 +50,9 @@ const withRetry = async <T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> =>
 export const useKayakData = () => {
   const [conditions, setConditions] = useState<KayakConditions | null>(null);
   const [forecastDays, setForecastDays] = useState<DayForecast[] | null>(null);
-  const [predictionData, setPredictionData] = useState<ChartDataPoint[] | null>(null);
+  const [predictionData, setPredictionData] = useState<ChartDataPoint[] | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [predictLoading, setPredictLoading] = useState(true);
   const [riverGraphData, setRiverGraphData] = useState<ChartDataPoint[] | null>(
@@ -68,8 +69,14 @@ export const useKayakData = () => {
   useEffect(() => {
     setIsOffline(!navigator.onLine);
     isOfflineRef.current = !navigator.onLine;
-    const handleOnline = () => { setIsOffline(false); isOfflineRef.current = false; };
-    const handleOffline = () => { setIsOffline(true); isOfflineRef.current = true; };
+    const handleOnline = () => {
+      setIsOffline(false);
+      isOfflineRef.current = false;
+    };
+    const handleOffline = () => {
+      setIsOffline(true);
+      isOfflineRef.current = true;
+    };
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
     return () => {
@@ -78,25 +85,75 @@ export const useKayakData = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cachedConditions = localStorage.getItem("paddlecheck_conditions");
+        const cachedForecastDays = localStorage.getItem(
+          "paddlecheck_forecastDays"
+        );
+        const cachedPredictionData = localStorage.getItem(
+          "paddlecheck_predictionData"
+        );
+        const cachedRiverGraphData = localStorage.getItem(
+          "paddlecheck_riverGraphData"
+        );
+        const cachedChange1h = localStorage.getItem(
+          "paddlecheck_riverChange1h"
+        );
+        const cachedChange24h = localStorage.getItem(
+          "paddlecheck_riverChange24h"
+        );
+        const cachedChange8h = localStorage.getItem(
+          "paddlecheck_riverChange8h"
+        );
+        const cachedChange5d = localStorage.getItem(
+          "paddlecheck_riverChange5d"
+        );
+
+        if (cachedConditions) setConditions(JSON.parse(cachedConditions));
+        if (cachedForecastDays) setForecastDays(JSON.parse(cachedForecastDays));
+        if (cachedPredictionData)
+          setPredictionData(JSON.parse(cachedPredictionData));
+        if (cachedRiverGraphData)
+          setRiverGraphData(JSON.parse(cachedRiverGraphData));
+        if (cachedChange1h) setRiverChange1h(JSON.parse(cachedChange1h));
+        if (cachedChange24h) setRiverChange24h(JSON.parse(cachedChange24h));
+        if (cachedChange8h) setRiverChange8h(JSON.parse(cachedChange8h));
+        if (cachedChange5d) setRiverChange5d(JSON.parse(cachedChange5d));
+      } catch (e) {
+        console.error("Failed to load cached data:", e);
+      }
+    }
+  }, []);
+
   const fetchData = useCallback(async () => {
+    let conditionsObj: KayakConditions | null = null;
     try {
       setLoading(true);
       setPredictLoading(true);
       setError(null);
 
       // Fetch all data concurrently; Bewdley and Warnings failure is non-fatal
-      const [riverData, weatherData, futureWeatherData, bewdleyData, warningsData] =
-        await Promise.all([
-          withRetry(() => fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS)),
-          withRetry(() => fetchWeatherData(LATITUDE, LONGITUDE)),
-          withRetry(() => fetchFutureWeatherData(LATITUDE, LONGITUDE)),
-          withRetry(() => fetchBewdleyForecast()).catch(() => ({
-            forecasts: [],
-            observations: [],
-            currentLevel: null,
-          })),
-          fetch("/api/weather/warnings").then(res => res.ok ? res.json() : []).catch(() => []),
-        ]);
+      const [
+        riverData,
+        weatherData,
+        futureWeatherData,
+        bewdleyData,
+        warningsData,
+      ] = await Promise.all([
+        withRetry(() => fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS)),
+        withRetry(() => fetchWeatherData(LATITUDE, LONGITUDE)),
+        withRetry(() => fetchFutureWeatherData(LATITUDE, LONGITUDE)),
+        withRetry(() => fetchBewdleyForecast()).catch(() => ({
+          forecasts: [],
+          observations: [],
+          currentLevel: null,
+        })),
+        fetch("/api/weather/warnings")
+          .then((res) => (res.ok ? res.json() : []))
+          .catch(() => []),
+      ]);
 
       // Process current conditions
       setRiverGraphData(riverData.historicalData);
@@ -113,11 +170,16 @@ export const useKayakData = () => {
         hour: "2-digit",
         minute: "2-digit",
       });
-      const sunriseHHMM = todaySunrise ? todaySunrise.split("T")[1]?.slice(0, 5) ?? null : null;
-      const sunsetHHMM = todaySunset ? todaySunset.split("T")[1]?.slice(0, 5) ?? null : null;
-      const currentDark = sunriseHHMM !== null && sunsetHHMM !== null
-        ? currentTimeHHMM <= sunriseHHMM || currentTimeHHMM >= sunsetHHMM
-        : false;
+      const sunriseHHMM = todaySunrise
+        ? (todaySunrise.split("T")[1]?.slice(0, 5) ?? null)
+        : null;
+      const sunsetHHMM = todaySunset
+        ? (todaySunset.split("T")[1]?.slice(0, 5) ?? null)
+        : null;
+      const currentDark =
+        sunriseHHMM !== null && sunsetHHMM !== null
+          ? currentTimeHHMM <= sunriseHHMM || currentTimeHHMM >= sunsetHHMM
+          : false;
 
       const currentConditions: Partial<KayakConditions> = {
         riverLevel:
@@ -146,7 +208,7 @@ export const useKayakData = () => {
         currentConditions.riverLevel ?? 0
       );
 
-      setConditions({
+      conditionsObj = {
         ...currentConditions,
         initialStatus,
         overallStatus: status,
@@ -161,7 +223,8 @@ export const useKayakData = () => {
         visibilityDescription,
         weatherDescription,
         pitchcroftPaddleability,
-      });
+      };
+      setConditions(conditionsObj);
       setLoading(false);
 
       // Build 5-day forecast (today + 4 days ahead)
@@ -181,8 +244,11 @@ export const useKayakData = () => {
       // after the Bewdley window can continue smoothly from wherever Bewdley
       // left off, rather than jumping back to the current level.
       const worcesterSlopePerHour =
-        predictRiverLevel(riverData.latestLevel ?? 0, riverData.historicalData, 1) -
-        (riverData.latestLevel ?? 0);
+        predictRiverLevel(
+          riverData.latestLevel ?? 0,
+          riverData.historicalData,
+          1
+        ) - (riverData.latestLevel ?? 0);
 
       // Tracks the last Bewdley-based prediction level and the hoursAhead at
       // which the Bewdley data ran out, so linear regression is anchored there.
@@ -235,7 +301,8 @@ export const useKayakData = () => {
           } else {
             // Anchor linear regression to the last Bewdley-predicted level so
             // there's no jump at the transition point.
-            const baseLevel = lastBewdleyPrediction ?? (riverData.latestLevel || 0);
+            const baseLevel =
+              lastBewdleyPrediction ?? (riverData.latestLevel || 0);
             const baseHours = transitionHoursAhead ?? 0;
             predictedRiverLevel = Math.max(
               0,
@@ -273,7 +340,7 @@ export const useKayakData = () => {
             reasons: slotReasons,
             value: ragHeight[slotStatus] || 0.1,
             predictedLevel: isCurrentHour
-              ? riverData.latestLevel ?? predictedRiverLevel
+              ? (riverData.latestLevel ?? predictedRiverLevel)
               : predictedRiverLevel,
             predictionSource,
             temperature: isCurrentHour
@@ -307,12 +374,56 @@ export const useKayakData = () => {
 
       setForecastDays(days);
       setPredictionData(predictionPoints);
+
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(
+            "paddlecheck_conditions",
+            JSON.stringify(conditionsObj)
+          );
+          localStorage.setItem(
+            "paddlecheck_forecastDays",
+            JSON.stringify(days)
+          );
+          localStorage.setItem(
+            "paddlecheck_predictionData",
+            JSON.stringify(predictionPoints)
+          );
+          localStorage.setItem(
+            "paddlecheck_riverGraphData",
+            JSON.stringify(riverData.historicalData)
+          );
+          localStorage.setItem(
+            "paddlecheck_riverChange1h",
+            JSON.stringify(riverData.change1h)
+          );
+          localStorage.setItem(
+            "paddlecheck_riverChange24h",
+            JSON.stringify(riverData.change24h)
+          );
+          localStorage.setItem(
+            "paddlecheck_riverChange8h",
+            JSON.stringify(riverData.change8h)
+          );
+          localStorage.setItem(
+            "paddlecheck_riverChange5d",
+            JSON.stringify(riverData.change5d)
+          );
+        } catch (e) {
+          console.error("Failed to write cache:", e);
+        }
+      }
     } catch (err) {
       console.error("Failed to fetch data:", err);
       const offline = isOfflineRef.current;
+      const hasCache =
+        typeof window !== "undefined" &&
+        localStorage.getItem("paddlecheck_conditions") !== null;
       setError(
         offline
-          ? "You're offline and no cached data is available. Connect to the internet and tap refresh."
+          ? hasCache
+            ? null
+            : "Offline - no cached data (reconnect and refresh)"
           : "Failed to load conditions. Check your connection and tap refresh to try again."
       );
     } finally {

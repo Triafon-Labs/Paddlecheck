@@ -4,14 +4,14 @@ import { THRESHOLDS } from "@/lib/config";
 const PREFERRED: Status[] = ["Light Green", "Dark Green"];
 
 const hourOf = (time: string) => parseInt(time.split(":")[0], 10);
-const fmtHour = (h: number) => `${String(((h % 24) + 24) % 24).padStart(2, "0")}:00`;
+const fmtHour = (h: number) =>
+  `${String(((h % 24) + 24) % 24).padStart(2, "0")}:00`;
 const hhmmOf = (iso: string) => iso.split("T")[1]?.slice(0, 5) ?? null;
 const isDarkOnly = (reasons: string[]) =>
   reasons.length === 1 && reasons[0] === "Dark";
 
 const slotAtHour = (graphData: DayForecast["graphData"], hour: number) =>
   graphData.find((pt) => hourOf(pt.time) === hour);
-
 
 interface Window {
   startHour: number;
@@ -24,7 +24,8 @@ function findGreenWindows(slots: DayForecast["graphData"]): {
   bestStatus: Status | null;
   windows: Window[];
 } {
-  const bestStatus = PREFERRED.find((s) => slots.some((pt) => pt.status === s)) ?? null;
+  const bestStatus =
+    PREFERRED.find((s) => slots.some((pt) => pt.status === s)) ?? null;
   if (!bestStatus) return { bestStatus: null, windows: [] };
 
   const windows: Window[] = [];
@@ -79,7 +80,9 @@ function formatWindow(
 }
 
 // Best paddling windows for the rest of today, relative to the current time.
-export function buildBestPaddlingTimes(todayForecast: DayForecast | null): string | null {
+export function buildBestPaddlingTimes(
+  todayForecast: DayForecast | null
+): string | null {
   if (!todayForecast) return null;
 
   const now = new Date();
@@ -99,7 +102,9 @@ export function buildBestPaddlingTimes(todayForecast: DayForecast | null): strin
   const { bestStatus, windows } = findGreenWindows(futureSlots);
   if (!bestStatus || windows.length === 0) return null;
 
-  const sunriseHHMM = todayForecast.sunrise ? hhmmOf(todayForecast.sunrise) : null;
+  const sunriseHHMM = todayForecast.sunrise
+    ? hhmmOf(todayForecast.sunrise)
+    : null;
   const sunsetHHMM = todayForecast.sunset ? hhmmOf(todayForecast.sunset) : null;
   const label = bestStatus === "Light Green" ? "light green" : "dark green";
 
@@ -115,9 +120,10 @@ export function buildBestPaddlingTimes(todayForecast: DayForecast | null): strin
       let note = "";
       if (start === "now") {
         const [endH, endM] = end.split(":").map(Number);
-        const remaining = endH * 60 + endM - (now.getHours() * 60 + now.getMinutes());
+        const remaining =
+          endH * 60 + endM - (now.getHours() * 60 + now.getMinutes());
         if (remaining > 0 && remaining < 60) {
-          note = ` — only ~${remaining} mins remaining`;
+          note = ` - only ~${remaining} mins remaining`;
         }
       }
       return `${start}–${end}${note}`;
@@ -128,8 +134,12 @@ export function buildBestPaddlingTimes(todayForecast: DayForecast | null): strin
 }
 
 // Hour-by-hour forecast text for today's remaining daylight, for the AI briefing.
-export function buildHourlyForecastText(todayForecast: DayForecast): string | null {
-  const slots = todayForecast.graphData.filter((pt) => !pt.reasons.includes("Dark"));
+export function buildHourlyForecastText(
+  todayForecast: DayForecast
+): string | null {
+  const slots = todayForecast.graphData.filter(
+    (pt) => !pt.reasons.includes("Dark")
+  );
   if (slots.length === 0) return null;
 
   const sunsetHHMM = todayForecast.sunset ? hhmmOf(todayForecast.sunset) : null;
@@ -138,11 +148,16 @@ export function buildHourlyForecastText(todayForecast: DayForecast): string | nu
     const h = hourOf(pt.time);
     const timeStr = `${String(h).padStart(2, "0")}:00`;
     const level = `river ${pt.predictedLevel.toFixed(2)}m`;
-    const temp = pt.temperature !== undefined ? `${Math.round(pt.temperature)}°C` : null;
-    const wind = pt.windSpeed !== undefined ? `${Math.round(pt.windSpeed)} mph wind` : null;
+    const temp =
+      pt.temperature !== undefined ? `${Math.round(pt.temperature)}°C` : null;
+    const wind =
+      pt.windSpeed !== undefined
+        ? `${Math.round(pt.windSpeed)} mph wind`
+        : null;
     const stats = [level, temp, wind].filter(Boolean).join(", ");
     const nonDarkReasons = pt.reasons.filter((r) => r !== "Dark");
-    const note = nonDarkReasons.length > 0 ? ` [${nonDarkReasons.join(", ")}]` : "";
+    const note =
+      nonDarkReasons.length > 0 ? ` [${nonDarkReasons.join(", ")}]` : "";
     // The final daylight hour's conditions persist until sunset; later hours
     // are omitted only because it gets dark.
     const sunsetNote =
@@ -156,7 +171,9 @@ export function buildHourlyForecastText(todayForecast: DayForecast): string | nu
 }
 
 // True if there are any non-dark slots still to come today.
-export function hasDaylightRemaining(todayForecast: DayForecast | null): boolean {
+export function hasDaylightRemaining(
+  todayForecast: DayForecast | null
+): boolean {
   if (!todayForecast) return false;
   const nowHour = parseInt(
     new Date().toLocaleTimeString("en-GB", {
@@ -177,7 +194,7 @@ export interface DaytimeOutlook {
   rangesText: string; // "river level 0.55–0.62m, air temperature 11–18°C, wind up to 14 mph"
 }
 
-// Outlook for the next daytime period — used when it's currently dark.
+// Outlook for the next daytime period - used when it's currently dark.
 // Picks the first forecast day that still has daylight hours.
 export function buildNextDaytimeOutlook(
   forecastDays: DayForecast[] | null
@@ -194,7 +211,11 @@ export function buildNextDaytimeOutlook(
   if (daySlots.length === 0) return null;
 
   const dayLabel =
-    dayIndex === 0 ? "later today" : dayIndex === 1 ? "tomorrow" : day.label.toLowerCase();
+    dayIndex === 0
+      ? "later today"
+      : dayIndex === 1
+        ? "tomorrow"
+        : day.label.toLowerCase();
 
   const levels = daySlots.map((s) => s.predictedLevel);
   const minL = Math.min(...levels);
@@ -219,7 +240,9 @@ export function buildNextDaytimeOutlook(
   const winds = daySlots
     .map((s) => s.windSpeed)
     .filter((w): w is number => typeof w === "number");
-  const windText = winds.length ? `wind up to ${Math.round(Math.max(...winds))} mph` : null;
+  const windText = winds.length
+    ? `wind up to ${Math.round(Math.max(...winds))} mph`
+    : null;
 
   const rangesText = [levelText, tempText, windText].filter(Boolean).join(", ");
 
@@ -231,7 +254,13 @@ export function buildNextDaytimeOutlook(
     const label = bestStatus === "Light Green" ? "light green" : "dark green";
     const ranges = windows
       .map((w) => {
-        const { start, end } = formatWindow(day.graphData, w, sunriseHHMM, sunsetHHMM, null);
+        const { start, end } = formatWindow(
+          day.graphData,
+          w,
+          sunriseHHMM,
+          sunsetHHMM,
+          null
+        );
         return `${start}–${end}`;
       })
       .join(", ");

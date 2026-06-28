@@ -76,8 +76,8 @@ components/
   StatusCard.tsx         Current RAG status + reasons + traffic light
   PaddlingMatrixCard.tsx Skill-level guidance table (Beginner/Improver/Intermediate/Independent)
   StatsCard.tsx          Numeric stats - river level, temp, wind, visibility, launch notes
-  RiverLevelGraph.tsx    Historical + predicted river levels (Recharts)
-  PredictedRagGraph.tsx  5-day hourly RAG forecast (Recharts bar chart)
+  RiverLevelGraph.tsx    Historical + forecasted river levels (Recharts)
+  ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart)
   TopNavBar.tsx          Header - share, settings, refresh buttons
   SettingsModal.tsx      Preferences drawer - theme, paddler level, links, conditions key
   TrafficLight.tsx       4-circle RAG visual indicator with animation
@@ -89,7 +89,7 @@ components/
 lib/
   config.ts              All thresholds, station IDs, descriptions, coordinates
   rag.ts                 RAG status calculation logic
-  river.ts               Environment Agency API calls + Bewdley prediction logic
+  river.ts               Environment Agency API calls + Bewdley forecast logic
   weather.ts             Open-Meteo API calls + utilities
   hooks.ts               useKayakData hook - orchestrates all fetching and state
   KayakDataContext.tsx   React Context wrapping the hook for component tree access
@@ -174,7 +174,7 @@ Bewdley data failure is non-fatal - the app falls back to linear regression sile
   conditions: KayakConditions | null   // current status, river level, weather, reasons
   riverGraphData: RiverReading[]       // historical readings for the graph
   forecastDays: DayForecast[]          // 5-day hourly RAG forecasts
-  predictedData: PredictedGraphDataPoint[]  // combined prediction series
+  forecastData: ChartDataPoint[]       // combined forecast series
   isLoading: boolean
   isBewdleyLoading: boolean
   error: string | null
@@ -195,7 +195,7 @@ Bewdley data failure is non-fatal - the app falls back to linear regression sile
 | ----------------- | ------------------------------------------------------------------- |
 | `theme`           | `"light"` \| `"dark"` \| `"system"`                                 |
 | `paddlerLevel`    | `"Beginner"` \| `"Improver"` \| `"Intermediate"` \| `"Independent"` |
-| `riverLevelRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"pred"`                   |
+| `riverLevelRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`                |
 
 ---
 
@@ -205,8 +205,8 @@ Bewdley data failure is non-fatal - the app falls back to linear regression sile
 | ------------------------- | ------------------------------------------------------------------------------------- |
 | `Status`                  | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"`     |
 | `KayakConditions`         | Full snapshot - status, river level, weather readings, reasons, timestamps            |
-| `DayForecast`             | 24-hour bucket with hourly `PredictedGraphDataPoint[]`                                |
-| `PredictedGraphDataPoint` | Single hourly prediction - status, level, reasons, source (`"bewdley"` \| `"linear"`) |
+| `DayForecast`             | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                 |
+| `ForecastGraphDataPoint`  | Single hourly forecast - status, level, reasons, source (`"bewdley"` \| `"linear"`)   |
 | `RiverReading`            | `{ dateTime: string; value: number }`                                                 |
 | `WeatherData`             | Current weather snapshot                                                              |
 | `FutureWeatherData`       | 5-day hourly forecast + daily sunrise/sunset                                          |
@@ -260,7 +260,7 @@ If Git hooks are not firing:
 | Constant               | Value                  | Meaning                                |
 | ---------------------- | ---------------------- | -------------------------------------- |
 | `DIGLIS_STATION_ID`    | `2642`                 | EA API station for current river level |
-| `BEWDLEY_STATION_ID`   | `2001`                 | Upstream station for prediction        |
+| `BEWDLEY_STATION_ID`   | `2001`                 | Upstream station for forecast          |
 | `BEWDLEY_LAG_HOURS`    | `6`                    | Travel time Bewdley → Worcester        |
 | `RAG_THRESHOLDS`       | `[1.0, 1.4, 2.2, 5.0]` | River level breakpoints (metres)       |
 | `TEMP_HIGH`            | `13` °C                | Above this: no temperature penalty     |

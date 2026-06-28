@@ -12,12 +12,12 @@ import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import { ragStatus } from "@/lib/rag";
 
-interface PredictedRagCardProps {
+interface ForecastRagCardProps {
   conditions: KayakConditions | null;
   loading?: boolean;
 }
 
-const PredictedRagCard: React.FC<PredictedRagCardProps> = ({
+const ForecastRagCard: React.FC<ForecastRagCardProps> = ({
   conditions,
   loading,
 }) => {
@@ -82,7 +82,7 @@ const PredictedRagCard: React.FC<PredictedRagCardProps> = ({
             !isNoPaddling && (
               <Box sx={{ mt: 3, textAlign: "center" }}>
                 <Typography variant="subtitle1" gutterBottom>
-                  Predicted Reasons
+                  Forecast Reasons
                 </Typography>
                 {conditions.reasons.map((reason, index) => (
                   <Typography variant="body2" key={index}>
@@ -96,7 +96,7 @@ const PredictedRagCard: React.FC<PredictedRagCardProps> = ({
     }
     return (
       <Typography variant="body1" sx={{ mt: 1, textAlign: "center" }}>
-        Not enough data to predict.
+        Not enough data to forecast.
       </Typography>
     );
   };
@@ -113,7 +113,7 @@ const PredictedRagCard: React.FC<PredictedRagCardProps> = ({
           color="text.secondary"
           sx={{ display: "block", textAlign: "center", mt: 2 }}
         >
-          This is an experimental prediction based on current trends and may not
+          This is an experimental forecast based on current trends and may not
           be accurate.
         </Typography>
       </CardContent>
@@ -121,4 +121,4 @@ const PredictedRagCard: React.FC<PredictedRagCardProps> = ({
   );
 };
 
-export default PredictedRagCard;
+export default ForecastRagCard;

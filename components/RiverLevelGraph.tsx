@@ -43,7 +43,7 @@ import { ChartDataPoint } from "@/types";
 
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
-  predictionData: ChartDataPoint[] | null;
+  forecastData: ChartDataPoint[] | null;
   loading: boolean;
   change1h: number | null;
   change24h: number | null;
@@ -104,7 +104,7 @@ const CustomTooltip = ({
 }: TooltipContentProps<ValueType, NameType>) => {
   if (active && payload && payload.length && label) {
     const value = payload[0].value as number;
-    // label is either an ISO string (historical views) or a numeric timestamp (pred view)
+    // label is either an ISO string (historical views) or a numeric timestamp (forecast view)
     const date = new Date(typeof label === "number" ? label : label);
     const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(
       date.getMonth() + 1
@@ -127,7 +127,7 @@ const CustomTooltip = ({
 
 const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   data,
-  predictionData,
+  forecastData,
   loading,
   change1h,
   change24h,
@@ -147,7 +147,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   }, [timeRange]);
 
   const filteredData = useMemo(() => {
-    if (!data || timeRange === "pred") return null;
+    if (!data || timeRange === "forecast") return null;
 
     const now = new Date();
     let hoursToFilter;
@@ -212,10 +212,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return makeTicks(filteredDataWithTs, intervalMs);
   }, [filteredDataWithTs, timeRange]);
 
-  // Combined dataset for the "pred" view: last 24h of actual readings followed
-  // by the full prediction series, joined at the current level so the line is continuous.
-  const combinedPredData = useMemo(() => {
-    if (!data || !predictionData) return null;
+  // Combined dataset for the "forecast" view: last 24h of actual readings followed
+  // by the full forecast series, joined at the current level so the line is continuous.
+  const combinedForecastData = useMemo(() => {
+    if (!data || !forecastData) return null;
     const now = new Date();
     const last24h = data.filter(
       (d) => new Date(d.dateTime) > new Date(now.getTime() - 24 * 60 * 60 * 1000)
@@ -223,34 +223,34 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     const historical = last24h.map((d) => ({
       ts: new Date(d.dateTime).getTime(),
       actual: d.level,
-      predicted: null as number | null,
+      forecasted: null as number | null,
     }));
-    const future = predictionData.map((d) => ({
+    const future = forecastData.map((d) => ({
       ts: new Date(d.dateTime).getTime(),
       actual: null as number | null,
-      predicted: d.level,
+      forecasted: d.level,
     }));
     if (last24h.length > 0) {
       const latest = last24h[last24h.length - 1];
-      future.unshift({ ts: new Date(latest.dateTime).getTime(), actual: null, predicted: latest.level });
+      future.unshift({ ts: new Date(latest.dateTime).getTime(), actual: null, forecasted: latest.level });
     }
     return [...historical, ...future];
-  }, [data, predictionData]);
+  }, [data, forecastData]);
 
-  const predYDomainMax = useMemo(() => {
-    if (!combinedPredData) return 6;
-    const allLevels = combinedPredData.flatMap((d) =>
-      [d.actual, d.predicted].filter((v): v is number => v !== null)
+  const forecastYDomainMax = useMemo(() => {
+    if (!combinedForecastData) return 6;
+    const allLevels = combinedForecastData.flatMap((d) =>
+      [d.actual, d.forecasted].filter((v): v is number => v !== null)
     );
     if (allLevels.length === 0) return 6;
     return Math.max(Math.ceil(Math.max(...allLevels)), 1);
-  }, [combinedPredData]);
+  }, [combinedForecastData]);
 
-  // One tick per calendar day (midnight) for the pred view
-  const predTicks = useMemo(() => {
-    if (!combinedPredData || combinedPredData.length === 0) return [];
-    const start = new Date(combinedPredData[0].ts);
-    const end = new Date(combinedPredData[combinedPredData.length - 1].ts);
+  // One tick per calendar day (midnight) for the forecast view
+  const forecastTicks = useMemo(() => {
+    if (!combinedForecastData || combinedForecastData.length === 0) return [];
+    const start = new Date(combinedForecastData[0].ts);
+    const end = new Date(combinedForecastData[combinedForecastData.length - 1].ts);
     const ticks: number[] = [];
     const cursor = new Date(start);
     cursor.setHours(0, 0, 0, 0);
@@ -260,23 +260,23 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
       cursor.setDate(cursor.getDate() + 1);
     }
     return ticks;
-  }, [combinedPredData]);
+  }, [combinedForecastData]);
 
-  // Predicted change over the next 24 hours: predicted level at now+24h minus current actual level
-  const predictedChange24h = useMemo(() => {
-    if (!predictionData || predictionData.length === 0 || !data || data.length === 0) return null;
+  // Forecasted change over the next 24 hours: forecasted level at now+24h minus current actual level
+  const forecastedChange24h = useMemo(() => {
+    if (!forecastData || forecastData.length === 0 || !data || data.length === 0) return null;
     const currentLevel = data[data.length - 1].level;
     const latestTs = new Date(data[data.length - 1].dateTime).getTime();
     const target = new Date(latestTs + 24 * 60 * 60 * 1000);
     let closest: ChartDataPoint | null = null;
     let minDiff = Infinity;
-    for (const pt of predictionData) {
+    for (const pt of forecastData) {
       const diff = Math.abs(new Date(pt.dateTime).getTime() - target.getTime());
       if (diff < minDiff) { minDiff = diff; closest = pt; }
     }
     if (!closest) return null;
     return closest.level - currentLevel;
-  }, [predictionData, data]);
+  }, [forecastData, data]);
 
   const formatXAxis = (tickItem: number) => {
     const date = new Date(tickItem);
@@ -286,7 +286,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  const formatPredTick = (ts: number) =>
+  const formatForecastTick = (ts: number) =>
     new Date(ts).toLocaleDateString([], { month: "short", day: "numeric" });
 
   const renderContent = () => {
@@ -297,12 +297,12 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
         </Box>
       );
     }
-    if (timeRange === "pred" && combinedPredData) {
+    if (timeRange === "forecast" && combinedForecastData) {
       const nowTs = new Date().getTime();
       return (
         <>
           <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart data={combinedPredData}>
+            <ComposedChart data={combinedForecastData}>
               <defs>
                 <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.8} />
@@ -315,12 +315,12 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 type="number"
                 scale="time"
                 domain={["dataMin", "dataMax"]}
-                ticks={predTicks}
-                tickFormatter={formatPredTick}
+                ticks={forecastTicks}
+                tickFormatter={formatForecastTick}
 
                 interval={0}
               />
-              <YAxis stroke={theme.palette.text.secondary} domain={[0, predYDomainMax]} />
+              <YAxis stroke={theme.palette.text.secondary} domain={[0, forecastYDomainMax]} />
               <Tooltip content={CustomTooltip} />
               <ReferenceLine
                 x={nowTs}
@@ -338,7 +338,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               />
               <Line
                 type="monotone"
-                dataKey="predicted"
+                dataKey="forecasted"
                 stroke={theme.palette.primary.main}
                 strokeDasharray="5 5"
                 strokeOpacity={0.7}
@@ -429,8 +429,8 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           aria-label="time range"
           sx={{ mt: 1, mb: 2, width: "100%" }}
         >
-          <ToggleButton value="pred" aria-label="prediction" sx={{ flex: 1 }}>
-            <Typography variant="caption">Pred</Typography>
+          <ToggleButton value="forecast" aria-label="forecast" sx={{ flex: 1 }}>
+            <Typography variant="caption">Forecast</Typography>
           </ToggleButton>
           <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
             <Typography variant="caption">5d</Typography>
@@ -477,8 +477,8 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
         </Box>
         <Box sx={{ mt: 2 }}>
           <ChangeIndicator
-            period="Predicted Change Next 24 Hours"
-            change={predictedChange24h}
+            period="Forecast Change Next 24 Hours"
+            change={forecastedChange24h}
             icon={<Timeline />}
           />
         </Box>

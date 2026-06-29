@@ -35,7 +35,7 @@ Each hour-by-hour entry covers conditions from that hour until the next entry be
 
 Write 1–2 concise sentences giving a broad sweep of how conditions look across the day, naturally weaving in the best window and its status colour. If there are no green conditions (i.e. the best available status is amber, red, or no paddling), note this instead of highlighting a best window. Only mention weather warnings that are active or upcoming within the specific period you are currently summarizing (e.g., today's remaining daylight or tomorrow's outlook). If there are such warnings, briefly mention the most severe one and how it might impact paddling (e.g. "be aware of the red heat warning"). Be punchy and avoid verbosity.
 
-Status colour names are always lowercase (light green, dark green, amber, red). If a status colour would fall at the very start of a sentence, rephrase to avoid leading with it. Use specific figures: river level in metres, temperature in °C, wind speed in mph, time in 24-hour format (e.g. 14:00). If the best window is already under way, say "now" rather than giving the start time (e.g. "…light green now until 20:00…"). The overall status already captures safety – don't add your own commentary on individual figures like river level. Don't mention or speculate about any dates or periods for which no data has been provided. Weave in the launch message naturally when it contains meaningful detail beyond "Normal conditions." However, avoid mentioning technical thresholds (like the 1.00m landing stage limit) if the river level is well below that limit (e.g. under 0.8m) as it is unremarkable. Do not repeat technical thresholds verbatim; instead, summarize their meaning if relevant to current safety or club access. Mention the river trend if it is notable (rising or falling); do not comment on the trend if it is described as steady.
+Status colour names are always lowercase (light green, dark green, amber, red). If a status colour would fall at the very start of a sentence, rephrase to avoid leading with it. Use specific figures: river level in metres, temperature in °C, wind speed in mph, time in 24-hour format (e.g. 14:00). If the best window is already under way, say "now" rather than giving the start time (e.g. "…light green now until 20:00…"). The overall status already captures safety – don't add your own commentary on individual figures like river level. Don't mention or speculate about any dates or periods for which no data has been provided. Weave in the launch message naturally when it contains meaningful detail beyond "Normal conditions." However, avoid mentioning technical thresholds (like the 1.00m landing stage limit) if the river level is well below that limit (e.g. under 0.8m) as it is unremarkable. Do not repeat technical thresholds verbatim; instead, summarize their meaning if relevant to current safety or club access. Mention the river trend if it is notable (rising or falling); strictly avoid any mention of the river trend, stability, or level changes if the trend is described as steady.
 
 If it is currently dark, do not summarise current conditions. Directly provide the outlook for the next available paddling window (later today or tomorrow) using the figures provided. When giving a temperature range across a future day, phrase it as "between X°C and Y°C."
 
@@ -78,10 +78,10 @@ function buildConditionsParts(req: SummaryRequest): string {
       ? (() => {
           const val = conditions.levelChange.value;
           const absVal = Math.abs(val);
-          let trend = "steady";
-          if (absVal > THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD) {
-            trend = val > 0 ? "rising" : "falling";
+          if (absVal <= THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD) {
+            return "River trend: steady";
           }
+          const trend = val > 0 ? "rising" : "falling";
           return `River trend: ${val >= 0 ? "+" : ""}${val.toFixed(2)}m over ${conditions.levelChange.period} (${trend})`;
         })()
       : null,

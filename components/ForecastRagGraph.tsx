@@ -321,7 +321,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
           </Box>
         )}
 
-        {/* Daily warnings display - moved above chart */}
+        {/* Daily warnings display – moved above chart */}
         {dailyWarnings.length > 0 && (
           <Box sx={{ mb: 2 }}>
             <Stack spacing={1}>
@@ -350,7 +350,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                         {warnings.map((w, wIdx) => (
                           <Box key={wIdx} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                             <Typography variant="caption" color="text.secondary">
-                              {formatMetTime(w.validFrom)} - {formatMetTime(w.validTo)}
+                              {formatMetTime(w.validFrom)}–{formatMetTime(w.validTo)}
                             </Typography>
                             <Link href={w.link} target="_blank" rel="noopener" sx={{ fontSize: "0.7rem", fontWeight: "bold" }}>
                               UK Met Office

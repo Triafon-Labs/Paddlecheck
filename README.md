@@ -6,19 +6,19 @@ A kayaking conditions dashboard providing real-time river levels, weather, and a
 
 ## Features
 
-- **RAG status** - Red/Amber/Green paddling safety rating based on river level, temperature, wind, visibility, and time of day
-- **River level graph** - historical readings plus a near-future forecast using an upstream gauge
-- **5-day forecast** - hourly RAG status for the coming days
-- **Skill-level matrix** - paddling guidance broken down by paddler level (Beginner → Independent)
-- **PWA** - installable as a mobile app for quick access on the water
+- **RAG status** – Red/Amber/Green paddling safety rating based on river level, temperature, wind, visibility, and time of day
+- **River level graph** – historical readings plus a near-future forecast using an upstream gauge
+- **5-day forecast** – hourly RAG status for the coming days
+- **Skill-level matrix** – paddling guidance broken down by paddler level (Beginner → Independent)
+- **PWA** – installable as a mobile app for quick access on the water
 - **Light/dark/system theme**
 
 ## How It Works
 
 The app fetches live data from two public APIs (no authentication or API keys required):
 
-- **River levels** - [Environment Agency flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/api-reference.html)
-- **Weather** - [Open-Meteo API](https://open-meteo.com/)
+- **River levels** – [Environment Agency flood-monitoring API](https://environment.data.gov.uk/flood-monitoring/doc/api-reference.html)
+- **Weather** – [Open-Meteo API](https://open-meteo.com/)
 
 River level, temperature, wind speed, visibility, weather codes, and time of day are combined into a RAG status using a configurable threshold table. An optional upstream gauge reading is shifted forward by a configurable number of hours to improve near-future level forecasts.
 
@@ -27,8 +27,8 @@ River level, temperature, wind speed, visibility, weather codes, and time of day
 - [Next.js](https://nextjs.org/) (App Router)
 - [Material UI (MUI)](https://mui.com/)
 - [TypeScript](https://www.typescriptlang.org/)
-- [Recharts](https://recharts.org/) - graphs
-- [Workbox](https://developer.chrome.com/docs/workbox/) - PWA / service worker
+- [Recharts](https://recharts.org/) – graphs
+- [Workbox](https://developer.chrome.com/docs/workbox/) – PWA / service worker
 
 ## Getting Started
 
@@ -73,7 +73,7 @@ Replace or extend with links relevant to your venue (e.g. your own station page,
 
 The app uses the Environment Agency flood-monitoring API. To find your station:
 
-1. Browse stations at [https://environment.data.gov.uk/flood-monitoring/id/stations](https://environment.data.gov.uk/flood-monitoring/id/stations) - you can filter by `?label=<river name>` or `?town=<town>`.
+1. Browse stations at [https://environment.data.gov.uk/flood-monitoring/id/stations](https://environment.data.gov.uk/flood-monitoring/id/stations) – you can filter by `?label=<river name>` or `?town=<town>`.
 2. Copy the numeric station ID from the URL (e.g. `2642` from `.../stations/2642`).
 
 ```ts
@@ -138,7 +138,7 @@ CSV export URLs follow the pattern `https://check-for-flooding.service.gov.uk/st
 
 ## Deployment
 
-The app is a standard Next.js application. [Vercel](https://vercel.com) is the simplest deployment option - connect your fork and it deploys automatically on every push to `main`. No environment variables are required.
+The app is a standard Next.js application. [Vercel](https://vercel.com) is the simplest deployment option – connect your fork and it deploys automatically on every push to `main`. No environment variables are required.
 
 ## Built With
 

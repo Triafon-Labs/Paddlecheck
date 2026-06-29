@@ -129,7 +129,7 @@ const TopNavBar = () => {
     useKayakContext();
 
   const isOfflineError =
-    error === "Offline - no cached data (reconnect and refresh)";
+    error === "Offline – no cached data (reconnect and refresh)";
 
   // Initialize state dynamically based on the current context value on render
   const [relativeLastUpdated, setRelativeLastUpdated] = useState<string>(() =>
@@ -177,7 +177,7 @@ const TopNavBar = () => {
             borderBottom: "1px solid rgba(0,0,0,0.08)",
           }}
         >
-          Offline - showing cached data
+          Offline – showing cached data
           {relativeLastUpdated ? ` (updated ${relativeLastUpdated})` : ""}
         </Box>
       )}
@@ -195,7 +195,7 @@ const TopNavBar = () => {
             borderBottom: "1px solid rgba(0,0,0,0.08)",
           }}
         >
-          Offline - no cached data (reconnect and refresh)
+          Offline – no cached data (reconnect and refresh)
         </Box>
       )}
       <AppBar position="static" color="inherit" elevation={0}>

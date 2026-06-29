@@ -112,8 +112,7 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
                       }}
                     >
                       <Typography variant="caption" sx={{ opacity: 0.9 }}>
-                        {formatMetTime(warning.validFrom)} -{" "}
-                        {formatMetTime(warning.validTo)}
+                        {formatMetTime(warning.validFrom)}–{formatMetTime(warning.validTo)}
                       </Typography>
                       <Link
                         href={warning.link}

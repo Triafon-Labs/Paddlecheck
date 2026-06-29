@@ -28,7 +28,7 @@ export default function HomePage() {
   return (
     <Container maxWidth="md">
       <Stack spacing={4}>
-        {error && error !== "Offline - no cached data (reconnect and refresh)" && (
+        {error && error !== "Offline – no cached data (reconnect and refresh)" && (
           <Alert severity="error" sx={{ borderRadius: 1 }}>
             {error}
           </Alert>

@@ -60,7 +60,7 @@ export const m3Dark = {
 // Widened type - maps each key to string so both m3Light and m3Dark satisfy it.
 export type M3Palette = { [K in keyof typeof m3Light]: string };
 
-// CSS linear() spring approximation - spring(1, 100, 15, 0), duration ~400ms
+// CSS linear() spring approximation – spring(1, 100, 15, 0), duration ~400ms
 // Gives a slight overshoot for M3 Expressive's "springy" feel.
 // Falls back to a regular transition in older browsers.
 export const springEasing =
@@ -68,7 +68,7 @@ export const springEasing =
 
 // M3 motion easing curves
 export const m3Easing = {
-  // Standard: everyday transitions - color, opacity, small layout shifts
+  // Standard: everyday transitions – color, opacity, small layout shifts
   standard: "cubic-bezier(0.2, 0, 0, 1)",
   // Decelerate: elements entering the screen (slide in, expand)
   decelerate: "cubic-bezier(0, 0, 0, 1)",

@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.14.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.13.0...paddlecheck-v1.14.0) (2026-06-30)
+
+
+### Features
+
+* **briefing:** always include river trend but instruct AI to ignore steady changes ([1ba2ea8](https://github.com/dylanr97/Paddlecheck/commit/1ba2ea89850bce256f7316cf284ec241db85d12c))
+* **briefing:** strictly suppress AI commentary on steady river trends ([e71be0e](https://github.com/dylanr97/Paddlecheck/commit/e71be0e4407e67561338e07050b60b2386ca8c21))
+
 ## [1.13.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.12.0...paddlecheck-v1.13.0) (2026-06-28)
 
 

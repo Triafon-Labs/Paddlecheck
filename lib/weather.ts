@@ -18,7 +18,7 @@ export const fetchWeatherData = async (
     windSpeed: current.wind_speed_10m,
     windDirection: current.wind_direction_10m,
     rain: isRainy(current.weather_code),
-    visibility: current.visibility, // visibility in meters
+    visibility: current.visibility, // visibility in metres
     weatherCode: current.weather_code,
   };
 };

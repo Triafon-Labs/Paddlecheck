@@ -74,8 +74,8 @@ export const fetchBewdleyForecast = async (): Promise<{
 
 // Apply a delta-transfer from Bewdley's data to forecast Worcester's level.
 // Worcester's current level already reflects what Bewdley was doing 6 hours
-// ago, so the reference baseline is Bewdley at (now - 6h), not Bewdley now.
-// delta = bewdley(targetWorcesterTime - 6h) - bewdley(now - 6h)
+// ago, so the reference baseline is Bewdley at (now – 6h), not Bewdley now.
+// delta = bewdley(targetWorcesterTime - 6h) – bewdley(now – 6h)
 // worcesterForecasted = worcesterCurrentLevel + delta
 export const getBewdleyBasedWorcesterLevel = (
   worcesterCurrentLevel: number,
@@ -102,7 +102,7 @@ export const getBewdleyBasedWorcesterLevel = (
   const baseline = findClosest(baselineBewdleyTime);
   if (!baseline) return null;
 
-  // Target: what Bewdley was/is/will be at (targetWorcesterTime - 6h)
+  // Target: what Bewdley was/is/will be at (targetWorcesterTime – 6h)
   const targetBewdleyTime = new Date(targetWorcesterTime.getTime() - BEWDLEY_TRAVEL_HOURS * 3600 * 1000);
   const target = findClosest(targetBewdleyTime);
   if (!target) return null;

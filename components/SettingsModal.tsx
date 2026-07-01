@@ -406,21 +406,21 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             </Typography>
             <ThresholdRow
               icon={<Thermostat fontSize="small" />}
-              label={`${THRESHOLDS.TEMP_HIGH} °C and above`}
+              label={`${THRESHOLDS.TEMP_HIGH}°C and above`}
               description="Warm. No temperature penalty applied."
               chipLabel="No penalty"
               chipColor="success"
             />
             <ThresholdRow
               icon={<Thermostat fontSize="small" />}
-              label={`${THRESHOLDS.TEMP_MODERATE}–${THRESHOLDS.TEMP_HIGH} °C`}
+              label={`${THRESHOLDS.TEMP_MODERATE}–${THRESHOLDS.TEMP_HIGH}°C`}
               description="Cool. Raises the base risk rating. Rain also becomes a factor."
               chipLabel="Raises rating"
               chipColor="warning"
             />
             <ThresholdRow
               icon={<AcUnit fontSize="small" />}
-              label={`Below ${THRESHOLDS.TEMP_MODERATE} °C`}
+              label={`Below ${THRESHOLDS.TEMP_MODERATE}°C`}
               description="Cold. Cold water shock risk. Significant increase in risk rating."
               chipLabel="Cold"
               chipColor="error"

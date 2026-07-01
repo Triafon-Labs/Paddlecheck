@@ -143,9 +143,9 @@ The RAG status is calculated from river level first, then modifiers are applied:
 
 **Modifiers (applied in order):**
 
-1. **Temperature** – below 5 °C raises status significantly (cold water shock); 5–13 °C raises status moderately and enables rain as a factor
+1. **Temperature** – below 5°C raises status significantly (cold water shock); 5–13°C raises status moderately and enables rain as a factor
 2. **Wind** – above 15 mph raises status at any temperature
-3. **Rain** – only a factor when temp is 5–13 °C (moderate)
+3. **Rain** – only a factor when temp is 5–13°C (moderate)
 4. **Darkness** – raises Green → Amber, Amber → Red
 5. **Poor visibility** – below 1 000 m raises Green → Amber, Amber → Red
 6. **Thunderstorm** – overrides everything → No Paddling
@@ -263,8 +263,8 @@ If Git hooks are not firing:
 | `BEWDLEY_STATION_ID`   | `2001`                 | Upstream station for forecast          |
 | `BEWDLEY_LAG_HOURS`    | `6`                    | Travel time Bewdley → Worcester        |
 | `RAG_THRESHOLDS`       | `[1.0, 1.4, 2.2, 5.0]` | River level breakpoints (metres)       |
-| `TEMP_HIGH`            | `13` °C                | Above this: no temperature penalty     |
-| `TEMP_LOW`             | `5` °C                 | Below this: cold water shock risk      |
+| `TEMP_HIGH`            | `13°C`                 | Above this: no temperature penalty     |
+| `TEMP_LOW`             | `5°C`                  | Below this: cold water shock risk      |
 | `WIND_THRESHOLD`       | `15` mph               | Above this: wind penalty applied       |
 | `VISIBILITY_THRESHOLD` | `1000` m               | Below this: fog penalty applied        |
 | Coordinates            | `52.2, -2.2`           | Open-Meteo weather location            |

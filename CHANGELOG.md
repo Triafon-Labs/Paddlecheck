@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.15.1...paddlecheck-v1.16.0) (2026-07-03)
+
+
+### Features
+
+* update launch message condition to be level-based ([0975060](https://github.com/dylanr97/Paddlecheck/commit/097506050b4367f05f290f47a0cce3fa477b5037))
+
 ## [1.15.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.15.0...paddlecheck-v1.15.1) (2026-07-03)
 
 

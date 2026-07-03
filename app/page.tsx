@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Container, Stack, Box, Alert } from "@mui/material";
-import LastUpdated from "@/components/LastUpdated";
+import { Container, Stack, Alert } from "@mui/material";
 import StatusCard from "@/components/StatusCard";
 import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";
 import StatsCard from "@/components/StatsCard";
@@ -58,9 +57,6 @@ export default function HomePage() {
           warnings={conditions?.warnings}
           loading={forecastLoading}
         />
-        <Box sx={{ width: "100%", textAlign: "center" }}>
-          <LastUpdated date={conditions?.lastUpdated} />
-        </Box>
       </Stack>
     </Container>
   );

@@ -10,6 +10,23 @@ const hhmmOf = (iso: string) => iso.split("T")[1]?.slice(0, 5) ?? null;
 const isDarkOnly = (reasons: string[]) =>
   reasons.length === 1 && reasons[0] === "Dark";
 
+// Helper function to format a relative time string.
+export const getRelativeTimeString = (
+  date: string | Date | undefined
+): string => {
+  if (!date) return "";
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  const diffMs = Date.now() - dateObj.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+
+  if (diffMins < 1) return "just now";
+  if (diffMins === 1) return "1 minute ago";
+  if (diffMins < 60) return `${diffMins} minutes ago`;
+
+  const diffHours = Math.floor(diffMins / 60);
+  return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
+};
+
 const slotAtHour = (graphData: DayForecast["graphData"], hour: number) =>
   graphData.find((pt) => hourOf(pt.time) === hour);
 

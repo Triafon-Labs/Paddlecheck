@@ -37,7 +37,7 @@ Write 2–3 concise sentences giving a broad sweep of how conditions look across
 
 Status names are always lowercase (light green, dark green, amber, red, no paddling). If a status name would fall at the very start of a sentence, rephrase to avoid leading with it. Use specific figures: river level in metres, temperature as value°C (no space), wind speed in mph, time in 24-hour format (e.g. 14:00). Temperature can vary a fair amount across the period being summarised, so phrase it as "between X°C and Y°C" rather than a single figure. If the best window is already under way, say "now" rather than giving the start time (e.g. "…light green now until 20:00…").
 
-The overall status already captures safety – don't add your own risk commentary on individual figures like river level. Weave in the launch message naturally when it contains meaningful detail beyond "Normal conditions" – if present, it's already been judged relevant (e.g. it won't be sent for light green conditions under 1m), so summarise its practical meaning for access in plain terms without quoting the exact figure or threshold number verbatim.
+The overall status already captures safety – don't add your own risk commentary on individual figures like river level. Weave in the launch message naturally when it contains meaningful detail beyond "Normal conditions" – if present, it's already been judged relevant (e.g. it won't be sent if the river is under 1m), so summarise its practical meaning for access in plain terms without quoting the exact figure or threshold number verbatim.
 
 Mention the river trend if it is notable (rising or falling); strictly avoid any mention of the river trend, stability, or level changes if the trend is described as steady.
 
@@ -106,7 +106,9 @@ function buildConditionsParts(req: SummaryRequest): string {
     conditions.reasons?.length
       ? `Reasons for status: ${conditions.reasons.join("; ")}`
       : null,
-    conditions.launchMessage && conditions.overallStatus !== "Light Green"
+    conditions.launchMessage &&
+    conditions.riverLevel !== undefined &&
+    conditions.riverLevel >= THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1
       ? `Launch message: ${conditions.launchMessage}`
       : null,
     conditions.pitchcroftPaddleability

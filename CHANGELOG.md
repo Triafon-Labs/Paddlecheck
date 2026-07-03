@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.15.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.14.0...paddlecheck-v1.15.0) (2026-07-03)
+
+
+### Features
+
+* switch to gpt-oss-120b and fix temperature formatting ([d194894](https://github.com/dylanr97/Paddlecheck/commit/d194894afdec8827016594574f4b3e89fe102891))
+* switch to gpt-oss-120b and fix temperature formatting ([44b356c](https://github.com/dylanr97/Paddlecheck/commit/44b356cb51c49602b13310489901f2ae7485aad5))
+* switch to gpt-oss-120b and fix temperature formatting ([5c50359](https://github.com/dylanr97/Paddlecheck/commit/5c50359a18443f08518a1afb555fcea550422ea6))
+
 ## [1.14.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.13.0...paddlecheck-v1.14.0) (2026-06-30)
 
 

@@ -192,7 +192,7 @@ export async function POST(request: Request) {
     temperature: 1.0,
     top_p: 0.95,
     max_tokens: 2048,
-    reasoning_effort: "low",
+    reasoning_effort: "medium",
     stream: true,
     messages: [
       { role: "user", content: `${BRIEFING_PROMPT}\n\n${conditionsParts}` },

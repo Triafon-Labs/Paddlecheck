@@ -52,7 +52,11 @@ const buildShareText = (
     lines.push(riverLine);
   }
 
-  if (conditions.launchMessage) {
+  if (
+    conditions.launchMessage &&
+    conditions.riverLevel !== undefined &&
+    conditions.riverLevel >= THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1
+  ) {
     lines.push("");
     lines.push(conditions.launchMessage);
     lines.push("");

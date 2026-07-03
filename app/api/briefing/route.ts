@@ -25,19 +25,25 @@ interface SummaryRequest {
 // ── Prompt ────────────────────────────────────────────────────────────────────
 
 const BRIEFING_PROMPT = `\
-You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. You are given current conditions and an hour-by-hour forecast covering today's remaining daylight hours.
+You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. You are given current conditions and an hour-by-hour forecast. Normally this covers today's remaining daylight hours; if it is currently dark, it instead covers the next available daylight window (later today or tomorrow) – determine which from the date/time on the entries provided, not by guessing.
 
 Each hour carries a status. From best to worst: Light Green, Dark Green, Amber, Red, No Paddling.
 
-The best window is the longest contiguous run of hours sharing the highest-ranked status present that day. If any hours are light green, the best window is the longest unbroken block of light green hours; only if no light green hours exist does dark green become the best window, and so on. If two blocks of the top-ranked status are equal in length, mention both. Do not merge hours of different statuses into a single window.
+The best window is the longest contiguous run of hours sharing the highest-ranked status present in the period being summarised. If any hours are light green, the best window is the longest unbroken block of light green hours; only if no light green hours exist does dark green become the best window, and so on. If two blocks of the top-ranked status are equal in length, mention both, but keep this brief – don't let it bloat the summary. Do not merge hours of different statuses into a single window.
 
-Each hour-by-hour entry covers conditions from that hour until the next entry begins. The list covers daylight hours only – later hours are omitted because it gets dark. If the data indicates that the last listed hour's conditions extend to sunset, use that sunset time as the window's end.
+Each hour-by-hour entry covers conditions from that hour until the next entry begins. The list covers daylight hours only – later hours are omitted because it gets dark. The final listed hour's conditions extend to sunset, which is always provided in the data – use that time as the window's end.
 
-Write 1–2 concise sentences giving a broad sweep of how conditions look across the day, naturally weaving in the best window and its status colour. If there are no green conditions (i.e. the best available status is amber, red, or no paddling), note this instead of highlighting a best window. Only mention weather warnings that are active or upcoming within the specific period you are currently summarising (e.g., today's remaining daylight or tomorrow's outlook). If there are such warnings, briefly mention the most severe one and how it might impact paddling (e.g. "be aware of the red heat warning"). If no weather warnings are provided in the data, do not mention them at all – do not include phrases like "no weather warnings are in force". Be punchy and avoid verbosity.
+Write 2–3 concise sentences giving a broad sweep of how conditions look across the period being summarised, naturally weaving in the best window and its status colour. This 1–2 sentence limit applies whether you're summarising today's remaining hours or a future window. If there are no green conditions (i.e. the best available status is amber, red, or no paddling), note this instead of highlighting a best window. Only mention weather warnings that are active or upcoming within the specific period you are summarising. If there are such warnings, briefly mention the most severe one and how it might impact paddling (e.g. "be aware of the red heat warning"). Be punchy and avoid verbosity.
 
-Status colour names are always lowercase (light green, dark green, amber, red). If a status colour would fall at the very start of a sentence, rephrase to avoid leading with it. Use specific figures: river level in metres, temperature as value°C (no space), wind speed in mph, time in 24-hour format (e.g. 14:00). If the best window is already under way, say "now" rather than giving the start time (e.g. "…light green now until 20:00…"). The overall status already captures safety – don't add your own commentary on individual figures like river level. Don't mention or speculate about any dates or periods for which no data has been provided. Weave in the launch message naturally when it contains meaningful detail beyond "Normal conditions." However, avoid mentioning technical thresholds (like the 1.00m landing stage limit) if the river level is well below that limit (e.g. under 0.8m) as it is unremarkable. Do not repeat technical thresholds verbatim; instead, summarise their meaning if relevant to current safety or club access. Mention the river trend if it is notable (rising or falling); strictly avoid any mention of the river trend, stability, or level changes if the trend is described as steady.
+Status names are always lowercase (light green, dark green, amber, red, no paddling). If a status name would fall at the very start of a sentence, rephrase to avoid leading with it. Use specific figures: river level in metres, temperature as value°C (no space), wind speed in mph, time in 24-hour format (e.g. 14:00). Temperature can vary a fair amount across the period being summarised, so phrase it as "between X°C and Y°C" rather than a single figure. If the best window is already under way, say "now" rather than giving the start time (e.g. "…light green now until 20:00…").
 
-If it is currently dark, do not summarise current conditions. Directly provide the outlook for the next available paddling window (later today or tomorrow) using the figures provided. When giving a temperature range across a future day, phrase it as "between X°C and Y°C."
+The overall status already captures safety – don't add your own risk commentary on individual figures like river level. Weave in the launch message naturally when it contains meaningful detail beyond "Normal conditions" – if present, it's already been judged relevant (e.g. it won't be sent for light green conditions under 1m), so summarise its practical meaning for access in plain terms without quoting the exact figure or threshold number verbatim.
+
+Mention the river trend if it is notable (rising or falling); strictly avoid any mention of the river trend, stability, or level changes if the trend is described as steady.
+
+If it is currently dark, do not summarise current conditions – go straight to the outlook for the next available paddling window. This is later today if it's currently post-midnight (before sunrise), or tomorrow if it's currently pre-midnight (after sunset). Use the figures provided for that period.
+
+Don't mention or speculate about any dates or periods for which no data has been provided.
 
 Write only the summary – no headings, bullet points, or introductory labels. Use British English throughout (metres, colour, favourable, summarise, etc.). Keep the tone friendly and accessible; members range from beginners to experienced paddlers.`;
 
@@ -186,7 +192,7 @@ export async function POST(request: Request) {
     temperature: 1.0,
     top_p: 0.95,
     max_tokens: 2048,
-    reasoning_effort: "low",
+    reasoning_effort: "medium",
     stream: true,
     messages: [
       { role: "user", content: `${BRIEFING_PROMPT}\n\n${conditionsParts}` },

@@ -32,13 +32,23 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 
 ## Important Development Notes
 
-### Conventional Commits
+### Conventional Commits & Semantic Versioning
 
-**Conventional commits are strictly enforced.** This is required for `release-please` to correctly categorize changes, update the `CHANGELOG.md`, and bump the version.
+**Conventional commits are strictly enforced.** This ensures that `release-please` correctly categorises changes, updates the `CHANGELOG.md`, and increments the version according to Semantic Versioning (SemVer).
 
-- **Local Enforcement:** Husky and commitlint run on the `commit-msg` hook. If hooks are not firing, run `npm install`.
-- **CI Enforcement:** The `Commit Lint` GitHub Action validates all commits in a Pull Request. PRs with non-compliant commit messages will fail CI.
-- Use prefixes like `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `style:`, `test:`, `perf:`, `ci:`.
+- **`feat:` (Minor):** Reserved for significant new user-facing features or major functional additions.
+- **`fix:` (Patch):** Used for bug fixes, prompt refinements, minor UI tweaks, and internal logic improvements. These trigger a patch release and do not increment the minor version.
+- **`chore:`:** Used for maintenance tasks, dependency updates, and configuration changes that do not affect the user experience.
+- **Other types:** `docs:`, `refactor:`, `style:`, `test:`, `perf:`, `ci:`, `build:`.
+
+**Strict Guidance for AI Agents:**
+- Do **not** use `feat:` for minor tweaks like updating the AI prompt, adjusting thresholds, or small styling changes. These must be marked as `fix:`.
+- Avoid pushing multiple `feat:` commits for a single logical feature. Squashing related changes into a single descriptive commit is preferred to prevent excessive version bumping.
+- Always use British English in commit messages (e.g., 'optimise' instead of 'optimize').
+
+**Enforcement:**
+- **Local:** Husky and commitlint run on the `commit-msg` hook. If hooks are not firing, run `npm install`.
+- **CI:** The `Commit Lint` GitHub Action validates all commits in a Pull Request.
 
 ### Build Requirements
 

@@ -22,22 +22,8 @@ import {
   buildBestPaddlingTimes,
   buildNextDaytimeOutlook,
   hasDaylightRemaining,
+  getRelativeTimeString,
 } from "@/lib/forecast";
-
-// Helper function to format the string outside of the hook mechanics
-const getRelativeTimeString = (dateStr: string | undefined): string => {
-  if (!dateStr) return "";
-  const dateObj = new Date(dateStr);
-  const diffMs = Date.now() - dateObj.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-
-  if (diffMins < 1) return "just now";
-  if (diffMins === 1) return "1 minute ago";
-  if (diffMins < 60) return `${diffMins} minutes ago`;
-
-  const diffHours = Math.floor(diffMins / 60);
-  return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
-};
 
 const buildShareText = (
   conditions: ReturnType<typeof useKayakContext>["conditions"],
@@ -200,20 +186,31 @@ const TopNavBar = () => {
       )}
       <AppBar position="static" color="inherit" elevation={0}>
         <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Image
               src="/favicon.svg"
               alt="Paddlecheck Logo"
               width={40}
               height={40}
             />
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 600 }}
-              color="text.primary"
-            >
-              Paddlecheck
-            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, lineHeight: 1.2 }}
+                color="text.primary"
+              >
+                Paddlecheck
+              </Typography>
+              {relativeLastUpdated && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ lineHeight: 1.2, mt: -0.2 }}
+                >
+                  Updated {relativeLastUpdated}
+                </Typography>
+              )}
+            </Box>
           </Box>
           <Box sx={{ display: "flex" }}>
             <IconButton onClick={handleShare} aria-label="share">

@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.15.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.15.0...paddlecheck-v1.15.1) (2026-07-03)
+
+
+### Bug Fixes
+
+* adjust reasoning effort from low to medium for improved response quality ([649f09a](https://github.com/dylanr97/Paddlecheck/commit/649f09a708e43164acebe9a785bfa2ef6de6a42b))
+* improve clarity and conciseness of prompt instructions ([83b5cd2](https://github.com/dylanr97/Paddlecheck/commit/83b5cd20d12b7c8c29b3b1702a4221c5d52f3f62))
+* refine briefing prompt for clarity and conciseness ([69b72c4](https://github.com/dylanr97/Paddlecheck/commit/69b72c40eb2e3827b1c151886b2005d765970264))
+* refine briefing prompt for clarity and conciseness ([f329439](https://github.com/dylanr97/Paddlecheck/commit/f329439116d1a61ac8cc5fda4743279d12fe2d84))
+* update prompt instructions to allow 2–3 sentences for summarizing conditions ([0eddc12](https://github.com/dylanr97/Paddlecheck/commit/0eddc12408d4ce0c2d408c38d40ee71440cb27b0))
+
 ## [1.15.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.14.0...paddlecheck-v1.15.0) (2026-07-03)
 
 

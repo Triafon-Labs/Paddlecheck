@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.0...paddlecheck-v1.16.1) (2026-07-04)
+
+
+### Bug Fixes
+
+* optimise release configuration and clean up changelog ([0a10f20](https://github.com/dylanr97/Paddlecheck/commit/0a10f20bc1e762c8fa3fd56652d46c19ca9919e6))
+
 ## [1.16.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.15.1...paddlecheck-v1.16.0) (2026-07-03)
 
 
@@ -322,6 +329,3 @@
 * use service worker showNotification for mobile Chrome support ([eeaa45d](https://github.com/dylanr97/Paddlecheck/commit/eeaa45de9abbd5d1f25d00a674be96dec8302b41))
 
 ## [1.2.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.1.1...paddlecheck-v1.2.0) (2026-06-04)
-
-
-

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.1...paddlecheck-v1.16.2) (2026-07-07)
+
+
+### Bug Fixes
+
+* ground AI briefing and refine launch message logic ([3f6cd09](https://github.com/dylanr97/Paddlecheck/commit/3f6cd098f54e7cb88b8bc9b6eca744beee867688))
+
 ## [1.16.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.0...paddlecheck-v1.16.1) (2026-07-04)
 
 

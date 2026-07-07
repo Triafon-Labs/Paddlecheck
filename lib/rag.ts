@@ -20,13 +20,21 @@ export {
 // --- Helper Functions for RAG Calculation ---
 
 export const findLevelDescription = (level: number): string => {
+  if (level <= 1.0) return LEVEL_DESCRIPTIONS[1.0];
+
   const allLevels = Object.keys(LEVEL_DESCRIPTIONS)
     .map(parseFloat)
     .sort((a, b) => a - b);
-  const nextLevelUp = allLevels.find((key) => key > level);
-  if (!nextLevelUp) return LEVEL_DESCRIPTIONS[allLevels[allLevels.length - 1]];
-  const gap = nextLevelUp - level;
+
+  const nextLevelUp = allLevels.find((key) => key >= level);
+
+  if (!nextLevelUp) {
+    return LEVEL_DESCRIPTIONS[allLevels[allLevels.length - 1]];
+  }
+
   const description = LEVEL_DESCRIPTIONS[nextLevelUp];
+  const gap = nextLevelUp - level;
+
   return gap > 0.1
     ? `${description} (applies at ${nextLevelUp.toFixed(2)}m)`
     : description;

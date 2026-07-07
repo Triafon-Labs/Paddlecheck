@@ -1,5 +1,6 @@
 import { DayForecast, Status } from "@/types";
 import { THRESHOLDS } from "@/lib/config";
+import { findLevelDescription } from "@/lib/rag";
 
 const PREFERRED: Status[] = ["Light Green", "Dark Green"];
 
@@ -165,13 +166,14 @@ export function buildHourlyForecastText(
     const h = hourOf(pt.time);
     const timeStr = `${String(h).padStart(2, "0")}:00`;
     const level = `river ${pt.forecastLevel.toFixed(2)}m`;
+    const launch = `launch: ${findLevelDescription(pt.forecastLevel)}`;
     const temp =
       pt.temperature !== undefined ? `${Math.round(pt.temperature)}°C` : null;
     const wind =
       pt.windSpeed !== undefined
         ? `${Math.round(pt.windSpeed)} mph wind`
         : null;
-    const stats = [level, temp, wind].filter(Boolean).join(", ");
+    const stats = [level, launch, temp, wind].filter(Boolean).join(", ");
     const nonDarkReasons = pt.reasons.filter((r) => r !== "Dark");
     const note =
       nonDarkReasons.length > 0 ? ` [${nonDarkReasons.join(", ")}]` : "";

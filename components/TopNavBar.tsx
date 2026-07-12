@@ -95,17 +95,11 @@ const buildShareText = (
     }
   } else {
     const outlook = buildNextDaytimeOutlook(forecastDays);
-    if (outlook) {
-      const label =
-        outlook.dayLabel.charAt(0).toUpperCase() + outlook.dayLabel.slice(1);
+    if (outlook && outlook.bestTimes) {
+      // Format tomorrow's times directly as "🟢 *Best conditions tomorrow: ...*" or "🟢 *Best conditions later today: ...*"
+      // instead of mentioning it is currently dark and outputting raw weather summary text.
       lines.push("");
-      lines.push(`🌙 _It's currently dark._`);
-      lines.push(`*${label}:* ${outlook.rangesText}`);
-      if (outlook.bestTimes) {
-        lines.push(
-          `🟢 *Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}*`
-        );
-      }
+      lines.push(`🟢 *Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}*`);
     }
   }
 

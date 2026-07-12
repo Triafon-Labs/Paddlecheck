@@ -375,7 +375,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
           sx={{ display: "block", textAlign: "center", mt: 2 }}
         >
           Solid line uses Bewdley upstream forecast (24h). Dashed line uses
-          local trend only. Both are experimental.
+          local trend only. For guidance only.
         </Typography>
       </CardContent>
     </Card>

@@ -242,36 +242,13 @@ export const LEVEL_DESCRIPTIONS: Record<number, string> = {
   2.75: "10th step wet, wet feet possible",
   4.28: "Almost on the car park – dry feet!",
   4.37: "5cm on the car park – not deep enough for boats, wet feet!",
-  4.49: "Water on car park, safe to park only if falling. Variable paddling on Pitchcroft",
-  4.7: "Just in the boat house! Plenty of water on Pitchcroft – paddle with care",
-  5.01: "Boathouse flooding. Water can flow back into the river from Pitchcroft, creating stronger flows – paddle with extreme care",
-  5.02: "Deep water in boathouse, boats can float out. Water can flow back into the river from Pitchcroft, creating stronger flows – paddle with extreme care",
+  4.49: "Water on car park, safe to park only if falling",
+  4.7: "Just in the boat house! Paddle with care",
+  5.01: "Boathouse flooding – paddle with extreme care",
+  5.02: "Deep water in boathouse, boats can float out – paddle with extreme care",
   5.18: "Grand Stand Road flooded, unsafe to access boathouse",
   5.54: "Sabrina Bridge closed, North Parade underwater, dangerous flows",
   5.55: "Boathouse inaccessible, dangerous flow, no paddling advised",
-};
-
-// Venue-specific flood-plain paddleability map – Worcester's Pitchcroft race
-// course becomes paddleable when the river overtops its banks at high levels.
-// Replace or remove this if your venue doesn't have a similar feature.
-export const PITCHCROFT_PADDLEABILITY: Record<number, string> = {
-  4.0: "Variable",
-  4.5: "Good",
-  5.0: "Risky",
-};
-
-export const getPitchcroftPaddleability = (
-  level: number
-): string | undefined => {
-  const allLevels = Object.keys(PITCHCROFT_PADDLEABILITY)
-    .map(parseFloat)
-    .sort((a, b) => b - a); // Sort descending
-
-  const applicableLevel = allLevels.find((key) => level >= key);
-
-  return applicableLevel
-    ? PITCHCROFT_PADDLEABILITY[applicableLevel]
-    : undefined;
 };
 
 export const VISIBILITY_DESCRIPTIONS: {

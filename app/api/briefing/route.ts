@@ -113,9 +113,6 @@ function buildConditionsParts(req: SummaryRequest): string {
     conditions.launchMessage
       ? `Launch message: ${conditions.launchMessage}`
       : null,
-    conditions.pitchcroftPaddleability
-      ? `Pitchcroft: ${conditions.pitchcroftPaddleability}`
-      : null,
     sunrise ? `Sunrise: ${sunrise}` : null,
     sunset ? `Sunset: ${sunset}` : null,
     hourlyForecast

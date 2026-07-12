@@ -37,6 +37,8 @@ Write 2–3 concise sentences giving a broad sweep of how conditions look across
 
 Status names are always lowercase (light green, dark green, amber, red, no paddling). If a status name would fall at the very start of a sentence, rephrase to avoid leading with it. Use specific figures: river level in metres, temperature as value°C (no space), wind speed in mph, time in 24-hour format (e.g. 14:00). Temperature can vary a fair amount across the period being summarised, so phrase it as "between X°C and Y°C" rather than a single figure. If the best window is already under way, say "now" rather than giving the start time (e.g. "…light green now until 20:00…").
 
+If there are any gaps, splits, or temporary dips in the best paddling conditions during the day (e.g. if conditions are light green from sunrise until 19:00 and again from 20:00 to sunset), you must naturally and briefly explain the reason for the gap (e.g., "due to a brief gust of wind" or "with a brief amber dip at 19:00 due to wind"). Avoid stating "a gap from 19:00 to 20:00" without explaining the physical reason (wind, temperature, or rain) shown in the hour-by-hour entries.
+
 The overall status already captures safety – don't add your own risk commentary on individual figures like river level. Weave in the launch message naturally; it contains specific landmark observations (e.g. water over a step) and should be summarised accurately as an approximation for access, without inventing club divisions like "sections" or "lanes".
 
 Mention the river trend if it is notable (rising or falling); strictly avoid any mention of the river trend, stability, or level changes if the trend is described as steady.
@@ -114,8 +116,8 @@ function buildConditionsParts(req: SummaryRequest): string {
       : null,
     !currentlyDark && sunrise ? `Sunrise: ${sunrise}` : null,
     !currentlyDark && sunset ? `Sunset: ${sunset}` : null,
-    !currentlyDark && hourlyForecast
-      ? `Hour-by-hour forecast for today's remaining daylight:\n${hourlyForecast}`
+    hourlyForecast
+      ? `Hour-by-hour forecast for the summarized daylight window:\n${hourlyForecast}`
       : null,
     currentlyDark && outlook
       ? `It is currently dark. The outlook for ${outlook.dayLabel} is: ${outlook.rangesText}.`

@@ -19,19 +19,36 @@ async function streamBriefing(
     hour: "2-digit",
     minute: "2-digit",
   });
-  const sunrise = todayForecast?.sunrise
+  const todaySunrise = todayForecast?.sunrise
     ? todayForecast.sunrise.split("T")[1]?.slice(0, 5) ?? null
     : null;
-  const sunset = todayForecast?.sunset
+  const todaySunset = todayForecast?.sunset
     ? todayForecast.sunset.split("T")[1]?.slice(0, 5) ?? null
     : null;
   // Derive dark from sunrise/sunset times rather than conditions.dark, which can be stale
   const currentlyDark = todayForecast
-    ? (sunrise !== null && currentTime < sunrise) || (sunset !== null && currentTime >= sunset)
+    ? (todaySunrise !== null && currentTime < todaySunrise) || (todaySunset !== null && currentTime >= todaySunset)
     : (conditions.dark ?? false);
-  const hourlyForecast = !currentlyDark && todayForecast
-    ? buildHourlyForecastText(todayForecast)
+
+  // Find the target day being summarized
+  let targetDay = todayForecast;
+  if (currentlyDark && forecastDays) {
+    const dayIndex = forecastDays.findIndex((day) =>
+      day.graphData.some((pt) => !pt.reasons.includes("Dark"))
+    );
+    if (dayIndex !== -1) {
+      targetDay = forecastDays[dayIndex];
+    }
+  }
+
+  const sunrise = targetDay?.sunrise
+    ? targetDay.sunrise.split("T")[1]?.slice(0, 5) ?? null
     : null;
+  const sunset = targetDay?.sunset
+    ? targetDay.sunset.split("T")[1]?.slice(0, 5) ?? null
+    : null;
+
+  const hourlyForecast = targetDay ? buildHourlyForecastText(targetDay) : null;
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
   // Filter for warnings that are active or upcoming (i.e. haven't expired yet)

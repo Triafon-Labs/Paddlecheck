@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.6](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.5...paddlecheck-v1.16.6) (2026-07-12)
+
+
+### Bug Fixes
+
+* remove Pitchcroft paddleability metric ([466aae0](https://github.com/dylanr97/Paddlecheck/commit/466aae01b31175e4f61ae708327623c903f706ac))
+
 ## [1.16.5](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.4...paddlecheck-v1.16.5) (2026-07-12)
 
 

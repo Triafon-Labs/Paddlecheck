@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.2...paddlecheck-v1.16.3) (2026-07-12)
+
+
+### Bug Fixes
+
+* update forecast captions to state guidance only and remove experimental term ([7a37d60](https://github.com/dylanr97/Paddlecheck/commit/7a37d6056557f9e3e446dbcb174641da70a4cf18))
+
 ## [1.16.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.1...paddlecheck-v1.16.2) (2026-07-07)
 
 

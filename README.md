@@ -132,10 +132,6 @@ export const BEWDLEY_TRAVEL_HOURS = 6;
 
 CSV export URLs follow the pattern `https://check-for-flooding.service.gov.uk/station-csv/<station-id>`. If you don't have a useful upstream station, the forecast feature will simply not show.
 
-### 9. Venue-specific flood plain (optional)
-
-`PITCHCROFT_PADDLEABILITY` describes paddleability of Worcester's Pitchcroft flood plain at high water. Remove or replace this if your venue doesn't have a similar feature.
-
 ## Deployment
 
 The app is a standard Next.js application. [Vercel](https://vercel.com) is the simplest deployment option – connect your fork and it deploys automatically on every push to `main`. No environment variables are required.

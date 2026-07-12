@@ -24,7 +24,6 @@ import {
   LATITUDE,
   LONGITUDE,
   HISTORICAL_DAYS,
-  getPitchcroftPaddleability,
   isRainy,
 } from "@/lib/config";
 
@@ -204,9 +203,6 @@ export const useKayakData = () => {
       const weatherDescription = getWeatherDescription(
         currentConditions.weatherCode ?? 0
       );
-      const pitchcroftPaddleability = getPitchcroftPaddleability(
-        currentConditions.riverLevel ?? 0
-      );
 
       conditionsObj = {
         ...currentConditions,
@@ -222,7 +218,6 @@ export const useKayakData = () => {
         lastUpdated: new Date().toISOString(),
         visibilityDescription,
         weatherDescription,
-        pitchcroftPaddleability,
       };
       setConditions(conditionsObj);
       setLoading(false);

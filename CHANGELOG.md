@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.16.5](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.4...paddlecheck-v1.16.5) (2026-07-12)
+
+
+### Bug Fixes
+
+* simplify dark-hours share text and update briefing boundary logic ([4e40b9f](https://github.com/dylanr97/Paddlecheck/commit/4e40b9f4cf3323f18bc10d0578abfb01944c8cb2))
+* simplify dark-hours share text and update briefing boundary logic ([1aa5c8b](https://github.com/dylanr97/Paddlecheck/commit/1aa5c8b70ec75bdee5ecd84592fc8623a079d614))
+
 ## [1.16.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.3...paddlecheck-v1.16.4) (2026-07-12)
 
 

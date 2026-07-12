@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.16.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.3...paddlecheck-v1.16.4) (2026-07-12)
+
+
+### Bug Fixes
+
+* improve briefing boundaries and forbid parenthetical text ([18b938b](https://github.com/dylanr97/Paddlecheck/commit/18b938bbfb0071cc5df2171b71501409394351c6))
+* provide target day hourly forecast details and update briefing prompt to explain gaps ([75bd281](https://github.com/dylanr97/Paddlecheck/commit/75bd2812107cb07146d67c8f83989aaf68866229))
+
 ## [1.16.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.2...paddlecheck-v1.16.3) (2026-07-12)
 
 

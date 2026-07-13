@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.7](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.6...paddlecheck-v1.16.7) (2026-07-13)
+
+
+### Bug Fixes
+
+* remove any references and functionality around Pitchcroft ([f28bb11](https://github.com/dylanr97/Paddlecheck/commit/f28bb11768381e34d50b583c8484630f0f3c12aa))
+
 ## [1.16.6](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.5...paddlecheck-v1.16.6) (2026-07-12)
 
 

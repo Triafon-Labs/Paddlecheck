@@ -24,31 +24,12 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 | Analytics     | Vercel Analytics + Speed Insights                      |
 | PWA           | Workbox 7 (service worker)                             |
 | Linting       | ESLint 10, Prettier 3                                  |
-| Git hooks     | Husky 9 + Commitlint                                   |
-| CI            | GitHub Actions (lint + build + commit-lint on PR)      |
-| Releases      | release-please (conventional commits → auto changelog) |
+| Git hooks     | Husky 9                                                |
+| CI            | GitHub Actions (lint + build on PR)                    |
 
 ---
 
 ## Important Development Notes
-
-### Conventional Commits & Semantic Versioning
-
-**Conventional commits are strictly enforced.** This ensures that `release-please` correctly categorises changes, updates the `CHANGELOG.md`, and increments the version according to Semantic Versioning (SemVer).
-
-- **`feat:` (Minor):** Reserved for significant new user-facing features or major functional additions.
-- **`fix:` (Patch):** Used for bug fixes, prompt refinements, minor UI tweaks, and internal logic improvements. These trigger a patch release and do not increment the minor version.
-- **`chore:`:** Used for maintenance tasks, dependency updates, and configuration changes that do not affect the user experience.
-- **Other types:** `docs:`, `refactor:`, `style:`, `test:`, `perf:`, `ci:`, `build:`.
-
-**Strict Guidance for AI Agents:**
-- Do **not** use `feat:` for minor tweaks like updating the AI prompt, adjusting thresholds, or small styling changes. These must be marked as `fix:`.
-- Avoid pushing multiple `feat:` commits for a single logical feature. Squashing related changes into a single descriptive commit is preferred to prevent excessive version bumping.
-- Always use British English in commit messages (e.g., 'optimise' instead of 'optimize').
-
-**Enforcement:**
-- **Local:** Husky and commitlint run on the `commit-msg` hook. If hooks are not firing, run `npm install`.
-- **CI:** The `Commit Lint` GitHub Action validates all commits in a Pull Request.
 
 ### Build Requirements
 
@@ -232,15 +213,13 @@ npm run build     # Production build
 npm run lint      # ESLint check
 ```
 
-Conventional commits are enforced by commitlint. Pre-commit lint runs via Husky.
+Pre-commit lint runs via Husky.
 
 ---
 
-## CI / Release Pipeline
+## CI Pipeline
 
 - **ci.yml** – runs `lint` then `build` on every push/PR to `main` (Node 20)
-- **commit-lint.yml** – enforces Conventional Commits on all PRs to `main`
-- **release-please.yml** – on merge to `main`, bumps version and updates `CHANGELOG.md` automatically based on conventional commit types (`feat`, `fix`, `chore`, etc.)
 
 ---
 

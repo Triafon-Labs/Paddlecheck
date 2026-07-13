@@ -31,8 +31,6 @@
     "postcss": ">=8.5.10"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.5.2",
-    "@commitlint/config-conventional": "^20.5.0",
     "@types/node": "^26",
     "@playwright/test": "^1.61.1",
     "@types/react": "^19",

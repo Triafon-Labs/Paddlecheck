@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { Card, CardContent, Typography, Box, CircularProgress } from "@mui/material";
 import { Status } from "@/types";
 import { ragStatus, LEVEL_DESCRIPTIONS } from "@/lib/rag";
@@ -17,11 +17,96 @@ interface ScaleRow {
   current: boolean;
 }
 
+// Horizontal center of the tick column, from the container's left edge
+// (56px level-label column + 8px half-width of the 16px tick column).
+const TICK_CENTER_X = 64;
+
 const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
   riverLevel,
   overallStatus,
   loading,
 }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const rowRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const [markerTop, setMarkerTop] = useState<number | null>(null);
+
+  const levels =
+    riverLevel !== undefined
+      ? Object.entries(LEVEL_DESCRIPTIONS)
+          .map(([level, desc]) => ({ level: parseFloat(level), desc }))
+          .sort((a, b) => a.level - b.level)
+      : [];
+
+  const below =
+    riverLevel !== undefined
+      ? levels
+          .filter((l) => l.level <= riverLevel)
+          .slice(-2)
+          .reverse() // nearest-below first, descending
+      : [];
+  const above =
+    riverLevel !== undefined
+      ? levels
+          .filter((l) => l.level > riverLevel)
+          .slice(0, 2)
+          .reverse() // furthest-above first, descending
+      : [];
+
+  // The two landmarks immediately bounding the current reading (if they
+  // exist within the visible window) - used both to pick which row's text
+  // to highlight and to interpolate the floating marker's position.
+  const nearestAbove = above[above.length - 1] ?? null;
+  const nearestBelow = below[0] ?? null;
+  const nearestLevel =
+    riverLevel !== undefined
+      ? nearestAbove && nearestBelow
+        ? riverLevel - nearestBelow.level <= nearestAbove.level - riverLevel
+          ? nearestBelow.level
+          : nearestAbove.level
+        : (nearestBelow ?? nearestAbove)?.level
+      : undefined;
+
+  const rows: ScaleRow[] = [...above, ...below].map((l) => ({
+    ...l,
+    current: l.level === nearestLevel,
+  }));
+
+  useLayoutEffect(() => {
+    if (riverLevel === undefined || !containerRef.current) {
+      setMarkerTop(null);
+      return;
+    }
+    const containerTop = containerRef.current.getBoundingClientRect().top;
+    const centerOf = (level: number) => {
+      const el = rowRefs.current.get(level);
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      return rect.top + rect.height / 2 - containerTop;
+    };
+
+    const aboveCenter = nearestAbove ? centerOf(nearestAbove.level) : null;
+    const belowCenter = nearestBelow ? centerOf(nearestBelow.level) : null;
+
+    if (
+      aboveCenter !== null &&
+      belowCenter !== null &&
+      nearestAbove &&
+      nearestBelow
+    ) {
+      // Interpolate between the two bounding rows' centers, proportional to
+      // how close the reading is to each one.
+      const frac =
+        (nearestAbove.level - riverLevel) /
+        (nearestAbove.level - nearestBelow.level);
+      setMarkerTop(aboveCenter + frac * (belowCenter - aboveCenter));
+    } else {
+      // Off one end of the recorded scale - no second bound to interpolate
+      // against, so sit on the single nearest row instead.
+      setMarkerTop(aboveCenter ?? belowCenter);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [riverLevel, nearestAbove?.level, nearestBelow?.level, rows.length]);
+
   if (loading) {
     return (
       <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
@@ -39,38 +124,9 @@ const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
 
   if (riverLevel === undefined) return null;
 
-  const levels = Object.entries(LEVEL_DESCRIPTIONS)
-    .map(([level, desc]) => ({ level: parseFloat(level), desc }))
-    .sort((a, b) => a.level - b.level);
-
-  const below = levels
-    .filter((l) => l.level <= riverLevel)
-    .slice(-2)
-    .reverse(); // nearest-below first, descending
-  const above = levels
-    .filter((l) => l.level > riverLevel)
-    .slice(0, 2)
-    .reverse(); // furthest-above first, descending
-
   const markerColor = overallStatus
     ? ragStatus[overallStatus].color
     : ragStatus.Unknown.color;
-
-  // Highlight whichever visible landmark is numerically closest to the
-  // current reading, rather than inserting a separate "current" row.
-  const nearestAbove = above[above.length - 1] ?? null; // last = nearest-above
-  const nearestBelow = below[0] ?? null; // first = nearest-below
-  const nearestLevel =
-    nearestAbove && nearestBelow
-      ? riverLevel - nearestBelow.level <= nearestAbove.level - riverLevel
-        ? nearestBelow.level
-        : nearestAbove.level
-      : (nearestBelow ?? nearestAbove)?.level;
-
-  const rows: ScaleRow[] = [...above, ...below].map((l) => ({
-    ...l,
-    current: l.level === nearestLevel,
-  }));
 
   return (
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
@@ -78,7 +134,25 @@ const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
         <Typography variant="h5" component="div" gutterBottom>
           Level Scale
         </Typography>
-        <Box sx={{ mt: 1 }}>
+        <Box ref={containerRef} sx={{ mt: 1, position: "relative" }}>
+          {markerTop !== null && (
+            <Box
+              sx={{
+                position: "absolute",
+                left: TICK_CENTER_X,
+                top: markerTop,
+                transform: "translate(-50%, -50%)",
+                width: 14,
+                height: 14,
+                borderRadius: "50%",
+                backgroundColor: markerColor,
+                border: "2px solid",
+                borderColor: "background.paper",
+                boxShadow: `0 0 0 3px ${markerColor}55`,
+                zIndex: 2,
+              }}
+            />
+          )}
           {rows.map((row, i) => (
             <Box
               key={`${row.level}-${i}`}
@@ -138,14 +212,17 @@ const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
                   />
                 )}
                 <Box
+                  ref={(el: HTMLDivElement | null) => {
+                    if (el) rowRefs.current.set(row.level, el);
+                    else rowRefs.current.delete(row.level);
+                  }}
                   sx={{
                     position: "absolute",
                     top: "7px",
-                    width: row.current ? 12 : 8,
-                    height: row.current ? 12 : 8,
+                    width: 8,
+                    height: 8,
                     borderRadius: "50%",
-                    backgroundColor: row.current ? markerColor : "text.disabled",
-                    boxShadow: row.current ? `0 0 0 3px ${markerColor}33` : "none",
+                    backgroundColor: "text.disabled",
                     zIndex: 1,
                   }}
                 />

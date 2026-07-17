@@ -40,6 +40,7 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import { ChartDataPoint } from "@/types";
+import { THRESHOLDS } from "@/lib/config";
 
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
@@ -57,7 +58,9 @@ const ChangeIndicator: React.FC<{
   icon: React.ReactNode;
 }> = ({ period, change, icon }) => {
   const changeStr = change !== null ? change.toFixed(2) : null;
-  const isFlat = changeStr === "0.00" || changeStr === "-0.00";
+  const isFlat =
+    change !== null &&
+    Math.abs(change) <= THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD;
 
   return (
     <Paper
@@ -90,7 +93,7 @@ const ChangeIndicator: React.FC<{
               <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
             )
           ) : null}
-          {change !== null ? (isFlat ? `0.00m` : `${changeStr}m`) : "N/A"}
+          {change !== null ? `${changeStr}m` : "N/A"}
         </Typography>
       </Box>
     </Paper>
@@ -421,7 +424,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
         <ToggleButtonGroup
           value={timeRange}
           exclusive
-          onChange={(event, newTimeRange) => {
+          onChange={(_event, newTimeRange) => {
             if (newTimeRange) {
               setTimeRange(newTimeRange);
             }

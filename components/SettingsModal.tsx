@@ -43,6 +43,7 @@ import {
 } from "@mui/icons-material";
 import { useAppTheme, ThemeMode } from "@/lib/ThemeContext";
 import { SETTINGS_CHANGED_EVENT } from "@/components/ConditionsBriefing";
+import { PADDLER_LEVEL_CHANGED_EVENT } from "@/components/PaddlingMatrixCard";
 import { PaddlerType, Status } from "@/types";
 import {
   RAG_STATUS_UI,
@@ -52,6 +53,7 @@ import {
   RAG_DESCRIPTIONS,
   RIVER_LEVEL_BAND_DESCRIPTIONS,
   CONTACT_EMAIL,
+  CLUB_NAME,
 } from "@/lib/config";
 
 interface SettingsModalProps {
@@ -175,11 +177,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     setPaddlerLevel(level);
     if (level) localStorage.setItem("paddlerLevel", level);
     else localStorage.removeItem("paddlerLevel");
+    window.dispatchEvent(new Event(PADDLER_LEVEL_CHANGED_EVENT));
   };
 
   const handleClearLevel = () => {
     setPaddlerLevel("");
     localStorage.removeItem("paddlerLevel");
+    window.dispatchEvent(new Event(PADDLER_LEVEL_CHANGED_EVENT));
   };
 
   const paddlerTypes: PaddlerType[] = [
@@ -550,9 +554,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           color="text.secondary"
           sx={{ mt: 2, display: "block" }}
         >
-          This is a hobby project, so there might be mistakes. Always check
-          conditions yourself and talk to coaches or experienced paddlers before
-          heading out.{" "}
+          Built for {CLUB_NAME}. This is a hobby project, so there might be
+          mistakes. Always check conditions yourself and talk to coaches or
+          experienced paddlers before heading out.{" "}
           <Link href={`mailto:${CONTACT_EMAIL}`} color="inherit">
             Feedback welcome here!
           </Link>

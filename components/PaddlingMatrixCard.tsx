@@ -30,6 +30,9 @@ import {
   PaddlingStatusValue,
 } from "@/types";
 import { ragStatus } from "@/lib/rag";
+import { THRESHOLDS } from "@/lib/config";
+
+export const PADDLER_LEVEL_CHANGED_EVENT = "paddlecheck:paddler-level-changed";
 
 interface PaddlingMatrixCardProps {
   overallStatus?: Status;
@@ -112,7 +115,7 @@ const getPaddlingMatrix = (
       beginner.details = "No paddling in red conditions.";
       improver.status = "No";
       improver.details = "No paddling in red conditions.";
-      if (riverLevel && riverLevel >= 2.75) {
+      if (riverLevel && riverLevel >= THRESHOLDS.RIVER_LEVEL_TEN_STEPS) {
         intermediate.status = "No";
         intermediate.details =
           "No paddling – river is above 10 steps from the car park.";
@@ -134,7 +137,11 @@ const getPaddlingMatrix = (
   }
 
   // PFD warning for high water level, if not in Red conditions (as Red already includes it)
-  if (overallStatus !== "Red" && riverLevel && riverLevel >= 1.48) {
+  if (
+    overallStatus !== "Red" &&
+    riverLevel &&
+    riverLevel >= THRESHOLDS.RIVER_LEVEL_CONCRETE_STEP
+  ) {
     if (independent.status === "Yes") {
       independent.status = "Warning";
       independent.details = "PFD required. River is high.";
@@ -183,46 +190,41 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
   );
 
   useEffect(() => {
+    const openStateForLevel = (level: PaddlerType | null) =>
+      paddlerTypes.reduce(
+        (acc, paddler) => {
+          acc[paddler] = level ? paddler === level : true; // Expand all if no level is selected
+          return acc;
+        },
+        {} as Record<PaddlerType, boolean>
+      );
+
     const savedLevel = localStorage.getItem(
       "paddlerLevel"
     ) as PaddlerType | null;
 
-    const newOpenState = paddlerTypes.reduce(
-      (acc, paddler) => {
-        if (savedLevel) {
-          acc[paddler] = paddler === savedLevel;
-        } else {
-          acc[paddler] = true; // Expand all if no level is selected
-        }
-        return acc;
-      },
-      {} as Record<PaddlerType, boolean>
-    );
-
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOpen(newOpenState);
+    setOpen(openStateForLevel(savedLevel));
+
+    // Custom event fires in this same tab (the "storage" event only fires in
+    // *other* tabs per spec), so the matrix updates immediately when the
+    // level is changed in Settings without needing a reload.
+    const handleLevelChanged = () => {
+      const newLevel = localStorage.getItem("paddlerLevel") as PaddlerType | null;
+      setOpen(openStateForLevel(newLevel));
+    };
 
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === "paddlerLevel") {
-        const newLevel = event.newValue as PaddlerType | null;
-        const updatedOpenState = paddlerTypes.reduce(
-          (acc, paddler) => {
-            if (newLevel) {
-              acc[paddler] = paddler === newLevel;
-            } else {
-              acc[paddler] = true;
-            }
-            return acc;
-          },
-          {} as Record<PaddlerType, boolean>
-        );
-        setOpen(updatedOpenState);
+        setOpen(openStateForLevel(event.newValue as PaddlerType | null));
       }
     };
 
+    window.addEventListener(PADDLER_LEVEL_CHANGED_EVENT, handleLevelChanged);
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
+      window.removeEventListener(PADDLER_LEVEL_CHANGED_EVENT, handleLevelChanged);
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []); // Empty dependency array to run only on mount and unmount

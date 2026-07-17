@@ -53,7 +53,9 @@ export async function GET() {
       // Only include warnings that mention Worcestershire
       if (description.toLowerCase().includes("worcestershire")) {
         const severityMatch = title.match(/^(Yellow|Amber|Red)/i);
-        const severity = (severityMatch ? severityMatch[0] : "Yellow") as WarningSeverity;
+        const rawSeverity = severityMatch ? severityMatch[0] : "Yellow";
+        const severity = (rawSeverity.charAt(0).toUpperCase() +
+          rawSeverity.slice(1).toLowerCase()) as WarningSeverity;
 
         const typeMatch = title.match(/warning of (.*) affecting/i);
         const type = typeMatch ? typeMatch[1].trim() : "Weather Warning";

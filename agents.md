@@ -72,9 +72,9 @@ components/
   TopNavBar.tsx          Header – share, settings, refresh buttons
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
   TrafficLight.tsx       4-circle RAG visual indicator with animation
-  MaterialSwitch.tsx     Styled MUI switch used in settings
   ThemeRegistry.tsx      Emotion cache + AppThemeProvider for SSR
-  PaddlingLoader.tsx     Custom PWA loading indicator
+  ConditionsBriefing.tsx AI-generated conditions summary (Groq)
+  WeatherWarnings.tsx    Met Office weather warning banners
 
 lib/
   config.ts              All thresholds, station IDs, descriptions, coordinates

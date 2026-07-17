@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Container, Stack, Alert } from "@mui/material";
 import StatusCard from "@/components/StatusCard";
 import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";

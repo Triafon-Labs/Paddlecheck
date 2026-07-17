@@ -421,7 +421,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
         <ToggleButtonGroup
           value={timeRange}
           exclusive
-          onChange={(event, newTimeRange) => {
+          onChange={(_event, newTimeRange) => {
             if (newTimeRange) {
               setTimeRange(newTimeRange);
             }

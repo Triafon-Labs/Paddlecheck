@@ -52,6 +52,7 @@ import {
   RAG_DESCRIPTIONS,
   RIVER_LEVEL_BAND_DESCRIPTIONS,
   CONTACT_EMAIL,
+  CLUB_NAME,
 } from "@/lib/config";
 
 interface SettingsModalProps {
@@ -550,9 +551,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           color="text.secondary"
           sx={{ mt: 2, display: "block" }}
         >
-          This is a hobby project, so there might be mistakes. Always check
-          conditions yourself and talk to coaches or experienced paddlers before
-          heading out.{" "}
+          Built for {CLUB_NAME}. This is a hobby project, so there might be
+          mistakes. Always check conditions yourself and talk to coaches or
+          experienced paddlers before heading out.{" "}
           <Link href={`mailto:${CONTACT_EMAIL}`} color="inherit">
             Feedback welcome here!
           </Link>

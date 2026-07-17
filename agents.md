@@ -4,7 +4,7 @@
 
 Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that provides real-time kayaking conditions on the River Severn. It presents a RAG (Red-Amber-Green) traffic light safety status, detailed weather and river statistics, a skill-level paddling matrix, and a 5-day hourly forecast. There is no backend – all data is fetched client-side from public APIs, with some proxying through Next.js API routes.
 
-**Current version:** 1.5.1
+**Current version:** 1.16.7
 **Deployed on:** Vercel  
 **Location hardcoded to:** Worcester, UK (lat 52.2, lon -2.2)
 
@@ -26,6 +26,7 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 | Linting       | ESLint 10, Prettier 3                                  |
 | Git hooks     | Husky 9                                                |
 | CI            | GitHub Actions (lint + build on PR)                    |
+| Releases      | commit-and-tag-version (auto version bump + changelog + tag on merge to main) |
 
 ---
 
@@ -220,6 +221,13 @@ Pre-commit lint runs via Husky.
 ## CI Pipeline
 
 - **ci.yml** – runs `lint` then `build` on every push/PR to `main` (Node 20)
+- **auto-tag.yml** – on every push to `main` (i.e. right after a PR merges), runs
+  `commit-and-tag-version` to bump `package.json`'s version, update `CHANGELOG.md`,
+  commit both directly to `main`, and push a `paddlecheck-vX.Y.Z` tag. No release PR,
+  no approval step. Commit types are not enforced (no commitlint) – `feat:`/`fix:`
+  prefixed commits get proper changelog entries and minor/patch bumps; anything else
+  is treated as a plain patch bump with no changelog entry. The job skips itself when
+  the triggering commit is its own `chore(release): ...` commit, to avoid a loop.
 
 ---
 

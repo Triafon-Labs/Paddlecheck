@@ -56,11 +56,21 @@ const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
     ? ragStatus[overallStatus].color
     : ragStatus.Unknown.color;
 
-  const rows: ScaleRow[] = [
-    ...above.map((l) => ({ ...l, current: false })),
-    { level: riverLevel, desc: "Latest reading", current: true },
-    ...below.map((l) => ({ ...l, current: false })),
-  ];
+  // Highlight whichever visible landmark is numerically closest to the
+  // current reading, rather than inserting a separate "current" row.
+  const nearestAbove = above[above.length - 1] ?? null; // last = nearest-above
+  const nearestBelow = below[0] ?? null; // first = nearest-below
+  const nearestLevel =
+    nearestAbove && nearestBelow
+      ? riverLevel - nearestBelow.level <= nearestAbove.level - riverLevel
+        ? nearestBelow.level
+        : nearestAbove.level
+      : (nearestBelow ?? nearestAbove)?.level;
+
+  const rows: ScaleRow[] = [...above, ...below].map((l) => ({
+    ...l,
+    current: l.level === nearestLevel,
+  }));
 
   return (
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
@@ -145,8 +155,16 @@ const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
                   variant="body2"
                   sx={{ fontWeight: row.current ? 700 : 400 }}
                 >
-                  {row.current ? "Latest reading" : row.desc}
+                  {row.desc}
                 </Typography>
+                {row.current && (
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontStyle: "italic" }}
+                  >
+                    Currently {riverLevel.toFixed(2)}m
+                  </Typography>
+                )}
               </Box>
             </Box>
           ))}

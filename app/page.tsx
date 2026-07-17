@@ -3,6 +3,7 @@
 import { Container, Stack, Alert } from "@mui/material";
 import StatusCard from "@/components/StatusCard";
 import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";
+import RiverLevelScale from "@/components/RiverLevelScale";
 import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
 import ForecastRagGraph from "@/components/ForecastRagGraph";
@@ -36,6 +37,11 @@ export default function HomePage() {
           loading={loading}
           overallStatus={conditions?.overallStatus}
           riverLevel={conditions?.riverLevel}
+        />
+        <RiverLevelScale
+          loading={loading}
+          riverLevel={conditions?.riverLevel}
+          overallStatus={conditions?.overallStatus}
         />
         <StatsCard
           conditions={conditions}

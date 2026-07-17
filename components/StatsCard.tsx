@@ -13,7 +13,6 @@ import Thermostat from "@mui/icons-material/Thermostat";
 import Visibility from "@mui/icons-material/Visibility";
 import Air from "@mui/icons-material/Air";
 import Water from "@mui/icons-material/Water";
-import Info from "@mui/icons-material/Info";
 import WaterDrop from "@mui/icons-material/WaterDrop";
 import NightsStay from "@mui/icons-material/NightsStay";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
@@ -112,28 +111,6 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) =
               </>
             }
             isInfluencing={reasons.some((r) => r.includes("river level"))}
-          />
-          <StatItem
-            icon={<Info />}
-            label="Launch Message"
-            value={(() => {
-              if (!conditions.launchMessage) return null;
-              const match = conditions.launchMessage.match(/(.*?)\s*\((.*)\)/);
-              if (match) {
-                return (
-                  <>
-                    {match[1]}
-                    <Typography
-                      variant="caption"
-                      sx={{ color: "text.secondary", fontStyle: "italic", ml: 0.5 }}
-                    >
-                      ({match[2]})
-                    </Typography>
-                  </>
-                );
-              }
-              return conditions.launchMessage;
-            })()}
           />
           <StatItem
             icon={<Thermostat />}

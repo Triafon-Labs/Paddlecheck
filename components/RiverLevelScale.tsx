@@ -21,6 +21,14 @@ interface ScaleRow {
 // (56px level-label column + 8px half-width of the 16px tick column).
 const TICK_CENTER_X = 64;
 
+// Vertical center of the tick dot within its row (top: 7px + half of its
+// 8px height). Line segments anchor here rather than at 50% of the row's
+// height, since rows vary in height (multi-line descriptions, the extra
+// "Currently Xm" caption) but the dot's own offset from the row top never
+// changes - anchoring to row-height percentage would misalign the line
+// with the dot on any row taller than the others.
+const TICK_DOT_CENTER = 11;
+
 const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
   riverLevel,
   overallStatus,
@@ -194,7 +202,7 @@ const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
                     sx={{
                       position: "absolute",
                       top: 0,
-                      height: "50%",
+                      height: `${TICK_DOT_CENTER}px`,
                       width: "2px",
                       backgroundColor: "divider",
                     }}
@@ -204,8 +212,8 @@ const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
                   <Box
                     sx={{
                       position: "absolute",
-                      top: "50%",
-                      height: "50%",
+                      top: `${TICK_DOT_CENTER}px`,
+                      bottom: 0,
                       width: "2px",
                       backgroundColor: "divider",
                     }}

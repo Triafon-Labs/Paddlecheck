@@ -86,43 +86,27 @@ export const useKayakData = () => {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      try {
-        const cachedConditions = localStorage.getItem("paddlecheck_conditions");
-        const cachedForecastDays = localStorage.getItem(
-          "paddlecheck_forecastDays"
-        );
-        const cachedForecastData = localStorage.getItem(
-          "paddlecheck_forecastData"
-        );
-        const cachedRiverGraphData = localStorage.getItem(
-          "paddlecheck_riverGraphData"
-        );
-        const cachedChange1h = localStorage.getItem(
-          "paddlecheck_riverChange1h"
-        );
-        const cachedChange24h = localStorage.getItem(
-          "paddlecheck_riverChange24h"
-        );
-        const cachedChange8h = localStorage.getItem(
-          "paddlecheck_riverChange8h"
-        );
-        const cachedChange5d = localStorage.getItem(
-          "paddlecheck_riverChange5d"
-        );
+      // Each key is parsed independently so one corrupted entry (e.g. from an
+      // older app version's schema) doesn't prevent the other, valid, cached
+      // values from loading.
+      const loadCached = <T,>(key: string, setter: (value: T) => void) => {
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        try {
+          setter(JSON.parse(raw));
+        } catch (e) {
+          console.error(`Failed to parse cached "${key}":`, e);
+        }
+      };
 
-        if (cachedConditions) setConditions(JSON.parse(cachedConditions));
-        if (cachedForecastDays) setForecastDays(JSON.parse(cachedForecastDays));
-        if (cachedForecastData)
-          setForecastData(JSON.parse(cachedForecastData));
-        if (cachedRiverGraphData)
-          setRiverGraphData(JSON.parse(cachedRiverGraphData));
-        if (cachedChange1h) setRiverChange1h(JSON.parse(cachedChange1h));
-        if (cachedChange24h) setRiverChange24h(JSON.parse(cachedChange24h));
-        if (cachedChange8h) setRiverChange8h(JSON.parse(cachedChange8h));
-        if (cachedChange5d) setRiverChange5d(JSON.parse(cachedChange5d));
-      } catch (e) {
-        console.error("Failed to load cached data:", e);
-      }
+      loadCached("paddlecheck_conditions", setConditions);
+      loadCached("paddlecheck_forecastDays", setForecastDays);
+      loadCached("paddlecheck_forecastData", setForecastData);
+      loadCached("paddlecheck_riverGraphData", setRiverGraphData);
+      loadCached("paddlecheck_riverChange1h", setRiverChange1h);
+      loadCached("paddlecheck_riverChange24h", setRiverChange24h);
+      loadCached("paddlecheck_riverChange8h", setRiverChange8h);
+      loadCached("paddlecheck_riverChange5d", setRiverChange5d);
     }
   }, []);
 
@@ -269,7 +253,7 @@ export const useKayakData = () => {
           if (index >= futureWeatherData.hourly.time.length) break;
 
           // Hours ahead from now for river level forecast
-          const hoursAhead = d * 24 + h - currentHour + 1;
+          const hoursAhead = d * 24 + h - currentHour;
           const targetWorcesterTime = new Date(
             now.getTime() + hoursAhead * 3600 * 1000
           );

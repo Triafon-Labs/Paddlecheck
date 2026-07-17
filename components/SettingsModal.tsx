@@ -43,6 +43,7 @@ import {
 } from "@mui/icons-material";
 import { useAppTheme, ThemeMode } from "@/lib/ThemeContext";
 import { SETTINGS_CHANGED_EVENT } from "@/components/ConditionsBriefing";
+import { PADDLER_LEVEL_CHANGED_EVENT } from "@/components/PaddlingMatrixCard";
 import { PaddlerType, Status } from "@/types";
 import {
   RAG_STATUS_UI,
@@ -176,11 +177,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     setPaddlerLevel(level);
     if (level) localStorage.setItem("paddlerLevel", level);
     else localStorage.removeItem("paddlerLevel");
+    window.dispatchEvent(new Event(PADDLER_LEVEL_CHANGED_EVENT));
   };
 
   const handleClearLevel = () => {
     setPaddlerLevel("");
     localStorage.removeItem("paddlerLevel");
+    window.dispatchEvent(new Event(PADDLER_LEVEL_CHANGED_EVENT));
   };
 
   const paddlerTypes: PaddlerType[] = [

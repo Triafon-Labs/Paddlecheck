@@ -10,7 +10,8 @@ async function streamBriefing(
   conditions: KayakConditions,
   forecastDays: DayForecast[] | null,
   model: string,
-  onChunk: (chunk: string) => void
+  onChunk: (chunk: string) => void,
+  signal: AbortSignal
 ): Promise<void> {
   const todayForecast = forecastDays?.[0] ?? null;
   const currentTime = new Date().toLocaleTimeString("en-GB", {
@@ -81,6 +82,7 @@ async function streamBriefing(
       model,
       outlook
     }),
+    signal,
   });
 
   if (!res.ok || !res.body) throw new Error("Failed");
@@ -105,6 +107,7 @@ export function useBriefing(
   const [failed, setFailed] = useState(false);
   const [triggered, setTriggered] = useState(false);
   const fetchedForRef = useRef<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const doFetch = useCallback(async () => {
     if (!conditions) return;
@@ -112,27 +115,39 @@ export function useBriefing(
     if (fetchedForRef.current === key) return;
     fetchedForRef.current = key;
 
+    // Cancel any still-in-flight stream so its chunks can't interleave with this one.
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setText("");
     setLoading(true);
     setFailed(false);
     setTriggered(true);
 
     try {
-      await streamBriefing(conditions, forecastDays, model, (chunk) =>
-        setText((prev) => prev + chunk)
+      await streamBriefing(
+        conditions,
+        forecastDays,
+        model,
+        (chunk) => setText((prev) => prev + chunk),
+        controller.signal
       );
     } catch (e) {
+      if (controller.signal.aborted) return;
       console.error("Briefing fetch failed:", e);
       fetchedForRef.current = null;
       setFailed(true);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   }, [conditions, forecastDays, model]);
 
   useEffect(() => {
     if (auto && conditions) doFetch();
   }, [auto, conditions, doFetch]);
+
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const trigger = useCallback(() => doFetch(), [doFetch]);
 

@@ -112,8 +112,12 @@ const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
       // against, so sit on the single nearest row instead.
       setMarkerTop(aboveCenter ?? belowCenter);
     }
+    // `loading` is included so the transition from the spinner branch (where
+    // containerRef never attaches) to the real content re-triggers this even
+    // when riverLevel/nearestAbove/nearestBelow happen to be unchanged - e.g.
+    // cached data already matches the freshly-fetched reading.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [riverLevel, nearestAbove?.level, nearestBelow?.level, rows.length]);
+  }, [riverLevel, nearestAbove?.level, nearestBelow?.level, rows.length, loading]);
 
   if (loading) {
     return (

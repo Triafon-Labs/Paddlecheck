@@ -109,7 +109,7 @@ const buildShareText = (
 const TopNavBar = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const { refetch, conditions, forecastDays, isOffline, error } =
+  const { refetch, conditions, forecastDays, isOffline, error, usingCachedData } =
     useKayakContext();
 
   const isOfflineError =
@@ -162,6 +162,24 @@ const TopNavBar = () => {
           }}
         >
           Offline – showing cached data
+          {relativeLastUpdated ? ` (updated ${relativeLastUpdated})` : ""}
+        </Box>
+      )}
+      {!isOffline && usingCachedData && (
+        <Box
+          sx={{
+            bgcolor: "warning.main",
+            color: "warning.contrastText",
+            py: 0.5,
+            px: 2,
+            textAlign: "center",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            letterSpacing: "0.02em",
+            borderBottom: "1px solid rgba(0,0,0,0.08)",
+          }}
+        >
+          Live update failed – showing cached data
           {relativeLastUpdated ? ` (updated ${relativeLastUpdated})` : ""}
         </Box>
       )}

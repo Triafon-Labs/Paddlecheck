@@ -87,7 +87,7 @@ const ChangeIndicator: React.FC<{
         <Typography variant="h6" component="span">
           {change !== null ? (
             isFlat ? (
-              <TrendingFlat sx={{ color: "warning.main", mr: 0.5 }} />
+              <TrendingFlat sx={{ color: "text.secondary", mr: 0.5 }} />
             ) : change > 0 ? (
               <TrendingUp sx={{ color: "error.main", mr: 0.5 }} />
             ) : (

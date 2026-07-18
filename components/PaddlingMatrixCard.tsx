@@ -142,17 +142,13 @@ const getPaddlingMatrix = (
     riverLevel &&
     riverLevel >= THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2
   ) {
-    if (independent.status === "Yes") {
-      independent.status = "Warning";
-      independent.details = "PFD required. River is high.";
-    } else if (independent.status !== "No") {
+    if (independent.status !== "No") {
+      if (independent.status === "Yes") independent.status = "Warning";
       independent.details += " PFD required. River is high.";
     }
 
-    if (intermediate.status === "Yes") {
-      intermediate.status = "Warning";
-      intermediate.details = "PFD required. River is high.";
-    } else if (intermediate.status !== "No") {
+    if (intermediate.status !== "No") {
+      if (intermediate.status === "Yes") intermediate.status = "Warning";
       intermediate.details += " PFD required. River is high.";
     }
   }

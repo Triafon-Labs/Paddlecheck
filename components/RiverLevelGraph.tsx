@@ -40,7 +40,6 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import { ChartDataPoint } from "@/types";
-import { THRESHOLDS } from "@/lib/config";
 
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
@@ -57,10 +56,11 @@ const ChangeIndicator: React.FC<{
   change: number | null;
   icon: React.ReactNode;
 }> = ({ period, change, icon }) => {
-  const changeStr = change !== null ? change.toFixed(2) : null;
-  const isFlat =
-    change !== null &&
-    Math.abs(change) <= THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD;
+  // Round first so the displayed value and the arrow direction always agree,
+  // and so a value that rounds to zero (e.g. -0.001) never renders as "-0.00".
+  const rounded = change !== null ? Number(change.toFixed(2)) : null;
+  const changeStr = rounded !== null ? Math.abs(rounded).toFixed(2) : null;
+  const isFlat = rounded !== null && rounded === 0;
 
   return (
     <Paper
@@ -85,16 +85,16 @@ const ChangeIndicator: React.FC<{
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
         <Typography variant="h6" component="span">
-          {change !== null ? (
+          {rounded !== null ? (
             isFlat ? (
               <TrendingFlat sx={{ color: "text.secondary", mr: 0.5 }} />
-            ) : change > 0 ? (
+            ) : rounded > 0 ? (
               <TrendingUp sx={{ color: "error.main", mr: 0.5 }} />
             ) : (
               <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
             )
           ) : null}
-          {change !== null ? `${changeStr}m` : "N/A"}
+          {changeStr !== null ? `${changeStr}m` : "N/A"}
         </Typography>
       </Box>
     </Paper>

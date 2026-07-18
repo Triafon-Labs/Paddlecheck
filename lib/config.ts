@@ -247,7 +247,7 @@ export const LEVEL_DESCRIPTIONS: Record<number, string> = {
   4.28: "Almost on the car park – dry feet!",
   4.37: "5cm on the car park – not deep enough for boats, wet feet!",
   4.49: "Water on car park, safe to park only if falling",
-  4.7: "Just in the boat house! Paddle with care",
+  4.7: "Just in the boat house!!",
   5.01: "Boathouse flooding – paddle with extreme care",
   5.02: "Deep water in boathouse, boats can float out – paddle with extreme care",
   5.18: "Grand Stand Road flooded, unsafe to access boathouse",

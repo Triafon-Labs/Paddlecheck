@@ -7,11 +7,9 @@ import {
   Typography,
   Box,
   CircularProgress,
-  Table,
-  TableBody,
-  TableRow,
-  TableCell,
+  Paper,
 } from "@mui/material";
+import HelpOutlined from "@mui/icons-material/HelpOutlined";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import { ragStatus, reasonIcons } from "@/lib/rag";
@@ -77,23 +75,38 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               <Typography variant="subtitle2" color="text.secondary">
                 Contributing Factors
               </Typography>
-              <Table size="small">
-                <TableBody>
-                  {conditions.reasons.map((reason, index) => {
-                    const Icon = reasonIcons[reason];
-                    return (
-                      <TableRow key={index}>
-                        <TableCell sx={{ width: 32, pl: 0, color: "text.secondary" }}>
-                          {Icon && <Icon fontSize="small" />}
-                        </TableCell>
-                        <TableCell sx={{ pr: 0 }}>
-                          <Typography variant="body2">{reason}</Typography>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: 1,
+                  mt: 1,
+                  "& > *:last-child:nth-child(odd)": {
+                    gridColumn: "1 / -1",
+                  },
+                }}
+              >
+                {conditions.reasons.map((reason, index) => {
+                  const Icon = reasonIcons[reason] ?? HelpOutlined;
+                  return (
+                    <Paper
+                      key={index}
+                      elevation={0}
+                      sx={{
+                        p: 1.5,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                        backgroundColor: "action.hover",
+                      }}
+                    >
+                      <Icon fontSize="small" sx={{ color: "primary.main" }} />
+                      <Typography variant="body2">{reason}</Typography>
+                    </Paper>
+                  );
+                })}
+              </Box>
             </Box>
           )}
           <WeatherWarnings warnings={conditions.warnings} />

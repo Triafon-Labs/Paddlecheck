@@ -249,6 +249,11 @@ const RiverLevelSection: React.FC<{
                 sx={{
                   fontWeight: row.current && !row.isReading ? 700 : 400,
                   fontStyle: row.isReading ? "italic" : "normal",
+                  // "Current level" has no descenders (g/j/p/q/y), so its
+                  // glyphs sit visibly higher within the line box than text
+                  // that does - nudge down to read as centered against the
+                  // dot and level number, which don't have this effect.
+                  ...(row.isReading && { mt: "2px" }),
                 }}
               >
                 {row.desc}

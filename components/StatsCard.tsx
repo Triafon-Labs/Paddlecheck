@@ -92,11 +92,11 @@ const RiverLevelSection: React.FC<{
 
   const below = levels
     .filter((l) => l.level <= riverLevel)
-    .slice(-2)
+    .slice(-1)
     .reverse(); // nearest-below first, descending
   const above = levels
     .filter((l) => l.level > riverLevel)
-    .slice(0, 2)
+    .slice(0, 1)
     .reverse(); // furthest-above first, descending
 
   const nearestAbove = above[above.length - 1] ?? null;

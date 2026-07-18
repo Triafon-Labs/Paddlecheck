@@ -281,7 +281,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                       alignItems: "center",
                       justifyContent: "space-between",
                       px: 1.5,
-                      py: 1,
+                      py: 1.25,
                       cursor: "pointer",
                     }}
                   >
@@ -301,7 +301,17 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                   </Box>
                   <Collapse in={isOpen} timeout="auto" unmountOnExit>
                     {statusInfo && statusInfo.details.length > 0 && (
-                      <Box component="ul" sx={{ m: 0, pl: 4.5, pr: 1.5, pb: 1.5 }}>
+                      <Box
+                        component="ul"
+                        sx={{
+                          m: 0,
+                          pl: 4.5,
+                          pr: 1.5,
+                          pt: 0.5,
+                          pb: 1.5,
+                          "& li:not(:last-of-type)": { mb: 0.75 },
+                        }}
+                      >
                         {statusInfo.details.map((line, index) => (
                           <Typography key={index} component="li" variant="body2">
                             {line}

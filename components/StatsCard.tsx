@@ -253,7 +253,7 @@ const RiverLevelSection: React.FC<{
                   // glyphs sit visibly higher within the line box than text
                   // that does - nudge down to read as centered against the
                   // dot and level number, which don't have this effect.
-                  ...(row.isReading && { mt: "2px" }),
+                  ...(row.isReading && { mt: "1px" }),
                 }}
               >
                 {row.desc}

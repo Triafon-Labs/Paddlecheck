@@ -78,9 +78,12 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                  gridTemplateColumns: "repeat(2, 1fr)",
                   gap: 1,
                   mt: 1,
+                  "& > *:last-child:nth-child(odd)": {
+                    gridColumn: "1 / -1",
+                  },
                 }}
               >
                 {conditions.reasons.map((reason, index) => {

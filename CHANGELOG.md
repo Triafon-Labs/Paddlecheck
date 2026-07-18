@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.18.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.18.1...paddlecheck-v1.18.2) (2026-07-18)
+
+
+### Bug Fixes
+
+* add breathing room to Who Can Paddle bullet lists ([030fd4a](https://github.com/dylanr97/Paddlecheck/commit/030fd4ae1c599754e0e99a73abadaed47fdbbd5e))
+
+
+### Code Refactoring
+
+* restyle Who Can Paddle as nested tiles, not a raw MUI table ([bcad820](https://github.com/dylanr97/Paddlecheck/commit/bcad8207e0c7aadaaddf2deddae97d21aed48846))
+
 ## [1.18.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.18.0...paddlecheck-v1.18.1) (2026-07-18)
 
 

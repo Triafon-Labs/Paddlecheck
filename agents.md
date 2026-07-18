@@ -24,7 +24,7 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 | Analytics     | Vercel Analytics + Speed Insights                      |
 | PWA           | Workbox 7 (service worker)                             |
 | Linting       | ESLint 10, Prettier 3                                  |
-| Git hooks     | Husky 9                                                |
+| Git hooks     | Husky 9 + commitlint (Conventional Commits)            |
 | CI            | GitHub Actions (lint + build on PR)                    |
 | Releases      | commit-and-tag-version (auto version bump + changelog + tag on merge to main) |
 
@@ -227,7 +227,10 @@ npm run build     # Production build
 npm run lint      # ESLint check
 ```
 
-Pre-commit lint runs via Husky.
+Pre-commit lint runs via Husky. A `commit-msg` hook also runs commitlint,
+rejecting commits whose first line isn't a valid Conventional Commit
+(`type: subject`, type one of `feat`/`fix`/`perf`/`refactor`/`docs`/`chore`/
+`style`/`test`/`build`/`ci`/`revert`). Merge commits are exempt.
 
 ---
 
@@ -237,10 +240,11 @@ Pre-commit lint runs via Husky.
 - **auto-tag.yml** – on every push to `main` (i.e. right after a PR merges), runs
   `commit-and-tag-version` to bump `package.json`'s version, update `CHANGELOG.md`,
   commit both directly to `main`, and push a `paddlecheck-vX.Y.Z` tag. No release PR,
-  no approval step. Commit types are not enforced (no commitlint) – `feat:`/`fix:`
-  prefixed commits get proper changelog entries and minor/patch bumps; anything else
-  is treated as a plain patch bump with no changelog entry. The job skips itself when
-  the triggering commit is its own `chore(release): ...` commit, to avoid a loop.
+  no approval step. Commit types are enforced locally via commitlint (see
+  `commitlint.config.js`) – `feat:` commits get a minor bump, `fix:`/`perf:`/etc.
+  get a patch bump with a changelog entry, and a `BREAKING CHANGE:` footer bumps
+  major. The job skips itself when the triggering commit is its own
+  `chore(release): ...` commit, to avoid a loop.
 
 ---
 

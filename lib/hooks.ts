@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { KayakConditions, ChartDataPoint, DayForecast } from "@/types";
+import {
+  KayakConditions,
+  ChartDataPoint,
+  DayForecast,
+  WeatherData,
+  FutureWeatherData,
+} from "@/types";
 import {
   calculateFinalRagStatus,
   findLevelDescription,
@@ -63,7 +69,18 @@ export const useKayakData = () => {
   const [riverChange5d, setRiverChange5d] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
+  const [usingCachedData, setUsingCachedData] = useState(false);
+  // Unlike loading/forecastLoading (which only gate the very first render),
+  // this is true for the full duration of *any* fetch attempt - initial or
+  // background - so the UI can signal "actively updating" without blocking
+  // on it with a spinner.
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const isOfflineRef = useRef(false);
+  // Tracks whether conditions/forecast data has ever been populated (from cache
+  // or a completed fetch), so a background refetch or manual refresh doesn't
+  // flip the loading flag back on and mask perfectly good data with a spinner.
+  const hasConditionsRef = useRef(false);
+  const hasForecastRef = useRef(false);
 
   useEffect(() => {
     setIsOffline(!navigator.onLine);
@@ -89,45 +106,90 @@ export const useKayakData = () => {
       // Each key is parsed independently so one corrupted entry (e.g. from an
       // older app version's schema) doesn't prevent the other, valid, cached
       // values from loading.
-      const loadCached = <T,>(key: string, setter: (value: T) => void) => {
+      const loadCached = <T,>(
+        key: string,
+        setter: (value: T) => void
+      ): boolean => {
         const raw = localStorage.getItem(key);
-        if (!raw) return;
+        if (!raw) return false;
         try {
           setter(JSON.parse(raw));
+          return true;
         } catch (e) {
           console.error(`Failed to parse cached "${key}":`, e);
+          return false;
         }
       };
 
-      loadCached("paddlecheck_conditions", setConditions);
-      loadCached("paddlecheck_forecastDays", setForecastDays);
+      if (loadCached("paddlecheck_conditions", setConditions)) {
+        hasConditionsRef.current = true;
+        // Cache paints synchronously here, so the initial `loading` state
+        // (which defaults to true before any fetch has resolved) must be
+        // cleared immediately - otherwise the spinner still covers the
+        // cached data until the very first fetch finishes.
+        setLoading(false);
+      }
+      const hasCachedForecast = loadCached(
+        "paddlecheck_forecastDays",
+        setForecastDays
+      );
       loadCached("paddlecheck_forecastData", setForecastData);
       loadCached("paddlecheck_riverGraphData", setRiverGraphData);
       loadCached("paddlecheck_riverChange1h", setRiverChange1h);
       loadCached("paddlecheck_riverChange24h", setRiverChange24h);
       loadCached("paddlecheck_riverChange8h", setRiverChange8h);
       loadCached("paddlecheck_riverChange5d", setRiverChange5d);
+      if (hasCachedForecast) {
+        hasForecastRef.current = true;
+        setForecastLoading(false);
+      }
     }
   }, []);
 
   const fetchData = useCallback(async () => {
     let conditionsObj: KayakConditions | null = null;
     try {
-      setLoading(true);
-      setForecastLoading(true);
+      // Only show a blocking spinner while there is genuinely nothing to
+      // display yet. Once conditions/forecast data has been populated (from
+      // cache or a prior fetch), background refetches and manual refreshes
+      // update quietly instead of flashing a spinner over good data.
+      if (!hasConditionsRef.current) setLoading(true);
+      if (!hasForecastRef.current) setForecastLoading(true);
+      setIsRefreshing(true);
       setError(null);
 
-      // Fetch all data concurrently; Bewdley and Warnings failure is non-fatal
+      const readRawCache = <T,>(key: string): T | null => {
+        if (typeof window === "undefined") return null;
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+        try {
+          return JSON.parse(raw) as T;
+        } catch {
+          return null;
+        }
+      };
+
+      // River, weather and future-weather are fetched independently so a
+      // failure in one (e.g. the EA river API blipping) doesn't discard data
+      // that arrived fine from the others. Each falls back to its own
+      // last-known cached value rather than the whole update failing.
+      // Bewdley and warnings were already isolated this way.
       const [
-        riverData,
-        weatherData,
-        futureWeatherData,
+        riverOutcome,
+        weatherOutcome,
+        futureWeatherOutcome,
         bewdleyData,
         warningsData,
       ] = await Promise.all([
-        withRetry(() => fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS)),
-        withRetry(() => fetchWeatherData(LATITUDE, LONGITUDE)),
-        withRetry(() => fetchFutureWeatherData(LATITUDE, LONGITUDE)),
+        withRetry(() => fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS))
+          .then((data) => ({ ok: true as const, data }))
+          .catch((err) => ({ ok: false as const, err })),
+        withRetry(() => fetchWeatherData(LATITUDE, LONGITUDE))
+          .then((data) => ({ ok: true as const, data }))
+          .catch((err) => ({ ok: false as const, err })),
+        withRetry(() => fetchFutureWeatherData(LATITUDE, LONGITUDE))
+          .then((data) => ({ ok: true as const, data }))
+          .catch((err) => ({ ok: false as const, err })),
         withRetry(() => fetchBewdleyForecast()).catch(() => ({
           forecasts: [],
           observations: [],
@@ -137,6 +199,28 @@ export const useKayakData = () => {
           .then((res) => (res.ok ? res.json() : []))
           .catch(() => []),
       ]);
+
+      const riverData = riverOutcome.ok
+        ? riverOutcome.data
+        : readRawCache<Awaited<ReturnType<typeof fetchRiverData>>>(
+            "paddlecheck_riverDataRaw"
+          );
+      const weatherData = weatherOutcome.ok
+        ? weatherOutcome.data
+        : readRawCache<WeatherData>("paddlecheck_weatherDataRaw");
+      const futureWeatherData = futureWeatherOutcome.ok
+        ? futureWeatherOutcome.data
+        : readRawCache<FutureWeatherData>("paddlecheck_futureWeatherDataRaw");
+
+      if (!riverData || !weatherData || !futureWeatherData) {
+        throw new Error(
+          "One or more data sources failed and no cached fallback was available"
+        );
+      }
+
+      setUsingCachedData(
+        !riverOutcome.ok || !weatherOutcome.ok || !futureWeatherOutcome.ok
+      );
 
       // Process current conditions
       setRiverGraphData(riverData.historicalData);
@@ -205,6 +289,7 @@ export const useKayakData = () => {
       };
       setConditions(conditionsObj);
       setLoading(false);
+      hasConditionsRef.current = true;
 
       // Build 5-day forecast (today + 4 days ahead)
       const currentHour = parseInt(
@@ -353,6 +438,7 @@ export const useKayakData = () => {
 
       setForecastDays(days);
       setForecastData(forecastPoints);
+      hasForecastRef.current = true;
 
       if (typeof window !== "undefined") {
         try {
@@ -388,6 +474,20 @@ export const useKayakData = () => {
             "paddlecheck_riverChange5d",
             JSON.stringify(riverData.change5d)
           );
+          // Raw per-source snapshots, so a future failure in just one source
+          // can fall back to that source's own last-known data.
+          localStorage.setItem(
+            "paddlecheck_riverDataRaw",
+            JSON.stringify(riverData)
+          );
+          localStorage.setItem(
+            "paddlecheck_weatherDataRaw",
+            JSON.stringify(weatherData)
+          );
+          localStorage.setItem(
+            "paddlecheck_futureWeatherDataRaw",
+            JSON.stringify(futureWeatherData)
+          );
         } catch (e) {
           console.error("Failed to write cache:", e);
         }
@@ -403,11 +503,15 @@ export const useKayakData = () => {
           ? hasCache
             ? null
             : "Offline – no cached data (reconnect and refresh)"
-          : "Failed to load conditions. Check your connection and tap refresh to try again."
+          : hasCache
+            ? null
+            : "Failed to load conditions. Check your connection and tap refresh to try again."
       );
+      if (hasCache) setUsingCachedData(true);
     } finally {
       setLoading(false);
       setForecastLoading(false);
+      setIsRefreshing(false);
     }
   }, []);
 
@@ -428,6 +532,8 @@ export const useKayakData = () => {
     riverChange5d,
     error,
     isOffline,
+    usingCachedData,
+    isRefreshing,
     refetch: fetchData,
   };
 };

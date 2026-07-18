@@ -109,8 +109,15 @@ const buildShareText = (
 const TopNavBar = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const { refetch, conditions, forecastDays, isOffline, error } =
-    useKayakContext();
+  const {
+    refetch,
+    conditions,
+    forecastDays,
+    isOffline,
+    error,
+    usingCachedData,
+    isRefreshing,
+  } = useKayakContext();
 
   const isOfflineError =
     error === "Offline – no cached data (reconnect and refresh)";
@@ -165,6 +172,24 @@ const TopNavBar = () => {
           {relativeLastUpdated ? ` (updated ${relativeLastUpdated})` : ""}
         </Box>
       )}
+      {!isOffline && usingCachedData && (
+        <Box
+          sx={{
+            bgcolor: "warning.main",
+            color: "warning.contrastText",
+            py: 0.5,
+            px: 2,
+            textAlign: "center",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            letterSpacing: "0.02em",
+            borderBottom: "1px solid rgba(0,0,0,0.08)",
+          }}
+        >
+          Live update failed – showing cached data
+          {relativeLastUpdated ? ` (updated ${relativeLastUpdated})` : ""}
+        </Box>
+      )}
       {isOfflineError && (
         <Box
           sx={{
@@ -199,13 +224,13 @@ const TopNavBar = () => {
               >
                 Paddlecheck
               </Typography>
-              {relativeLastUpdated && (
+              {(isRefreshing || relativeLastUpdated) && (
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ lineHeight: 1.2, mt: -0.2 }}
                 >
-                  Updated {relativeLastUpdated}
+                  {isRefreshing ? "Updating…" : `Updated ${relativeLastUpdated}`}
                 </Typography>
               )}
             </Box>

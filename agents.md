@@ -162,19 +162,32 @@ Bewdley data failure is non-fatal – the app falls back to linear regression si
 
 ```ts
 {
-  conditions: KayakConditions | null   // current status, river level, weather, reasons
-  riverGraphData: RiverReading[]       // historical readings for the graph
-  forecastDays: DayForecast[]          // 5-day hourly RAG forecasts
-  forecastData: ChartDataPoint[]       // combined forecast series
-  isLoading: boolean
-  isBewdleyLoading: boolean
-  error: string | null
-  bewdleyError: string | null
+  conditions: KayakConditions | null   // current status, river level, weather, reasons (includes lastUpdated)
+  riverGraphData: ChartDataPoint[] | null  // historical readings for the graph
+  forecastDays: DayForecast[] | null    // 5-day hourly RAG forecasts
+  forecastData: ChartDataPoint[] | null // combined forecast series
+  riverChange1h: number | null
+  riverChange8h: number | null
+  riverChange24h: number | null
+  riverChange5d: number | null
+  loading: boolean          // true only until conditions has ever been populated (cache or fetch)
+  forecastLoading: boolean  // true only until forecastDays has ever been populated
+  error: string | null      // set only when there's truly nothing to show (no cache fallback)
   isOffline: boolean
-  lastUpdated: Date | null
-  refresh: () => void
+  usingCachedData: boolean  // true when the latest fetch fell back to cache for any source
+  isRefreshing: boolean     // true for the full duration of any fetch (initial or background)
+  refetch: () => void
 }
 ```
+
+River, weather and future-weather are fetched independently (`Promise.all` with each
+promise wrapped in its own `.then/.catch`), each falling back to its own last-known
+cached value (`paddlecheck_riverDataRaw` / `paddlecheck_weatherDataRaw` /
+`paddlecheck_futureWeatherDataRaw` in `localStorage`) on failure. This means a single
+source blipping doesn't discard data that arrived fine from the others. `loading` /
+`forecastLoading` only gate the very first render before any data (cached or fetched)
+exists – background refetches and manual refreshes never reset them, so they never mask
+already-displayed data with a spinner.
 
 `KayakDataContext.tsx` wraps this hook in React Context so all components can access it without prop drilling.
 

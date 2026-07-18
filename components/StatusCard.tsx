@@ -7,10 +7,7 @@ import {
   Typography,
   Box,
   CircularProgress,
-  Table,
-  TableBody,
-  TableRow,
-  TableCell,
+  Paper,
 } from "@mui/material";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
@@ -77,23 +74,36 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               <Typography variant="subtitle2" color="text.secondary">
                 Contributing Factors
               </Typography>
-              <Table size="small">
-                <TableBody>
-                  {conditions.reasons.map((reason, index) => {
-                    const Icon = reasonIcons[reason];
-                    return (
-                      <TableRow key={index}>
-                        <TableCell sx={{ width: 32, pl: 0, color: "text.secondary" }}>
-                          {Icon && <Icon fontSize="small" />}
-                        </TableCell>
-                        <TableCell sx={{ pr: 0 }}>
-                          <Typography variant="body2">{reason}</Typography>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                  gap: 1,
+                  mt: 1,
+                }}
+              >
+                {conditions.reasons.map((reason, index) => {
+                  const Icon = reasonIcons[reason];
+                  return (
+                    <Paper
+                      key={index}
+                      elevation={0}
+                      sx={{
+                        p: 1.5,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        backgroundColor: "action.hover",
+                      }}
+                    >
+                      {Icon && (
+                        <Icon fontSize="small" sx={{ color: "primary.main" }} />
+                      )}
+                      <Typography variant="body2">{reason}</Typography>
+                    </Paper>
+                  );
+                })}
+              </Box>
             </Box>
           )}
           <WeatherWarnings warnings={conditions.warnings} />

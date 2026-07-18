@@ -115,7 +115,7 @@ const getPaddlingMatrix = (
       beginner.details = "No paddling in red conditions.";
       improver.status = "No";
       improver.details = "No paddling in red conditions.";
-      if (riverLevel && riverLevel >= THRESHOLDS.RIVER_LEVEL_TEN_STEPS) {
+      if (riverLevel && riverLevel >= THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3) {
         intermediate.status = "No";
         intermediate.details =
           "No paddling – river is above 10 steps from the car park.";
@@ -140,7 +140,7 @@ const getPaddlingMatrix = (
   if (
     overallStatus !== "Red" &&
     riverLevel &&
-    riverLevel >= THRESHOLDS.RIVER_LEVEL_CONCRETE_STEP
+    riverLevel >= THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2
   ) {
     if (independent.status === "Yes") {
       independent.status = "Warning";

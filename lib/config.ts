@@ -165,13 +165,11 @@ export const THRESHOLDS = {
   THUNDERSTORM_CODES: [95, 96, 97, 98, 99],
   FOG_CODES: [40, 41, 42, 43, 44, 45, 46, 47, 48, 49],
   RIVER_LEVEL_INITIAL_RAG_1: 1.0,
-  RIVER_LEVEL_INITIAL_RAG_2: 1.4,
-  RIVER_LEVEL_INITIAL_RAG_3: 2.2,
-  RIVER_LEVEL_TREND_THRESHOLD: 0.1,
   // Above this, the concrete step landmark is submerged and PFDs are required.
-  RIVER_LEVEL_CONCRETE_STEP: 1.48,
+  RIVER_LEVEL_INITIAL_RAG_2: 1.48,
   // Above this, the river is above the 10th step from the car park - no paddling for intermediates.
-  RIVER_LEVEL_TEN_STEPS: 2.75,
+  RIVER_LEVEL_INITIAL_RAG_3: 2.75,
+  RIVER_LEVEL_TREND_THRESHOLD: 0.1,
 };
 
 // WMO weather interpretation codes 50–99 cover drizzle, rain, snow, showers

@@ -69,88 +69,112 @@ const getPaddlingMatrix = (
 ): PaddlingMatrix => {
   const matrix: PaddlingMatrix = {};
 
-  const beginner: PaddlingStatus = { status: "No", details: "" };
-  const improver: PaddlingStatus = { status: "No", details: "" };
-  const intermediate: PaddlingStatus = { status: "No", details: "" };
-  const independent: PaddlingStatus = { status: "No", details: "" };
+  const beginner: PaddlingStatus = { status: "No", details: [] };
+  const improver: PaddlingStatus = { status: "No", details: [] };
+  const intermediate: PaddlingStatus = { status: "No", details: [] };
+  const independent: PaddlingStatus = { status: "No", details: [] };
+
+  const sabrinaSlip = "Stay between Sabrina Bridge and the Slip.";
 
   switch (overallStatus) {
     case "Light Green":
       beginner.status = "Yes";
-      beginner.details = "Must be supervised by a club coach. PFD required.";
+      beginner.details = ["Coach supervision required.", "PFD required."];
       improver.status = "Yes";
-      improver.details =
-        "Can paddle as a group without a coach, provided the group has a mobile phone, uses a familiar boat, and stays upstream of Sabrina Bridge and downstream of the Slip. PFD required.";
+      improver.details = [
+        "Group can paddle without a coach.",
+        "Group carries a mobile phone.",
+        "Familiar boat only.",
+        sabrinaSlip,
+        "PFD required.",
+      ];
       intermediate.status = "Yes";
-      intermediate.details =
-        "Can paddle solo. Carry a mobile phone, use a familiar boat, and stay upstream of Sabrina Bridge and downstream of the Slip. PFD required.";
+      intermediate.details = [
+        "Can paddle solo.",
+        "Carry a mobile phone.",
+        "Familiar boat only.",
+        sabrinaSlip,
+        "PFD required.",
+      ];
       independent.status = "Yes";
-      independent.details = "No restrictions.";
+      independent.details = ["No restrictions."];
       break;
     case "Dark Green":
       beginner.status = "Yes";
-      beginner.details = "Must be supervised by a club coach. PFD required.";
+      beginner.details = ["Coach supervision required.", "PFD required."];
       improver.status = "Yes";
-      improver.details = "Must be supervised by a club coach. PFD required.";
+      improver.details = ["Coach supervision required.", "PFD required."];
       intermediate.status = "Yes";
-      intermediate.details =
-        "Can paddle with at least one other intermediate without a coach. Carry a mobile phone, use a familiar boat, and stay upstream of Sabrina Bridge and downstream of the Slip. PFD required.";
+      intermediate.details = [
+        "Pair up with another intermediate, no coach needed.",
+        "Carry a mobile phone.",
+        "Familiar boat only.",
+        sabrinaSlip,
+        "PFD required.",
+      ];
       independent.status = "Yes";
-      independent.details = "No restrictions.";
+      independent.details = ["No restrictions."];
       break;
     case "Amber":
       beginner.status = "Discretion";
-      beginner.details = "Coach's discretion only. PFD required.";
+      beginner.details = ["Coach's discretion only.", "PFD required."];
       improver.status = "Discretion";
-      improver.details = "Coach's discretion only. PFD required.";
+      improver.details = ["Coach's discretion only.", "PFD required."];
       intermediate.status = "Yes";
-      intermediate.details =
-        "Must be supervised by an independent paddler or club coach. PFD required.";
+      intermediate.details = [
+        "Supervised by an independent paddler or coach.",
+        "PFD required.",
+      ];
       independent.status = "Yes";
-      independent.details =
-        "Can paddle. May supervise intermediate paddlers. PFD required if river is above the concrete step.";
+      independent.details = [
+        "Can paddle, may supervise intermediates.",
+        "PFD required above the concrete step.",
+      ];
       break;
     case "Red":
       beginner.status = "No";
-      beginner.details = "No paddling in red conditions.";
+      beginner.details = ["No paddling."];
       improver.status = "No";
-      improver.details = "No paddling in red conditions.";
+      improver.details = ["No paddling."];
       if (riverLevel && riverLevel >= THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3) {
         intermediate.status = "No";
-        intermediate.details =
-          "No paddling – river is above 10 steps from the car park.";
+        intermediate.details = ["No paddling above 10 steps from the car park."];
       } else {
         intermediate.status = "Discretion";
-        intermediate.details = "Coach's discretion only. PFD required.";
+        intermediate.details = ["Coach's discretion only.", "PFD required."];
       }
       independent.status = "Warning";
-      independent.details = "Strongly advised not to paddle alone. PFD required.";
+      independent.details = ["Avoid paddling alone.", "PFD required."];
       break;
     case "No Paddling":
     case "Unknown":
     default:
-      beginner.details = "Paddling not recommended.";
-      improver.details = "Paddling not recommended.";
-      intermediate.details = "Paddling not recommended.";
-      independent.details = "Paddling not recommended.";
+      beginner.details = ["Not recommended."];
+      improver.details = ["Not recommended."];
+      intermediate.details = ["Not recommended."];
+      independent.details = ["Not recommended."];
       break;
   }
 
   // PFD warning for high water level, if not in Red conditions (as Red already includes it)
+  const addHighWaterPfdWarning = (paddler: PaddlingStatus) => {
+    if (paddler.status === "No") return;
+    if (paddler.status === "Yes") paddler.status = "Warning";
+    const last = paddler.details[paddler.details.length - 1];
+    if (last === "PFD required.") {
+      paddler.details[paddler.details.length - 1] = "PFD required – river is high.";
+    } else {
+      paddler.details.push("PFD required – river is high.");
+    }
+  };
+
   if (
     overallStatus !== "Red" &&
     riverLevel &&
     riverLevel >= THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2
   ) {
-    if (independent.status !== "No") {
-      if (independent.status === "Yes") independent.status = "Warning";
-      independent.details += " PFD required. River is high.";
-    }
-
-    if (intermediate.status !== "No") {
-      if (intermediate.status === "Yes") intermediate.status = "Warning";
-      intermediate.details += " PFD required. River is high.";
-    }
+    addHighWaterPfdWarning(independent);
+    addHighWaterPfdWarning(intermediate);
   }
 
   matrix["Beginner"] = beginner;
@@ -299,9 +323,19 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                             unmountOnExit
                           >
                             <Box sx={{ margin: 1 }}>
-                              <Typography variant="body2">
-                                {statusInfo ? statusInfo.details : ""}
-                              </Typography>
+                              {statusInfo && statusInfo.details.length > 0 && (
+                                <Box component="ul" sx={{ pl: 2.5, m: 0 }}>
+                                  {statusInfo.details.map((line, index) => (
+                                    <Typography
+                                      key={index}
+                                      component="li"
+                                      variant="body2"
+                                    >
+                                      {line}
+                                    </Typography>
+                                  ))}
+                                </Box>
+                              )}
                             </Box>
                           </Collapse>
                         </TableCell>

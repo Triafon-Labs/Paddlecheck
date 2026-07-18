@@ -116,7 +116,7 @@ export type PaddlingStatusValue = "Yes" | "No" | "Discretion" | "Warning";
 
 export interface PaddlingStatus {
   status: PaddlingStatusValue;
-  details: string;
+  details: string[];
 }
 
 export type PaddlingMatrix = {

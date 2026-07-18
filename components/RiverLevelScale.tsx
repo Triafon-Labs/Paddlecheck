@@ -119,7 +119,7 @@ const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
                   textAlign: "right",
                   pr: 1.5,
                   pt: "1px",
-                  fontWeight: row.current ? 700 : 400,
+                  fontWeight: row.current && !row.isReading ? 700 : 400,
                   fontSize: "0.875rem",
                 }}
               >
@@ -160,7 +160,7 @@ const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
                 <Box
                   sx={{
                     position: "absolute",
-                    top: "7px",
+                    top: `${TICK_DOT_CENTER - (row.current ? 6 : 4)}px`,
                     width: row.current ? 12 : 8,
                     height: row.current ? 12 : 8,
                     borderRadius: "50%",
@@ -174,7 +174,7 @@ const RiverLevelScale: React.FC<RiverLevelScaleProps> = ({
                 <Typography
                   variant="body2"
                   sx={{
-                    fontWeight: row.current ? 700 : 400,
+                    fontWeight: row.current && !row.isReading ? 700 : 400,
                     fontStyle: row.isReading ? "italic" : "normal",
                   }}
                 >

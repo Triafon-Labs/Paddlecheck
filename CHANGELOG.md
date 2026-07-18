@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.16.15](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.14...paddlecheck-v1.16.15) (2026-07-18)
+
+
+### Bug Fixes
+
+* enforce Conventional Commits so version bumps aren't always patch ([f622491](https://github.com/dylanr97/Paddlecheck/commit/f6224910c2f697e2f2e762b475674bc292308c67))
+
 ## [1.16.14](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.13...paddlecheck-v1.16.14) (2026-07-18)
 
 ## [1.16.13](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.12...paddlecheck-v1.16.13) (2026-07-18)

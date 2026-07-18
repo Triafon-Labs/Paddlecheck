@@ -80,10 +80,10 @@ const getPaddlingMatrix = (
       beginner.details = "Must be supervised by a club coach. PFD required.";
       improver.status = "Yes";
       improver.details =
-        "Can paddle as a group without a coach, provided the group includes someone who can swim with ease, has a mobile phone, uses a familiar boat, and stays upstream of Sabrina Bridge. PFD required.";
+        "Can paddle as a group without a coach, provided the group has a mobile phone, uses a familiar boat, and stays upstream of Sabrina Bridge and downstream of the Slip. PFD required.";
       intermediate.status = "Yes";
       intermediate.details =
-        "Can paddle solo. Carry a mobile phone, use a familiar boat, and stay upstream of Sabrina Bridge. PFD required.";
+        "Can paddle solo. Carry a mobile phone, use a familiar boat, and stay upstream of Sabrina Bridge and downstream of the Slip. PFD required.";
       independent.status = "Yes";
       independent.details = "No restrictions.";
       break;
@@ -94,7 +94,7 @@ const getPaddlingMatrix = (
       improver.details = "Must be supervised by a club coach. PFD required.";
       intermediate.status = "Yes";
       intermediate.details =
-        "Can paddle with at least one other intermediate without a coach. Carry a mobile phone, use a familiar boat, and stay upstream of Sabrina Bridge. PFD required.";
+        "Can paddle with at least one other intermediate without a coach. Carry a mobile phone, use a familiar boat, and stay upstream of Sabrina Bridge and downstream of the Slip. PFD required.";
       independent.status = "Yes";
       independent.details = "No restrictions.";
       break;

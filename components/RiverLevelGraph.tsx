@@ -64,7 +64,7 @@ const ChangeIndicator: React.FC<{
 
   return (
     <Paper
-      variant="outlined"
+      elevation={0}
       sx={{
         p: 2,
         display: "flex",
@@ -72,13 +72,14 @@ const ChangeIndicator: React.FC<{
         justifyContent: "center",
         flexDirection: "column",
         height: "100%",
+        backgroundColor: "action.hover",
       }}
     >
       <Box
-        sx={{ display: "flex", alignItems: "center", color: "text.secondary" }}
+        sx={{ display: "flex", alignItems: "center", color: "primary.main" }}
       >
         {icon}
-        <Typography variant="subtitle2" sx={{ ml: 0.5 }}>
+        <Typography variant="subtitle2" color="text.secondary" sx={{ ml: 0.5 }}>
           {period}
         </Typography>
       </Box>

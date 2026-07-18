@@ -175,6 +175,7 @@ Bewdley data failure is non-fatal – the app falls back to linear regression si
   error: string | null      // set only when there's truly nothing to show (no cache fallback)
   isOffline: boolean
   usingCachedData: boolean  // true when the latest fetch fell back to cache for any source
+  isRefreshing: boolean     // true for the full duration of any fetch (initial or background)
   refetch: () => void
 }
 ```

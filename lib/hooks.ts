@@ -70,6 +70,11 @@ export const useKayakData = () => {
   const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
   const [usingCachedData, setUsingCachedData] = useState(false);
+  // Unlike loading/forecastLoading (which only gate the very first render),
+  // this is true for the full duration of *any* fetch attempt - initial or
+  // background - so the UI can signal "actively updating" without blocking
+  // on it with a spinner.
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const isOfflineRef = useRef(false);
   // Tracks whether conditions/forecast data has ever been populated (from cache
   // or a completed fetch), so a background refetch or manual refresh doesn't
@@ -150,6 +155,7 @@ export const useKayakData = () => {
       // update quietly instead of flashing a spinner over good data.
       if (!hasConditionsRef.current) setLoading(true);
       if (!hasForecastRef.current) setForecastLoading(true);
+      setIsRefreshing(true);
       setError(null);
 
       const readRawCache = <T,>(key: string): T | null => {
@@ -505,6 +511,7 @@ export const useKayakData = () => {
     } finally {
       setLoading(false);
       setForecastLoading(false);
+      setIsRefreshing(false);
     }
   }, []);
 
@@ -526,6 +533,7 @@ export const useKayakData = () => {
     error,
     isOffline,
     usingCachedData,
+    isRefreshing,
     refetch: fetchData,
   };
 };

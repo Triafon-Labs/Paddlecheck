@@ -109,8 +109,15 @@ const buildShareText = (
 const TopNavBar = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const { refetch, conditions, forecastDays, isOffline, error, usingCachedData } =
-    useKayakContext();
+  const {
+    refetch,
+    conditions,
+    forecastDays,
+    isOffline,
+    error,
+    usingCachedData,
+    isRefreshing,
+  } = useKayakContext();
 
   const isOfflineError =
     error === "Offline – no cached data (reconnect and refresh)";
@@ -217,13 +224,13 @@ const TopNavBar = () => {
               >
                 Paddlecheck
               </Typography>
-              {relativeLastUpdated && (
+              {(isRefreshing || relativeLastUpdated) && (
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ lineHeight: 1.2, mt: -0.2 }}
                 >
-                  Updated {relativeLastUpdated}
+                  {isRefreshing ? "Updating…" : `Updated ${relativeLastUpdated}`}
                 </Typography>
               )}
             </Box>

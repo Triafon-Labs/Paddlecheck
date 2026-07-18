@@ -70,7 +70,9 @@ const CustomTooltip = ({
         </Typography>
         {data.reasons && data.reasons.length > 0 && (
           <Box sx={{ mt: 1 }}>
-            <Typography variant="subtitle2">Reasons:</Typography>
+            <Typography variant="subtitle2" color="text.secondary">
+              Contributing Factors
+            </Typography>
             {data.reasons.map((reason: string, index: number) => {
               const Icon = REASON_ICONS[reason];
               return (

@@ -74,12 +74,8 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
 
           {conditions.reasons && conditions.reasons.length > 0 && (
             <Box sx={{ mt: 2 }}>
-              <Typography
-                variant="subtitle2"
-                color="text.secondary"
-                sx={{ fontWeight: "bold" }}
-              >
-                Reasons
+              <Typography variant="subtitle2" color="text.secondary">
+                Contributing Factors
               </Typography>
               <Table size="small">
                 <TableBody>

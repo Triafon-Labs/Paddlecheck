@@ -3,16 +3,8 @@ import {
   Card,
   CardContent,
   Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
   Box,
   Collapse,
-  IconButton,
   CircularProgress,
 } from "@mui/material";
 import {
@@ -40,27 +32,21 @@ interface PaddlingMatrixCardProps {
   loading?: boolean;
 }
 
-const getStatusIcon = (status: PaddlingStatusValue) => {
-  switch (status) {
-    case "Yes":
-      return (
-        <CheckCircleOutlined
-          style={{ color: ragStatus["Light Green"].color }}
-        />
-      );
-    case "No":
-      return <CancelOutlined style={{ color: ragStatus["Red"].color }} />;
-    case "Discretion":
-      return (
-        <WarningAmberOutlined style={{ color: ragStatus["Amber"].color }} />
-      );
-    case "Warning":
-      return (
-        <WarningAmberOutlined style={{ color: ragStatus["Amber"].color }} />
-      );
-    default:
-      return <HelpOutlined style={{ color: ragStatus["Unknown"].color }} />;
-  }
+// Colours each paddler's status icon using the same RAG colour tokens as
+// the rest of the app.
+const STATUS_UI: Record<
+  PaddlingStatusValue,
+  { color: string; icon: React.ElementType }
+> = {
+  Yes: { color: ragStatus["Light Green"].color, icon: CheckCircleOutlined },
+  No: { color: ragStatus["Red"].color, icon: CancelOutlined },
+  Discretion: { color: ragStatus["Amber"].color, icon: WarningAmberOutlined },
+  Warning: { color: ragStatus["Amber"].color, icon: WarningAmberOutlined },
+};
+
+const UNKNOWN_UI = {
+  color: ragStatus["Unknown"].color,
+  icon: HelpOutlined,
 };
 
 const getPaddlingMatrix = (
@@ -264,88 +250,70 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
             <CircularProgress />
           </Box>
         ) : (
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell />
-                  {/* For the collapse button */}
-                  <TableCell align="center">Paddler</TableCell>
-                  <TableCell align="center">Status</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paddlerTypes.map((paddler) => {
-                  const statusInfo = paddlingMatrix[paddler];
-                  return (
-                    <React.Fragment key={paddler}>
-                      <TableRow sx={{ "& .MuiTableCell-root": { borderBottom: "none" } }}>
-                        <TableCell>
-                          <IconButton
-                            aria-label="expand row"
-                            size="small"
-                            onClick={() => handleToggle(paddler)}
-                          >
-                            <ExpandMore
-                              sx={{
-                                transform: open[paddler] ? "rotate(180deg)" : "rotate(0deg)",
-                                transition: "transform 200ms cubic-bezier(0.2, 0, 0, 1)",
-                              }}
-                            />
-                          </IconButton>
-                        </TableCell>
-                        <TableCell component="th" scope="row" align="center">
-                          {paddler}
-                        </TableCell>
-                        <TableCell align="center">
-                          {statusInfo && (
-                            <Tooltip title={statusInfo.status} placement="top">
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                {getStatusIcon(statusInfo.status)}
-                              </Box>
-                            </Tooltip>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow sx={{ "& .MuiTableCell-root": { borderBottom: "none" } }}>
-                        <TableCell
-                          style={{ paddingBottom: 0, paddingTop: 0 }}
-                          colSpan={3}
-                        >
-                          <Collapse
-                            in={open[paddler]}
-                            timeout="auto"
-                            unmountOnExit
-                          >
-                            <Box sx={{ margin: 1 }}>
-                              {statusInfo && statusInfo.details.length > 0 && (
-                                <Box component="ul" sx={{ pl: 2.5, m: 0 }}>
-                                  {statusInfo.details.map((line, index) => (
-                                    <Typography
-                                      key={index}
-                                      component="li"
-                                      variant="body2"
-                                    >
-                                      {line}
-                                    </Typography>
-                                  ))}
-                                </Box>
-                              )}
-                            </Box>
-                          </Collapse>
-                        </TableCell>
-                      </TableRow>
-                    </React.Fragment>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}>
+            {paddlerTypes.map((paddler) => {
+              const statusInfo = paddlingMatrix[paddler];
+              const ui = statusInfo ? STATUS_UI[statusInfo.status] : UNKNOWN_UI;
+              const StatusIcon = ui.icon;
+              const isOpen = open[paddler];
+              return (
+                <Box
+                  key={paddler}
+                  sx={{
+                    backgroundColor: "action.hover",
+                    borderRadius: 1.5,
+                    overflow: "hidden",
+                  }}
+                >
+                  <Box
+                    onClick={() => handleToggle(paddler)}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isOpen}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleToggle(paddler);
+                      }
+                    }}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      px: 1.5,
+                      py: 1,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <StatusIcon sx={{ color: ui.color, fontSize: 22 }} />
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        {paddler}
+                      </Typography>
+                    </Box>
+                    <ExpandMore
+                      sx={{
+                        color: "text.secondary",
+                        transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 200ms cubic-bezier(0.2, 0, 0, 1)",
+                      }}
+                    />
+                  </Box>
+                  <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                    {statusInfo && statusInfo.details.length > 0 && (
+                      <Box component="ul" sx={{ m: 0, pl: 4.5, pr: 1.5, pb: 1.5 }}>
+                        {statusInfo.details.map((line, index) => (
+                          <Typography key={index} component="li" variant="body2">
+                            {line}
+                          </Typography>
+                        ))}
+                      </Box>
+                    )}
+                  </Collapse>
+                </Box>
+              );
+            })}
+          </Box>
         )}
       </CardContent>
     </Card>

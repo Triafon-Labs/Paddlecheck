@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.18.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.17.0...paddlecheck-v1.18.0) (2026-07-18)
+
+
+### Features
+
+* **status-card:** render contributing factors as cards ([0e59347](https://github.com/dylanr97/Paddlecheck/commit/0e593475a5b2ef002486d37c8a96d42cb58061be))
+
+
+### Bug Fixes
+
+* **status-card:** center contributing factor card content ([029a0cb](https://github.com/dylanr97/Paddlecheck/commit/029a0cb87c75b7877a291569aa7472a9605bbe66))
+* **status-card:** guarantee an icon for every contributing factor ([ffb621e](https://github.com/dylanr97/Paddlecheck/commit/ffb621ecf76dd50ee065799768a435876bbc0b73))
+* **status-card:** stretch a lone trailing factor card full width ([347e363](https://github.com/dylanr97/Paddlecheck/commit/347e363b9f5b795ca2b1404da21164296dc02129))
+
 ## [1.17.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.16...paddlecheck-v1.17.0) (2026-07-18)
 
 

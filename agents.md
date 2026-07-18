@@ -170,12 +170,12 @@ Bewdley data failure is non-fatal – the app falls back to linear regression si
   riverChange8h: number | null
   riverChange24h: number | null
   riverChange5d: number | null
-  loading: boolean          // true only until conditions has ever been populated (cache or fetch)
-  forecastLoading: boolean  // true only until forecastDays has ever been populated
+  loading: boolean          // true for every online fetch (initial, background, manual refresh)
+  forecastLoading: boolean  // same, for the forecast section specifically
   error: string | null      // set only when there's truly nothing to show (no cache fallback)
   isOffline: boolean
   usingCachedData: boolean  // true when the latest fetch fell back to cache for any source
-  isRefreshing: boolean     // true for the full duration of any fetch (initial or background)
+  isRefreshing: boolean     // mirrors loading; true for the full duration of any online fetch
   refetch: () => void
 }
 ```
@@ -184,10 +184,15 @@ River, weather and future-weather are fetched independently (`Promise.all` with 
 promise wrapped in its own `.then/.catch`), each falling back to its own last-known
 cached value (`paddlecheck_riverDataRaw` / `paddlecheck_weatherDataRaw` /
 `paddlecheck_futureWeatherDataRaw` in `localStorage`) on failure. This means a single
-source blipping doesn't discard data that arrived fine from the others. `loading` /
-`forecastLoading` only gate the very first render before any data (cached or fetched)
-exists – background refetches and manual refreshes never reset them, so they never mask
-already-displayed data with a spinner.
+source blipping doesn't discard data that arrived fine from the others.
+
+`loading` / `forecastLoading` intentionally show a spinner for *every* online fetch –
+initial load, background refetch, manual refresh alike – so the spinner disappearing is
+always a guarantee the data on screen just came from the network, never a silently-stale
+cache. The one exception is being fully offline with a cache already loaded: there's no
+fetch that can succeed to wait on, so the cache displays immediately and the "Offline –
+showing cached data" banner (`TopNavBar`) communicates that it isn't live, instead of
+spinning forever.
 
 `KayakDataContext.tsx` wraps this hook in React Context so all components can access it without prop drilling.
 

@@ -70,15 +70,18 @@ export const useKayakData = () => {
   const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
   const [usingCachedData, setUsingCachedData] = useState(false);
-  // Unlike loading/forecastLoading (which only gate the very first render),
-  // this is true for the full duration of *any* fetch attempt - initial or
-  // background - so the UI can signal "actively updating" without blocking
-  // on it with a spinner.
+  // True for the full duration of any fetch attempt - initial, background,
+  // or manual refresh - mirrored by loading/forecastLoading below.
   const [isRefreshing, setIsRefreshing] = useState(false);
   const isOfflineRef = useRef(false);
-  // Tracks whether conditions/forecast data has ever been populated (from cache
-  // or a completed fetch), so a background refetch or manual refresh doesn't
-  // flip the loading flag back on and mask perfectly good data with a spinner.
+  // Tracks whether conditions/forecast data has ever been populated, so that
+  // *while offline* a fetch attempt (which can't succeed anyway) doesn't
+  // spin forever over data that's already on screen - the offline banner
+  // communicates it isn't live instead. This is the one exception: whenever
+  // online, every fetch (initial, background, manual refresh) shows the
+  // spinner and only clears it once a fresh response has actually landed,
+  // so "not spinning" is always a guarantee the data just came from the
+  // network, never a quietly-stale cache.
   const hasConditionsRef = useRef(false);
   const hasForecastRef = useRef(false);
 
@@ -121,14 +124,11 @@ export const useKayakData = () => {
         }
       };
 
-      if (loadCached("paddlecheck_conditions", setConditions)) {
-        hasConditionsRef.current = true;
-        // Cache paints synchronously here, so the initial `loading` state
-        // (which defaults to true before any fetch has resolved) must be
-        // cleared immediately - otherwise the spinner still covers the
-        // cached data until the very first fetch finishes.
-        setLoading(false);
-      }
+      const hasCachedConditions = loadCached(
+        "paddlecheck_conditions",
+        setConditions
+      );
+      if (hasCachedConditions) hasConditionsRef.current = true;
       const hasCachedForecast = loadCached(
         "paddlecheck_forecastDays",
         setForecastDays
@@ -139,9 +139,15 @@ export const useKayakData = () => {
       loadCached("paddlecheck_riverChange24h", setRiverChange24h);
       loadCached("paddlecheck_riverChange8h", setRiverChange8h);
       loadCached("paddlecheck_riverChange5d", setRiverChange5d);
-      if (hasCachedForecast) {
-        hasForecastRef.current = true;
-        setForecastLoading(false);
+      if (hasCachedForecast) hasForecastRef.current = true;
+
+      // The offline exception: with no network to wait on, show the cache
+      // immediately (the offline banner elsewhere makes clear it isn't
+      // live) instead of spinning forever. This runs after the offline
+      // effect above, which has already set isOfflineRef synchronously.
+      if (isOfflineRef.current) {
+        if (hasCachedConditions) setLoading(false);
+        if (hasCachedForecast) setForecastLoading(false);
       }
     }
   }, []);
@@ -149,13 +155,20 @@ export const useKayakData = () => {
   const fetchData = useCallback(async () => {
     let conditionsObj: KayakConditions | null = null;
     try {
-      // Only show a blocking spinner while there is genuinely nothing to
-      // display yet. Once conditions/forecast data has been populated (from
-      // cache or a prior fetch), background refetches and manual refreshes
-      // update quietly instead of flashing a spinner over good data.
-      if (!hasConditionsRef.current) setLoading(true);
-      if (!hasForecastRef.current) setForecastLoading(true);
-      setIsRefreshing(true);
+      // Every online fetch shows the spinner - initial load, background
+      // refetch, manual refresh - so it disappearing is always a guarantee
+      // of freshly-fetched data. The only exception is offline with a cache
+      // already on screen: there's no fetch that can succeed to wait on, so
+      // the cache-loading effect already cleared these and this attempt
+      // (which will fail) is left to fail quietly behind the offline banner.
+      const skipSpinner = isOfflineRef.current && hasConditionsRef.current;
+      if (!skipSpinner) {
+        setLoading(true);
+        setIsRefreshing(true);
+      }
+      if (!(isOfflineRef.current && hasForecastRef.current)) {
+        setForecastLoading(true);
+      }
       setError(null);
 
       const readRawCache = <T,>(key: string): T | null => {

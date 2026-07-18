@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.17.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.16...paddlecheck-v1.17.0) (2026-07-18)
+
+
+### Features
+
+* **status-card:** add subheadings for reasons and AI overview ([b3e24fa](https://github.com/dylanr97/Paddlecheck/commit/b3e24fa2834533657d133ac09adb18631d03617b))
+
+
+### Bug Fixes
+
+* **forecast-graph:** match Contributing Factors label used on status card ([89134d0](https://github.com/dylanr97/Paddlecheck/commit/89134d04431980de1dd350fae826229ad8e8b995))
+* **status-card:** rename reasons heading and match app subheading style ([77cc63c](https://github.com/dylanr97/Paddlecheck/commit/77cc63c97dd181509bd7685bac1118fb4b6d4f07))
+
 ## [1.16.16](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.15...paddlecheck-v1.16.16) (2026-07-18)
 
 ## [1.16.15](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.16.14...paddlecheck-v1.16.15) (2026-07-18)

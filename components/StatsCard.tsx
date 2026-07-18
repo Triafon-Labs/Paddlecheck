@@ -151,24 +151,15 @@ const RiverLevelSection: React.FC<{
               </Box>
             )}
           </Typography>
-          <Typography variant="body1" component="div">
-            {riverLevel.toFixed(2)}m
-            {levelChange && (
-              <Typography
-                variant="caption"
-                component="span"
-                sx={{ color: "text.secondary", fontStyle: "italic", ml: 0.5 }}
-              >
-                (
-                {levelChange.value > THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
-                  ? "and rising"
-                  : levelChange.value < -THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
-                    ? "and falling"
-                    : "and steady"}
-                )
-              </Typography>
-            )}
-          </Typography>
+          {levelChange && (
+            <Typography variant="body1" component="div">
+              {levelChange.value > THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
+                ? "Rising"
+                : levelChange.value < -THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
+                  ? "Falling"
+                  : "Steady"}
+            </Typography>
+          )}
         </Box>
       </Box>
       <Box sx={{ pl: "44px" }}>

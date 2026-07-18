@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.18.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.18.0...paddlecheck-v1.18.1) (2026-07-18)
+
+
+### Bug Fixes
+
+* align river-level RAG thresholds with concrete-step/10-steps landmarks ([bd3ca93](https://github.com/dylanr97/Paddlecheck/commit/bd3ca9394922fb6ff66cdf3cac3250c23a9d1ce8))
+* append high-water PFD warning instead of overwriting paddler details ([a2c1a3c](https://github.com/dylanr97/Paddlecheck/commit/a2c1a3ce5d6ad745b286283e1fd4d3a9cab2b614))
+* correct fabricated swim requirement and add missing Slip boundary ([fa30891](https://github.com/dylanr97/Paddlecheck/commit/fa3089112cd3ddd8b8b2eec8ddbe72a0e0e65e13))
+
+
+### Code Refactoring
+
+* render Who Can Paddle details as bullet lists ([ffbb0c1](https://github.com/dylanr97/Paddlecheck/commit/ffbb0c1b98b94c99be530a7dce98aa847d624645))
+
 ## [1.18.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.17.0...paddlecheck-v1.18.0) (2026-07-18)
 
 

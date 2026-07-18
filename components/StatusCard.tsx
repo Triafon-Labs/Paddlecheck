@@ -9,6 +9,7 @@ import {
   CircularProgress,
   Paper,
 } from "@mui/material";
+import HelpOutlined from "@mui/icons-material/HelpOutlined";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import { ragStatus, reasonIcons } from "@/lib/rag";
@@ -83,7 +84,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                 }}
               >
                 {conditions.reasons.map((reason, index) => {
-                  const Icon = reasonIcons[reason];
+                  const Icon = reasonIcons[reason] ?? HelpOutlined;
                   return (
                     <Paper
                       key={index}
@@ -96,9 +97,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                         backgroundColor: "action.hover",
                       }}
                     >
-                      {Icon && (
-                        <Icon fontSize="small" sx={{ color: "primary.main" }} />
-                      )}
+                      <Icon fontSize="small" sx={{ color: "primary.main" }} />
                       <Typography variant="body2">{reason}</Typography>
                     </Paper>
                   );

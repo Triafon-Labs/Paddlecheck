@@ -226,6 +226,8 @@ export const REASON_ICONS: Record<string, React.ElementType> = {
   Foggy: Foggy,
   "River level is dangerously high": Flood,
   "Risk of thunderstorms": Thunderstorm,
+  "Missing data": HelpOutlined,
+  "Could not determine conditions": HelpOutlined,
 };
 
 // Descriptions of river levels at specific local landmarks.

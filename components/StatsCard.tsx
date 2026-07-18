@@ -179,6 +179,7 @@ const RiverLevelSection: React.FC<{
               display: "flex",
               alignItems: "flex-start",
               py: 1,
+              px: 1.5,
               ...(row.current && {
                 backgroundColor: "action.hover",
                 borderRadius: 1,

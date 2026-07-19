@@ -515,7 +515,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
         </Box>
         <Box sx={{ mt: 2 }}>
           <ChangeIndicator
-            period="Forecast Change Next 24 Hours"
+            period="24h Forecast"
             change={forecastedChange24h}
             icon={<Update />}
             loading={loading}

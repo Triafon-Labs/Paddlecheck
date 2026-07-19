@@ -311,7 +311,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               <Skeleton
                 key={i}
                 variant="rounded"
-                height={32}
+                height={40.5}
                 animation="wave"
                 sx={{ flex: 1 }}
               />

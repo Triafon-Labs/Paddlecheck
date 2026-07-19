@@ -425,33 +425,47 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
         <Typography variant="h5" component="div">
           River Level
         </Typography>
-        <ToggleButtonGroup
-          value={timeRange}
-          exclusive
-          onChange={(_event, newTimeRange) => {
-            if (newTimeRange) {
-              setTimeRange(newTimeRange);
-            }
-          }}
-          aria-label="time range"
-          sx={{ mt: 1, mb: 2, width: "100%" }}
-        >
-          <ToggleButton value="forecast" aria-label="forecast" sx={{ flex: 1 }}>
-            <Typography variant="caption">Forecast</Typography>
-          </ToggleButton>
-          <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
-            <Typography variant="caption">5d</Typography>
-          </ToggleButton>
-          <ToggleButton value="24h" aria-label="24 hours" sx={{ flex: 1 }}>
-            <Typography variant="caption">24h</Typography>
-          </ToggleButton>
-          <ToggleButton value="8h" aria-label="8 hours" sx={{ flex: 1 }}>
-            <Typography variant="caption">8h</Typography>
-          </ToggleButton>
-          <ToggleButton value="1h" aria-label="1 hour" sx={{ flex: 1 }}>
-            <Typography variant="caption">1h</Typography>
-          </ToggleButton>
-        </ToggleButtonGroup>
+        {loading ? (
+          <Box sx={{ mt: 1, mb: 2, display: "flex", gap: 1 }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                variant="rounded"
+                height={46}
+                animation="wave"
+                sx={{ flex: 1 }}
+              />
+            ))}
+          </Box>
+        ) : (
+          <ToggleButtonGroup
+            value={timeRange}
+            exclusive
+            onChange={(_event, newTimeRange) => {
+              if (newTimeRange) {
+                setTimeRange(newTimeRange);
+              }
+            }}
+            aria-label="time range"
+            sx={{ mt: 1, mb: 2, width: "100%" }}
+          >
+            <ToggleButton value="forecast" aria-label="forecast" sx={{ flex: 1 }}>
+              <Typography variant="caption">Forecast</Typography>
+            </ToggleButton>
+            <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
+              <Typography variant="caption">5d</Typography>
+            </ToggleButton>
+            <ToggleButton value="24h" aria-label="24 hours" sx={{ flex: 1 }}>
+              <Typography variant="caption">24h</Typography>
+            </ToggleButton>
+            <ToggleButton value="8h" aria-label="8 hours" sx={{ flex: 1 }}>
+              <Typography variant="caption">8h</Typography>
+            </ToggleButton>
+            <ToggleButton value="1h" aria-label="1 hour" sx={{ flex: 1 }}>
+              <Typography variant="caption">1h</Typography>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        )}
         {renderContent()}
         <Box
           sx={{

@@ -6,7 +6,7 @@ import {
   CardContent,
   Typography,
   Box,
-  CircularProgress,
+  Skeleton,
   Paper,
 } from "@mui/material";
 import HelpOutlined from "@mui/icons-material/HelpOutlined";
@@ -21,13 +21,70 @@ interface StatusCardProps {
   loading?: boolean;
 }
 
+// Mirrors the filtering in TrafficLight.tsx so the skeleton renders the same
+// number of placeholder circles as the real traffic light.
+const TRAFFIC_LIGHT_COUNT = (Object.keys(ragStatus) as (keyof typeof ragStatus)[]).filter(
+  (s) => s !== "Unknown" && s !== "No Paddling"
+).length;
+
 const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
   const renderContent = () => {
     if (loading) {
       return (
-        <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
-          <CircularProgress />
-        </Box>
+        <>
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+              {Array.from({ length: TRAFFIC_LIGHT_COUNT }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  variant="circular"
+                  width={50}
+                  height={50}
+                  animation="wave"
+                />
+              ))}
+            </Box>
+            <Skeleton variant="text" width={100} height={32} animation="wave" />
+          </Box>
+
+          <Box sx={{ mt: 2 }}>
+            <Skeleton variant="text" width={140} height={20} animation="wave" />
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: 1,
+                mt: 1,
+                "& > *:last-child:nth-child(odd)": {
+                  gridColumn: "1 / -1",
+                },
+              }}
+            >
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  variant="rounded"
+                  height={56}
+                  animation="wave"
+                />
+              ))}
+            </Box>
+          </Box>
+
+          <Skeleton
+            variant="rounded"
+            height={72}
+            animation="wave"
+            sx={{ mt: 2 }}
+          />
+        </>
       );
     }
     if (conditions) {

@@ -4,11 +4,9 @@ import {
   TrendingUp,
   TrendingDown,
   TrendingFlat,
-  Schedule,
-  Update,
+  History,
   CalendarToday,
-  AccessTime,
-  Timeline,
+  Update,
 } from "@mui/icons-material";
 import React, { useState, useEffect, useMemo } from "react";
 import {
@@ -16,7 +14,7 @@ import {
   CardContent,
   Typography,
   Box,
-  CircularProgress,
+  Skeleton,
   useTheme,
   Paper,
   ToggleButtonGroup,
@@ -55,7 +53,8 @@ const ChangeIndicator: React.FC<{
   period: string;
   change: number | null;
   icon: React.ReactNode;
-}> = ({ period, change, icon }) => {
+  loading?: boolean;
+}> = ({ period, change, icon, loading }) => {
   // Round first so the displayed value and the arrow direction always agree,
   // and so a value that rounds to zero (e.g. -0.001) never renders as "-0.00".
   const rounded = change !== null ? Number(change.toFixed(2)) : null;
@@ -78,24 +77,43 @@ const ChangeIndicator: React.FC<{
       <Box
         sx={{ display: "flex", alignItems: "center", color: "primary.main" }}
       >
-        {icon}
-        <Typography variant="subtitle2" color="text.secondary" sx={{ ml: 0.5 }}>
-          {period}
-        </Typography>
+        {loading ? (
+          <>
+            <Skeleton variant="circular" width={24} height={24} animation="wave" />
+            <Skeleton
+              variant="text"
+              width={70}
+              height={20}
+              animation="wave"
+              sx={{ ml: 0.5 }}
+            />
+          </>
+        ) : (
+          <>
+            {icon}
+            <Typography variant="subtitle2" color="text.secondary" sx={{ ml: 0.5 }}>
+              {period}
+            </Typography>
+          </>
+        )}
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-        <Typography variant="h6" component="span">
-          {rounded !== null ? (
-            isFlat ? (
-              <TrendingFlat sx={{ color: "text.secondary", mr: 0.5 }} />
-            ) : rounded > 0 ? (
-              <TrendingUp sx={{ color: "error.main", mr: 0.5 }} />
-            ) : (
-              <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
-            )
-          ) : null}
-          {changeStr !== null ? `${changeStr}m` : "N/A"}
-        </Typography>
+        {loading ? (
+          <Skeleton variant="text" width={50} height={32} animation="wave" />
+        ) : (
+          <Typography variant="h6" component="span">
+            {rounded !== null ? (
+              isFlat ? (
+                <TrendingFlat sx={{ color: "text.secondary", mr: 0.5 }} />
+              ) : rounded > 0 ? (
+                <TrendingUp sx={{ color: "error.main", mr: 0.5 }} />
+              ) : (
+                <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
+              )
+            ) : null}
+            {changeStr !== null ? `${changeStr}m` : "N/A"}
+          </Typography>
+        )}
       </Box>
     </Paper>
   );
@@ -296,9 +314,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   const renderContent = () => {
     if (loading) {
       return (
-        <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
-          <CircularProgress />
-        </Box>
+        <Skeleton variant="rounded" width="100%" height={200} animation="wave" />
       );
     }
     if (timeRange === "forecast" && combinedForecastData) {
@@ -422,33 +438,47 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
         <Typography variant="h5" component="div">
           River Level
         </Typography>
-        <ToggleButtonGroup
-          value={timeRange}
-          exclusive
-          onChange={(_event, newTimeRange) => {
-            if (newTimeRange) {
-              setTimeRange(newTimeRange);
-            }
-          }}
-          aria-label="time range"
-          sx={{ mt: 1, mb: 2, width: "100%" }}
-        >
-          <ToggleButton value="forecast" aria-label="forecast" sx={{ flex: 1 }}>
-            <Typography variant="caption">Forecast</Typography>
-          </ToggleButton>
-          <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
-            <Typography variant="caption">5d</Typography>
-          </ToggleButton>
-          <ToggleButton value="24h" aria-label="24 hours" sx={{ flex: 1 }}>
-            <Typography variant="caption">24h</Typography>
-          </ToggleButton>
-          <ToggleButton value="8h" aria-label="8 hours" sx={{ flex: 1 }}>
-            <Typography variant="caption">8h</Typography>
-          </ToggleButton>
-          <ToggleButton value="1h" aria-label="1 hour" sx={{ flex: 1 }}>
-            <Typography variant="caption">1h</Typography>
-          </ToggleButton>
-        </ToggleButtonGroup>
+        {loading ? (
+          <Box sx={{ mt: 1, mb: 2, display: "flex", gap: 1 }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                variant="rounded"
+                height={46}
+                animation="wave"
+                sx={{ flex: 1 }}
+              />
+            ))}
+          </Box>
+        ) : (
+          <ToggleButtonGroup
+            value={timeRange}
+            exclusive
+            onChange={(_event, newTimeRange) => {
+              if (newTimeRange) {
+                setTimeRange(newTimeRange);
+              }
+            }}
+            aria-label="time range"
+            sx={{ mt: 1, mb: 2, width: "100%" }}
+          >
+            <ToggleButton value="forecast" aria-label="forecast" sx={{ flex: 1 }}>
+              <Typography variant="caption">Forecast</Typography>
+            </ToggleButton>
+            <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
+              <Typography variant="caption">5d</Typography>
+            </ToggleButton>
+            <ToggleButton value="24h" aria-label="24 hours" sx={{ flex: 1 }}>
+              <Typography variant="caption">24h</Typography>
+            </ToggleButton>
+            <ToggleButton value="8h" aria-label="8 hours" sx={{ flex: 1 }}>
+              <Typography variant="caption">8h</Typography>
+            </ToggleButton>
+            <ToggleButton value="1h" aria-label="1 hour" sx={{ flex: 1 }}>
+              <Typography variant="caption">1h</Typography>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        )}
         {renderContent()}
         <Box
           sx={{
@@ -461,29 +491,34 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           <ChangeIndicator
             period="1h Change"
             change={change1h}
-            icon={<AccessTime />}
+            icon={<History />}
+            loading={loading}
           />
           <ChangeIndicator
             period="8h Change"
             change={change8h}
-            icon={<Schedule />}
+            icon={<History />}
+            loading={loading}
           />
           <ChangeIndicator
             period="24h Change"
             change={change24h}
-            icon={<Update />}
+            icon={<History />}
+            loading={loading}
           />
           <ChangeIndicator
             period="5d Change"
             change={change5d}
             icon={<CalendarToday />}
+            loading={loading}
           />
         </Box>
         <Box sx={{ mt: 2 }}>
           <ChangeIndicator
-            period="Forecast Change Next 24 Hours"
+            period="24h Forecast"
             change={forecastedChange24h}
-            icon={<Timeline />}
+            icon={<Update />}
+            loading={loading}
           />
         </Box>
       </CardContent>

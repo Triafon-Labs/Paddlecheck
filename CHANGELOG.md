@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.18.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.18.2...paddlecheck-v1.18.3) (2026-07-19)
+
+
+### Bug Fixes
+
+* add skeleton loading state to ForecastRagGraph ([695c17e](https://github.com/dylanr97/Paddlecheck/commit/695c17ebec56c1738c6d49a6edc958046fa26252))
+* match odd-item full-width rule in Contributing Factors skeleton ([9a069d7](https://github.com/dylanr97/Paddlecheck/commit/9a069d72076e4d04175f8e3c500546b8a55f2ac1))
+* pick clearer icons for 8h and 24h change indicators ([98b8eae](https://github.com/dylanr97/Paddlecheck/commit/98b8eae6cda4b51470fbdd5f74086af37fb9e072))
+* replace loading spinners with sized skeletons to prevent layout shift ([43cda52](https://github.com/dylanr97/Paddlecheck/commit/43cda521920e7891f52041c9a70dd37e91ca52e2))
+* shorten forecast change indicator label ([daf78cb](https://github.com/dylanr97/Paddlecheck/commit/daf78cbc3a9969fa8ac49138e34d0b6d8f7ab258))
+* skeleton the change-indicator labels, not just the values ([aa70968](https://github.com/dylanr97/Paddlecheck/commit/aa70968541d81dc71d37fbe0825f811adf952037))
+* skeleton the river-level change indicators while loading ([1a23f8a](https://github.com/dylanr97/Paddlecheck/commit/1a23f8aa676815d5f47e6f1c4e83cb5cf5538329))
+* skeleton the river-level time range selector while loading ([cc68e24](https://github.com/dylanr97/Paddlecheck/commit/cc68e243838d96eafa81ddc37d09d121ac3ce11a))
+* tighten skeleton sizing against measured real content ([4253005](https://github.com/dylanr97/Paddlecheck/commit/425300544577a05692610d888a71560d5adedf1b))
+* use a distinct icon for the 8h river-level change indicator ([39b71d6](https://github.com/dylanr97/Paddlecheck/commit/39b71d66b66ecd76bcbaa3dec161f2af9bf906c5))
+* use forward-facing clock for the forecast change indicator ([dcfc27a](https://github.com/dylanr97/Paddlecheck/commit/dcfc27a7df7b8c78557756ca1750108ee71cc5e9))
+* use one consistent clock icon across all hour-based change indicators ([5ae0e97](https://github.com/dylanr97/Paddlecheck/commit/5ae0e9773e5ef6758c5cddfed2a2a24bad4512a4))
+
 ## [1.18.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.18.1...paddlecheck-v1.18.2) (2026-07-18)
 
 

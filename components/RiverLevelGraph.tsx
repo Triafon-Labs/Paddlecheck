@@ -55,7 +55,8 @@ const ChangeIndicator: React.FC<{
   period: string;
   change: number | null;
   icon: React.ReactNode;
-}> = ({ period, change, icon }) => {
+  loading?: boolean;
+}> = ({ period, change, icon, loading }) => {
   // Round first so the displayed value and the arrow direction always agree,
   // and so a value that rounds to zero (e.g. -0.001) never renders as "-0.00".
   const rounded = change !== null ? Number(change.toFixed(2)) : null;
@@ -84,18 +85,22 @@ const ChangeIndicator: React.FC<{
         </Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-        <Typography variant="h6" component="span">
-          {rounded !== null ? (
-            isFlat ? (
-              <TrendingFlat sx={{ color: "text.secondary", mr: 0.5 }} />
-            ) : rounded > 0 ? (
-              <TrendingUp sx={{ color: "error.main", mr: 0.5 }} />
-            ) : (
-              <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
-            )
-          ) : null}
-          {changeStr !== null ? `${changeStr}m` : "N/A"}
-        </Typography>
+        {loading ? (
+          <Skeleton variant="text" width={50} height={32} animation="wave" />
+        ) : (
+          <Typography variant="h6" component="span">
+            {rounded !== null ? (
+              isFlat ? (
+                <TrendingFlat sx={{ color: "text.secondary", mr: 0.5 }} />
+              ) : rounded > 0 ? (
+                <TrendingUp sx={{ color: "error.main", mr: 0.5 }} />
+              ) : (
+                <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
+              )
+            ) : null}
+            {changeStr !== null ? `${changeStr}m` : "N/A"}
+          </Typography>
+        )}
       </Box>
     </Paper>
   );
@@ -460,21 +465,25 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             period="1h Change"
             change={change1h}
             icon={<AccessTime />}
+            loading={loading}
           />
           <ChangeIndicator
             period="8h Change"
             change={change8h}
             icon={<Schedule />}
+            loading={loading}
           />
           <ChangeIndicator
             period="24h Change"
             change={change24h}
             icon={<Update />}
+            loading={loading}
           />
           <ChangeIndicator
             period="5d Change"
             change={change5d}
             icon={<CalendarToday />}
+            loading={loading}
           />
         </Box>
         <Box sx={{ mt: 2 }}>
@@ -482,6 +491,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             period="Forecast Change Next 24 Hours"
             change={forecastedChange24h}
             icon={<Timeline />}
+            loading={loading}
           />
         </Box>
       </CardContent>

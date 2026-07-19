@@ -4,10 +4,8 @@ import {
   TrendingUp,
   TrendingDown,
   TrendingFlat,
-  Timelapse,
   History,
   CalendarToday,
-  AccessTime,
   Timeline,
 } from "@mui/icons-material";
 import React, { useState, useEffect, useMemo } from "react";
@@ -493,13 +491,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           <ChangeIndicator
             period="1h Change"
             change={change1h}
-            icon={<AccessTime />}
+            icon={<History />}
             loading={loading}
           />
           <ChangeIndicator
             period="8h Change"
             change={change8h}
-            icon={<Timelapse />}
+            icon={<History />}
             loading={loading}
           />
           <ChangeIndicator

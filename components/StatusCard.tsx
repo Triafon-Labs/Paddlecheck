@@ -62,6 +62,9 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                 gridTemplateColumns: "repeat(2, 1fr)",
                 gap: 1,
                 mt: 1,
+                "& > *:last-child:nth-child(odd)": {
+                  gridColumn: "1 / -1",
+                },
               }}
             >
               {Array.from({ length: 3 }).map((_, i) => (

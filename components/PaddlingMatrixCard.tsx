@@ -247,41 +247,70 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
         </Typography>
         {loading ? (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}>
-            {paddlerTypes.map((paddler) => (
-              <Box
-                key={paddler}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  backgroundColor: "action.hover",
-                  borderRadius: 1.5,
-                  px: 1.5,
-                  py: 1.25,
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Skeleton
-                    variant="circular"
-                    width={22}
-                    height={22}
-                    animation="wave"
-                  />
-                  <Skeleton
-                    variant="text"
-                    width={100}
-                    height={28}
-                    animation="wave"
-                  />
+            {paddlerTypes.map((paddler) => {
+              // Mirrors the open-state resolution below (read directly,
+              // rather than from `open` state, since that's only populated
+              // once the effect below runs) so a row that's about to expand
+              // by default reserves the space for its detail lines too.
+              const savedLevel =
+                typeof window !== "undefined"
+                  ? (localStorage.getItem("paddlerLevel") as PaddlerType | null)
+                  : null;
+              const isOpen = savedLevel ? paddler === savedLevel : true;
+              return (
+                <Box
+                  key={paddler}
+                  sx={{
+                    backgroundColor: "action.hover",
+                    borderRadius: 1.5,
+                    overflow: "hidden",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      px: 1.5,
+                      py: 1.25,
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Skeleton
+                        variant="circular"
+                        width={22}
+                        height={22}
+                        animation="wave"
+                      />
+                      <Skeleton
+                        variant="text"
+                        width={100}
+                        height={28}
+                        animation="wave"
+                      />
+                    </Box>
+                    <Skeleton
+                      variant="circular"
+                      width={20}
+                      height={20}
+                      animation="wave"
+                    />
+                  </Box>
+                  {isOpen && (
+                    <Box sx={{ pl: 4.5, pr: 1.5, pt: 0.5, pb: 1.5 }}>
+                      <Skeleton
+                        variant="text"
+                        width="90%"
+                        height={20}
+                        animation="wave"
+                        sx={{ mb: 0.75 }}
+                      />
+                      <Skeleton variant="text" width="70%" height={20} animation="wave" />
+                    </Box>
+                  )}
                 </Box>
-                <Skeleton
-                  variant="circular"
-                  width={20}
-                  height={20}
-                  animation="wave"
-                />
-              </Box>
-            ))}
+              );
+            })}
           </Box>
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}>

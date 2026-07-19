@@ -289,12 +289,16 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) =
               </Box>
             </Box>
             <Box sx={{ pl: "44px" }}>
+              {/* Level descriptions are long enough to wrap to two lines on
+                  typical widths, so each row skeleton is sized for that
+                  (measured against the real rendered row height) rather
+                  than a single line. */}
               {Array.from({ length: 3 }).map((_, i) => (
                 <Skeleton
                   key={i}
-                  variant="text"
-                  width="70%"
-                  height={32}
+                  variant="rounded"
+                  width="85%"
+                  height={56}
                   animation="wave"
                   sx={{ my: 1 }}
                 />

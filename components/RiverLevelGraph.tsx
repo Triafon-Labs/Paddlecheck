@@ -4,7 +4,7 @@ import {
   TrendingUp,
   TrendingDown,
   TrendingFlat,
-  Schedule,
+  HourglassBottom,
   Update,
   CalendarToday,
   AccessTime,
@@ -499,7 +499,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           <ChangeIndicator
             period="8h Change"
             change={change8h}
-            icon={<Schedule />}
+            icon={<HourglassBottom />}
             loading={loading}
           />
           <ChangeIndicator

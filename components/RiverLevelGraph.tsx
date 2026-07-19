@@ -79,10 +79,25 @@ const ChangeIndicator: React.FC<{
       <Box
         sx={{ display: "flex", alignItems: "center", color: "primary.main" }}
       >
-        {icon}
-        <Typography variant="subtitle2" color="text.secondary" sx={{ ml: 0.5 }}>
-          {period}
-        </Typography>
+        {loading ? (
+          <>
+            <Skeleton variant="circular" width={24} height={24} animation="wave" />
+            <Skeleton
+              variant="text"
+              width={70}
+              height={20}
+              animation="wave"
+              sx={{ ml: 0.5 }}
+            />
+          </>
+        ) : (
+          <>
+            {icon}
+            <Typography variant="subtitle2" color="text.secondary" sx={{ ml: 0.5 }}>
+              {period}
+            </Typography>
+          </>
+        )}
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
         {loading ? (

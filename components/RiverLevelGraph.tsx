@@ -6,7 +6,7 @@ import {
   TrendingFlat,
   History,
   CalendarToday,
-  Timeline,
+  Update,
 } from "@mui/icons-material";
 import React, { useState, useEffect, useMemo } from "react";
 import {
@@ -517,7 +517,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           <ChangeIndicator
             period="Forecast Change Next 24 Hours"
             change={forecastedChange24h}
-            icon={<Timeline />}
+            icon={<Update />}
             loading={loading}
           />
         </Box>

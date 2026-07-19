@@ -6,7 +6,7 @@ import {
   CardContent,
   Typography,
   Box,
-  CircularProgress,
+  Skeleton,
   Paper,
   useTheme,
   ToggleButtonGroup,
@@ -198,9 +198,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   const renderChart = () => {
     if (loading) {
       return (
-        <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
-          <CircularProgress />
-        </Box>
+        <Skeleton variant="rounded" width="100%" height={200} animation="wave" />
       );
     }
     if (data && data.length > 0) {
@@ -307,20 +305,34 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         <Typography variant="h5" component="div">
           Paddling Forecast
         </Typography>
-        {forecastDays && forecastDays.length > 0 && (
-          <Box sx={{ pt: 2, pb: 2 }}>
-            <ToggleButtonGroup
-              value={selectedDay}
-              exclusive
-              onChange={(_, val) => { if (val !== null) setSelectedDay(val); }}
-              fullWidth
-              size="small"
-            >
-              {forecastDays.map((day, i) => (
-                <ToggleButton key={i} value={i}>{day.label}</ToggleButton>
-              ))}
-            </ToggleButtonGroup>
+        {loading ? (
+          <Box sx={{ pt: 2, pb: 2, display: "flex", gap: 1 }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                variant="rounded"
+                height={32}
+                animation="wave"
+                sx={{ flex: 1 }}
+              />
+            ))}
           </Box>
+        ) : (
+          forecastDays && forecastDays.length > 0 && (
+            <Box sx={{ pt: 2, pb: 2 }}>
+              <ToggleButtonGroup
+                value={selectedDay}
+                exclusive
+                onChange={(_, val) => { if (val !== null) setSelectedDay(val); }}
+                fullWidth
+                size="small"
+              >
+                {forecastDays.map((day, i) => (
+                  <ToggleButton key={i} value={i}>{day.label}</ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Box>
+          )
         )}
 
         {/* Daily warnings display – moved above chart */}

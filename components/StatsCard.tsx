@@ -7,7 +7,7 @@ import {
   Typography,
   Box,
   Tooltip,
-  CircularProgress,
+  Skeleton,
 } from "@mui/material";
 import Thermostat from "@mui/icons-material/Thermostat";
 import Visibility from "@mui/icons-material/Visibility";
@@ -274,8 +274,47 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) =
           <Typography variant="h5" component="div" gutterBottom>
             Detailed Stats
           </Typography>
-          <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
-            <CircularProgress />
+          <Box sx={{ mt: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <Skeleton
+                variant="circular"
+                width={24}
+                height={24}
+                animation="wave"
+                sx={{ mr: 1.5 }}
+              />
+              <Box>
+                <Skeleton variant="text" width={80} height={16} animation="wave" />
+                <Skeleton variant="text" width={60} height={24} animation="wave" />
+              </Box>
+            </Box>
+            <Box sx={{ pl: "44px" }}>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  variant="text"
+                  width="70%"
+                  height={32}
+                  animation="wave"
+                  sx={{ my: 1 }}
+                />
+              ))}
+            </Box>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Box key={i} sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Skeleton
+                  variant="circular"
+                  width={24}
+                  height={24}
+                  animation="wave"
+                  sx={{ mr: 1.5 }}
+                />
+                <Box>
+                  <Skeleton variant="text" width={90} height={16} animation="wave" />
+                  <Skeleton variant="text" width={70} height={24} animation="wave" />
+                </Box>
+              </Box>
+            ))}
           </Box>
         </CardContent>
       </Card>

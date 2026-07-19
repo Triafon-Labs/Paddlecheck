@@ -16,7 +16,7 @@ import {
   CardContent,
   Typography,
   Box,
-  CircularProgress,
+  Skeleton,
   useTheme,
   Paper,
   ToggleButtonGroup,
@@ -296,9 +296,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   const renderContent = () => {
     if (loading) {
       return (
-        <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
-          <CircularProgress />
-        </Box>
+        <Skeleton variant="rounded" width="100%" height={200} animation="wave" />
       );
     }
     if (timeRange === "forecast" && combinedForecastData) {

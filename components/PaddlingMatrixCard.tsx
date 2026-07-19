@@ -5,7 +5,7 @@ import {
   Typography,
   Box,
   Collapse,
-  CircularProgress,
+  Skeleton,
 } from "@mui/material";
 import {
   CheckCircleOutlined,
@@ -246,8 +246,42 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
           Who Can Paddle
         </Typography>
         {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
-            <CircularProgress />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}>
+            {paddlerTypes.map((paddler) => (
+              <Box
+                key={paddler}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  backgroundColor: "action.hover",
+                  borderRadius: 1.5,
+                  px: 1.5,
+                  py: 1.25,
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Skeleton
+                    variant="circular"
+                    width={22}
+                    height={22}
+                    animation="wave"
+                  />
+                  <Skeleton
+                    variant="text"
+                    width={100}
+                    height={28}
+                    animation="wave"
+                  />
+                </Box>
+                <Skeleton
+                  variant="circular"
+                  width={20}
+                  height={20}
+                  animation="wave"
+                />
+              </Box>
+            ))}
           </Box>
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}>

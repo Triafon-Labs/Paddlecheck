@@ -179,7 +179,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                   >
                     <Air fontSize="small" sx={{ color: "primary.main" }} />
                     <Typography variant="body2">
-                      Gusts to {Math.round(conditions.windGust!)} mph
+                      Gusts up to {Math.round(conditions.windGust!)} mph
                     </Typography>
                     <Box
                       title={`Would be ${conditions.gustStatus} if sustained`}

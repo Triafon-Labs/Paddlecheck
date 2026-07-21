@@ -464,7 +464,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 />
               }
               label={`Gust dot (${THRESHOLDS.WIND_GUST_NOTABLE} mph+)`}
-              description="A heads-up only, not a rating change: shown next to a 'Gusts to Xmph' note and on forecast bars when gusts pass this speed. The dot's colour is just what the rating would be if that gust were sustained wind, not what it actually is - use it as a prompt to check conditions yourself, not a verdict."
+              description="A heads-up only, not a rating change: shown next to a 'Gusts up to Xmph' note and on forecast bars when gusts pass this speed. The dot's colour is just what the rating would be if that gust were sustained wind, not what it actually is - use it as a prompt to check conditions yourself, not a verdict."
               chipLabel="Heads-up"
               chipColor="default"
             />

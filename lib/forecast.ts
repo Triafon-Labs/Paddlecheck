@@ -175,7 +175,7 @@ export function buildHourlyForecastText(
         : null;
     const gust =
       pt.windGust !== undefined && pt.windGust >= THRESHOLDS.WIND_GUST_NOTABLE
-        ? `gusts to ${Math.round(pt.windGust)} mph`
+        ? `gusts up to ${Math.round(pt.windGust)} mph`
         : null;
     const stats = [level, launch, temp, wind, gust].filter(Boolean).join(", ");
     const nonDarkReasons = pt.reasons.filter((r) => r !== "Dark");

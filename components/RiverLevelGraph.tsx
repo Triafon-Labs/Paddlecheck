@@ -180,12 +180,12 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     if (!data || data.length === 0) return null;
     const latestTs = new Date(data[data.length - 1].dateTime).getTime();
     const ageMinutes = Math.round((now.getTime() - latestTs) / (60 * 1000));
-    if (ageMinutes < 1) return "Data is up to date";
-    if (ageMinutes < 60) return `Data is ${ageMinutes} min behind real-time`;
+    if (ageMinutes < 1) return "As of just now";
+    if (ageMinutes < 60) return `As of ${ageMinutes} min ago`;
     const hours = Math.floor(ageMinutes / 60);
     const minutes = ageMinutes % 60;
     const duration = minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
-    return `Data is ${duration} behind real-time`;
+    return `As of ${duration} ago`;
   }, [data, now]);
 
   const filteredData = useMemo(() => {
@@ -470,44 +470,46 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             ))}
           </Box>
         ) : (
-          <ToggleButtonGroup
-            value={timeRange}
-            exclusive
-            onChange={(_event, newTimeRange) => {
-              if (newTimeRange) {
-                setTimeRange(newTimeRange);
-              }
-            }}
-            aria-label="time range"
-            sx={{ mt: 1, mb: 2, width: "100%" }}
-          >
-            <ToggleButton value="forecast" aria-label="forecast" sx={{ flex: 1 }}>
-              <Typography variant="caption">Forecast</Typography>
-            </ToggleButton>
-            <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
-              <Typography variant="caption">5d</Typography>
-            </ToggleButton>
-            <ToggleButton value="24h" aria-label="24 hours" sx={{ flex: 1 }}>
-              <Typography variant="caption">24h</Typography>
-            </ToggleButton>
-            <ToggleButton value="8h" aria-label="8 hours" sx={{ flex: 1 }}>
-              <Typography variant="caption">8h</Typography>
-            </ToggleButton>
-            <ToggleButton value="1h" aria-label="1 hour" sx={{ flex: 1 }}>
-              <Typography variant="caption">1h</Typography>
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <>
+            {dataAgeLabel && (
+              <Typography
+                variant="caption"
+                color="text.disabled"
+                sx={{ display: "block", textAlign: "right", fontSize: "0.7rem", mt: 1 }}
+              >
+                {dataAgeLabel}
+              </Typography>
+            )}
+            <ToggleButtonGroup
+              value={timeRange}
+              exclusive
+              onChange={(_event, newTimeRange) => {
+                if (newTimeRange) {
+                  setTimeRange(newTimeRange);
+                }
+              }}
+              aria-label="time range"
+              sx={{ mt: 0.5, mb: 2, width: "100%" }}
+            >
+              <ToggleButton value="forecast" aria-label="forecast" sx={{ flex: 1 }}>
+                <Typography variant="caption">Forecast</Typography>
+              </ToggleButton>
+              <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
+                <Typography variant="caption">5d</Typography>
+              </ToggleButton>
+              <ToggleButton value="24h" aria-label="24 hours" sx={{ flex: 1 }}>
+                <Typography variant="caption">24h</Typography>
+              </ToggleButton>
+              <ToggleButton value="8h" aria-label="8 hours" sx={{ flex: 1 }}>
+                <Typography variant="caption">8h</Typography>
+              </ToggleButton>
+              <ToggleButton value="1h" aria-label="1 hour" sx={{ flex: 1 }}>
+                <Typography variant="caption">1h</Typography>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </>
         )}
         {renderContent()}
-        {!loading && dataAgeLabel && (
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ display: "block", textAlign: "center", mt: 1 }}
-          >
-            {dataAgeLabel}
-          </Typography>
-        )}
         <Box
           sx={{
             display: "grid",

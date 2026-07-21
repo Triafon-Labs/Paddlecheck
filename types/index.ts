@@ -104,6 +104,7 @@ export interface ForecastGraphDataPoint {
   windGust?: number;
   gustStatus?: Status;
   rainWhileWarm?: boolean;
+  weatherDescription?: string;
 }
 
 export interface DayForecast {

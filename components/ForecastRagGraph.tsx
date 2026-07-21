@@ -119,7 +119,7 @@ const CustomTooltip = ({
               <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
                 <WaterDrop fontSize="small" />
                 <Typography variant="caption" sx={{ ml: 1 }}>
-                  Raining - too warm to affect the rating
+                  {data.weatherDescription || "Rain"}
                 </Typography>
               </Box>
             )}

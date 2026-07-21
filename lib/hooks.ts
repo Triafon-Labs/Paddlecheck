@@ -428,6 +428,9 @@ export const useKayakData = () => {
             windGust: futureWeatherData.hourly.wind_gusts_10m[index],
             gustStatus: forecastGustStatus,
             rainWhileWarm: forecastRainWhileWarm,
+            weatherDescription: getWeatherDescription(
+              futureWeatherData.hourly.weather_code[index]
+            ),
           });
 
           // Only include Bewdley-backed points in the river level graph forecast

@@ -215,7 +215,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                   >
                     <WaterDrop fontSize="small" sx={{ color: "primary.main" }} />
                     <Typography variant="body2">
-                      Raining - too warm to affect the rating
+                      {conditions.weatherDescription || "Rain"}
                     </Typography>
                   </Paper>
                 )}

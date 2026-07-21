@@ -17,6 +17,8 @@ export interface KayakConditions {
   initialStatus?: Status;
   temperature?: number;
   windSpeed?: number;
+  windGust?: number;
+  gustStatus?: Status;
   windDirection?: number;
   rain?: boolean;
   dark?: boolean;
@@ -62,6 +64,7 @@ export interface ChartDataPoint {
 export interface WeatherData {
   temperature: number;
   windSpeed: number;
+  windGust: number;
   windDirection: number;
   rain: boolean;
   visibility: number;
@@ -74,6 +77,7 @@ export interface HourlyData {
   precipitation: number[];
   visibility: number[];
   wind_speed_10m: number[];
+  wind_gusts_10m: number[];
   weather_code: number[];
 }
 
@@ -96,6 +100,8 @@ export interface ForecastGraphDataPoint {
   forecastSource: "bewdley" | "linear";
   temperature?: number;
   windSpeed?: number;
+  windGust?: number;
+  gustStatus?: Status;
 }
 
 export interface DayForecast {

@@ -34,6 +34,7 @@ import { REASON_ICONS, WARNING_COLORS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
+import Air from "@mui/icons-material/Air";
 import { isSameDay, parseISO } from "date-fns";
 import { tz } from "@date-fns/tz";
 import { formatMetTime } from "@/lib/weather";
@@ -68,12 +69,12 @@ const CustomTooltip = ({
             ? "Source: Bewdley upstream forecast"
             : "Source: Local trend (linear)"}
         </Typography>
-        {data.reasons && data.reasons.length > 0 && (
+        {((data.reasons && data.reasons.length > 0) || data.gustStatus) && (
           <Box sx={{ mt: 1 }}>
             <Typography variant="subtitle2" color="text.secondary">
               Contributing Factors
             </Typography>
-            {data.reasons.map((reason: string, index: number) => {
+            {data.reasons?.map((reason: string, index: number) => {
               const Icon = REASON_ICONS[reason];
               return (
                 <Box
@@ -87,6 +88,25 @@ const CustomTooltip = ({
                 </Box>
               );
             })}
+            {data.gustStatus && (
+              <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
+                <Air fontSize="small" />
+                <Typography variant="caption" sx={{ ml: 1 }}>
+                  Gusts up to {Math.round(data.windGust!)} mph
+                </Typography>
+                <Box
+                  title={`Would be ${data.gustStatus} if sustained`}
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    backgroundColor: ragStatus[data.gustStatus].color,
+                    ml: 1,
+                    flexShrink: 0,
+                  }}
+                />
+              </Box>
+            )}
           </Box>
         )}
       </Paper>
@@ -145,24 +165,54 @@ const BarLabel = (props: BarLabelProps) => {
   const entry = data[index];
   if (!entry) return null;
 
+  const elements: React.ReactNode[] = [];
+  let clearAbove = 0;
+
   if (entry.status === "No Paddling") {
     const Icon = ragStatus[entry.status]?.icon;
     if (Icon) {
-      return (
-        <g>
-          <foreignObject
-            x={x + width / 2 - 12}
-            y={y - 28}
-            width={24}
-            height={24}
-          >
-            <Icon sx={{ color: theme.palette.error.main, fontSize: 24 }} />
-          </foreignObject>
-        </g>
+      elements.push(
+        <foreignObject
+          key="no-paddling"
+          x={x + width / 2 - 12}
+          y={y - 28}
+          width={24}
+          height={24}
+        >
+          <Icon sx={{ color: theme.palette.error.main, fontSize: 24 }} />
+        </foreignObject>
       );
+      clearAbove = 28;
     }
   }
-  return null;
+
+  // Heads-up dot for a notable gust - coloured by the status that gust would
+  // imply if it were sustained wind. Sits above any No Paddling icon so the
+  // two never overlap.
+  if (entry.gustStatus) {
+    elements.push(
+      <foreignObject
+        key="gust-dot"
+        x={x + width / 2 - 5}
+        y={y - clearAbove - 14}
+        width={10}
+        height={10}
+      >
+        <Box
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            backgroundColor: ragStatus[entry.gustStatus].color,
+            border: `1px solid ${theme.palette.background.paper}`,
+          }}
+        />
+      </foreignObject>
+    );
+  }
+
+  if (elements.length === 0) return null;
+  return <g>{elements}</g>;
 };
 
 const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({

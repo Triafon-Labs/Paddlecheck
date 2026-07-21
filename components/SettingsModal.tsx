@@ -503,7 +503,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               return (
                 <ThresholdRow
                   key={key}
-                  icon={<Visibility fontSize="small" />}
+                  icon={
+                    isBad ? (
+                      <Foggy fontSize="small" />
+                    ) : (
+                      <Visibility fontSize="small" />
+                    )
+                  }
                   label={`${desc} (${range})`}
                   description={
                     isBad

@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.20.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.19.0...paddlecheck-v1.20.0) (2026-07-21)
+
+
+### Features
+
+* show gust dot on forecast bars and explain it in Conditions Key ([cb8073e](https://github.com/dylanr97/Paddlecheck/commit/cb8073e1edccd8e5792469489b96aee218652d85))
+* show wind gust awareness note without affecting RAG status ([8f66bae](https://github.com/dylanr97/Paddlecheck/commit/8f66baef0de606a68564bea4a973d8155dc3e479))
+
+
+### Bug Fixes
+
+* loosen AI briefing prompt to stop run-on, comma-spliced summaries ([606b62f](https://github.com/dylanr97/Paddlecheck/commit/606b62f010eb07547373b155fb436b051ca1c9fc))
+* mention gusts alongside wind speed in AI briefing, not as own sentence ([ad2bfc7](https://github.com/dylanr97/Paddlecheck/commit/ad2bfc78fab067cb4d288feec7b0e872455fbe10))
+* say "gusts up to X" instead of "gusts to X" ([8c30054](https://github.com/dylanr97/Paddlecheck/commit/8c30054c3381aead8b2cbe9090a1e392487a6a85))
+* say "Gusts" instead of "Gusting" and feed gusts into AI briefing ([f97b71e](https://github.com/dylanr97/Paddlecheck/commit/f97b71e6728384e9517a4a43dfe875984acad29c))
+* tell AI briefing to write river level with no space before "m" ([d572f3f](https://github.com/dylanr97/Paddlecheck/commit/d572f3f3e1685ec02a36e7eace9aa9fdb3c7dedc))
+
 ## [1.19.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.18.3...paddlecheck-v1.19.0) (2026-07-21)
 
 

@@ -193,3 +193,14 @@ export const getGustStatus = (
   }
   return calculateFinalRagStatus({ ...conditions, windSpeed: windGust }).status;
 };
+
+// Rain is only counted towards the RAG when it's not warm (see
+// getWeatherConditions above) - above TEMP_HIGH it's dropped entirely, so
+// there'd otherwise be no signal at all that it's raining.
+export const isRainWhileWarm = (
+  conditions: Partial<KayakConditions>
+): boolean => {
+  const { temperature, rain } = conditions;
+  if (temperature === undefined || !rain) return false;
+  return temperature >= THRESHOLDS.TEMP_HIGH;
+};

@@ -21,6 +21,7 @@ export interface KayakConditions {
   gustStatus?: Status;
   windDirection?: number;
   rain?: boolean;
+  rainWhileWarm?: boolean;
   dark?: boolean;
   visibility?: number;
   visibilityDescription?: string;
@@ -102,6 +103,7 @@ export interface ForecastGraphDataPoint {
   windSpeed?: number;
   windGust?: number;
   gustStatus?: Status;
+  rainWhileWarm?: boolean;
 }
 
 export interface DayForecast {

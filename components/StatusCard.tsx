@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import HelpOutlined from "@mui/icons-material/HelpOutlined";
 import Air from "@mui/icons-material/Air";
+import WaterDrop from "@mui/icons-material/WaterDrop";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import { ragStatus, reasonIcons } from "@/lib/rag";
@@ -128,8 +129,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
             </Box>
           )}
 
-          {((conditions.reasons && conditions.reasons.length > 0) ||
-            conditions.gustStatus) && (
+          {conditions.reasons && conditions.reasons.length > 0 && (
             <Box sx={{ mt: 2 }}>
               <Typography variant="subtitle2" color="text.secondary">
                 Contributing Factors
@@ -145,7 +145,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                   },
                 }}
               >
-                {conditions.reasons?.map((reason, index) => {
+                {conditions.reasons.map((reason, index) => {
                   const Icon = reasonIcons[reason] ?? HelpOutlined;
                   return (
                     <Paper
@@ -165,6 +165,15 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                     </Paper>
                   );
                 })}
+              </Box>
+            </Box>
+          )}
+          {(conditions.gustStatus || conditions.rainWhileWarm) && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Be Aware
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
                 {conditions.gustStatus && (
                   <Paper
                     elevation={0}
@@ -172,7 +181,6 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                       p: 1.5,
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
                       gap: 1,
                       backgroundColor: "action.hover",
                     }}
@@ -189,8 +197,26 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                         borderRadius: "50%",
                         backgroundColor: ragStatus[conditions.gustStatus].color,
                         flexShrink: 0,
+                        ml: "auto",
                       }}
                     />
+                  </Paper>
+                )}
+                {conditions.rainWhileWarm && (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 1.5,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      backgroundColor: "action.hover",
+                    }}
+                  >
+                    <WaterDrop fontSize="small" sx={{ color: "primary.main" }} />
+                    <Typography variant="body2">
+                      Raining - too warm to affect the rating
+                    </Typography>
                   </Paper>
                 )}
               </Box>

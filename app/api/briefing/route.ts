@@ -41,6 +41,8 @@ If a status name would fall at the very start of a sentence, rephrase to avoid l
 
 Wind gusts are given separately from sustained wind speed and are not part of the status calculation - never treat a gust figure as raising or changing the status. Only mention gusts when they're provided, and fold them in right alongside the wind speed figure itself (e.g. "wind around 12mph, gusting up to 24mph") rather than as a separate sentence elsewhere.
 
+Rain that's flagged as occurring at a warm temperature is deliberately excluded from the status calculation - it's only mentioned as a courtesy heads-up, never as something that lowers the status. When this is flagged, briefly mention that it's raining alongside the temperature figure (e.g. "a warm 18°C with some rain") rather than treating it as a mark against conditions.
+
 If there are any gaps, splits, or temporary dips in the best paddling conditions during the day (e.g. if conditions are light green from sunrise until 19:00 and again from 20:00 to sunset), you must naturally and briefly explain the reason for the gap (e.g., "due to a brief windy period" or "with a brief amber dip at 19:00 due to increased wind"). Avoid stating "a gap from 19:00 to 20:00" without explaining the physical reason (wind, temperature, or rain) shown in the hour-by-hour entries.
 
 Strict negative constraint: Do not use any parenthetical or bracketed text to explain or contain figures, speeds, reasons, or notes in the output (for example, avoid "(15 mph)" or "[due to wind]"). All details must flow naturally as part of the sentence itself.
@@ -109,7 +111,11 @@ function buildConditionsParts(req: SummaryRequest): string {
     conditions.windGust >= THRESHOLDS.WIND_GUST_NOTABLE
       ? `Wind gusts: ${Math.round(conditions.windGust)} mph (gusts only - not sustained wind, and not part of the status calculation)`
       : null,
-    conditions.rain ? `Rain: ${conditions.weatherDescription || "yes"}` : null,
+    conditions.rain
+      ? conditions.rainWhileWarm
+        ? `Rain: ${conditions.weatherDescription || "yes"} (occurring at a warm temperature - deliberately not part of the status calculation, mention only as a brief heads-up)`
+        : `Rain: ${conditions.weatherDescription || "yes"}`
+      : null,
     conditions.visibilityDescription &&
     conditions.visibility !== undefined &&
     conditions.visibility < VISIBILITY_DESCRIPTIONS.MODERATE.min

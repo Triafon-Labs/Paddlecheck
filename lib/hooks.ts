@@ -11,6 +11,7 @@ import {
   findLevelDescription,
   calculateInitialRagStatus,
   getGustStatus,
+  isRainWhileWarm,
   RAG_STATUS_MAP,
   ragHeight,
 } from "@/lib/rag";
@@ -281,6 +282,7 @@ export const useKayakData = () => {
       const initialStatus = RAG_STATUS_MAP[initialRagNumber];
       const { status, reasons } = calculateFinalRagStatus(currentConditions);
       const gustStatus = getGustStatus(currentConditions);
+      const rainWhileWarm = isRainWhileWarm(currentConditions);
       const visibilityDescription = getVisibilityDescription(
         currentConditions.visibility ?? 0
       );
@@ -294,6 +296,7 @@ export const useKayakData = () => {
         overallStatus: status,
         reasons: reasons,
         gustStatus,
+        rainWhileWarm,
         warnings: warningsData,
         levelChange: {
           value: riverData.change8h ?? 0,
@@ -411,6 +414,7 @@ export const useKayakData = () => {
           const { status: forecastStatus, reasons: forecastReasons } =
             calculateFinalRagStatus(forecastConditions);
           const forecastGustStatus = getGustStatus(forecastConditions);
+          const forecastRainWhileWarm = isRainWhileWarm(forecastConditions);
 
           graphData.push({
             time: `${h}:00`,
@@ -423,6 +427,7 @@ export const useKayakData = () => {
             windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
             windGust: futureWeatherData.hourly.wind_gusts_10m[index],
             gustStatus: forecastGustStatus,
+            rainWhileWarm: forecastRainWhileWarm,
           });
 
           // Only include Bewdley-backed points in the river level graph forecast

@@ -473,8 +473,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 />
               }
               label={`Gust dot (${THRESHOLDS.WIND_GUST_NOTABLE} mph+)`}
-              description="A heads-up only, not a rating change: shown next to a 'Gusts up to Xmph' note and on forecast bars when gusts pass this speed. The dot's colour is just what the rating would be if that gust were sustained wind, not what it actually is - use it as a prompt to check conditions yourself, not a verdict."
-              chipLabel="Heads-up"
+              description="Not a rating change: shown in a 'Be Aware' note next to 'Gusts up to Xmph', and on forecast bars, when gusts pass this speed. The dot's colour is just what the rating would be if that gust were sustained wind, not what it actually is - use it as a prompt to check conditions yourself, not a verdict."
+              chipLabel="Be Aware"
               chipColor="default"
             />
 
@@ -532,6 +532,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               description="Rain at cool temperatures (5–12°C) raises the risk rating."
               chipLabel="Raises rating"
               chipColor="warning"
+            />
+            <ThresholdRow
+              icon={<WaterDrop fontSize="small" />}
+              label={`Rain at ${THRESHOLDS.TEMP_HIGH}°C+`}
+              description="Not a rating change: shown in a 'Be Aware' note so you still know it's raining, even though warm rain isn't counted against the rating."
+              chipLabel="Be Aware"
+              chipColor="default"
             />
             <ThresholdRow
               icon={<NightsStay fontSize="small" />}

@@ -38,6 +38,7 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import { ChartDataPoint } from "@/types";
+import { useNowTicking, formatDataAge } from "@/lib/time";
 
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
@@ -168,10 +169,16 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     localStorage.setItem("riverGraphTimeRange", timeRange);
   }, [timeRange]);
 
-  const filteredData = useMemo(() => {
-    if (!data || timeRange === "forecast") return null;
+  const now = useNowTicking();
 
-    const now = new Date();
+  const dataAgeLabel = useMemo(() => {
+    if (!data || data.length === 0) return null;
+    return formatDataAge(new Date(data[data.length - 1].dateTime).getTime(), now);
+  }, [data, now]);
+
+  const filteredData = useMemo(() => {
+    if (!data || data.length === 0 || timeRange === "forecast") return null;
+
     let hoursToFilter;
     if (timeRange === "1h") {
       hoursToFilter = 1;
@@ -183,7 +190,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
       return data;
     }
 
-    const filterDate = new Date(now.getTime() - hoursToFilter * 60 * 60 * 1000);
+    // Anchor the window to the latest reading rather than wall-clock "now" so
+    // the graph always shows a full window even when the data feed is lagging.
+    const latest = new Date(data[data.length - 1].dateTime).getTime();
+    const filterDate = new Date(latest - hoursToFilter * 60 * 60 * 1000);
 
     return data.filter((d) => new Date(d.dateTime) > filterDate);
   }, [data, timeRange]);
@@ -268,20 +278,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return Math.max(Math.ceil(Math.max(...allLevels)), 1);
   }, [combinedForecastData]);
 
-  // One tick per calendar day (midnight) for the forecast view
+  // Evenly-spaced ticks every 12 hours for the forecast view
   const forecastTicks = useMemo(() => {
-    if (!combinedForecastData || combinedForecastData.length === 0) return [];
-    const start = new Date(combinedForecastData[0].ts);
-    const end = new Date(combinedForecastData[combinedForecastData.length - 1].ts);
-    const ticks: number[] = [];
-    const cursor = new Date(start);
-    cursor.setHours(0, 0, 0, 0);
-    cursor.setDate(cursor.getDate() + 1); // first midnight after start
-    while (cursor <= end) {
-      ticks.push(cursor.getTime());
-      cursor.setDate(cursor.getDate() + 1);
-    }
-    return ticks;
+    if (!combinedForecastData) return [];
+    return makeTicks(combinedForecastData, 12 * 60 * 60 * 1000);
   }, [combinedForecastData]);
 
   // Forecasted change over the next 24 hours: forecasted level at now+24h minus current actual level
@@ -309,7 +309,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   };
 
   const formatForecastTick = (ts: number) =>
-    new Date(ts).toLocaleDateString([], { month: "short", day: "numeric" });
+    new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   const renderContent = () => {
     if (loading) {
@@ -322,7 +322,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
       return (
         <>
           <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart data={combinedForecastData}>
+            <ComposedChart
+              data={combinedForecastData}
+              margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
+            >
               <defs>
                 <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.8} />
@@ -337,7 +340,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 domain={["dataMin", "dataMax"]}
                 ticks={forecastTicks}
                 tickFormatter={formatForecastTick}
-
+                tick={{ fontSize: 12 }}
                 interval={0}
               />
               <YAxis stroke={theme.palette.text.secondary} domain={[0, forecastYDomainMax]} />
@@ -381,7 +384,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     if (filteredData) {
       return (
         <ResponsiveContainer width="100%" height={200}>
-          <ComposedChart data={filteredDataWithTs ?? undefined}>
+          <ComposedChart
+            data={filteredDataWithTs ?? undefined}
+            margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
+          >
             <defs>
               <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
                 <stop
@@ -407,6 +413,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               domain={["dataMin", "dataMax"]}
               ticks={historicalTicks}
               tickFormatter={formatXAxis}
+              tick={{ fontSize: 12 }}
               interval={0}
             />
             <YAxis
@@ -451,33 +458,44 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             ))}
           </Box>
         ) : (
-          <ToggleButtonGroup
-            value={timeRange}
-            exclusive
-            onChange={(_event, newTimeRange) => {
-              if (newTimeRange) {
-                setTimeRange(newTimeRange);
-              }
-            }}
-            aria-label="time range"
-            sx={{ mt: 1, mb: 2, width: "100%" }}
-          >
-            <ToggleButton value="forecast" aria-label="forecast" sx={{ flex: 1 }}>
-              <Typography variant="caption">Forecast</Typography>
-            </ToggleButton>
-            <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
-              <Typography variant="caption">5d</Typography>
-            </ToggleButton>
-            <ToggleButton value="24h" aria-label="24 hours" sx={{ flex: 1 }}>
-              <Typography variant="caption">24h</Typography>
-            </ToggleButton>
-            <ToggleButton value="8h" aria-label="8 hours" sx={{ flex: 1 }}>
-              <Typography variant="caption">8h</Typography>
-            </ToggleButton>
-            <ToggleButton value="1h" aria-label="1 hour" sx={{ flex: 1 }}>
-              <Typography variant="caption">1h</Typography>
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <>
+            {dataAgeLabel && (
+              <Typography
+                variant="caption"
+                color="text.disabled"
+                sx={{ display: "block", textAlign: "right", fontSize: "0.7rem", mt: 1 }}
+              >
+                As of {dataAgeLabel}
+              </Typography>
+            )}
+            <ToggleButtonGroup
+              value={timeRange}
+              exclusive
+              onChange={(_event, newTimeRange) => {
+                if (newTimeRange) {
+                  setTimeRange(newTimeRange);
+                }
+              }}
+              aria-label="time range"
+              sx={{ mt: 0.5, mb: 2, width: "100%" }}
+            >
+              <ToggleButton value="forecast" aria-label="forecast" sx={{ flex: 1 }}>
+                <Typography variant="caption">Forecast</Typography>
+              </ToggleButton>
+              <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
+                <Typography variant="caption">5d</Typography>
+              </ToggleButton>
+              <ToggleButton value="24h" aria-label="24 hours" sx={{ flex: 1 }}>
+                <Typography variant="caption">24h</Typography>
+              </ToggleButton>
+              <ToggleButton value="8h" aria-label="8 hours" sx={{ flex: 1 }}>
+                <Typography variant="caption">8h</Typography>
+              </ToggleButton>
+              <ToggleButton value="1h" aria-label="1 hour" sx={{ flex: 1 }}>
+                <Typography variant="caption">1h</Typography>
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </>
         )}
         {renderContent()}
         <Box

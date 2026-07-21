@@ -343,7 +343,9 @@ export const useKayakData = () => {
           ? parseInt(sunset.split("T")[1].split(":")[0], 10)
           : null;
 
-        const hourStart = d === 0 ? currentHour : 0;
+        // Skip the hour we're already in - it's a mix of past and future by
+        // the time it's shown, so the forecast starts from the next full hour.
+        const hourStart = d === 0 ? currentHour + 1 : 0;
         const graphData = [];
 
         for (let h = hourStart; h < 24; h++) {
@@ -404,28 +406,15 @@ export const useKayakData = () => {
           const { status: forecastStatus, reasons: forecastReasons } =
             calculateFinalRagStatus(forecastConditions);
 
-          // The "now" point should mirror the live status shown at the top of
-          // the app rather than the backward-looking hourly forecast bucket,
-          // so the graph and the headline status never disagree.
-          const isCurrentHour = d === 0 && h === currentHour;
-          const slotStatus = isCurrentHour ? status : forecastStatus;
-          const slotReasons = isCurrentHour ? reasons : forecastReasons;
-
           graphData.push({
             time: `${h}:00`,
-            status: slotStatus,
-            reasons: slotReasons,
-            value: ragHeight[slotStatus] || 0.1,
-            forecastLevel: isCurrentHour
-              ? (riverData.latestLevel ?? forecastRiverLevel)
-              : forecastRiverLevel,
+            status: forecastStatus,
+            reasons: forecastReasons,
+            value: ragHeight[forecastStatus] || 0.1,
+            forecastLevel: forecastRiverLevel,
             forecastSource,
-            temperature: isCurrentHour
-              ? weatherData.temperature
-              : futureWeatherData.hourly.temperature_2m[index],
-            windSpeed: isCurrentHour
-              ? weatherData.windSpeed
-              : futureWeatherData.hourly.wind_speed_10m[index],
+            temperature: futureWeatherData.hourly.temperature_2m[index],
+            windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
           });
 
           // Only include Bewdley-backed points in the river level graph forecast

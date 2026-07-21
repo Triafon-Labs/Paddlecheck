@@ -41,6 +41,7 @@ export default function HomePage() {
           conditions={conditions}
           loading={loading}
           reasons={conditions?.reasons || []}
+          riverReadings={riverGraphData}
         />
         <RiverLevelGraph
           data={riverGraphData}

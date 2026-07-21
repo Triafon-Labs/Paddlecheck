@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -16,15 +16,17 @@ import Water from "@mui/icons-material/Water";
 import WaterDrop from "@mui/icons-material/WaterDrop";
 import NightsStay from "@mui/icons-material/NightsStay";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
-import { KayakConditions } from "@/types";
+import { ChartDataPoint, KayakConditions } from "@/types";
 import { degreesToCompass } from "@/lib/weather";
 import { THRESHOLDS } from "@/lib/config";
 import { ragStatus, LEVEL_DESCRIPTIONS } from "@/lib/rag";
+import { useNowTicking, formatDataAge } from "@/lib/time";
 
 interface StatsCardProps {
   conditions: KayakConditions | null;
   loading: boolean;
   reasons: string[];
+  riverReadings: ChartDataPoint[] | null;
 }
 
 interface ScaleRow {
@@ -82,7 +84,8 @@ const StatItem: React.FC<{
 const RiverLevelSection: React.FC<{
   conditions: KayakConditions;
   isInfluencing: boolean;
-}> = ({ conditions, isInfluencing }) => {
+  dataAgeLabel: string | null;
+}> = ({ conditions, isInfluencing, dataAgeLabel }) => {
   const { riverLevel, overallStatus, levelChange } = conditions;
   if (riverLevel === undefined) return null;
 
@@ -249,6 +252,15 @@ const RiverLevelSection: React.FC<{
                 }}
               >
                 {row.desc}
+                {row.isReading && dataAgeLabel && (
+                  <Typography
+                    component="span"
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontStyle: "normal", ml: 0.5 }}
+                  >
+                    ({dataAgeLabel})
+                  </Typography>
+                )}
               </Typography>
               {row.current && !row.isReading && (
                 <Typography
@@ -256,6 +268,7 @@ const RiverLevelSection: React.FC<{
                   sx={{ color: "text.secondary", fontStyle: "italic" }}
                 >
                   Currently {riverLevel.toFixed(2)}m
+                  {dataAgeLabel ? ` (${dataAgeLabel})` : ""}
                 </Typography>
               )}
             </Box>
@@ -266,7 +279,21 @@ const RiverLevelSection: React.FC<{
   );
 };
 
-const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) => {
+const StatsCard: React.FC<StatsCardProps> = ({
+  conditions,
+  loading,
+  reasons,
+  riverReadings,
+}) => {
+  const now = useNowTicking();
+  const dataAgeLabel = useMemo(() => {
+    if (!riverReadings || riverReadings.length === 0) return null;
+    return formatDataAge(
+      new Date(riverReadings[riverReadings.length - 1].dateTime).getTime(),
+      now
+    );
+  }, [riverReadings, now]);
+
   if (loading) {
     return (
       <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
@@ -338,6 +365,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) =
         <Box sx={{ mt: 1 }}>
           <RiverLevelSection
             conditions={conditions}
+            dataAgeLabel={dataAgeLabel}
             isInfluencing={reasons.some((r) => r.includes("river level"))}
           />
           <StatItem

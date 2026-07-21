@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.19.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.18.3...paddlecheck-v1.19.0) (2026-07-21)
+
+
+### Features
+
+* show data-age note on Detailed Stats; drop in-progress hour from Today's forecast ([f385c6e](https://github.com/dylanr97/Paddlecheck/commit/f385c6ea4fbd8a3bc1ba1d67bf136bc0cbaaa651))
+* show data-age note under River Level graph ([9c6717c](https://github.com/dylanr97/Paddlecheck/commit/9c6717c9a16d6d3f535d0b6b79a8d80d37a47378))
+
+
+### Bug Fixes
+
+* anchor River Level time-range filters to latest reading, not wall clock ([444dce7](https://github.com/dylanr97/Paddlecheck/commit/444dce7a6253d2ef5a12ab77d7751fdcf4d78972))
+* attach data-age note to the river reading itself, not the whole Detailed Stats card ([147cfbf](https://github.com/dylanr97/Paddlecheck/commit/147cfbfb181e139bd422cf462b5091402fa56195))
+* make graph X-axis tick spacing consistent and prevent label clipping ([b093f21](https://github.com/dylanr97/Paddlecheck/commit/b093f21ba1225c213f88e05c4aef51888705d88c))
+* remove XAxis padding that left gaps around the plotted data ([5e99fe9](https://github.com/dylanr97/Paddlecheck/commit/5e99fe92b974bae4934bc65fb2dfcdc88bf127f5))
+* reword and reposition data-age note on River Level graph ([677bec1](https://github.com/dylanr97/Paddlecheck/commit/677bec1fd4895f412b2df2063a453cfe563310b6))
+* widen Paddling Forecast left margin and show times on River Level forecast axis ([6e79f22](https://github.com/dylanr97/Paddlecheck/commit/6e79f225c182c6dd456b1e16b82976618f6521cc))
+
 ## [1.18.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.18.2...paddlecheck-v1.18.3) (2026-07-19)
 
 

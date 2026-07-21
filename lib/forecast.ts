@@ -177,7 +177,10 @@ export function buildHourlyForecastText(
       pt.windGust !== undefined && pt.windGust >= THRESHOLDS.WIND_GUST_NOTABLE
         ? `gusts up to ${Math.round(pt.windGust)} mph`
         : null;
-    const stats = [level, launch, temp, wind, gust].filter(Boolean).join(", ");
+    const rainNote = pt.rainWhileWarm ? "rain (warm, no rating impact)" : null;
+    const stats = [level, launch, temp, wind, gust, rainNote]
+      .filter(Boolean)
+      .join(", ");
     const nonDarkReasons = pt.reasons.filter((r) => r !== "Dark");
     const note =
       nonDarkReasons.length > 0 ? ` [${nonDarkReasons.join(", ")}]` : "";
@@ -276,7 +279,11 @@ export function buildNextDaytimeOutlook(
       ? `gusts up to ${Math.round(maxGust)} mph`
       : null;
 
-  const rangesText = [levelText, tempText, windText, gustText]
+  const rainWhileWarmText = daySlots.some((s) => s.rainWhileWarm)
+    ? "rain at times (warm, no rating impact)"
+    : null;
+
+  const rangesText = [levelText, tempText, windText, gustText, rainWhileWarmText]
     .filter(Boolean)
     .join(", ");
 

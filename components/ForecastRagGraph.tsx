@@ -35,6 +35,7 @@ import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
 import Air from "@mui/icons-material/Air";
+import WaterDrop from "@mui/icons-material/WaterDrop";
 import { isSameDay, parseISO } from "date-fns";
 import { tz } from "@date-fns/tz";
 import { formatMetTime } from "@/lib/weather";
@@ -69,12 +70,12 @@ const CustomTooltip = ({
             ? "Source: Bewdley upstream forecast"
             : "Source: Local trend (linear)"}
         </Typography>
-        {((data.reasons && data.reasons.length > 0) || data.gustStatus) && (
+        {data.reasons && data.reasons.length > 0 && (
           <Box sx={{ mt: 1 }}>
             <Typography variant="subtitle2" color="text.secondary">
               Contributing Factors
             </Typography>
-            {data.reasons?.map((reason: string, index: number) => {
+            {data.reasons.map((reason: string, index: number) => {
               const Icon = REASON_ICONS[reason];
               return (
                 <Box
@@ -88,6 +89,13 @@ const CustomTooltip = ({
                 </Box>
               );
             })}
+          </Box>
+        )}
+        {(data.gustStatus || data.rainWhileWarm) && (
+          <Box sx={{ mt: 1 }}>
+            <Typography variant="subtitle2" color="text.secondary">
+              Be Aware
+            </Typography>
             {data.gustStatus && (
               <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
                 <Air fontSize="small" />
@@ -105,6 +113,14 @@ const CustomTooltip = ({
                     flexShrink: 0,
                   }}
                 />
+              </Box>
+            )}
+            {data.rainWhileWarm && (
+              <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
+                <WaterDrop fontSize="small" />
+                <Typography variant="caption" sx={{ ml: 1 }}>
+                  {data.weatherDescription || "Rain"}
+                </Typography>
               </Box>
             )}
           </Box>

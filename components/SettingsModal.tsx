@@ -119,7 +119,16 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({
   ragColor,
 }) => (
   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.5 }}>
-    <Box sx={{ color: "text.secondary", display: "flex", flexShrink: 0 }}>
+    <Box
+      sx={{
+        color: "text.secondary",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+        width: 20,
+      }}
+    >
       {icon}
     </Box>
     <Box sx={{ flex: 1 }}>
@@ -425,7 +434,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             <ThresholdRow
               icon={<AcUnit fontSize="small" />}
               label={`Below ${THRESHOLDS.TEMP_MODERATE}°C`}
-              description="Cold. Cold water shock risk. Significant increase in risk rating."
+              description="Cold air, and likely cold water too - capsizing is far more dangerous with nowhere warm to recover. Significant increase in risk rating."
               chipLabel="Cold"
               chipColor="error"
             />
@@ -464,8 +473,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 />
               }
               label={`Gust dot (${THRESHOLDS.WIND_GUST_NOTABLE} mph+)`}
-              description="A heads-up only, not a rating change: shown next to a 'Gusts up to Xmph' note and on forecast bars when gusts pass this speed. The dot's colour is just what the rating would be if that gust were sustained wind, not what it actually is - use it as a prompt to check conditions yourself, not a verdict."
-              chipLabel="Heads-up"
+              description="Not a rating change - shown for awareness. Colour shows what the rating would be if the gust were sustained wind."
+              chipLabel="Be Aware"
               chipColor="default"
             />
 
@@ -494,7 +503,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               return (
                 <ThresholdRow
                   key={key}
-                  icon={<Visibility fontSize="small" />}
+                  icon={
+                    isBad ? (
+                      <Foggy fontSize="small" />
+                    ) : (
+                      <Visibility fontSize="small" />
+                    )
+                  }
                   label={`${desc} (${range})`}
                   description={
                     isBad
@@ -523,6 +538,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               description="Rain at cool temperatures (5–12°C) raises the risk rating."
               chipLabel="Raises rating"
               chipColor="warning"
+            />
+            <ThresholdRow
+              icon={<WaterDrop fontSize="small" />}
+              label={`Rain at ${THRESHOLDS.TEMP_HIGH}°C+`}
+              description="Not a rating change - shown for awareness. Lets you know it's raining, even though rain doesn't count against the rating once it's this warm."
+              chipLabel="Be Aware"
+              chipColor="default"
             />
             <ThresholdRow
               icon={<NightsStay fontSize="small" />}

@@ -268,20 +268,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return Math.max(Math.ceil(Math.max(...allLevels)), 1);
   }, [combinedForecastData]);
 
-  // One tick per calendar day (midnight) for the forecast view
+  // Evenly-spaced ticks every 12 hours for the forecast view
   const forecastTicks = useMemo(() => {
-    if (!combinedForecastData || combinedForecastData.length === 0) return [];
-    const start = new Date(combinedForecastData[0].ts);
-    const end = new Date(combinedForecastData[combinedForecastData.length - 1].ts);
-    const ticks: number[] = [];
-    const cursor = new Date(start);
-    cursor.setHours(0, 0, 0, 0);
-    cursor.setDate(cursor.getDate() + 1); // first midnight after start
-    while (cursor <= end) {
-      ticks.push(cursor.getTime());
-      cursor.setDate(cursor.getDate() + 1);
-    }
-    return ticks;
+    if (!combinedForecastData) return [];
+    return makeTicks(combinedForecastData, 12 * 60 * 60 * 1000);
   }, [combinedForecastData]);
 
   // Forecasted change over the next 24 hours: forecasted level at now+24h minus current actual level
@@ -309,7 +299,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   };
 
   const formatForecastTick = (ts: number) =>
-    new Date(ts).toLocaleDateString([], { month: "short", day: "numeric" });
+    new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   const renderContent = () => {
     if (loading) {

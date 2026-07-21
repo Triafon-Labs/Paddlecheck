@@ -231,7 +231,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         <ResponsiveContainer width="100%" height={200}>
           <ComposedChart
             data={chartData}
-            margin={{ top: 40, right: 15, left: 5, bottom: 5 }}
+            margin={{ top: 40, right: 15, left: 15, bottom: 5 }}
           >
             <XAxis
               dataKey="time"

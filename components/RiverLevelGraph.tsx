@@ -38,6 +38,7 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import { ChartDataPoint } from "@/types";
+import { useNowTicking, formatDataAge } from "@/lib/time";
 
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
@@ -168,24 +169,11 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     localStorage.setItem("riverGraphTimeRange", timeRange);
   }, [timeRange]);
 
-  // Ticks once a minute so the "data age" note stays accurate for as long as
-  // the card stays open, even without a refetch.
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const now = useNowTicking();
 
   const dataAgeLabel = useMemo(() => {
     if (!data || data.length === 0) return null;
-    const latestTs = new Date(data[data.length - 1].dateTime).getTime();
-    const ageMinutes = Math.round((now.getTime() - latestTs) / (60 * 1000));
-    if (ageMinutes < 1) return "As of just now";
-    if (ageMinutes < 60) return `As of ${ageMinutes} min ago`;
-    const hours = Math.floor(ageMinutes / 60);
-    const minutes = ageMinutes % 60;
-    const duration = minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
-    return `As of ${duration} ago`;
+    return formatDataAge(new Date(data[data.length - 1].dateTime).getTime(), now);
   }, [data, now]);
 
   const filteredData = useMemo(() => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -16,15 +16,17 @@ import Water from "@mui/icons-material/Water";
 import WaterDrop from "@mui/icons-material/WaterDrop";
 import NightsStay from "@mui/icons-material/NightsStay";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
-import { KayakConditions } from "@/types";
+import { ChartDataPoint, KayakConditions } from "@/types";
 import { degreesToCompass } from "@/lib/weather";
 import { THRESHOLDS } from "@/lib/config";
 import { ragStatus, LEVEL_DESCRIPTIONS } from "@/lib/rag";
+import { useNowTicking, formatDataAge } from "@/lib/time";
 
 interface StatsCardProps {
   conditions: KayakConditions | null;
   loading: boolean;
   reasons: string[];
+  riverReadings: ChartDataPoint[] | null;
 }
 
 interface ScaleRow {
@@ -266,7 +268,21 @@ const RiverLevelSection: React.FC<{
   );
 };
 
-const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) => {
+const StatsCard: React.FC<StatsCardProps> = ({
+  conditions,
+  loading,
+  reasons,
+  riverReadings,
+}) => {
+  const now = useNowTicking();
+  const dataAgeLabel = useMemo(() => {
+    if (!riverReadings || riverReadings.length === 0) return null;
+    return formatDataAge(
+      new Date(riverReadings[riverReadings.length - 1].dateTime).getTime(),
+      now
+    );
+  }, [riverReadings, now]);
+
   if (loading) {
     return (
       <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
@@ -332,9 +348,16 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading, reasons }) =
   return (
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
-        <Typography variant="h5" component="div" gutterBottom>
-          Detailed Stats
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+          <Typography variant="h5" component="div" gutterBottom>
+            Detailed Stats
+          </Typography>
+          {dataAgeLabel && (
+            <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.7rem" }}>
+              {dataAgeLabel}
+            </Typography>
+          )}
+        </Box>
         <Box sx={{ mt: 1 }}>
           <RiverLevelSection
             conditions={conditions}

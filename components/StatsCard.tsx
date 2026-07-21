@@ -84,7 +84,8 @@ const StatItem: React.FC<{
 const RiverLevelSection: React.FC<{
   conditions: KayakConditions;
   isInfluencing: boolean;
-}> = ({ conditions, isInfluencing }) => {
+  dataAgeLabel: string | null;
+}> = ({ conditions, isInfluencing, dataAgeLabel }) => {
   const { riverLevel, overallStatus, levelChange } = conditions;
   if (riverLevel === undefined) return null;
 
@@ -251,6 +252,15 @@ const RiverLevelSection: React.FC<{
                 }}
               >
                 {row.desc}
+                {row.isReading && dataAgeLabel && (
+                  <Typography
+                    component="span"
+                    variant="caption"
+                    sx={{ color: "text.secondary", fontStyle: "normal", ml: 0.5 }}
+                  >
+                    ({dataAgeLabel})
+                  </Typography>
+                )}
               </Typography>
               {row.current && !row.isReading && (
                 <Typography
@@ -258,6 +268,7 @@ const RiverLevelSection: React.FC<{
                   sx={{ color: "text.secondary", fontStyle: "italic" }}
                 >
                   Currently {riverLevel.toFixed(2)}m
+                  {dataAgeLabel ? ` (${dataAgeLabel})` : ""}
                 </Typography>
               )}
             </Box>
@@ -348,19 +359,13 @@ const StatsCard: React.FC<StatsCardProps> = ({
   return (
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
-        <Box sx={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-          <Typography variant="h5" component="div" gutterBottom>
-            Detailed Stats
-          </Typography>
-          {dataAgeLabel && (
-            <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.7rem" }}>
-              {dataAgeLabel}
-            </Typography>
-          )}
-        </Box>
+        <Typography variant="h5" component="div" gutterBottom>
+          Detailed Stats
+        </Typography>
         <Box sx={{ mt: 1 }}>
           <RiverLevelSection
             conditions={conditions}
+            dataAgeLabel={dataAgeLabel}
             isInfluencing={reasons.some((r) => r.includes("river level"))}
           />
           <StatItem

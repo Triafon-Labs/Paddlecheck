@@ -13,10 +13,10 @@ export const useNowTicking = (intervalMs: number = 60 * 1000): Date => {
 
 export const formatDataAge = (latestTs: number, now: Date): string => {
   const ageMinutes = Math.round((now.getTime() - latestTs) / (60 * 1000));
-  if (ageMinutes < 1) return "As of just now";
-  if (ageMinutes < 60) return `As of ${ageMinutes} min ago`;
+  if (ageMinutes < 1) return "just now";
+  if (ageMinutes < 60) return `${ageMinutes} min ago`;
   const hours = Math.floor(ageMinutes / 60);
   const minutes = ageMinutes % 60;
   const duration = minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
-  return `As of ${duration} ago`;
+  return `${duration} ago`;
 };

@@ -465,7 +465,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 color="text.disabled"
                 sx={{ display: "block", textAlign: "right", fontSize: "0.7rem", mt: 1 }}
               >
-                {dataAgeLabel}
+                As of {dataAgeLabel}
               </Typography>
             )}
             <ToggleButtonGroup

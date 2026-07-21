@@ -434,7 +434,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             <ThresholdRow
               icon={<AcUnit fontSize="small" />}
               label={`Below ${THRESHOLDS.TEMP_MODERATE}°C`}
-              description="Cold. Cold water shock risk. Significant increase in risk rating."
+              description="Cold air, and likely cold water too - capsizing is far more dangerous with nowhere warm to recover. Significant increase in risk rating."
               chipLabel="Cold"
               chipColor="error"
             />
@@ -536,7 +536,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             <ThresholdRow
               icon={<WaterDrop fontSize="small" />}
               label={`Rain at ${THRESHOLDS.TEMP_HIGH}°C+`}
-              description="Not a rating change: shown in a 'Be Aware' note so you still know it's raining, even though warm rain isn't counted against the rating."
+              description="Not a rating change - shown for awareness. Lets you know it's raining, even though rain doesn't count against the rating once it's this warm."
               chipLabel="Be Aware"
               chipColor="default"
             />

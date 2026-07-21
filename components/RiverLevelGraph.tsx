@@ -169,9 +169,8 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   }, [timeRange]);
 
   const filteredData = useMemo(() => {
-    if (!data || timeRange === "forecast") return null;
+    if (!data || data.length === 0 || timeRange === "forecast") return null;
 
-    const now = new Date();
     let hoursToFilter;
     if (timeRange === "1h") {
       hoursToFilter = 1;
@@ -183,7 +182,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
       return data;
     }
 
-    const filterDate = new Date(now.getTime() - hoursToFilter * 60 * 60 * 1000);
+    // Anchor the window to the latest reading rather than wall-clock "now" so
+    // the graph always shows a full window even when the data feed is lagging.
+    const latest = new Date(data[data.length - 1].dateTime).getTime();
+    const filterDate = new Date(latest - hoursToFilter * 60 * 60 * 1000);
 
     return data.filter((d) => new Date(d.dateTime) > filterDate);
   }, [data, timeRange]);

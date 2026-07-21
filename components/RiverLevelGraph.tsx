@@ -322,7 +322,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
       return (
         <>
           <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart data={combinedForecastData}>
+            <ComposedChart
+              data={combinedForecastData}
+              margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
+            >
               <defs>
                 <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.8} />
@@ -337,8 +340,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 domain={["dataMin", "dataMax"]}
                 ticks={forecastTicks}
                 tickFormatter={formatForecastTick}
-
+                tick={{ fontSize: 12 }}
                 interval={0}
+                padding={{ left: 12, right: 12 }}
               />
               <YAxis stroke={theme.palette.text.secondary} domain={[0, forecastYDomainMax]} />
               <Tooltip content={CustomTooltip} />
@@ -381,7 +385,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     if (filteredData) {
       return (
         <ResponsiveContainer width="100%" height={200}>
-          <ComposedChart data={filteredDataWithTs ?? undefined}>
+          <ComposedChart
+            data={filteredDataWithTs ?? undefined}
+            margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
+          >
             <defs>
               <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
                 <stop
@@ -407,7 +414,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               domain={["dataMin", "dataMax"]}
               ticks={historicalTicks}
               tickFormatter={formatXAxis}
+              tick={{ fontSize: 12 }}
               interval={0}
+              padding={{ left: 12, right: 12 }}
             />
             <YAxis
               stroke={theme.palette.text.secondary}

@@ -223,10 +223,23 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         };
       });
 
+      const xAxisTicks = chartData
+        .filter((d) => parseInt(d.time, 10) % 3 === 0)
+        .map((d) => d.time);
+
       return (
         <ResponsiveContainer width="100%" height={200}>
-          <ComposedChart data={chartData} margin={{ top: 40 }}>
-            <XAxis dataKey="time" />
+          <ComposedChart
+            data={chartData}
+            margin={{ top: 40, right: 15, left: 5, bottom: 5 }}
+          >
+            <XAxis
+              dataKey="time"
+              ticks={xAxisTicks}
+              interval={0}
+              tick={{ fontSize: 12 }}
+              padding={{ left: 12, right: 12 }}
+            />
             <YAxis hide domain={[0, 1.2]} />
             <Tooltip content={CustomTooltip} cursor={{ fill: "transparent" }} />
             {sunriseHour && sunrise && (

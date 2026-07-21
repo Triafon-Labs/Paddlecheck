@@ -238,7 +238,6 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               ticks={xAxisTicks}
               interval={0}
               tick={{ fontSize: 12 }}
-              padding={{ left: 12, right: 12 }}
             />
             <YAxis hide domain={[0, 1.2]} />
             <Tooltip content={CustomTooltip} cursor={{ fill: "transparent" }} />

@@ -342,7 +342,6 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 tickFormatter={formatForecastTick}
                 tick={{ fontSize: 12 }}
                 interval={0}
-                padding={{ left: 12, right: 12 }}
               />
               <YAxis stroke={theme.palette.text.secondary} domain={[0, forecastYDomainMax]} />
               <Tooltip content={CustomTooltip} />
@@ -416,7 +415,6 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               tickFormatter={formatXAxis}
               tick={{ fontSize: 12 }}
               interval={0}
-              padding={{ left: 12, right: 12 }}
             />
             <YAxis
               stroke={theme.palette.text.secondary}

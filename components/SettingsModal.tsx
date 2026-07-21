@@ -119,7 +119,16 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({
   ragColor,
 }) => (
   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.5 }}>
-    <Box sx={{ color: "text.secondary", display: "flex", flexShrink: 0 }}>
+    <Box
+      sx={{
+        color: "text.secondary",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+        width: 20,
+      }}
+    >
       {icon}
     </Box>
     <Box sx={{ flex: 1 }}>

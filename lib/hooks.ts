@@ -10,6 +10,7 @@ import {
   calculateFinalRagStatus,
   findLevelDescription,
   calculateInitialRagStatus,
+  getGustStatus,
   RAG_STATUS_MAP,
   ragHeight,
 } from "@/lib/rag";
@@ -266,6 +267,7 @@ export const useKayakData = () => {
           riverData.latestLevel === null ? undefined : riverData.latestLevel,
         temperature: weatherData.temperature,
         windSpeed: weatherData.windSpeed,
+        windGust: weatherData.windGust,
         windDirection: weatherData.windDirection,
         rain: weatherData.rain,
         dark: currentDark,
@@ -278,6 +280,7 @@ export const useKayakData = () => {
       );
       const initialStatus = RAG_STATUS_MAP[initialRagNumber];
       const { status, reasons } = calculateFinalRagStatus(currentConditions);
+      const gustStatus = getGustStatus(currentConditions);
       const visibilityDescription = getVisibilityDescription(
         currentConditions.visibility ?? 0
       );
@@ -290,6 +293,7 @@ export const useKayakData = () => {
         initialStatus,
         overallStatus: status,
         reasons: reasons,
+        gustStatus,
         warnings: warningsData,
         levelChange: {
           value: riverData.change8h ?? 0,
@@ -397,6 +401,7 @@ export const useKayakData = () => {
             riverLevel: forecastRiverLevel,
             temperature: futureWeatherData.hourly.temperature_2m[index],
             windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
+            windGust: futureWeatherData.hourly.wind_gusts_10m[index],
             rain: isRainy(futureWeatherData.hourly.weather_code[index]),
             dark,
             visibility: futureWeatherData.hourly.visibility[index],
@@ -405,6 +410,7 @@ export const useKayakData = () => {
 
           const { status: forecastStatus, reasons: forecastReasons } =
             calculateFinalRagStatus(forecastConditions);
+          const forecastGustStatus = getGustStatus(forecastConditions);
 
           graphData.push({
             time: `${h}:00`,
@@ -415,6 +421,8 @@ export const useKayakData = () => {
             forecastSource,
             temperature: futureWeatherData.hourly.temperature_2m[index],
             windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
+            windGust: futureWeatherData.hourly.wind_gusts_10m[index],
+            gustStatus: forecastGustStatus,
           });
 
           // Only include Bewdley-backed points in the river level graph forecast

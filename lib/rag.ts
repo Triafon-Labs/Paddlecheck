@@ -180,3 +180,16 @@ export const calculateFinalRagStatus = (
     reasons: allReasons,
   };
 };
+
+// Informational only: what the RAG status would be if the gust speed were
+// the sustained wind speed. Never fed back into the real RAG calculation -
+// a gust isn't sustained wind, so it shouldn't move the actual status.
+export const getGustStatus = (
+  conditions: Partial<KayakConditions>
+): Status | undefined => {
+  const { windGust } = conditions;
+  if (windGust === undefined || windGust < THRESHOLDS.WIND_GUST_NOTABLE) {
+    return undefined;
+  }
+  return calculateFinalRagStatus({ ...conditions, windSpeed: windGust }).status;
+};

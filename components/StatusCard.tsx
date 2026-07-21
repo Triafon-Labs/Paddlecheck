@@ -10,6 +10,7 @@ import {
   Paper,
 } from "@mui/material";
 import HelpOutlined from "@mui/icons-material/HelpOutlined";
+import Air from "@mui/icons-material/Air";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import { ragStatus, reasonIcons } from "@/lib/rag";
@@ -127,7 +128,8 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
             </Box>
           )}
 
-          {conditions.reasons && conditions.reasons.length > 0 && (
+          {((conditions.reasons && conditions.reasons.length > 0) ||
+            conditions.gustStatus) && (
             <Box sx={{ mt: 2 }}>
               <Typography variant="subtitle2" color="text.secondary">
                 Contributing Factors
@@ -143,7 +145,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                   },
                 }}
               >
-                {conditions.reasons.map((reason, index) => {
+                {conditions.reasons?.map((reason, index) => {
                   const Icon = reasonIcons[reason] ?? HelpOutlined;
                   return (
                     <Paper
@@ -163,6 +165,34 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                     </Paper>
                   );
                 })}
+                {conditions.gustStatus && (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 1.5,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 1,
+                      backgroundColor: "action.hover",
+                    }}
+                  >
+                    <Air fontSize="small" sx={{ color: "primary.main" }} />
+                    <Typography variant="body2">
+                      Gusting to {Math.round(conditions.windGust!)} mph
+                    </Typography>
+                    <Box
+                      title={`Would be ${conditions.gustStatus} if sustained`}
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        backgroundColor: ragStatus[conditions.gustStatus].color,
+                        flexShrink: 0,
+                      }}
+                    />
+                  </Paper>
+                )}
               </Box>
             </Box>
           )}

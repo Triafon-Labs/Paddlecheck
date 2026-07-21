@@ -223,7 +223,14 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
             </Box>
           )}
           <WeatherWarnings warnings={conditions.warnings} />
-          <ConditionsBriefing conditions={conditions} label="AI Overview" />
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle2" color="text.secondary">
+              AI Overview
+            </Typography>
+            <Box sx={{ mt: 1 }}>
+              <ConditionsBriefing conditions={conditions} />
+            </Box>
+          </Box>
         </>
       );
     }

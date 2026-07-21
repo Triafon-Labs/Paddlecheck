@@ -173,7 +173,11 @@ export function buildHourlyForecastText(
       pt.windSpeed !== undefined
         ? `${Math.round(pt.windSpeed)} mph wind`
         : null;
-    const stats = [level, launch, temp, wind].filter(Boolean).join(", ");
+    const gust =
+      pt.windGust !== undefined && pt.windGust >= THRESHOLDS.WIND_GUST_NOTABLE
+        ? `gusts to ${Math.round(pt.windGust)} mph`
+        : null;
+    const stats = [level, launch, temp, wind, gust].filter(Boolean).join(", ");
     const nonDarkReasons = pt.reasons.filter((r) => r !== "Dark");
     const note =
       nonDarkReasons.length > 0 ? ` [${nonDarkReasons.join(", ")}]` : "";
@@ -263,7 +267,18 @@ export function buildNextDaytimeOutlook(
     ? `wind up to ${Math.round(Math.max(...winds))} mph`
     : null;
 
-  const rangesText = [levelText, tempText, windText].filter(Boolean).join(", ");
+  const gusts = daySlots
+    .map((s) => s.windGust)
+    .filter((g): g is number => typeof g === "number");
+  const maxGust = gusts.length ? Math.max(...gusts) : null;
+  const gustText =
+    maxGust !== null && maxGust >= THRESHOLDS.WIND_GUST_NOTABLE
+      ? `gusts up to ${Math.round(maxGust)} mph`
+      : null;
+
+  const rangesText = [levelText, tempText, windText, gustText]
+    .filter(Boolean)
+    .join(", ");
 
   const { bestStatus, windows } = findGreenWindows(daySlots);
   let bestTimes: string | null = null;

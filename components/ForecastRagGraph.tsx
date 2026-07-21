@@ -92,7 +92,7 @@ const CustomTooltip = ({
               <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
                 <Air fontSize="small" />
                 <Typography variant="caption" sx={{ ml: 1 }}>
-                  Gusting to {Math.round(data.windGust!)} mph
+                  Gusts to {Math.round(data.windGust!)} mph
                 </Typography>
                 <Box
                   title={`Would be ${data.gustStatus} if sustained`}

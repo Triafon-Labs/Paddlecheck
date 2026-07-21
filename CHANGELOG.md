@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.20.0...paddlecheck-v1.21.0) (2026-07-21)
+
+
+### Features
+
+* add "raining but warm" as a second Be Aware note ([caa4e43](https://github.com/dylanr97/Paddlecheck/commit/caa4e439813906ce40e7813e59dd2c20d9da1d9a))
+
+
+### Bug Fixes
+
+* align Be Aware wording and correct the cold-temperature description ([e1c4041](https://github.com/dylanr97/Paddlecheck/commit/e1c40410533191960774dec685fbd43667fc0604))
+* align Conditions Key rows regardless of icon size ([94d6bde](https://github.com/dylanr97/Paddlecheck/commit/94d6bde4c0859cef7e8123d0556871dfafe825e8))
+* move "AI Overview" to its own heading above the summary box ([f279068](https://github.com/dylanr97/Paddlecheck/commit/f2790688ae9fbd663b785bc98b6f5d8b1d93be2f))
+* say "shown for awareness" instead of "a heads-up" ([e90467f](https://github.com/dylanr97/Paddlecheck/commit/e90467f45ee024a448104fbb25d861a1e4ac0678))
+* shorten gust dot description in Conditions Key ([31621b7](https://github.com/dylanr97/Paddlecheck/commit/31621b701129e905201883eef50614d20b57b637))
+* show the same rain description as Detailed Stats in Be Aware ([0a29a5f](https://github.com/dylanr97/Paddlecheck/commit/0a29a5f5559ef2ae371ba115ae783f782cdace10))
+* use the Foggy icon for the Very Poor visibility row ([3574a6d](https://github.com/dylanr97/Paddlecheck/commit/3574a6d55bd6307f2aec24b4e86b049e07019507))
+
 ## [1.20.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.19.0...paddlecheck-v1.20.0) (2026-07-21)
 
 

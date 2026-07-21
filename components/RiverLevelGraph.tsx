@@ -168,6 +168,26 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     localStorage.setItem("riverGraphTimeRange", timeRange);
   }, [timeRange]);
 
+  // Ticks once a minute so the "data age" note stays accurate for as long as
+  // the card stays open, even without a refetch.
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const dataAgeLabel = useMemo(() => {
+    if (!data || data.length === 0) return null;
+    const latestTs = new Date(data[data.length - 1].dateTime).getTime();
+    const ageMinutes = Math.round((now.getTime() - latestTs) / (60 * 1000));
+    if (ageMinutes < 1) return "Data is up to date";
+    if (ageMinutes < 60) return `Data is ${ageMinutes} min behind real-time`;
+    const hours = Math.floor(ageMinutes / 60);
+    const minutes = ageMinutes % 60;
+    const duration = minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
+    return `Data is ${duration} behind real-time`;
+  }, [data, now]);
+
   const filteredData = useMemo(() => {
     if (!data || data.length === 0 || timeRange === "forecast") return null;
 
@@ -479,6 +499,15 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           </ToggleButtonGroup>
         )}
         {renderContent()}
+        {!loading && dataAgeLabel && (
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: "block", textAlign: "center", mt: 1 }}
+          >
+            {dataAgeLabel}
+          </Typography>
+        )}
         <Box
           sx={{
             display: "grid",

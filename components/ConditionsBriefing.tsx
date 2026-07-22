@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Alert, Box, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { KayakConditions } from "@/types";
 import { useKayakContext } from "@/lib/KayakDataContext";
@@ -38,14 +38,17 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_AI_MODE
   if (!AI_SUMMARY_ENABLED) return null;
 
   return (
-    <Alert
-      icon={<AutoAwesomeIcon fontSize="small" />}
-      severity="info"
+    <Paper
+      elevation={0}
       sx={{
+        p: 1.5,
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
         backgroundColor: "action.hover",
-        "& .MuiAlert-icon": { color: "text.secondary" },
       }}
     >
+      <AutoAwesomeIcon fontSize="small" sx={{ color: "primary.main" }} />
       {!triggered ? (
         <Typography
           variant="body2"
@@ -83,6 +86,6 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_AI_MODE
           )}
         </Typography>
       )}
-    </Alert>
+    </Paper>
   );
 }

@@ -155,7 +155,6 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                         p: 1.5,
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
                         gap: 1,
                         backgroundColor: "action.hover",
                       }}

@@ -43,12 +43,15 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_AI_MODE
       sx={{
         p: 1.5,
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         gap: 1,
         backgroundColor: "action.hover",
       }}
     >
-      <AutoAwesomeIcon fontSize="small" sx={{ color: "primary.main" }} />
+      <AutoAwesomeIcon
+        fontSize="small"
+        sx={{ color: "primary.main", mt: "2px" }}
+      />
       {!triggered ? (
         <Typography
           variant="body2"

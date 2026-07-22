@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.21.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.21.0...paddlecheck-v1.21.1) (2026-07-22)
+
+
+### Bug Fixes
+
+* keep AI Overview icon top-aligned with multi-line summaries ([804cc86](https://github.com/dylanr97/Paddlecheck/commit/804cc863f8c48f25e5addad6b7f13a522b3813ae))
+* left-align contributing factors icon and text ([f45e606](https://github.com/dylanr97/Paddlecheck/commit/f45e606c3d80f3285fcc60e1ed7e4c4a3ebeb5d4))
+* match AI Overview row styling to Be Aware/Contributing Factors ([79616c4](https://github.com/dylanr97/Paddlecheck/commit/79616c46b4444b44cc39b16d0485a9cb90d45bc6))
+* match Weather Warnings styling to other StatusCard sections ([befd131](https://github.com/dylanr97/Paddlecheck/commit/befd131e401dbace8b6b515ed8bfdf34048e4951))
+
+
+### Code Refactoring
+
+* consolidate duplicated helpers and remove dead code ([a2dda14](https://github.com/dylanr97/Paddlecheck/commit/a2dda1421751edc609f06f43af6679ab1bee6ffe))
+
 ## [1.21.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.20.0...paddlecheck-v1.21.0) (2026-07-21)
 
 

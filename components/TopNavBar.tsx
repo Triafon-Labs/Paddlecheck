@@ -22,8 +22,8 @@ import {
   buildBestPaddlingTimes,
   buildNextDaytimeOutlook,
   hasDaylightRemaining,
-  getRelativeTimeString,
 } from "@/lib/forecast";
+import { getRelativeTimeString } from "@/lib/time";
 
 const buildShareText = (
   conditions: ReturnType<typeof useKayakContext>["conditions"],

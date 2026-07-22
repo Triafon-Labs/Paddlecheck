@@ -33,7 +33,10 @@ import {
   LONGITUDE,
   HISTORICAL_DAYS,
   isRainy,
+  TIME_PERIODS,
 } from "@/lib/config";
+import { getLondonHHMM, getLondonHour, hhmmOfISO } from "@/lib/time";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -127,20 +130,20 @@ export const useKayakData = () => {
       };
 
       const hasCachedConditions = loadCached(
-        "paddlecheck_conditions",
+        STORAGE_KEYS.CONDITIONS,
         setConditions
       );
       if (hasCachedConditions) hasConditionsRef.current = true;
       const hasCachedForecast = loadCached(
-        "paddlecheck_forecastDays",
+        STORAGE_KEYS.FORECAST_DAYS,
         setForecastDays
       );
-      loadCached("paddlecheck_forecastData", setForecastData);
-      loadCached("paddlecheck_riverGraphData", setRiverGraphData);
-      loadCached("paddlecheck_riverChange1h", setRiverChange1h);
-      loadCached("paddlecheck_riverChange24h", setRiverChange24h);
-      loadCached("paddlecheck_riverChange8h", setRiverChange8h);
-      loadCached("paddlecheck_riverChange5d", setRiverChange5d);
+      loadCached(STORAGE_KEYS.FORECAST_DATA, setForecastData);
+      loadCached(STORAGE_KEYS.RIVER_GRAPH_DATA, setRiverGraphData);
+      loadCached(STORAGE_KEYS.RIVER_CHANGE_1H, setRiverChange1h);
+      loadCached(STORAGE_KEYS.RIVER_CHANGE_24H, setRiverChange24h);
+      loadCached(STORAGE_KEYS.RIVER_CHANGE_8H, setRiverChange8h);
+      loadCached(STORAGE_KEYS.RIVER_CHANGE_5D, setRiverChange5d);
       if (hasCachedForecast) hasForecastRef.current = true;
 
       // The offline exception: with no network to wait on, show the cache
@@ -218,14 +221,14 @@ export const useKayakData = () => {
       const riverData = riverOutcome.ok
         ? riverOutcome.data
         : readRawCache<Awaited<ReturnType<typeof fetchRiverData>>>(
-            "paddlecheck_riverDataRaw"
+            STORAGE_KEYS.RIVER_DATA_RAW
           );
       const weatherData = weatherOutcome.ok
         ? weatherOutcome.data
-        : readRawCache<WeatherData>("paddlecheck_weatherDataRaw");
+        : readRawCache<WeatherData>(STORAGE_KEYS.WEATHER_DATA_RAW);
       const futureWeatherData = futureWeatherOutcome.ok
         ? futureWeatherOutcome.data
-        : readRawCache<FutureWeatherData>("paddlecheck_futureWeatherDataRaw");
+        : readRawCache<FutureWeatherData>(STORAGE_KEYS.FUTURE_WEATHER_DATA_RAW);
 
       if (!riverData || !weatherData || !futureWeatherData) {
         throw new Error(
@@ -246,18 +249,9 @@ export const useKayakData = () => {
 
       const todaySunrise = futureWeatherData.daily.sunrise[0] ?? null;
       const todaySunset = futureWeatherData.daily.sunset[0] ?? null;
-      const currentTimeHHMM = new Date().toLocaleTimeString("en-GB", {
-        timeZone: "Europe/London",
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      const sunriseHHMM = todaySunrise
-        ? (todaySunrise.split("T")[1]?.slice(0, 5) ?? null)
-        : null;
-      const sunsetHHMM = todaySunset
-        ? (todaySunset.split("T")[1]?.slice(0, 5) ?? null)
-        : null;
+      const currentTimeHHMM = getLondonHHMM();
+      const sunriseHHMM = todaySunrise ? hhmmOfISO(todaySunrise) : null;
+      const sunsetHHMM = todaySunset ? hhmmOfISO(todaySunset) : null;
       const currentDark =
         sunriseHHMM !== null && sunsetHHMM !== null
           ? currentTimeHHMM <= sunriseHHMM || currentTimeHHMM >= sunsetHHMM
@@ -312,14 +306,7 @@ export const useKayakData = () => {
       hasConditionsRef.current = true;
 
       // Build 5-day forecast (today + 4 days ahead)
-      const currentHour = parseInt(
-        new Date().toLocaleTimeString("en-GB", {
-          timeZone: "Europe/London",
-          hour12: false,
-          hour: "2-digit",
-        }),
-        10
-      );
+      const currentHour = getLondonHour();
       const now = new Date();
       const days: DayForecast[] = [];
       const forecastPoints: ChartDataPoint[] = [];
@@ -362,7 +349,7 @@ export const useKayakData = () => {
           // Hours ahead from now for river level forecast
           const hoursAhead = d * 24 + h - currentHour;
           const targetWorcesterTime = new Date(
-            now.getTime() + hoursAhead * 3600 * 1000
+            now.getTime() + hoursAhead * TIME_PERIODS.ONE_HOUR
           );
 
           const bewdleyLevel =
@@ -461,49 +448,49 @@ export const useKayakData = () => {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem(
-            "paddlecheck_conditions",
+            STORAGE_KEYS.CONDITIONS,
             JSON.stringify(conditionsObj)
           );
           localStorage.setItem(
-            "paddlecheck_forecastDays",
+            STORAGE_KEYS.FORECAST_DAYS,
             JSON.stringify(days)
           );
           localStorage.setItem(
-            "paddlecheck_forecastData",
+            STORAGE_KEYS.FORECAST_DATA,
             JSON.stringify(forecastPoints)
           );
           localStorage.setItem(
-            "paddlecheck_riverGraphData",
+            STORAGE_KEYS.RIVER_GRAPH_DATA,
             JSON.stringify(riverData.historicalData)
           );
           localStorage.setItem(
-            "paddlecheck_riverChange1h",
+            STORAGE_KEYS.RIVER_CHANGE_1H,
             JSON.stringify(riverData.change1h)
           );
           localStorage.setItem(
-            "paddlecheck_riverChange24h",
+            STORAGE_KEYS.RIVER_CHANGE_24H,
             JSON.stringify(riverData.change24h)
           );
           localStorage.setItem(
-            "paddlecheck_riverChange8h",
+            STORAGE_KEYS.RIVER_CHANGE_8H,
             JSON.stringify(riverData.change8h)
           );
           localStorage.setItem(
-            "paddlecheck_riverChange5d",
+            STORAGE_KEYS.RIVER_CHANGE_5D,
             JSON.stringify(riverData.change5d)
           );
           // Raw per-source snapshots, so a future failure in just one source
           // can fall back to that source's own last-known data.
           localStorage.setItem(
-            "paddlecheck_riverDataRaw",
+            STORAGE_KEYS.RIVER_DATA_RAW,
             JSON.stringify(riverData)
           );
           localStorage.setItem(
-            "paddlecheck_weatherDataRaw",
+            STORAGE_KEYS.WEATHER_DATA_RAW,
             JSON.stringify(weatherData)
           );
           localStorage.setItem(
-            "paddlecheck_futureWeatherDataRaw",
+            STORAGE_KEYS.FUTURE_WEATHER_DATA_RAW,
             JSON.stringify(futureWeatherData)
           );
         } catch (e) {
@@ -515,7 +502,7 @@ export const useKayakData = () => {
       const offline = isOfflineRef.current;
       const hasCache =
         typeof window !== "undefined" &&
-        localStorage.getItem("paddlecheck_conditions") !== null;
+        localStorage.getItem(STORAGE_KEYS.CONDITIONS) !== null;
       setError(
         offline
           ? hasCache

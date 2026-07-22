@@ -23,6 +23,7 @@ import {
 } from "@/types";
 import { ragStatus } from "@/lib/rag";
 import { THRESHOLDS } from "@/lib/config";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 export const PADDLER_LEVEL_CHANGED_EVENT = "paddlecheck:paddler-level-changed";
 
@@ -206,7 +207,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
       );
 
     const savedLevel = localStorage.getItem(
-      "paddlerLevel"
+      STORAGE_KEYS.PADDLER_LEVEL
     ) as PaddlerType | null;
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -216,12 +217,14 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
     // *other* tabs per spec), so the matrix updates immediately when the
     // level is changed in Settings without needing a reload.
     const handleLevelChanged = () => {
-      const newLevel = localStorage.getItem("paddlerLevel") as PaddlerType | null;
+      const newLevel = localStorage.getItem(
+        STORAGE_KEYS.PADDLER_LEVEL
+      ) as PaddlerType | null;
       setOpen(openStateForLevel(newLevel));
     };
 
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === "paddlerLevel") {
+      if (event.key === STORAGE_KEYS.PADDLER_LEVEL) {
         setOpen(openStateForLevel(event.newValue as PaddlerType | null));
       }
     };
@@ -254,7 +257,9 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
               // by default reserves the space for its detail lines too.
               const savedLevel =
                 typeof window !== "undefined"
-                  ? (localStorage.getItem("paddlerLevel") as PaddlerType | null)
+                  ? (localStorage.getItem(
+                      STORAGE_KEYS.PADDLER_LEVEL
+                    ) as PaddlerType | null)
                   : null;
               const isOpen = savedLevel ? paddler === savedLevel : true;
               return (

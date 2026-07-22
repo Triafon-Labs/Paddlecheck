@@ -1,0 +1,17 @@
+export const STORAGE_KEYS = {
+  THEME_MODE: "themeMode",
+  AUTO_SUMMARISE: "autoSummarise",
+  PADDLER_LEVEL: "paddlerLevel",
+  RIVER_GRAPH_TIME_RANGE: "riverGraphTimeRange",
+  CONDITIONS: "paddlecheck_conditions",
+  FORECAST_DAYS: "paddlecheck_forecastDays",
+  FORECAST_DATA: "paddlecheck_forecastData",
+  RIVER_GRAPH_DATA: "paddlecheck_riverGraphData",
+  RIVER_CHANGE_1H: "paddlecheck_riverChange1h",
+  RIVER_CHANGE_24H: "paddlecheck_riverChange24h",
+  RIVER_CHANGE_8H: "paddlecheck_riverChange8h",
+  RIVER_CHANGE_5D: "paddlecheck_riverChange5d",
+  RIVER_DATA_RAW: "paddlecheck_riverDataRaw",
+  WEATHER_DATA_RAW: "paddlecheck_weatherDataRaw",
+  FUTURE_WEATHER_DATA_RAW: "paddlecheck_futureWeatherDataRaw",
+} as const;

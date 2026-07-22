@@ -13,7 +13,6 @@ export interface KayakConditions {
     period: string; // e.g., '8h'
   };
   launchMessage?: string;
-  launchStatus?: string;
   initialStatus?: Status;
   temperature?: number;
   windSpeed?: number;

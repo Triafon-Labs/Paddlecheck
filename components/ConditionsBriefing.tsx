@@ -6,6 +6,8 @@ import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { KayakConditions } from "@/types";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { useBriefing } from "@/lib/useBriefing";
+import { DEFAULT_AI_MODEL } from "@/lib/config";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 export const SETTINGS_CHANGED_EVENT = "paddlecheck:settings-changed";
 
@@ -14,18 +16,19 @@ interface Props {
   model?: string;
 }
 
-const DEFAULT_MODEL = "openai/gpt-oss-120b";
-
 const AI_SUMMARY_ENABLED = process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY !== "false";
 
-export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL }: Props) {
+export default function ConditionsBriefing({ conditions, model = DEFAULT_AI_MODEL }: Props) {
   const { forecastDays } = useKayakContext();
   const [auto, setAuto] = useState(
-    () => typeof window !== "undefined" && localStorage.getItem("autoSummarise") === "true"
+    () =>
+      typeof window !== "undefined" &&
+      localStorage.getItem(STORAGE_KEYS.AUTO_SUMMARISE) === "true"
   );
 
   useEffect(() => {
-    const handler = () => setAuto(localStorage.getItem("autoSummarise") === "true");
+    const handler = () =>
+      setAuto(localStorage.getItem(STORAGE_KEYS.AUTO_SUMMARISE) === "true");
     window.addEventListener(SETTINGS_CHANGED_EVENT, handler);
     return () => window.removeEventListener(SETTINGS_CHANGED_EVENT, handler);
   }, []);

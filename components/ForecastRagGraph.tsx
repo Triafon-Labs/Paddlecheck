@@ -36,9 +36,8 @@ import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
 import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
-import { isSameDay, parseISO } from "date-fns";
-import { tz } from "@date-fns/tz";
 import { formatMetTime } from "@/lib/weather";
+import { isWarningOnDay } from "@/lib/warnings";
 
 interface ForecastRagGraphProps {
   forecastDays: DayForecast[] | null;
@@ -246,20 +245,10 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   const sunset = currentDay?.sunset ?? null;
 
   // Find warnings active on the selected day
-  const dailyWarnings = warnings?.filter((w) => {
-    if (!w.validFromISO || !w.validToISO || !currentDay?.date) return false;
-    const dayDate = parseISO(currentDay.date, { in: tz("Europe/London") });
-    const start = parseISO(w.validFromISO, { in: tz("Europe/London") });
-    const end = parseISO(w.validToISO, { in: tz("Europe/London") });
-
-    // Check if the warning overlaps with the selected day
-    // Met Office warnings can span multiple days
-    return (
-      isSameDay(dayDate, start, { in: tz("Europe/London") }) ||
-      isSameDay(dayDate, end, { in: tz("Europe/London") }) ||
-      (dayDate > start && dayDate < end)
-    );
-  }) || [];
+  const dailyWarnings =
+    warnings?.filter((w) =>
+      currentDay?.date ? isWarningOnDay(w, currentDay.date) : false
+    ) || [];
 
   const renderChart = () => {
     if (loading) {

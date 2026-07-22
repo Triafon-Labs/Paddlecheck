@@ -2,10 +2,9 @@ import React from "react";
 import { Alert, Stack, Typography, Link, Box, Divider } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import { WeatherWarning, WarningSeverity } from "@/types";
-import { isWithinInterval, parseISO } from "date-fns";
-import { tz, TZDate } from "@date-fns/tz";
 import { formatMetTime } from "@/lib/weather";
 import { WARNING_COLORS } from "@/lib/config";
+import { londonNow, isWarningActiveNow } from "@/lib/warnings";
 
 interface Props {
   warnings?: WeatherWarning[];
@@ -16,20 +15,12 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
 
   if (displayWarnings.length === 0) return null;
 
-  const now = new TZDate(new Date(), "Europe/London");
+  const now = londonNow();
 
   // Filter for warnings active right now
-  const activeWarnings = displayWarnings.filter((w) => {
-    if (!w.validFromISO || !w.validToISO) return true; // Fallback if parsing failed
-    try {
-      return isWithinInterval(now, {
-        start: parseISO(w.validFromISO, { in: tz("Europe/London") }),
-        end: parseISO(w.validToISO, { in: tz("Europe/London") }),
-      });
-    } catch {
-      return true;
-    }
-  });
+  const activeWarnings = displayWarnings.filter((w) =>
+    isWarningActiveNow(w, now)
+  );
 
   if (activeWarnings.length === 0) return null;
 

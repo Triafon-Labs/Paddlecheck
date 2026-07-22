@@ -273,6 +273,12 @@ export const VISIBILITY_DESCRIPTIONS: {
 // --- Time-based Constants ---
 export const TIME_PERIODS = {
   ONE_HOUR: 1 * 60 * 60 * 1000,
+  TWO_HOURS: 2 * 60 * 60 * 1000,
+  SIX_HOURS: 6 * 60 * 60 * 1000,
   EIGHT_HOURS: 8 * 60 * 60 * 1000,
+  TWELVE_HOURS: 12 * 60 * 60 * 1000,
   TWENTY_FOUR_HOURS: 24 * 60 * 60 * 1000,
 };
+
+// --- AI Summary ---
+export const DEFAULT_AI_MODEL = "openai/gpt-oss-120b";

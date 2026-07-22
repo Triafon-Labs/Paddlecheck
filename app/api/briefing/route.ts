@@ -1,7 +1,11 @@
 import Groq from "groq-sdk";
 import { KayakConditions } from "@/types";
 import { formatMetTime, degreesToCompass } from "@/lib/weather";
-import { THRESHOLDS, VISIBILITY_DESCRIPTIONS } from "@/lib/config";
+import {
+  THRESHOLDS,
+  VISIBILITY_DESCRIPTIONS,
+  DEFAULT_AI_MODEL,
+} from "@/lib/config";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -203,7 +207,7 @@ export async function POST(request: Request) {
 
   const client = new Groq();
   const groqStream = await client.chat.completions.create({
-    model: body.model ?? "openai/gpt-oss-120b",
+    model: body.model ?? DEFAULT_AI_MODEL,
     temperature: 0.7,
     top_p: 0.95,
     max_tokens: 2048,

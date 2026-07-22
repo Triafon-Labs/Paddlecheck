@@ -31,7 +31,9 @@ export const fetchBewdleyForecast = async (): Promise<{
   const observations: BewdleyForecastPoint[] = [];
 
   const now = new Date();
-  const twentyFourHoursAhead = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const twentyFourHoursAhead = new Date(
+    now.getTime() + TIME_PERIODS.TWENTY_FOUR_HOURS
+  );
 
   // Skip header row (index 0)
   for (let i = 1; i < lines.length; i++) {
@@ -98,12 +100,16 @@ export const getBewdleyBasedWorcesterLevel = (
   };
 
   // Baseline: what Bewdley was reading 6h ago (already baked into Worcester's current level)
-  const baselineBewdleyTime = new Date(now.getTime() - BEWDLEY_TRAVEL_HOURS * 3600 * 1000);
+  const baselineBewdleyTime = new Date(
+    now.getTime() - BEWDLEY_TRAVEL_HOURS * TIME_PERIODS.ONE_HOUR
+  );
   const baseline = findClosest(baselineBewdleyTime);
   if (!baseline) return null;
 
   // Target: what Bewdley was/is/will be at (targetWorcesterTime – 6h)
-  const targetBewdleyTime = new Date(targetWorcesterTime.getTime() - BEWDLEY_TRAVEL_HOURS * 3600 * 1000);
+  const targetBewdleyTime = new Date(
+    targetWorcesterTime.getTime() - BEWDLEY_TRAVEL_HOURS * TIME_PERIODS.ONE_HOUR
+  );
   const target = findClosest(targetBewdleyTime);
   if (!target) return null;
 

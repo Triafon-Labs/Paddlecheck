@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Alert, Box, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { KayakConditions } from "@/types";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { useBriefing } from "@/lib/useBriefing";
+import { DEFAULT_AI_MODEL } from "@/lib/config";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 export const SETTINGS_CHANGED_EVENT = "paddlecheck:settings-changed";
 
@@ -14,18 +16,19 @@ interface Props {
   model?: string;
 }
 
-const DEFAULT_MODEL = "openai/gpt-oss-120b";
-
 const AI_SUMMARY_ENABLED = process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY !== "false";
 
-export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL }: Props) {
+export default function ConditionsBriefing({ conditions, model = DEFAULT_AI_MODEL }: Props) {
   const { forecastDays } = useKayakContext();
   const [auto, setAuto] = useState(
-    () => typeof window !== "undefined" && localStorage.getItem("autoSummarise") === "true"
+    () =>
+      typeof window !== "undefined" &&
+      localStorage.getItem(STORAGE_KEYS.AUTO_SUMMARISE) === "true"
   );
 
   useEffect(() => {
-    const handler = () => setAuto(localStorage.getItem("autoSummarise") === "true");
+    const handler = () =>
+      setAuto(localStorage.getItem(STORAGE_KEYS.AUTO_SUMMARISE) === "true");
     window.addEventListener(SETTINGS_CHANGED_EVENT, handler);
     return () => window.removeEventListener(SETTINGS_CHANGED_EVENT, handler);
   }, []);
@@ -35,14 +38,20 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL }
   if (!AI_SUMMARY_ENABLED) return null;
 
   return (
-    <Alert
-      icon={<AutoAwesomeIcon fontSize="small" />}
-      severity="info"
+    <Paper
+      elevation={0}
       sx={{
+        p: 1.5,
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 1,
         backgroundColor: "action.hover",
-        "& .MuiAlert-icon": { color: "text.secondary" },
       }}
     >
+      <AutoAwesomeIcon
+        fontSize="small"
+        sx={{ color: "primary.main", mt: "2px" }}
+      />
       {!triggered ? (
         <Typography
           variant="body2"
@@ -80,6 +89,6 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_MODEL }
           )}
         </Typography>
       )}
-    </Alert>
+    </Paper>
   );
 }

@@ -12,6 +12,7 @@ import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import { lightTheme, darkTheme } from "./themes";
 import CssBaseline from "@mui/material/CssBaseline";
 import { GlobalStyles } from "@mui/material";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 export type ThemeMode = "light" | "dark" | "system";
 
@@ -36,7 +37,9 @@ export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Restore saved preference
-    const savedTheme = localStorage.getItem("themeMode") as ThemeMode | null;
+    const savedTheme = localStorage.getItem(
+      STORAGE_KEYS.THEME_MODE
+    ) as ThemeMode | null;
     if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeMode(savedTheme);
@@ -51,7 +54,7 @@ export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("themeMode", themeMode);
+    localStorage.setItem(STORAGE_KEYS.THEME_MODE, themeMode);
   }, [themeMode]);
 
   const resolvedMode =

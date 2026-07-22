@@ -55,6 +55,7 @@ import {
   CONTACT_EMAIL,
   CLUB_NAME,
 } from "@/lib/config";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 interface SettingsModalProps {
   open: boolean;
@@ -160,13 +161,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const { themeMode, setThemeMode } = useAppTheme();
   const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">(() =>
     typeof window !== "undefined"
-      ? ((localStorage.getItem("paddlerLevel") as PaddlerType | null) ?? "")
+      ? ((localStorage.getItem(STORAGE_KEYS.PADDLER_LEVEL) as PaddlerType | null) ?? "")
       : ""
   );
   const [autoSummarise, setAutoSummarise] = useState(
     () =>
       typeof window !== "undefined" &&
-      localStorage.getItem("autoSummarise") === "true"
+      localStorage.getItem(STORAGE_KEYS.AUTO_SUMMARISE) === "true"
   );
 
   const handleAutoSummariseChange = (
@@ -174,7 +175,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   ) => {
     const val = e.target.checked;
     setAutoSummarise(val);
-    localStorage.setItem("autoSummarise", val ? "true" : "false");
+    localStorage.setItem(STORAGE_KEYS.AUTO_SUMMARISE, val ? "true" : "false");
     window.dispatchEvent(new Event(SETTINGS_CHANGED_EVENT));
   };
   const visKeys = Object.keys(
@@ -184,14 +185,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const handleLevelChange = (event: SelectChangeEvent<PaddlerType | "">) => {
     const level = event.target.value as PaddlerType | "";
     setPaddlerLevel(level);
-    if (level) localStorage.setItem("paddlerLevel", level);
-    else localStorage.removeItem("paddlerLevel");
+    if (level) localStorage.setItem(STORAGE_KEYS.PADDLER_LEVEL, level);
+    else localStorage.removeItem(STORAGE_KEYS.PADDLER_LEVEL);
     window.dispatchEvent(new Event(PADDLER_LEVEL_CHANGED_EVENT));
   };
 
   const handleClearLevel = () => {
     setPaddlerLevel("");
-    localStorage.removeItem("paddlerLevel");
+    localStorage.removeItem(STORAGE_KEYS.PADDLER_LEVEL);
     window.dispatchEvent(new Event(PADDLER_LEVEL_CHANGED_EVENT));
   };
 

@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
 import { buildHourlyForecastText, buildNextDaytimeOutlook } from "@/lib/forecast";
-import { parseISO } from "date-fns";
-import { tz, TZDate } from "@date-fns/tz";
+import { getLondonHHMM, hhmmOfISO } from "@/lib/time";
+import { londonNow, isWarningNotExpired } from "@/lib/warnings";
 
 async function streamBriefing(
   conditions: KayakConditions,
@@ -14,17 +14,12 @@ async function streamBriefing(
   signal: AbortSignal
 ): Promise<void> {
   const todayForecast = forecastDays?.[0] ?? null;
-  const currentTime = new Date().toLocaleTimeString("en-GB", {
-    timeZone: "Europe/London",
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const currentTime = getLondonHHMM();
   const todaySunrise = todayForecast?.sunrise
-    ? todayForecast.sunrise.split("T")[1]?.slice(0, 5) ?? null
+    ? hhmmOfISO(todayForecast.sunrise)
     : null;
   const todaySunset = todayForecast?.sunset
-    ? todayForecast.sunset.split("T")[1]?.slice(0, 5) ?? null
+    ? hhmmOfISO(todayForecast.sunset)
     : null;
   // Derive dark from sunrise/sunset times rather than conditions.dark, which can be stale
   const currentlyDark = todayForecast
@@ -42,27 +37,16 @@ async function streamBriefing(
     }
   }
 
-  const sunrise = targetDay?.sunrise
-    ? targetDay.sunrise.split("T")[1]?.slice(0, 5) ?? null
-    : null;
-  const sunset = targetDay?.sunset
-    ? targetDay.sunset.split("T")[1]?.slice(0, 5) ?? null
-    : null;
+  const sunrise = targetDay?.sunrise ? hhmmOfISO(targetDay.sunrise) : null;
+  const sunset = targetDay?.sunset ? hhmmOfISO(targetDay.sunset) : null;
 
   const hourlyForecast = targetDay ? buildHourlyForecastText(targetDay) : null;
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
   // Filter for warnings that are active or upcoming (i.e. haven't expired yet)
-  const now = new TZDate(new Date(), "Europe/London");
-  const relevantWarnings = conditions.warnings?.filter((w) => {
-    if (!w.validToISO) return true;
-    try {
-      const expiry = parseISO(w.validToISO, { in: tz("Europe/London") });
-      return expiry > now;
-    } catch {
-      return true;
-    }
-  }) || [];
+  const now = londonNow();
+  const relevantWarnings =
+    conditions.warnings?.filter((w) => isWarningNotExpired(w, now)) || [];
 
   const conditionsWithRelevantWarnings = {
     ...conditions,

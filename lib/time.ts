@@ -20,3 +20,44 @@ export const formatDataAge = (latestTs: number, now: Date): string => {
   const duration = minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
   return `${duration} ago`;
 };
+
+// Helper function to format a relative time string.
+export const getRelativeTimeString = (
+  date: string | Date | undefined
+): string => {
+  if (!date) return "";
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  const diffMs = Date.now() - dateObj.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+
+  if (diffMins < 1) return "just now";
+  if (diffMins === 1) return "1 minute ago";
+  if (diffMins < 60) return `${diffMins} minutes ago`;
+
+  const diffHours = Math.floor(diffMins / 60);
+  return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
+};
+
+// Current time in Europe/London as "HH:MM", regardless of the runtime's local timezone.
+export const getLondonHHMM = (date: Date = new Date()): string =>
+  date.toLocaleTimeString("en-GB", {
+    timeZone: "Europe/London",
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+// Current hour (0-23) in Europe/London, regardless of the runtime's local timezone.
+export const getLondonHour = (date: Date = new Date()): number =>
+  parseInt(
+    date.toLocaleTimeString("en-GB", {
+      timeZone: "Europe/London",
+      hour12: false,
+      hour: "2-digit",
+    }),
+    10
+  );
+
+// Extracts "HH:MM" from an ISO timestamp string, e.g. for sunrise/sunset fields.
+export const hhmmOfISO = (iso: string): string | null =>
+  iso.split("T")[1]?.slice(0, 5) ?? null;

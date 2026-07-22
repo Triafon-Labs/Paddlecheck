@@ -1,32 +1,15 @@
 import { DayForecast, Status } from "@/types";
 import { THRESHOLDS } from "@/lib/config";
 import { findLevelDescription } from "@/lib/rag";
+import { getLondonHour, hhmmOfISO } from "@/lib/time";
 
 const PREFERRED: Status[] = ["Light Green", "Dark Green"];
 
 const hourOf = (time: string) => parseInt(time.split(":")[0], 10);
 const fmtHour = (h: number) =>
   `${String(((h % 24) + 24) % 24).padStart(2, "0")}:00`;
-const hhmmOf = (iso: string) => iso.split("T")[1]?.slice(0, 5) ?? null;
 const isDarkOnly = (reasons: string[]) =>
   reasons.length === 1 && reasons[0] === "Dark";
-
-// Helper function to format a relative time string.
-export const getRelativeTimeString = (
-  date: string | Date | undefined
-): string => {
-  if (!date) return "";
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  const diffMs = Date.now() - dateObj.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-
-  if (diffMins < 1) return "just now";
-  if (diffMins === 1) return "1 minute ago";
-  if (diffMins < 60) return `${diffMins} minutes ago`;
-
-  const diffHours = Math.floor(diffMins / 60);
-  return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
-};
 
 const slotAtHour = (graphData: DayForecast["graphData"], hour: number) =>
   graphData.find((pt) => hourOf(pt.time) === hour);
@@ -104,14 +87,7 @@ export function buildBestPaddlingTimes(
   if (!todayForecast) return null;
 
   const now = new Date();
-  const nowHour = parseInt(
-    new Date().toLocaleTimeString("en-GB", {
-      timeZone: "Europe/London",
-      hour12: false,
-      hour: "2-digit",
-    }),
-    10
-  );
+  const nowHour = getLondonHour();
   const futureSlots = todayForecast.graphData.filter(
     (pt) => hourOf(pt.time) >= nowHour && !pt.reasons.includes("Dark")
   );
@@ -121,9 +97,9 @@ export function buildBestPaddlingTimes(
   if (!bestStatus || windows.length === 0) return null;
 
   const sunriseHHMM = todayForecast.sunrise
-    ? hhmmOf(todayForecast.sunrise)
+    ? hhmmOfISO(todayForecast.sunrise)
     : null;
-  const sunsetHHMM = todayForecast.sunset ? hhmmOf(todayForecast.sunset) : null;
+  const sunsetHHMM = todayForecast.sunset ? hhmmOfISO(todayForecast.sunset) : null;
   const label = bestStatus === "Light Green" ? "light green" : "dark green";
 
   const ranges = windows
@@ -160,7 +136,7 @@ export function buildHourlyForecastText(
   );
   if (slots.length === 0) return null;
 
-  const sunsetHHMM = todayForecast.sunset ? hhmmOf(todayForecast.sunset) : null;
+  const sunsetHHMM = todayForecast.sunset ? hhmmOfISO(todayForecast.sunset) : null;
 
   const lines = slots.map((pt, i) => {
     const h = hourOf(pt.time);
@@ -201,14 +177,7 @@ export function hasDaylightRemaining(
   todayForecast: DayForecast | null
 ): boolean {
   if (!todayForecast) return false;
-  const nowHour = parseInt(
-    new Date().toLocaleTimeString("en-GB", {
-      timeZone: "Europe/London",
-      hour12: false,
-      hour: "2-digit",
-    }),
-    10
-  );
+  const nowHour = getLondonHour();
   return todayForecast.graphData.some(
     (pt) => hourOf(pt.time) >= nowHour && !pt.reasons.includes("Dark")
   );
@@ -290,8 +259,8 @@ export function buildNextDaytimeOutlook(
   const { bestStatus, windows } = findGreenWindows(daySlots);
   let bestTimes: string | null = null;
   if (bestStatus && windows.length > 0) {
-    const sunriseHHMM = day.sunrise ? hhmmOf(day.sunrise) : null;
-    const sunsetHHMM = day.sunset ? hhmmOf(day.sunset) : null;
+    const sunriseHHMM = day.sunrise ? hhmmOfISO(day.sunrise) : null;
+    const sunsetHHMM = day.sunset ? hhmmOfISO(day.sunset) : null;
     const label = bestStatus === "Light Green" ? "light green" : "dark green";
     const ranges = windows
       .map((w) => {

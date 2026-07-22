@@ -39,6 +39,8 @@ import {
 
 import { ChartDataPoint } from "@/types";
 import { useNowTicking, formatDataAge } from "@/lib/time";
+import { TIME_PERIODS } from "@/lib/config";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
@@ -161,12 +163,12 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   const [timeRange, setTimeRange] = useState(
     () =>
       (typeof window !== "undefined"
-        ? localStorage.getItem("riverGraphTimeRange")
+        ? localStorage.getItem(STORAGE_KEYS.RIVER_GRAPH_TIME_RANGE)
         : null) ?? "24h"
   );
 
   useEffect(() => {
-    localStorage.setItem("riverGraphTimeRange", timeRange);
+    localStorage.setItem(STORAGE_KEYS.RIVER_GRAPH_TIME_RANGE, timeRange);
   }, [timeRange]);
 
   const now = useNowTicking();
@@ -193,7 +195,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     // Anchor the window to the latest reading rather than wall-clock "now" so
     // the graph always shows a full window even when the data feed is lagging.
     const latest = new Date(data[data.length - 1].dateTime).getTime();
-    const filterDate = new Date(latest - hoursToFilter * 60 * 60 * 1000);
+    const filterDate = new Date(latest - hoursToFilter * TIME_PERIODS.ONE_HOUR);
 
     return data.filter((d) => new Date(d.dateTime) > filterDate);
   }, [data, timeRange]);
@@ -218,8 +220,8 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     const end = pts[pts.length - 1].ts;
     const ticks: number[] = [];
     const cursor = new Date(start);
-    if (intervalMs >= 60 * 60 * 1000) {
-      const intervalHours = intervalMs / (60 * 60 * 1000);
+    if (intervalMs >= TIME_PERIODS.ONE_HOUR) {
+      const intervalHours = intervalMs / TIME_PERIODS.ONE_HOUR;
       cursor.setMinutes(0, 0, 0);
       cursor.setHours(Math.ceil(cursor.getHours() / intervalHours) * intervalHours);
     } else {
@@ -237,9 +239,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   const historicalTicks = useMemo(() => {
     if (!filteredDataWithTs) return [];
     const intervalMs =
-      timeRange === "5d" ? 24 * 60 * 60 * 1000 :
-      timeRange === "24h" ? 6 * 60 * 60 * 1000 :
-      timeRange === "8h"  ? 2 * 60 * 60 * 1000 :
+      timeRange === "5d" ? TIME_PERIODS.TWENTY_FOUR_HOURS :
+      timeRange === "24h" ? TIME_PERIODS.SIX_HOURS :
+      timeRange === "8h"  ? TIME_PERIODS.TWO_HOURS :
                             15 * 60 * 1000; // 1h → every 15 min
     return makeTicks(filteredDataWithTs, intervalMs);
   }, [filteredDataWithTs, timeRange]);
@@ -250,7 +252,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     if (!data || !forecastData) return null;
     const now = new Date();
     const last24h = data.filter(
-      (d) => new Date(d.dateTime) > new Date(now.getTime() - 24 * 60 * 60 * 1000)
+      (d) =>
+        new Date(d.dateTime) >
+        new Date(now.getTime() - TIME_PERIODS.TWENTY_FOUR_HOURS)
     );
     const historical = last24h.map((d) => ({
       ts: new Date(d.dateTime).getTime(),
@@ -281,7 +285,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   // Evenly-spaced ticks every 12 hours for the forecast view
   const forecastTicks = useMemo(() => {
     if (!combinedForecastData) return [];
-    return makeTicks(combinedForecastData, 12 * 60 * 60 * 1000);
+    return makeTicks(combinedForecastData, TIME_PERIODS.TWELVE_HOURS);
   }, [combinedForecastData]);
 
   // Forecasted change over the next 24 hours: forecasted level at now+24h minus current actual level
@@ -289,7 +293,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     if (!forecastData || forecastData.length === 0 || !data || data.length === 0) return null;
     const currentLevel = data[data.length - 1].level;
     const latestTs = new Date(data[data.length - 1].dateTime).getTime();
-    const target = new Date(latestTs + 24 * 60 * 60 * 1000);
+    const target = new Date(latestTs + TIME_PERIODS.TWENTY_FOUR_HOURS);
     let closest: ChartDataPoint | null = null;
     let minDiff = Infinity;
     for (const pt of forecastData) {

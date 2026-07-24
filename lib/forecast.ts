@@ -25,36 +25,65 @@ interface Window {
   endHour: number;
 }
 
-// Find contiguous runs of the best available green status among the given
-// (chronologically ordered) slots.
-function findGreenWindows(slots: DayForecast["graphData"]): {
-  bestStatus: Status | null;
-  windows: Window[];
-} {
-  const bestStatus =
-    PREFERRED.find((s) => slots.some((pt) => pt.status === s)) ?? null;
-  if (!bestStatus) return { bestStatus: null, windows: [] };
+interface StatusBlock extends Window {
+  status: Status;
+  reasons: string[];
+}
 
-  const windows: Window[] = [];
-  let startHour: number | null = null;
-  let lastHour: number | null = null;
+// Splits chronologically-ordered slots into contiguous same-status runs,
+// merging each run's non-"Dark" reasons together.
+function findStatusBlocks(slots: DayForecast["graphData"]): StatusBlock[] {
+  const blocks: StatusBlock[] = [];
 
   for (const pt of slots) {
     const h = hourOf(pt.time);
-    if (pt.status === bestStatus) {
-      if (startHour === null) startHour = h;
-      lastHour = h;
-    } else if (startHour !== null && lastHour !== null) {
-      windows.push({ startHour, endHour: lastHour });
-      startHour = null;
-      lastHour = null;
+    const reasons = pt.reasons.filter((r) => r !== "Dark");
+    const last = blocks[blocks.length - 1];
+
+    if (last && last.status === pt.status) {
+      last.endHour = h;
+      for (const r of reasons) {
+        if (!last.reasons.includes(r)) last.reasons.push(r);
+      }
+    } else {
+      blocks.push({ status: pt.status, startHour: h, endHour: h, reasons });
     }
   }
-  if (startHour !== null && lastHour !== null) {
-    windows.push({ startHour, endHour: lastHour });
+
+  return blocks;
+}
+
+// Find contiguous runs of the best available green status among the given
+// (chronologically ordered) slots, plus the block(s) of worse status that
+// separate consecutive windows, if any.
+function findGreenWindows(slots: DayForecast["graphData"]): {
+  bestStatus: Status | null;
+  windows: Window[];
+  gaps: StatusBlock[][];
+} {
+  const blocks = findStatusBlocks(slots);
+  const bestStatus =
+    PREFERRED.find((s) => blocks.some((b) => b.status === s)) ?? null;
+  if (!bestStatus) return { bestStatus: null, windows: [], gaps: [] };
+
+  const bestIndices = blocks
+    .map((b, i) => (b.status === bestStatus ? i : -1))
+    .filter((i) => i !== -1);
+
+  const windows = bestIndices.map((i) => ({
+    startHour: blocks[i].startHour,
+    endHour: blocks[i].endHour,
+  }));
+
+  // Every pair of consecutive best-status blocks is necessarily separated by
+  // at least one worse-status block, since findStatusBlocks would otherwise
+  // have merged them into a single run.
+  const gaps: StatusBlock[][] = [];
+  for (let k = 0; k < bestIndices.length - 1; k++) {
+    gaps.push(blocks.slice(bestIndices[k] + 1, bestIndices[k + 1]));
   }
 
-  return { bestStatus, windows };
+  return { bestStatus, windows, gaps };
 }
 
 // Format a window's start/end, extending to actual sunrise/sunset when the
@@ -86,10 +115,36 @@ function formatWindow(
   return { start, end };
 }
 
+// Describes the block(s) of worse-status conditions that separate best-status
+// windows, e.g. "17:00–18:00 dark green due to High winds". Gaps are always
+// interior to the daylight period, so no sunrise/sunset substitution applies.
+function formatGaps(
+  graphData: DayForecast["graphData"],
+  gaps: StatusBlock[][]
+): string | null {
+  if (gaps.length === 0) return null;
+
+  const describeBlock = (b: StatusBlock) => {
+    const { start, end } = formatWindow(graphData, b, null, null, null);
+    const label = b.status.toLowerCase();
+    const reasonText = b.reasons.length > 0 ? ` due to ${b.reasons.join(", ")}` : "";
+    return `${start}–${end} ${label}${reasonText}`;
+  };
+
+  return gaps
+    .map((blocks) => blocks.map(describeBlock).join(" then "))
+    .join("; ");
+}
+
+export interface BestPaddlingTimes {
+  text: string; // "Best conditions today: 09:00–17:00 (light green)"
+  gapsText: string | null; // "17:00–18:00 dark green due to High winds"
+}
+
 // Best paddling windows for the rest of today, relative to the current time.
 export function buildBestPaddlingTimes(
   todayForecast: DayForecast | null
-): string | null {
+): BestPaddlingTimes | null {
   if (!todayForecast) return null;
 
   const now = new Date();
@@ -99,7 +154,7 @@ export function buildBestPaddlingTimes(
   );
   if (futureSlots.length === 0) return null;
 
-  const { bestStatus, windows } = findGreenWindows(futureSlots);
+  const { bestStatus, windows, gaps } = findGreenWindows(futureSlots);
   if (!bestStatus || windows.length === 0) return null;
 
   const sunriseHHMM = todayForecast.sunrise
@@ -130,7 +185,10 @@ export function buildBestPaddlingTimes(
     })
     .join(", ");
 
-  return `Best conditions today: ${ranges} (${label})`;
+  return {
+    text: `Best conditions today: ${ranges} (${label})`,
+    gapsText: formatGaps(todayForecast.graphData, gaps),
+  };
 }
 
 // Hour-by-hour forecast text for today's remaining daylight, for the AI briefing.
@@ -193,6 +251,7 @@ export interface DaytimeOutlook {
   dayLabel: string; // "later today" | "tomorrow" | day label
   bestTimes: string | null; // "09:00–17:00 (light green)" or null
   rangesText: string; // "river level between 0.55 m and 0.62 m, air temperature between 11.0°C and 18.0°C, wind up to 14.0 mph"
+  gapsText: string | null; // "17:00–18:00 dark green due to High winds"
 }
 
 // Outlook for the next daytime period – used when it's currently dark.
@@ -262,8 +321,9 @@ export function buildNextDaytimeOutlook(
     .filter(Boolean)
     .join(", ");
 
-  const { bestStatus, windows } = findGreenWindows(daySlots);
+  const { bestStatus, windows, gaps } = findGreenWindows(daySlots);
   let bestTimes: string | null = null;
+  let gapsText: string | null = null;
   if (bestStatus && windows.length > 0) {
     const sunriseHHMM = day.sunrise ? hhmmOfISO(day.sunrise) : null;
     const sunsetHHMM = day.sunset ? hhmmOfISO(day.sunset) : null;
@@ -281,7 +341,8 @@ export function buildNextDaytimeOutlook(
       })
       .join(", ");
     bestTimes = `${ranges} (${label})`;
+    gapsText = formatGaps(day.graphData, gaps);
   }
 
-  return { dayLabel, bestTimes, rangesText };
+  return { dayLabel, bestTimes, rangesText, gapsText };
 }

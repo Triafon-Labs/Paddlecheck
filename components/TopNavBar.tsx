@@ -92,7 +92,7 @@ const buildShareText = (
     const bestTimes = buildBestPaddlingTimes(todayForecast);
     if (bestTimes) {
       lines.push("");
-      lines.push(`🟢 *${bestTimes}*`);
+      lines.push(`🟢 *${bestTimes.text}*`);
     }
   } else {
     const outlook = buildNextDaytimeOutlook(forecastDays);

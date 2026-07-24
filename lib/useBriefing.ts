@@ -47,6 +47,11 @@ async function streamBriefing(
   const hourlyForecast = targetDay ? buildHourlyForecastText(targetDay) : null;
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
+  const bestPaddlingToday =
+    !currentlyDark && todayForecast
+      ? buildBestPaddlingTimes(todayForecast)
+      : null;
+
   // The same deterministic best-window text shown in the share dialog, passed
   // to the AI as ground truth so it doesn't recompute (and potentially
   // mis-derive) its own window boundaries from the raw hourly table.
@@ -54,9 +59,14 @@ async function streamBriefing(
     ? outlook?.bestTimes
       ? `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`
       : null
-    : todayForecast
-      ? buildBestPaddlingTimes(todayForecast)
-      : null;
+    : (bestPaddlingToday?.text ?? null);
+
+  // Likewise, the deterministic description of any worse-status gap(s)
+  // between best-status windows, so the AI doesn't have to derive the gap's
+  // status/time/reason itself from the raw hourly table.
+  const gapConditionsLine = currentlyDark
+    ? (outlook?.gapsText ?? null)
+    : (bestPaddlingToday?.gapsText ?? null);
 
   // Filter for warnings that are active or upcoming (i.e. haven't expired yet)
   const now = londonNow();
@@ -80,7 +90,8 @@ async function streamBriefing(
       currentTime,
       model,
       outlook,
-      bestConditionsLine
+      bestConditionsLine,
+      gapConditionsLine
     }),
     signal,
   });

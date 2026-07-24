@@ -31,6 +31,7 @@ interface SummaryRequest {
   model?: string;
   outlook?: Outlook | null;
   bestConditionsLine?: string | null;
+  gapConditionsLine?: string | null;
 }
 
 // ── Prompt ────────────────────────────────────────────────────────────────────
@@ -54,7 +55,7 @@ Wind gusts are given separately from sustained wind speed and are not part of th
 
 Rain that's flagged as occurring at a warm temperature is deliberately excluded from the status calculation - it's only mentioned as a courtesy heads-up, never as something that lowers the status. When this is flagged, briefly mention that it's raining alongside the temperature figure (e.g. "a warm 18°C with some rain") rather than treating it as a mark against conditions.
 
-If there are any gaps, splits, or temporary dips in the best paddling conditions during the day (e.g. if conditions are light green from sunrise until 19:00 and again from 20:00 to sunset), look at the hour-by-hour entries that fall between the two ranges. You must always state all three of the following about the drop, woven directly into the same sentence that gives the window, right between the two ranges: the status it drops to, the exact time range of the drop, and the physical reason for it (wind, temperature, or rain) shown in those entries. Never give only one or two of the three. For example, write "light green from sunrise until 19:00, dropping to amber until 20:00 for a windy spell, then light green again until sunset" – not "...dropping briefly for a windy spell..." (missing the status), and not "...dropping to amber until 20:00, then light green again..." (missing the reason). Don't state both ranges up front and only explain the drop in a separate, later sentence.
+If the data includes a line starting "Gap(s) within the best-conditions window:", the best-status window has one or more breaks in it – this line is the definitive, already-computed status, time range, and reason for each break, so use it exactly rather than deriving it yourself from the hour-by-hour table. Weave it directly into the same sentence that gives the window, right between the two ranges it falls between, always including all three pieces given: the status it drops to, the time range of the drop, and its reason if one is given. Never give only one or two of the three when all three are present. For example, if that line reads "17:00–20:00 dark green due to High winds", write "light green from sunrise until 17:00, dropping to dark green until 20:00 for high winds, then light green again until sunset" – not "...dropping briefly for a windy spell..." (missing the status and the given time range), and not "...dropping to dark green until 20:00, then light green again..." (missing the reason). Don't state both ranges up front and only explain the drop in a separate, later sentence. If that line is absent, the best-status window has no gaps – don't invent one.
 
 Strict negative constraint: Do not use any parenthetical or bracketed text to explain or contain figures, speeds, reasons, or notes in the output (for example, avoid "(15 mph)" or "[due to wind]"). All details must flow naturally as part of the sentence itself.
 
@@ -80,6 +81,7 @@ function buildConditionsParts(req: SummaryRequest): string {
     currentTime,
     outlook,
     bestConditionsLine,
+    gapConditionsLine,
   } = req;
 
   const windDir =
@@ -154,6 +156,9 @@ function buildConditionsParts(req: SummaryRequest): string {
       : null,
     bestConditionsLine
       ? `${bestConditionsLine} — this is the definitive, already-computed best-conditions window(s) for the period; use its exact time boundaries and status colour rather than recomputing your own from the hour-by-hour table.`
+      : null,
+    gapConditionsLine
+      ? `Gap(s) within the best-conditions window: ${gapConditionsLine}`
       : null,
     currentlyDark && !outlook
       ? `It is currently dark and no daytime forecast is available.`

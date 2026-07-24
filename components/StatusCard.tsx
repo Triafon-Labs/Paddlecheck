@@ -12,6 +12,7 @@ import {
 import HelpOutlined from "@mui/icons-material/HelpOutlined";
 import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
+import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import { ragStatus, reasonIcons } from "@/lib/rag";
@@ -188,10 +189,10 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                     <Typography variant="body2">
                       Gusts up to {Math.round(conditions.windGust!)} mph
                     </Typography>
-                    <Air
+                    <FiberManualRecord
                       titleAccess={`Would be ${conditions.gustStatus} if sustained`}
                       sx={{
-                        fontSize: 18,
+                        fontSize: 8,
                         color: ragStatus[conditions.gustStatus].color,
                         flexShrink: 0,
                         ml: "auto",

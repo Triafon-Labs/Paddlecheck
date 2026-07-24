@@ -55,6 +55,7 @@ import {
   CONTACT_EMAIL,
   CLUB_NAME,
 } from "@/lib/config";
+import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 interface SettingsModalProps {
@@ -376,35 +377,35 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             </Typography>
             <ThresholdRow
               icon={<Water fontSize="small" />}
-              label={`Below ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} m`}
+              label={`Below ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)}`}
               description={RIVER_LEVEL_BAND_DESCRIPTIONS.belowRag1}
               chipLabel="Light Green"
               ragColor={RAG_STATUS_UI["Light Green"].color}
             />
             <ThresholdRow
               icon={<Water fontSize="small" />}
-              label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1}–${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} m`}
+              label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)}–${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)}`}
               description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag1ToRag2}
               chipLabel="Dark Green"
               ragColor={RAG_STATUS_UI["Dark Green"].color}
             />
             <ThresholdRow
               icon={<Waves fontSize="small" />}
-              label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2}–${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m`}
+              label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)}–${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)}`}
               description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag2ToRag3}
               chipLabel="Amber"
               ragColor={RAG_STATUS_UI["Amber"].color}
             />
             <ThresholdRow
               icon={<Tsunami fontSize="small" />}
-              label={`${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m and above`}
+              label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)} and above`}
               description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag3Plus}
               chipLabel="Red"
               ragColor={RAG_STATUS_UI["Red"].color}
             />
             <ThresholdRow
               icon={<Flood fontSize="small" />}
-              label={`${THRESHOLDS.RIVER_LEVEL_NO_PADDLING} m and above`}
+              label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_NO_PADDLING)} and above`}
               description={RIVER_LEVEL_BAND_DESCRIPTIONS.noPaddling}
               chipLabel="No Paddling"
               ragColor={RAG_STATUS_UI["No Paddling"].color}

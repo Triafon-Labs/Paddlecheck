@@ -16,6 +16,7 @@ import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
+import { formatWindGust } from "@/lib/units";
 import ConditionsBriefing from "./ConditionsBriefing";
 import WeatherWarnings from "./WeatherWarnings";
 
@@ -191,7 +192,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                   >
                     <Air fontSize="small" sx={{ color: "primary.main" }} />
                     <Typography variant="body2">
-                      Gusts up to {Math.round(conditions.windGust!)} mph
+                      Gusts up to {formatWindGust(conditions.windGust!)}
                     </Typography>
                     <FiberManualRecord
                       titleAccess={`Would be ${conditions.gustStatus} if sustained`}

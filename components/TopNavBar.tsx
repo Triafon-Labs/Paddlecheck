@@ -18,6 +18,7 @@ import { useKayakContext } from "@/lib/KayakDataContext";
 import { degreesToCompass } from "@/lib/weather";
 import { ragStatus } from "@/lib/rag";
 import { THRESHOLDS } from "@/lib/config";
+import { formatRiverLevel, formatTemperature, formatWindSpeed } from "@/lib/units";
 import {
   buildBestPaddlingTimes,
   buildNextDaytimeOutlook,
@@ -38,7 +39,7 @@ const buildShareText = (
   lines.push("");
 
   if (conditions.riverLevel !== undefined) {
-    let riverLine = `🛶 *River Level:* ${conditions.riverLevel.toFixed(2)} m`;
+    let riverLine = `🛶 *River Level:* ${formatRiverLevel(conditions.riverLevel)}`;
     if (conditions.levelChange !== undefined) {
       const { value, period } = conditions.levelChange;
       const arrow =
@@ -47,7 +48,7 @@ const buildShareText = (
           : value < -THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
             ? "⬇️"
             : "➡️";
-      riverLine += ` _(${arrow} ${Math.abs(value).toFixed(2)} m in ${period})_`;
+      riverLine += ` _(${arrow} ${formatRiverLevel(Math.abs(value))} in ${period})_`;
     }
     lines.push(riverLine);
   }
@@ -77,11 +78,11 @@ const buildShareText = (
 
   const tempStr =
     conditions.temperature !== undefined
-      ? `🌡️ *Temperature:* ${conditions.temperature.toFixed(1)}°C`
+      ? `🌡️ *Temperature:* ${formatTemperature(conditions.temperature)}`
       : null;
   const windStr =
     conditions.windSpeed !== undefined
-      ? `💨 *Wind:* ${conditions.windSpeed.toFixed(1)} mph${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`
+      ? `💨 *Wind:* ${formatWindSpeed(conditions.windSpeed)}${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`
       : null;
   const weatherLine = [tempStr, windStr].filter(Boolean).join(" | ");
   if (weatherLine) lines.push(weatherLine);

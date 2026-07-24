@@ -20,6 +20,7 @@ import { ChartDataPoint, KayakConditions } from "@/types";
 import { degreesToCompass } from "@/lib/weather";
 import { THRESHOLDS } from "@/lib/config";
 import { ragStatus, LEVEL_DESCRIPTIONS } from "@/lib/rag";
+import { formatRiverLevel, formatTemperature, formatWindSpeed } from "@/lib/units";
 import { useNowTicking, formatDataAge } from "@/lib/time";
 
 interface StatsCardProps {
@@ -191,7 +192,7 @@ const RiverLevelSection: React.FC<{
                 fontSize: "0.875rem",
               }}
             >
-              {row.level.toFixed(2)} m
+              {formatRiverLevel(row.level)}
             </Box>
             <Box
               sx={{
@@ -267,7 +268,7 @@ const RiverLevelSection: React.FC<{
                   variant="caption"
                   sx={{ color: "text.secondary", fontStyle: "italic" }}
                 >
-                  Currently {riverLevel.toFixed(2)} m
+                  Currently {formatRiverLevel(riverLevel)}
                   {dataAgeLabel ? ` (${dataAgeLabel})` : ""}
                 </Typography>
               )}
@@ -371,13 +372,21 @@ const StatsCard: React.FC<StatsCardProps> = ({
           <StatItem
             icon={<Thermostat />}
             label="Temperature"
-            value={`${conditions.temperature?.toFixed(1)}°C`}
+            value={
+              conditions.temperature !== undefined
+                ? formatTemperature(conditions.temperature)
+                : "N/A"
+            }
             isInfluencing={reasons.some((r) => r.includes("temperature"))}
           />
           <StatItem
             icon={<Air />}
             label="Wind Speed"
-            value={`${conditions.windSpeed?.toFixed(1)} mph${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`}
+            value={
+              conditions.windSpeed !== undefined
+                ? `${formatWindSpeed(conditions.windSpeed)}${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`
+                : "N/A"
+            }
             isInfluencing={reasons.includes("High winds")}
           />
           <StatItem

@@ -31,6 +31,7 @@ import {
 import { DayForecast, ForecastGraphDataPoint, WeatherWarning } from "@/types";
 import { ragStatus, describeReason } from "@/lib/rag";
 import { REASON_ICONS, WARNING_COLORS } from "@/lib/config";
+import { formatRiverLevel, formatWindGust } from "@/lib/units";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -63,7 +64,7 @@ const CustomTooltip = ({
         <Typography variant="body1">{`${label}`}</Typography>
         <Typography variant="body2">{`${data.status}`}</Typography>
         <Typography variant="body2" color="text.secondary">
-          Forecast Level: {data.forecastLevel.toFixed(2)} m
+          Forecast Level: {formatRiverLevel(data.forecastLevel)}
         </Typography>
         <Typography variant="caption" color="text.disabled">
           {data.forecastSource === "bewdley"
@@ -104,7 +105,7 @@ const CustomTooltip = ({
               <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
                 <Air fontSize="small" />
                 <Typography variant="caption" sx={{ ml: 1 }}>
-                  Gusts up to {Math.round(data.windGust!)} mph
+                  Gusts up to {formatWindGust(data.windGust!)}
                 </Typography>
                 <FiberManualRecord
                   titleAccess={`Would be ${data.gustStatus} if sustained`}

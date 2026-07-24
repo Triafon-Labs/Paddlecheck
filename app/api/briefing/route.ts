@@ -6,6 +6,12 @@ import {
   VISIBILITY_DESCRIPTIONS,
   DEFAULT_AI_MODEL,
 } from "@/lib/config";
+import {
+  formatRiverLevel,
+  formatTemperature,
+  formatWindSpeed,
+  formatWindGust,
+} from "@/lib/units";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -92,7 +98,7 @@ function buildConditionsParts(req: SummaryRequest): string {
     currentTime ? `Current time: ${currentTime}` : null,
     `Overall status: ${conditions.overallStatus}`,
     conditions.riverLevel !== undefined
-      ? `River level: ${conditions.riverLevel.toFixed(2)} m`
+      ? `River level: ${formatRiverLevel(conditions.riverLevel)}`
       : null,
     conditions.levelChange
       ? (() => {
@@ -102,18 +108,18 @@ function buildConditionsParts(req: SummaryRequest): string {
             return "River trend: steady";
           }
           const trend = val > 0 ? "rising" : "falling";
-          return `River trend: ${val >= 0 ? "+" : ""}${val.toFixed(2)} m over ${conditions.levelChange.period} (${trend})`;
+          return `River trend: ${val >= 0 ? "+" : ""}${formatRiverLevel(val)} over ${conditions.levelChange.period} (${trend})`;
         })()
       : null,
     conditions.temperature !== undefined
-      ? `Air temperature: ${conditions.temperature}°C`
+      ? `Air temperature: ${formatTemperature(conditions.temperature)}`
       : null,
     conditions.windSpeed !== undefined
-      ? `Wind: ${conditions.windSpeed} mph${windDir ? ` from the ${windDir}` : ""}`
+      ? `Wind: ${formatWindSpeed(conditions.windSpeed)}${windDir ? ` from the ${windDir}` : ""}`
       : null,
     conditions.windGust !== undefined &&
     conditions.windGust >= THRESHOLDS.WIND_GUST_NOTABLE
-      ? `Wind gusts: ${Math.round(conditions.windGust)} mph (gusts only - not sustained wind, and not part of the status calculation)`
+      ? `Wind gusts: ${formatWindGust(conditions.windGust)} (gusts only - not sustained wind, and not part of the status calculation)`
       : null,
     conditions.rain
       ? conditions.rainWhileWarm

@@ -1,6 +1,12 @@
 import { DayForecast, Status } from "@/types";
 import { THRESHOLDS } from "@/lib/config";
 import { findLevelDescription } from "@/lib/rag";
+import {
+  formatRiverLevel,
+  formatTemperature,
+  formatWindSpeed,
+  formatWindGust,
+} from "@/lib/units";
 import { getLondonHour, hhmmOfISO } from "@/lib/time";
 
 const PREFERRED: Status[] = ["Light Green", "Dark Green"];
@@ -141,17 +147,17 @@ export function buildHourlyForecastText(
   const lines = slots.map((pt, i) => {
     const h = hourOf(pt.time);
     const timeStr = `${String(h).padStart(2, "0")}:00`;
-    const level = `river ${pt.forecastLevel.toFixed(2)} m`;
+    const level = `river ${formatRiverLevel(pt.forecastLevel)}`;
     const launch = `launch: ${findLevelDescription(pt.forecastLevel)}`;
     const temp =
-      pt.temperature !== undefined ? `${Math.round(pt.temperature)}°C` : null;
+      pt.temperature !== undefined ? formatTemperature(pt.temperature) : null;
     const wind =
       pt.windSpeed !== undefined
-        ? `${Math.round(pt.windSpeed)} mph wind`
+        ? `${formatWindSpeed(pt.windSpeed)} wind`
         : null;
     const gust =
       pt.windGust !== undefined && pt.windGust >= THRESHOLDS.WIND_GUST_NOTABLE
-        ? `gusts up to ${Math.round(pt.windGust)} mph`
+        ? `gusts up to ${formatWindGust(pt.windGust)}`
         : null;
     const rainNote = pt.rainWhileWarm ? "rain (warm, no rating impact)" : null;
     const stats = [level, launch, temp, wind, gust, rainNote]
@@ -186,7 +192,7 @@ export function hasDaylightRemaining(
 export interface DaytimeOutlook {
   dayLabel: string; // "later today" | "tomorrow" | day label
   bestTimes: string | null; // "09:00–17:00 (light green)" or null
-  rangesText: string; // "river level 0.55–0.62 m, air temperature 11–18°C, wind up to 14 mph"
+  rangesText: string; // "river level between 0.55 m and 0.62 m, air temperature between 11.0°C and 18.0°C, wind up to 14.0 mph"
 }
 
 // Outlook for the next daytime period – used when it's currently dark.
@@ -217,26 +223,26 @@ export function buildNextDaytimeOutlook(
   const maxL = Math.max(...levels);
   const levelText =
     maxL - minL < THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
-      ? `river level steady around ${minL.toFixed(2)} m`
-      : `river level between ${minL.toFixed(2)} m and ${maxL.toFixed(2)} m`;
+      ? `river level steady around ${formatRiverLevel(minL)}`
+      : `river level between ${formatRiverLevel(minL)} and ${formatRiverLevel(maxL)}`;
 
   const temps = daySlots
     .map((s) => s.temperature)
     .filter((t): t is number => typeof t === "number");
-  const minTemp = temps.length ? Math.round(Math.min(...temps)) : null;
-  const maxTemp = temps.length ? Math.round(Math.max(...temps)) : null;
+  const minTemp = temps.length ? Math.min(...temps) : null;
+  const maxTemp = temps.length ? Math.max(...temps) : null;
   const tempText =
     minTemp !== null && maxTemp !== null
       ? maxTemp - minTemp < 2
-        ? `air temperature steady around ${minTemp}°C`
-        : `air temperature between ${minTemp}°C and ${maxTemp}°C`
+        ? `air temperature steady around ${formatTemperature(minTemp)}`
+        : `air temperature between ${formatTemperature(minTemp)} and ${formatTemperature(maxTemp)}`
       : null;
 
   const winds = daySlots
     .map((s) => s.windSpeed)
     .filter((w): w is number => typeof w === "number");
   const windText = winds.length
-    ? `wind up to ${Math.round(Math.max(...winds))} mph`
+    ? `wind up to ${formatWindSpeed(Math.max(...winds))}`
     : null;
 
   const gusts = daySlots
@@ -245,7 +251,7 @@ export function buildNextDaytimeOutlook(
   const maxGust = gusts.length ? Math.max(...gusts) : null;
   const gustText =
     maxGust !== null && maxGust >= THRESHOLDS.WIND_GUST_NOTABLE
-      ? `gusts up to ${Math.round(maxGust)} mph`
+      ? `gusts up to ${formatWindGust(maxGust)}`
       : null;
 
   const rainWhileWarmText = daySlots.some((s) => s.rainWhileWarm)

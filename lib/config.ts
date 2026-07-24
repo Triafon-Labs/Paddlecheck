@@ -18,6 +18,7 @@ import {
   Foggy,
 } from "@mui/icons-material";
 import { Status } from "@/types";
+import { formatRiverLevel } from "./units";
 
 // ============================================================================
 // CONFIGURATION
@@ -213,11 +214,11 @@ export const RIVER_LEVEL_BAND_DESCRIPTIONS = {
 
 // --- UI Text and Icons ---
 export const REASON_ICONS: Record<string, React.ElementType> = {
-  [`Slightly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1} m)`]:
+  [`Slightly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)})`]:
     Water,
-  [`Moderately elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2} m)`]:
+  [`Moderately elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)})`]:
     Waves,
-  [`Significantly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3} m)`]:
+  [`Significantly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)})`]:
     Tsunami,
   "Moderately low temperature": Thermostat,
   "Low temperature": AcUnit,

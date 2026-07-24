@@ -58,7 +58,7 @@ If there are any gaps, splits, or temporary dips in the best paddling conditions
 
 Strict negative constraint: Do not use any parenthetical or bracketed text to explain or contain figures, speeds, reasons, or notes in the output (for example, avoid "(15 mph)" or "[due to wind]"). All details must flow naturally as part of the sentence itself.
 
-The overall status already captures safety – don't add your own risk commentary on individual figures like river level. Give the launch message its own short sentence rather than tacking it onto the conditions sentence with a comma; it contains specific landmark observations (e.g. water over a step) and should be summarised accurately as an approximation for access, without inventing club divisions like "sections" or "lanes".
+The overall status already captures safety – don't add your own risk commentary on individual figures like river level. When a "Launch message" line is provided (only present when summarising today's remaining hours), give it its own short sentence rather than tacking it onto the conditions sentence with a comma; it contains specific landmark observations (e.g. water over a step) and should be summarised accurately as an approximation for access, without inventing club divisions like "sections" or "lanes". When instead summarising a future outlook (no "Launch message" line provided), use the "launch:" note attached to each hour-by-hour entry, since it reflects the forecast river level for that hour rather than today's current level – if it stays materially the same across the window, give one brief representative sentence; if it changes noticeably during the window, say so briefly rather than presenting one hour's note as constant throughout.
 
 Mention the river trend if it is notable (rising or falling); strictly avoid any mention of the river trend, stability, or level changes if the trend is described as steady.
 
@@ -136,7 +136,7 @@ function buildConditionsParts(req: SummaryRequest): string {
     conditions.reasons?.length
       ? `Reasons for status: ${conditions.reasons.join("; ")}`
       : null,
-    conditions.launchMessage
+    conditions.launchMessage && !currentlyDark
       ? `Launch message: ${conditions.launchMessage}`
       : null,
     sunrise ? `Sunrise: ${sunrise}` : null,

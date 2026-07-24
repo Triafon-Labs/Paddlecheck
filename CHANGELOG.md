@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.0...paddlecheck-v1.22.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* align AI summary best window with share dialog ([726d639](https://github.com/dylanr97/Paddlecheck/commit/726d639492cce87e50784e6915cd0f96222b8d9d))
+* compute gap status/time/reason in code instead of asking the AI to derive it ([b07c1df](https://github.com/dylanr97/Paddlecheck/commit/b07c1df020227f10bbbe8b668ef7792896c6fdd3))
+* lower briefing temperature for more consistent instruction-following ([20c5376](https://github.com/dylanr97/Paddlecheck/commit/20c5376b3b3284ac9dd6f87cec4dfb0affd052d9))
+* name the gap status/timing and state the summarised day ([d35dd8b](https://github.com/dylanr97/Paddlecheck/commit/d35dd8b39ed039f51e45752be0672415add19c4f))
+* require status, time, and reason equally for gap descriptions ([9fa2147](https://github.com/dylanr97/Paddlecheck/commit/9fa21479cc249c8d37227497be73546e8475b70b))
+* stop sending current-conditions readings when summarising a dark outlook ([7d5726b](https://github.com/dylanr97/Paddlecheck/commit/7d5726bca6e2b8fea6f2e7099b6b2a0550308059))
+* use forecast-level launch note for future outlook summaries ([80174ee](https://github.com/dylanr97/Paddlecheck/commit/80174ee066c08c12515222aca87d1819c7c0866b))
+* weave gap reason into the same sentence as the best window ([46667e6](https://github.com/dylanr97/Paddlecheck/commit/46667e6e6651adfecd8968253545f0bedcba992c))
+
 ## [1.22.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.21.1...paddlecheck-v1.22.0) (2026-07-24)
 
 

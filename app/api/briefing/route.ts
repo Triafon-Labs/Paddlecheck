@@ -221,8 +221,8 @@ export async function POST(request: Request) {
   const client = new Groq();
   const groqStream = await client.chat.completions.create({
     model: body.model ?? DEFAULT_AI_MODEL,
-    temperature: 0.7,
-    top_p: 0.95,
+    temperature: 0.3,
+    top_p: 0.9,
     max_tokens: 2048,
     reasoning_effort: "medium",
     stream: true,

@@ -36,7 +36,7 @@ interface SummaryRequest {
 // ── Prompt ────────────────────────────────────────────────────────────────────
 
 const BRIEFING_PROMPT = `\
-You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. You are given current conditions and an hour-by-hour forecast. Normally this covers today's remaining daylight hours; if it is currently dark, it instead covers the next available daylight window (later today or tomorrow) – determine which from the date/time on the entries provided, not by guessing.
+You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. You are given an hour-by-hour forecast, plus the club's current conditions when it isn't currently dark. Normally this covers today's remaining daylight hours; if it is currently dark, it instead covers the next available daylight window (later today or tomorrow) – determine which from the date/time on the entries provided, not by guessing.
 
 Each hour carries a status. From best to worst: Light Green, Dark Green, Amber, Red, No Paddling.
 
@@ -58,11 +58,11 @@ If there are any gaps, splits, or temporary dips in the best paddling conditions
 
 Strict negative constraint: Do not use any parenthetical or bracketed text to explain or contain figures, speeds, reasons, or notes in the output (for example, avoid "(15 mph)" or "[due to wind]"). All details must flow naturally as part of the sentence itself.
 
-The overall status already captures safety – don't add your own risk commentary on individual figures like river level. When a "Launch message" line is provided (only present when summarising today's remaining hours), give it its own short sentence rather than tacking it onto the conditions sentence with a comma; it contains specific landmark observations (e.g. water over a step) and should be summarised accurately as an approximation for access, without inventing club divisions like "sections" or "lanes". When instead summarising a future outlook (no "Launch message" line provided), use the "launch:" note attached to each hour-by-hour entry, since it reflects the forecast river level for that hour rather than today's current level – if it stays materially the same across the window, give one brief representative sentence; if it changes noticeably during the window, say so briefly rather than presenting one hour's note as constant throughout.
+The overall status already captures safety – don't add your own risk commentary on individual figures like river level. When a "Launch message" line is provided (only present when summarising today's remaining hours), it contains specific landmark observations (e.g. water over a step) and should be summarised accurately as an approximation for access, without inventing club divisions like "sections" or "lanes". When instead summarising a future outlook (no "Launch message" line provided), use the "launch:" note attached to each hour-by-hour entry, since it reflects the forecast river level for that hour rather than today's current level – if it stays materially the same across the window, give one brief representative sentence; if it changes noticeably during the window, say so briefly rather than presenting one hour's note as constant throughout.
 
 Mention the river trend if it is notable (rising or falling); strictly avoid any mention of the river trend, stability, or level changes if the trend is described as steady.
 
-If it is currently dark, do not summarise current conditions – go straight to the outlook for the next available paddling window. This is later today if it's currently post-midnight (before sunrise), or tomorrow if it's currently pre-midnight (after sunset). Use the figures provided for that period.
+If it is currently dark, no current-conditions figures are provided at all (they wouldn't apply to the period you're summarising) – go straight to the outlook for the next available paddling window, using only the forecast data given. This is later today if it's currently post-midnight (before sunrise), or tomorrow if it's currently pre-midnight (after sunset). Use the figures provided for that period.
 
 Don't mention or speculate about any dates or periods for which no data has been provided.
 
@@ -96,13 +96,16 @@ function buildConditionsParts(req: SummaryRequest): string {
         .join("\n")}`
     : null;
 
+  // Current-conditions readings (as opposed to forecast/outlook data) only
+  // describe right now, so they're omitted entirely when it's dark and the
+  // summary is for a future window instead – nothing here would apply.
   const lines: (string | null)[] = [
     currentTime ? `Current time: ${currentTime}` : null,
-    `Overall status: ${conditions.overallStatus}`,
-    conditions.riverLevel !== undefined
+    !currentlyDark ? `Overall status: ${conditions.overallStatus}` : null,
+    !currentlyDark && conditions.riverLevel !== undefined
       ? `River level: ${formatRiverLevel(conditions.riverLevel)}`
       : null,
-    conditions.levelChange
+    !currentlyDark && conditions.levelChange
       ? (() => {
           const val = conditions.levelChange.value;
           const absVal = Math.abs(val);
@@ -113,27 +116,29 @@ function buildConditionsParts(req: SummaryRequest): string {
           return `River trend: ${val >= 0 ? "+" : ""}${formatRiverLevel(val)} over ${conditions.levelChange.period} (${trend})`;
         })()
       : null,
-    conditions.temperature !== undefined
+    !currentlyDark && conditions.temperature !== undefined
       ? `Air temperature: ${formatTemperature(conditions.temperature)}`
       : null,
-    conditions.windSpeed !== undefined
+    !currentlyDark && conditions.windSpeed !== undefined
       ? `Wind: ${formatWindSpeed(conditions.windSpeed)}${windDir ? ` from the ${windDir}` : ""}`
       : null,
+    !currentlyDark &&
     conditions.windGust !== undefined &&
     conditions.windGust >= THRESHOLDS.WIND_GUST_NOTABLE
       ? `Wind gusts: ${formatWindGust(conditions.windGust)} (gusts only - not sustained wind, and not part of the status calculation)`
       : null,
-    conditions.rain
+    !currentlyDark && conditions.rain
       ? conditions.rainWhileWarm
         ? `Rain: ${conditions.weatherDescription || "yes"} (occurring at a warm temperature - deliberately not part of the status calculation, mention only as a brief heads-up)`
         : `Rain: ${conditions.weatherDescription || "yes"}`
       : null,
+    !currentlyDark &&
     conditions.visibilityDescription &&
     conditions.visibility !== undefined &&
     conditions.visibility < VISIBILITY_DESCRIPTIONS.MODERATE.min
       ? `Visibility: ${conditions.visibilityDescription}`
       : null,
-    conditions.reasons?.length
+    !currentlyDark && conditions.reasons?.length
       ? `Reasons for status: ${conditions.reasons.join("; ")}`
       : null,
     conditions.launchMessage && !currentlyDark

@@ -30,6 +30,7 @@ interface SummaryRequest {
   currentTime?: string;
   model?: string;
   outlook?: Outlook | null;
+  bestConditionsLine?: string | null;
 }
 
 // ── Prompt ────────────────────────────────────────────────────────────────────
@@ -39,11 +40,11 @@ You are writing a short conditions briefing for members of a kayaking club on th
 
 Each hour carries a status. From best to worst: Light Green, Dark Green, Amber, Red, No Paddling.
 
-The best window is the longest contiguous run of hours sharing the highest-ranked status present in the period being summarised. If any hours are light green, the best window is the longest unbroken block of light green hours; only if no light green hours exist does dark green become the best window, and so on. If two blocks of the top-ranked status are equal in length, mention both, but keep this brief – don't let it bloat the summary. Do not merge hours of different statuses into a single window.
+The data includes a line starting "Best conditions ...:" giving the definitive, already-computed best-conditions window(s) for the period, with correct sunrise/sunset boundary handling already applied. Always use that line's exact time boundaries and status colour rather than recomputing your own window from the hour-by-hour table. If that line lists more than one comma-separated time range, they are all part of the same best-status window with a break in between – you must mention every range given, not just the longest one; never silently drop a later range. Do not merge hours of different statuses into a single window.
 
 Each hour-by-hour entry covers conditions from that hour until the next entry begins. The list covers daylight hours only – later hours are omitted because it gets dark. The final listed hour's conditions extend to sunset, which is always provided in the data – use that time as the window's end. This means each hour slot represents that full hour. For example, if light green is listed from sunrise until 18:00 and then dark green starts at 19:00, the light green window runs all the way until 19:00 (since the 18:00 slot lasts until 19:00). Never subtract an hour or say "until 18:00" when the 18:00 hour slot is still light green.
 
-Write 2–3 short sentences giving a broad sweep of how conditions look across the period being summarised. The first sentence should naturally weave in the best window and its status colour, plus the headline figures (river level, temperature range, wind). This length applies whether you're summarising today's remaining hours or a future window. If there are no green conditions (i.e. the best available status is amber, red, or no paddling), note this instead of highlighting a best window. Only mention weather warnings that are active or upcoming within the specific period you are summarising. If there are such warnings, briefly mention the most severe one and how it might impact paddling (e.g. "be aware of the red heat warning"). Be punchy and avoid verbosity.
+Write 2–3 short sentences giving a broad sweep of how conditions look across the period being summarised. The first sentence should naturally weave in the best window and its status colour, plus the headline figures (river level, temperature range, wind). This length applies whether you're summarising today's remaining hours or a future window. If there are no green conditions (i.e. the best available status is amber, red, or no paddling), note this instead of highlighting a best window. Only call something a "warning" if it is one of the official Met Office weather warnings supplied in the data; only mention those that are active or upcoming within the specific period you are summarising, briefly noting the most severe one and how it might impact paddling (e.g. "be aware of the red heat warning"). A plain spell of higher wind (or any other dip shown only in the hour-by-hour reasons, with no matching Met Office warning) is not a "warning" – describe it plainly instead (e.g. "it turns windier around 17:00"). Be punchy and avoid verbosity.
 
 Don't chain more than two comma-separated clauses into one sentence. When you have several distinct things to say - the conditions summary and the launch message - give each its own short sentence rather than stringing them all together with commas into one long run-on sentence.
 
@@ -78,6 +79,7 @@ function buildConditionsParts(req: SummaryRequest): string {
     currentlyDark,
     currentTime,
     outlook,
+    bestConditionsLine,
   } = req;
 
   const windDir =
@@ -145,8 +147,8 @@ function buildConditionsParts(req: SummaryRequest): string {
     currentlyDark && outlook
       ? `It is currently dark. The outlook for ${outlook.dayLabel} is: ${outlook.rangesText}.`
       : null,
-    currentlyDark && outlook?.bestTimes
-      ? `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`
+    bestConditionsLine
+      ? `${bestConditionsLine} — this is the definitive, already-computed best-conditions window(s) for the period; use its exact time boundaries and status colour rather than recomputing your own from the hour-by-hour table.`
       : null,
     currentlyDark && !outlook
       ? `It is currently dark and no daytime forecast is available.`

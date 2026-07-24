@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
-import { buildHourlyForecastText, buildNextDaytimeOutlook } from "@/lib/forecast";
+import {
+  buildHourlyForecastText,
+  buildNextDaytimeOutlook,
+  buildBestPaddlingTimes,
+} from "@/lib/forecast";
 import { getLondonHHMM, hhmmOfISO } from "@/lib/time";
 import { londonNow, isWarningNotExpired } from "@/lib/warnings";
 
@@ -43,6 +47,17 @@ async function streamBriefing(
   const hourlyForecast = targetDay ? buildHourlyForecastText(targetDay) : null;
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
+  // The same deterministic best-window text shown in the share dialog, passed
+  // to the AI as ground truth so it doesn't recompute (and potentially
+  // mis-derive) its own window boundaries from the raw hourly table.
+  const bestConditionsLine = currentlyDark
+    ? outlook?.bestTimes
+      ? `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`
+      : null
+    : todayForecast
+      ? buildBestPaddlingTimes(todayForecast)
+      : null;
+
   // Filter for warnings that are active or upcoming (i.e. haven't expired yet)
   const now = londonNow();
   const relevantWarnings =
@@ -64,7 +79,8 @@ async function streamBriefing(
       currentlyDark,
       currentTime,
       model,
-      outlook
+      outlook,
+      bestConditionsLine
     }),
     signal,
   });

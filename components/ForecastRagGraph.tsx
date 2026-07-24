@@ -29,7 +29,7 @@ import {
   LabelList,
 } from "recharts";
 import { DayForecast, ForecastGraphDataPoint, WeatherWarning } from "@/types";
-import { ragStatus } from "@/lib/rag";
+import { ragStatus, describeReason } from "@/lib/rag";
 import { REASON_ICONS, WARNING_COLORS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
@@ -77,6 +77,10 @@ const CustomTooltip = ({
             </Typography>
             {data.reasons.map((reason: string, index: number) => {
               const Icon = REASON_ICONS[reason];
+              const label = describeReason(reason, {
+                temperature: data.temperature,
+                windSpeed: data.windSpeed,
+              });
               return (
                 <Box
                   key={index}
@@ -84,7 +88,7 @@ const CustomTooltip = ({
                 >
                   {Icon && <Icon fontSize="small" />}
                   <Typography variant="caption" sx={{ ml: 1 }}>
-                    {reason}
+                    {label}
                   </Typography>
                 </Box>
               );

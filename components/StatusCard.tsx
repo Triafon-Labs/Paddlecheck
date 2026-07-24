@@ -15,7 +15,7 @@ import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
-import { ragStatus, reasonIcons } from "@/lib/rag";
+import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
 import ConditionsBriefing from "./ConditionsBriefing";
 import WeatherWarnings from "./WeatherWarnings";
 
@@ -148,6 +148,10 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               >
                 {conditions.reasons.map((reason, index) => {
                   const Icon = reasonIcons[reason] ?? HelpOutlined;
+                  const label = describeReason(reason, {
+                    temperature: conditions.temperature,
+                    windSpeed: conditions.windSpeed,
+                  });
                   return (
                     <Paper
                       key={index}
@@ -161,7 +165,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                       }}
                     >
                       <Icon fontSize="small" sx={{ color: "primary.main" }} />
-                      <Typography variant="body2">{reason}</Typography>
+                      <Typography variant="body2">{label}</Typography>
                     </Paper>
                   );
                 })}

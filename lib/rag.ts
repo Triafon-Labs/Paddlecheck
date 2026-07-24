@@ -204,3 +204,22 @@ export const isRainWhileWarm = (
   if (temperature === undefined || !rain) return false;
   return temperature >= THRESHOLDS.TEMP_HIGH;
 };
+
+// Appends the underlying reading to a reason string for display, e.g.
+// "High winds (18.0 mph)". Reason text itself stays untouched everywhere
+// else (icon lookup, "Dark" checks, etc.) - this is purely a UI label.
+export const describeReason = (
+  reason: string,
+  values: { temperature?: number; windSpeed?: number }
+): string => {
+  if (reason === "High winds" && values.windSpeed !== undefined) {
+    return `${reason} (${values.windSpeed.toFixed(1)} mph)`;
+  }
+  if (
+    (reason === "Low temperature" || reason === "Moderately low temperature") &&
+    values.temperature !== undefined
+  ) {
+    return `${reason} (${values.temperature.toFixed(1)}°C)`;
+  }
+  return reason;
+};

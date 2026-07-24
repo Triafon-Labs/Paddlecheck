@@ -36,6 +36,7 @@ import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
 import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
+import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { formatMetTime } from "@/lib/weather";
 import { isWarningOnDay } from "@/lib/warnings";
 
@@ -101,13 +102,11 @@ const CustomTooltip = ({
                 <Typography variant="caption" sx={{ ml: 1 }}>
                   Gusts up to {Math.round(data.windGust!)} mph
                 </Typography>
-                <Box
-                  title={`Would be ${data.gustStatus} if sustained`}
+                <FiberManualRecord
+                  titleAccess={`Would be ${data.gustStatus} if sustained`}
                   sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    backgroundColor: ragStatus[data.gustStatus].color,
+                    fontSize: 10,
+                    color: ragStatus[data.gustStatus].color,
                     ml: 1,
                     flexShrink: 0,
                   }}
@@ -208,20 +207,27 @@ const BarLabel = (props: BarLabelProps) => {
     elements.push(
       <foreignObject
         key="gust-dot"
-        x={x + width / 2 - 5}
-        y={y - clearAbove - 14}
-        width={10}
-        height={10}
+        x={x + width / 2 - 7}
+        y={y - clearAbove - 16}
+        width={14}
+        height={14}
       >
         <Box
           sx={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            backgroundColor: ragStatus[entry.gustStatus].color,
-            border: `1px solid ${theme.palette.background.paper}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 14,
+            height: 14,
           }}
-        />
+        >
+          <FiberManualRecord
+            sx={{
+              fontSize: 12,
+              color: ragStatus[entry.gustStatus].color,
+            }}
+          />
+        </Box>
       </foreignObject>
     );
   }

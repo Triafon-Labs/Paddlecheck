@@ -63,7 +63,7 @@ const CustomTooltip = ({
         <Typography variant="body1">{`${label}`}</Typography>
         <Typography variant="body2">{`${data.status}`}</Typography>
         <Typography variant="body2" color="text.secondary">
-          Forecast Level: {data.forecastLevel.toFixed(2)}m
+          Forecast Level: {data.forecastLevel.toFixed(2)} m
         </Typography>
         <Typography variant="caption" color="text.disabled">
           {data.forecastSource === "bewdley"

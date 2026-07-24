@@ -191,7 +191,7 @@ const RiverLevelSection: React.FC<{
                 fontSize: "0.875rem",
               }}
             >
-              {row.level.toFixed(2)}m
+              {row.level.toFixed(2)} m
             </Box>
             <Box
               sx={{
@@ -267,7 +267,7 @@ const RiverLevelSection: React.FC<{
                   variant="caption"
                   sx={{ color: "text.secondary", fontStyle: "italic" }}
                 >
-                  Currently {riverLevel.toFixed(2)}m
+                  Currently {riverLevel.toFixed(2)} m
                   {dataAgeLabel ? ` (${dataAgeLabel})` : ""}
                 </Typography>
               )}

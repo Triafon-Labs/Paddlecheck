@@ -114,7 +114,7 @@ const ChangeIndicator: React.FC<{
                 <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
               )
             ) : null}
-            {changeStr !== null ? `${changeStr}m` : "N/A"}
+            {changeStr !== null ? `${changeStr} m` : "N/A"}
           </Typography>
         )}
       </Box>
@@ -142,7 +142,7 @@ const CustomTooltip = ({
     return (
       <Paper sx={{ p: 2 }}>
         <Typography variant="body1">{formattedDate}</Typography>
-        <Typography variant="body2">{`${value.toFixed(2)}m`}</Typography>
+        <Typography variant="body2">{`${value.toFixed(2)} m`}</Typography>
       </Paper>
     );
   }

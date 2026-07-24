@@ -141,7 +141,7 @@ export function buildHourlyForecastText(
   const lines = slots.map((pt, i) => {
     const h = hourOf(pt.time);
     const timeStr = `${String(h).padStart(2, "0")}:00`;
-    const level = `river ${pt.forecastLevel.toFixed(2)}m`;
+    const level = `river ${pt.forecastLevel.toFixed(2)} m`;
     const launch = `launch: ${findLevelDescription(pt.forecastLevel)}`;
     const temp =
       pt.temperature !== undefined ? `${Math.round(pt.temperature)}°C` : null;
@@ -186,7 +186,7 @@ export function hasDaylightRemaining(
 export interface DaytimeOutlook {
   dayLabel: string; // "later today" | "tomorrow" | day label
   bestTimes: string | null; // "09:00–17:00 (light green)" or null
-  rangesText: string; // "river level 0.55–0.62m, air temperature 11–18°C, wind up to 14 mph"
+  rangesText: string; // "river level 0.55–0.62 m, air temperature 11–18°C, wind up to 14 mph"
 }
 
 // Outlook for the next daytime period – used when it's currently dark.
@@ -217,8 +217,8 @@ export function buildNextDaytimeOutlook(
   const maxL = Math.max(...levels);
   const levelText =
     maxL - minL < THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
-      ? `river level steady around ${minL.toFixed(2)}m`
-      : `river level between ${minL.toFixed(2)}m and ${maxL.toFixed(2)}m`;
+      ? `river level steady around ${minL.toFixed(2)} m`
+      : `river level between ${minL.toFixed(2)} m and ${maxL.toFixed(2)} m`;
 
   const temps = daySlots
     .map((s) => s.temperature)

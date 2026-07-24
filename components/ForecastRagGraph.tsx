@@ -36,7 +36,7 @@ import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
 import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
-import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
+import Cyclone from "@mui/icons-material/Cyclone";
 import { formatMetTime } from "@/lib/weather";
 import { isWarningOnDay } from "@/lib/warnings";
 
@@ -102,10 +102,10 @@ const CustomTooltip = ({
                 <Typography variant="caption" sx={{ ml: 1 }}>
                   Gusts up to {Math.round(data.windGust!)} mph
                 </Typography>
-                <FiberManualRecord
+                <Cyclone
                   titleAccess={`Would be ${data.gustStatus} if sustained`}
                   sx={{
-                    fontSize: 10,
+                    fontSize: 16,
                     color: ragStatus[data.gustStatus].color,
                     ml: 1,
                     flexShrink: 0,
@@ -200,30 +200,31 @@ const BarLabel = (props: BarLabelProps) => {
     }
   }
 
-  // Heads-up dot for a notable gust - coloured by the status that gust would
-  // imply if it were sustained wind. Sits above any No Paddling icon so the
-  // two never overlap.
+  // Heads-up icon for a notable gust - coloured by the status that gust
+  // would imply if it were sustained wind. Sits above any No Paddling icon
+  // so the two never overlap.
   if (entry.gustStatus) {
     elements.push(
       <foreignObject
-        key="gust-dot"
-        x={x + width / 2 - 7}
-        y={y - clearAbove - 16}
-        width={14}
-        height={14}
+        key="gust-icon"
+        x={x + width / 2 - 8}
+        y={y - clearAbove - 18}
+        width={16}
+        height={16}
       >
         <Box
+          title={`Would be ${entry.gustStatus} if sustained`}
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 14,
-            height: 14,
+            width: 16,
+            height: 16,
           }}
         >
-          <FiberManualRecord
+          <Cyclone
             sx={{
-              fontSize: 12,
+              fontSize: 14,
               color: ragStatus[entry.gustStatus].color,
             }}
           />

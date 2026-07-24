@@ -40,6 +40,7 @@ import {
 import { ChartDataPoint } from "@/types";
 import { useNowTicking, formatDataAge } from "@/lib/time";
 import { TIME_PERIODS } from "@/lib/config";
+import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 interface RiverLevelGraphProps {
@@ -61,7 +62,7 @@ const ChangeIndicator: React.FC<{
   // Round first so the displayed value and the arrow direction always agree,
   // and so a value that rounds to zero (e.g. -0.001) never renders as "-0.00".
   const rounded = change !== null ? Number(change.toFixed(2)) : null;
-  const changeStr = rounded !== null ? Math.abs(rounded).toFixed(2) : null;
+  const changeStr = rounded !== null ? formatRiverLevel(Math.abs(rounded)) : null;
   const isFlat = rounded !== null && rounded === 0;
 
   return (
@@ -114,7 +115,7 @@ const ChangeIndicator: React.FC<{
                 <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
               )
             ) : null}
-            {changeStr !== null ? `${changeStr}m` : "N/A"}
+            {changeStr !== null ? changeStr : "N/A"}
           </Typography>
         )}
       </Box>
@@ -142,7 +143,7 @@ const CustomTooltip = ({
     return (
       <Paper sx={{ p: 2 }}>
         <Typography variant="body1">{formattedDate}</Typography>
-        <Typography variant="body2">{`${value.toFixed(2)}m`}</Typography>
+        <Typography variant="body2">{formatRiverLevel(value)}</Typography>
       </Paper>
     );
   }

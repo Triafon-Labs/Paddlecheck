@@ -12,9 +12,11 @@ import {
 import HelpOutlined from "@mui/icons-material/HelpOutlined";
 import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
+import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
-import { ragStatus, reasonIcons } from "@/lib/rag";
+import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
+import { formatWindGust } from "@/lib/units";
 import ConditionsBriefing from "./ConditionsBriefing";
 import WeatherWarnings from "./WeatherWarnings";
 
@@ -147,6 +149,10 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               >
                 {conditions.reasons.map((reason, index) => {
                   const Icon = reasonIcons[reason] ?? HelpOutlined;
+                  const label = describeReason(reason, {
+                    temperature: conditions.temperature,
+                    windSpeed: conditions.windSpeed,
+                  });
                   return (
                     <Paper
                       key={index}
@@ -160,7 +166,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                       }}
                     >
                       <Icon fontSize="small" sx={{ color: "primary.main" }} />
-                      <Typography variant="body2">{reason}</Typography>
+                      <Typography variant="body2">{label}</Typography>
                     </Paper>
                   );
                 })}
@@ -186,15 +192,13 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                   >
                     <Air fontSize="small" sx={{ color: "primary.main" }} />
                     <Typography variant="body2">
-                      Gusts up to {Math.round(conditions.windGust!)} mph
+                      Gusts up to {formatWindGust(conditions.windGust!)}
                     </Typography>
-                    <Box
-                      title={`Would be ${conditions.gustStatus} if sustained`}
+                    <FiberManualRecord
+                      titleAccess={`Would be ${conditions.gustStatus} if sustained`}
                       sx={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        backgroundColor: ragStatus[conditions.gustStatus].color,
+                        fontSize: 8,
+                        color: ragStatus[conditions.gustStatus].color,
                         flexShrink: 0,
                         ml: "auto",
                       }}

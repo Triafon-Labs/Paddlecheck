@@ -6,6 +6,12 @@ import {
   VISIBILITY_DESCRIPTIONS,
   DEFAULT_AI_MODEL,
 } from "@/lib/config";
+import {
+  formatRiverLevel,
+  formatTemperature,
+  formatWindSpeed,
+  formatWindGust,
+} from "@/lib/units";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -41,9 +47,9 @@ Write 2–3 short sentences giving a broad sweep of how conditions look across t
 
 Don't chain more than two comma-separated clauses into one sentence. When you have several distinct things to say - the conditions summary and the launch message - give each its own short sentence rather than stringing them all together with commas into one long run-on sentence.
 
-If a status name would fall at the very start of a sentence, rephrase to avoid leading with it. Use specific figures: river level as valuem (no space, e.g. "1.20m"), temperature as value°C (no space), wind speed in mph, time in 24-hour format (e.g. 14:00). Temperature can vary a fair amount across the period being summarised, so phrase it as "between X°C and Y°C" rather than a single figure. If the best window is already under way, say "now" rather than giving the start time (e.g. "…light green now until 20:00…").
+If a status name would fall at the very start of a sentence, rephrase to avoid leading with it. Use specific figures with this exact unit formatting: river level as value m (space before the unit, e.g. "1.20 m"), temperature as value°C (no space, e.g. "18.1°C"), wind speed as value mph (space before the unit, e.g. "6.9 mph"), time in 24-hour format (e.g. 14:00). Temperature can vary a fair amount across the period being summarised, so phrase it as "between X°C and Y°C" rather than a single figure. If the best window is already under way, say "now" rather than giving the start time (e.g. "…light green now until 20:00…").
 
-Wind gusts are given separately from sustained wind speed and are not part of the status calculation - never treat a gust figure as raising or changing the status. Only mention gusts when they're provided, and fold them in right alongside the wind speed figure itself (e.g. "wind around 12mph, gusting up to 24mph") rather than as a separate sentence elsewhere.
+Wind gusts are given separately from sustained wind speed and are not part of the status calculation - never treat a gust figure as raising or changing the status. Only mention gusts when they're provided, and fold them in right alongside the wind speed figure itself (e.g. "wind around 12 mph, gusting up to 24 mph") rather than as a separate sentence elsewhere.
 
 Rain that's flagged as occurring at a warm temperature is deliberately excluded from the status calculation - it's only mentioned as a courtesy heads-up, never as something that lowers the status. When this is flagged, briefly mention that it's raining alongside the temperature figure (e.g. "a warm 18°C with some rain") rather than treating it as a mark against conditions.
 
@@ -92,7 +98,7 @@ function buildConditionsParts(req: SummaryRequest): string {
     currentTime ? `Current time: ${currentTime}` : null,
     `Overall status: ${conditions.overallStatus}`,
     conditions.riverLevel !== undefined
-      ? `River level: ${conditions.riverLevel.toFixed(2)}m`
+      ? `River level: ${formatRiverLevel(conditions.riverLevel)}`
       : null,
     conditions.levelChange
       ? (() => {
@@ -102,18 +108,18 @@ function buildConditionsParts(req: SummaryRequest): string {
             return "River trend: steady";
           }
           const trend = val > 0 ? "rising" : "falling";
-          return `River trend: ${val >= 0 ? "+" : ""}${val.toFixed(2)}m over ${conditions.levelChange.period} (${trend})`;
+          return `River trend: ${val >= 0 ? "+" : ""}${formatRiverLevel(val)} over ${conditions.levelChange.period} (${trend})`;
         })()
       : null,
     conditions.temperature !== undefined
-      ? `Air temperature: ${conditions.temperature}°C`
+      ? `Air temperature: ${formatTemperature(conditions.temperature)}`
       : null,
     conditions.windSpeed !== undefined
-      ? `Wind: ${conditions.windSpeed} mph${windDir ? ` from the ${windDir}` : ""}`
+      ? `Wind: ${formatWindSpeed(conditions.windSpeed)}${windDir ? ` from the ${windDir}` : ""}`
       : null,
     conditions.windGust !== undefined &&
     conditions.windGust >= THRESHOLDS.WIND_GUST_NOTABLE
-      ? `Wind gusts: ${Math.round(conditions.windGust)} mph (gusts only - not sustained wind, and not part of the status calculation)`
+      ? `Wind gusts: ${formatWindGust(conditions.windGust)} (gusts only - not sustained wind, and not part of the status calculation)`
       : null,
     conditions.rain
       ? conditions.rainWhileWarm

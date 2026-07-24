@@ -8,6 +8,7 @@ import {
   REASON_ICONS,
   RAG_HEIGHT_MAP,
 } from "./config";
+import { formatRiverLevel, formatTemperature, formatWindSpeed } from "./units";
 
 export {
   RAG_STATUS_MAP,
@@ -36,7 +37,7 @@ export const findLevelDescription = (level: number): string => {
   const gap = nextLevelUp - level;
 
   return gap > 0.1
-    ? `${description} (applies at ${nextLevelUp.toFixed(2)}m)`
+    ? `${description} (applies at ${formatRiverLevel(nextLevelUp)})`
     : description;
 };
 
@@ -95,11 +96,11 @@ const adjustRagForFactors = (
 
 const getRiverLevelReason = (initialRag: number): string | undefined => {
   if (initialRag === 1)
-    return `Slightly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1}m)`;
+    return `Slightly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)})`;
   if (initialRag === 2)
-    return `Moderately elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2}m)`;
+    return `Moderately elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)})`;
   if (initialRag === 3)
-    return `Significantly elevated river level (> ${THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3}m)`;
+    return `Significantly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)})`;
   return undefined;
 };
 
@@ -203,4 +204,23 @@ export const isRainWhileWarm = (
   const { temperature, rain } = conditions;
   if (temperature === undefined || !rain) return false;
   return temperature >= THRESHOLDS.TEMP_HIGH;
+};
+
+// Appends the underlying reading to a reason string for display, e.g.
+// "High winds (18.0 mph)". Reason text itself stays untouched everywhere
+// else (icon lookup, "Dark" checks, etc.) - this is purely a UI label.
+export const describeReason = (
+  reason: string,
+  values: { temperature?: number; windSpeed?: number }
+): string => {
+  if (reason === "High winds" && values.windSpeed !== undefined) {
+    return `${reason} (${formatWindSpeed(values.windSpeed)})`;
+  }
+  if (
+    (reason === "Low temperature" || reason === "Moderately low temperature") &&
+    values.temperature !== undefined
+  ) {
+    return `${reason} (${formatTemperature(values.temperature)})`;
+  }
+  return reason;
 };

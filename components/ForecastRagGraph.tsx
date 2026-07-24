@@ -29,13 +29,15 @@ import {
   LabelList,
 } from "recharts";
 import { DayForecast, ForecastGraphDataPoint, WeatherWarning } from "@/types";
-import { ragStatus } from "@/lib/rag";
+import { ragStatus, describeReason } from "@/lib/rag";
 import { REASON_ICONS, WARNING_COLORS } from "@/lib/config";
+import { formatRiverLevel, formatWindGust } from "@/lib/units";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
 import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
+import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { formatMetTime } from "@/lib/weather";
 import { isWarningOnDay } from "@/lib/warnings";
 
@@ -62,7 +64,7 @@ const CustomTooltip = ({
         <Typography variant="body1">{`${label}`}</Typography>
         <Typography variant="body2">{`${data.status}`}</Typography>
         <Typography variant="body2" color="text.secondary">
-          Forecast Level: {data.forecastLevel.toFixed(2)}m
+          Forecast Level: {formatRiverLevel(data.forecastLevel)}
         </Typography>
         <Typography variant="caption" color="text.disabled">
           {data.forecastSource === "bewdley"
@@ -76,6 +78,10 @@ const CustomTooltip = ({
             </Typography>
             {data.reasons.map((reason: string, index: number) => {
               const Icon = REASON_ICONS[reason];
+              const label = describeReason(reason, {
+                temperature: data.temperature,
+                windSpeed: data.windSpeed,
+              });
               return (
                 <Box
                   key={index}
@@ -83,7 +89,7 @@ const CustomTooltip = ({
                 >
                   {Icon && <Icon fontSize="small" />}
                   <Typography variant="caption" sx={{ ml: 1 }}>
-                    {reason}
+                    {label}
                   </Typography>
                 </Box>
               );
@@ -99,15 +105,13 @@ const CustomTooltip = ({
               <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
                 <Air fontSize="small" />
                 <Typography variant="caption" sx={{ ml: 1 }}>
-                  Gusts up to {Math.round(data.windGust!)} mph
+                  Gusts up to {formatWindGust(data.windGust!)}
                 </Typography>
-                <Box
-                  title={`Would be ${data.gustStatus} if sustained`}
+                <FiberManualRecord
+                  titleAccess={`Would be ${data.gustStatus} if sustained`}
                   sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    backgroundColor: ragStatus[data.gustStatus].color,
+                    fontSize: 8,
+                    color: ragStatus[data.gustStatus].color,
                     ml: 1,
                     flexShrink: 0,
                   }}
@@ -208,20 +212,28 @@ const BarLabel = (props: BarLabelProps) => {
     elements.push(
       <foreignObject
         key="gust-dot"
-        x={x + width / 2 - 5}
-        y={y - clearAbove - 14}
-        width={10}
-        height={10}
+        x={x + width / 2 - 6}
+        y={y - clearAbove - 13}
+        width={12}
+        height={12}
       >
         <Box
+          title={`Would be ${entry.gustStatus} if sustained`}
           sx={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            backgroundColor: ragStatus[entry.gustStatus].color,
-            border: `1px solid ${theme.palette.background.paper}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 12,
+            height: 12,
           }}
-        />
+        >
+          <FiberManualRecord
+            sx={{
+              fontSize: 8,
+              color: ragStatus[entry.gustStatus].color,
+            }}
+          />
+        </Box>
       </foreignObject>
     );
   }

@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.21.1...paddlecheck-v1.22.0) (2026-07-24)
+
+
+### Features
+
+* show the underlying reading for contributing factors ([9ae7fb2](https://github.com/dylanr97/Paddlecheck/commit/9ae7fb23d1fe6200dfbfef54b02fc618841d2ff6))
+
+
+### Bug Fixes
+
+* apply consistent unit spacing across the app ([ba285e6](https://github.com/dylanr97/Paddlecheck/commit/ba285e690802cfbbf49f875b3865a4c650890a50))
+* replace off-centre gust status dot with a centred icon ([0133905](https://github.com/dylanr97/Paddlecheck/commit/01339051694145026a6a48317b832e382d30a589))
+* revert gust status indicator to a smaller dot ([420c511](https://github.com/dylanr97/Paddlecheck/commit/420c511a3fb54ee660f1b3804e131a3eeb0069cf))
+* standardize decimal precision across river level, temperature, wind ([db517de](https://github.com/dylanr97/Paddlecheck/commit/db517deeb56fbb8eaaa89e3c68d1a60625c96294))
+* use a wind-swirl icon for the gust status indicator ([9f11387](https://github.com/dylanr97/Paddlecheck/commit/9f11387918afe99a7bc76e6366784a29f810114d))
+* use the Air icon for the gust status indicator ([d146e9d](https://github.com/dylanr97/Paddlecheck/commit/d146e9d9570a1dcdd34d351f54312a7a2a35dfe1))
+
 ## [1.21.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.21.0...paddlecheck-v1.21.1) (2026-07-22)
 
 

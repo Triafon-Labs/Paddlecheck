@@ -36,7 +36,6 @@ import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
 import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
-import Cyclone from "@mui/icons-material/Cyclone";
 import { formatMetTime } from "@/lib/weather";
 import { isWarningOnDay } from "@/lib/warnings";
 
@@ -102,7 +101,7 @@ const CustomTooltip = ({
                 <Typography variant="caption" sx={{ ml: 1 }}>
                   Gusts up to {Math.round(data.windGust!)} mph
                 </Typography>
-                <Cyclone
+                <Air
                   titleAccess={`Would be ${data.gustStatus} if sustained`}
                   sx={{
                     fontSize: 16,
@@ -222,7 +221,7 @@ const BarLabel = (props: BarLabelProps) => {
             height: 16,
           }}
         >
-          <Cyclone
+          <Air
             sx={{
               fontSize: 14,
               color: ragStatus[entry.gustStatus].color,

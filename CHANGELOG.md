@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.1...paddlecheck-v1.22.2) (2026-07-25)
+
+
+### Bug Fixes
+
+* correctly detect an already-underway window, and always give sunrise/sunset their time ([bfe60f7](https://github.com/dylanr97/Paddlecheck/commit/bfe60f7db4688df5ae3b6c37eda9e993cb8cebbb))
+* stop the AI applying dark-outlook day-label framing to today's summary ([ed0db97](https://github.com/dylanr97/Paddlecheck/commit/ed0db97c92a602cc6e163d7b6491c1c73ebd899b))
+
 ## [1.22.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.0...paddlecheck-v1.22.1) (2026-07-24)
 
 

@@ -49,7 +49,7 @@ async function streamBriefing(
 
   const bestPaddlingToday =
     !currentlyDark && todayForecast
-      ? buildBestPaddlingTimes(todayForecast)
+      ? buildBestPaddlingTimes(todayForecast, conditions.overallStatus)
       : null;
 
   // The same deterministic best-window text shown in the share dialog, passed

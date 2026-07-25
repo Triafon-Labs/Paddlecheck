@@ -89,7 +89,10 @@ const buildShareText = (
 
   const todayForecast = forecastDays?.[0] ?? null;
   if (hasDaylightRemaining(todayForecast)) {
-    const bestTimes = buildBestPaddlingTimes(todayForecast);
+    const bestTimes = buildBestPaddlingTimes(
+      todayForecast,
+      conditions.overallStatus
+    );
     if (bestTimes) {
       lines.push("");
       lines.push(`🟢 *${bestTimes.text}*`);

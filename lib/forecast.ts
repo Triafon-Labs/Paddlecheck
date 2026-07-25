@@ -88,19 +88,19 @@ function findGreenWindows(slots: DayForecast["graphData"]): {
 
 // Format a window's start/end, extending to actual sunrise/sunset when the
 // adjacent hour is dark-only (conditions are valid right up to the sun).
-// When nowHour is provided and matches the window start, renders "now".
+// When isNow is true, renders "now" as the start instead of a clock time.
 function formatWindow(
   graphData: DayForecast["graphData"],
   w: Window,
   sunriseHHMM: string | null,
   sunsetHHMM: string | null,
-  nowHour: number | null
+  isNow: boolean
 ): { start: string; end: string } {
   let start: string;
   const prev = slotAtHour(graphData, w.startHour - 1);
   const isSunrise = sunriseHHMM && prev && isDarkOnly(prev.reasons);
 
-  if (nowHour !== null && w.startHour === nowHour) {
+  if (isNow) {
     start = "now";
   } else if (isSunrise) {
     start = "sunrise";
@@ -125,7 +125,7 @@ function formatGaps(
   if (gaps.length === 0) return null;
 
   const describeBlock = (b: StatusBlock) => {
-    const { start, end } = formatWindow(graphData, b, null, null, null);
+    const { start, end } = formatWindow(graphData, b, null, null, false);
     const label = b.status.toLowerCase();
     const reasonText = b.reasons.length > 0 ? ` due to ${b.reasons.join(", ")}` : "";
     return `${start}–${end} ${label}${reasonText}`;
@@ -142,8 +142,14 @@ export interface BestPaddlingTimes {
 }
 
 // Best paddling windows for the rest of today, relative to the current time.
+// currentStatus is today's live overall status (not the forecast): the
+// hour we're currently in is always excluded from todayForecast's hourly
+// data (see hooks.ts), so there's no forecast slot to compare against "now"
+// - this is what lets us tell whether the first forecast window is really a
+// continuation of a window already under way right now.
 export function buildBestPaddlingTimes(
-  todayForecast: DayForecast | null
+  todayForecast: DayForecast | null,
+  currentStatus?: Status
 ): BestPaddlingTimes | null {
   if (!todayForecast) return null;
 
@@ -156,6 +162,9 @@ export function buildBestPaddlingTimes(
 
   const { bestStatus, windows, gaps } = findGreenWindows(futureSlots);
   if (!bestStatus || windows.length === 0) return null;
+
+  const alreadyUnderway =
+    currentStatus === bestStatus && futureSlots[0].status === bestStatus;
 
   const sunriseHHMM = todayForecast.sunrise
     ? hhmmOfISO(todayForecast.sunrise)
@@ -170,7 +179,7 @@ export function buildBestPaddlingTimes(
         w,
         sunriseHHMM,
         sunsetHHMM,
-        i === 0 ? nowHour : null
+        i === 0 && alreadyUnderway
       );
       let note = "";
       if (start === "now") {
@@ -335,7 +344,7 @@ export function buildNextDaytimeOutlook(
           w,
           sunriseHHMM,
           sunsetHHMM,
-          null
+          false
         );
         return `${start}–${end}`;
       })

@@ -1,6 +1,5 @@
 import { DayForecast, Status } from "@/types";
 import { THRESHOLDS } from "@/lib/config";
-import { findLevelDescription } from "@/lib/rag";
 import {
   formatRiverLevel,
   formatTemperature,
@@ -200,7 +199,9 @@ export function buildBestPaddlingTimes(
   };
 }
 
-// Hour-by-hour forecast text for today's remaining daylight, for the AI briefing.
+// Hour-by-hour forecast text for today's remaining daylight, for the AI
+// briefing. Deliberately status-free: the briefing summarises raw river and
+// weather conditions, so RAG statuses and their reasons are left out.
 export function buildHourlyForecastText(
   todayForecast: DayForecast
 ): string | null {
@@ -215,7 +216,6 @@ export function buildHourlyForecastText(
     const h = hourOf(pt.time);
     const timeStr = `${String(h).padStart(2, "0")}:00`;
     const level = `river ${formatRiverLevel(pt.forecastLevel)}`;
-    const launch = `launch: ${findLevelDescription(pt.forecastLevel)}`;
     const temp =
       pt.temperature !== undefined ? formatTemperature(pt.temperature) : null;
     const wind =
@@ -226,20 +226,17 @@ export function buildHourlyForecastText(
       pt.windGust !== undefined && pt.windGust >= THRESHOLDS.WIND_GUST_NOTABLE
         ? `gusts up to ${formatWindGust(pt.windGust)}`
         : null;
-    const rainNote = pt.rainWhileWarm ? "rain (warm, no rating impact)" : null;
-    const stats = [level, launch, temp, wind, gust, rainNote]
+    const weather = pt.weatherDescription ?? null;
+    const stats = [level, temp, wind, gust, weather]
       .filter(Boolean)
       .join(", ");
-    const nonDarkReasons = pt.reasons.filter((r) => r !== "Dark");
-    const note =
-      nonDarkReasons.length > 0 ? ` [${nonDarkReasons.join(", ")}]` : "";
     // The final daylight hour's conditions persist until sunset; later hours
     // are omitted only because it gets dark.
     const sunsetNote =
       i === slots.length - 1 && sunsetHHMM
         ? ` (these conditions hold until sunset at ${sunsetHHMM})`
         : "";
-    return `${timeStr} ${pt.status} – ${stats}${note}${sunsetNote}`;
+    return `${timeStr} – ${stats}${sunsetNote}`;
   });
 
   return lines.join("\n");
@@ -323,7 +320,7 @@ export function buildNextDaytimeOutlook(
       : null;
 
   const rainWhileWarmText = daySlots.some((s) => s.rainWhileWarm)
-    ? "rain at times (warm, no rating impact)"
+    ? "warm rain at times"
     : null;
 
   const rangesText = [levelText, tempText, windText, gustText, rainWhileWarmText]

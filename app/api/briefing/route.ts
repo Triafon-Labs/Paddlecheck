@@ -1,7 +1,11 @@
 import Groq from "groq-sdk";
 import { KayakConditions } from "@/types";
 import { formatMetTime, degreesToCompass } from "@/lib/weather";
-import { VISIBILITY_DESCRIPTIONS, DEFAULT_AI_MODEL } from "@/lib/config";
+import {
+  THRESHOLDS,
+  VISIBILITY_DESCRIPTIONS,
+  DEFAULT_AI_MODEL,
+} from "@/lib/config";
 import {
   formatRiverLevel,
   formatTemperature,
@@ -27,15 +31,13 @@ interface SummaryRequest {
 // ── Prompt ────────────────────────────────────────────────────────────────────
 
 const BRIEFING_PROMPT = `\
-You are writing a single-sentence weather vibe for members of a kayaking club on the River Severn at Worcester, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day, with warmer weather on the way.").
+You are writing a single-sentence summary of river and weather conditions for members of a kayaking club on the River Severn at Worcester, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day, with warmer weather on the way.").
 
-The data below labels each hour with a paddling status. From best to worst: Light Green, Dark Green, Amber, Red, No Paddling. Use this ranking to judge whether conditions are improving or worsening - don't assume, since "Light Green" and "Dark Green" aren't a standard colour convention.
-
-Write ONE short, natural sentence (roughly 15-25 words) capturing the overall feel of paddling conditions across the period being summarised - today's remaining daylight hours, or if it's currently dark, the next available daylight window (later today or tomorrow, stated plainly, e.g. "Tomorrow looks..." or "Later today looks..."). Ground it in what conditions are like at the start of that period (or right now, if summarising today), then say how it trends from there if it changes. State the plain-language cause (e.g. "a bit breezy") and the status colour it leads to causally, not as a coordinate pair - e.g. "a bit breezy, putting things at dark green, easing to light green later", not "breezy and dark green" or a bare destination adjective like "increasingly favourable" that never says what it starts as. Not exact figures, times, or individual dips/gaps/hours - just the overall shape of the day.
+Write ONE short, natural sentence (roughly 15-25 words) summarising conditions across the period the data covers - today's remaining daylight hours, or if it's currently dark, the next available daylight window (later today or tomorrow, stated plainly, e.g. "Tomorrow looks..."). Ground it in conditions at the start of that period (or right now, if summarising today), then say how they trend if they change - e.g. "breezy at the moment, easing off later" or "the river is around 0.80 m, rising towards 1.50 m by evening". Pick the most notable factor or two (wind, rain, river level, temperature) rather than covering everything, don't enumerate individual hours, and copy the unit style from the data for any figure you quote.
 
 Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising.
 
-Write only the sentence - no headings, labels, or quote marks. Use British English (mild, favourable, etc.) and a friendly, accessible tone for members ranging from beginners to experienced paddlers.`;
+Write only the sentence - no headings, labels, or quote marks. Use British English (mild, favourable, metres) and a friendly, accessible tone for members ranging from beginners to experienced paddlers.`;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -61,9 +63,18 @@ function buildConditionsParts(req: SummaryRequest): string {
   // summary is for a future window instead – nothing here would apply.
   const lines: (string | null)[] = [
     currentTime ? `Current time: ${currentTime}` : null,
-    !currentlyDark ? `Overall status: ${conditions.overallStatus}` : null,
     !currentlyDark && conditions.riverLevel !== undefined
       ? `River level: ${formatRiverLevel(conditions.riverLevel)}`
+      : null,
+    !currentlyDark && conditions.levelChange
+      ? (() => {
+          const val = conditions.levelChange.value;
+          if (Math.abs(val) <= THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD) {
+            return "River trend: steady";
+          }
+          const trend = val > 0 ? "rising" : "falling";
+          return `River trend: ${val >= 0 ? "+" : ""}${formatRiverLevel(val)} over ${conditions.levelChange.period} (${trend})`;
+        })()
       : null,
     !currentlyDark && conditions.temperature !== undefined
       ? `Air temperature: ${formatTemperature(conditions.temperature)}`
@@ -79,9 +90,6 @@ function buildConditionsParts(req: SummaryRequest): string {
     conditions.visibility !== undefined &&
     conditions.visibility < VISIBILITY_DESCRIPTIONS.MODERATE.min
       ? `Visibility: ${conditions.visibilityDescription}`
-      : null,
-    !currentlyDark && conditions.reasons?.length
-      ? `Reasons for status: ${conditions.reasons.join("; ")}`
       : null,
     hourlyForecast
       ? `Hour-by-hour forecast for the summarized daylight window:\n${hourlyForecast}`

@@ -1,94 +1,44 @@
 import Groq from "groq-sdk";
 import { KayakConditions } from "@/types";
 import { formatMetTime, degreesToCompass } from "@/lib/weather";
-import {
-  THRESHOLDS,
-  VISIBILITY_DESCRIPTIONS,
-  DEFAULT_AI_MODEL,
-} from "@/lib/config";
+import { VISIBILITY_DESCRIPTIONS, DEFAULT_AI_MODEL } from "@/lib/config";
 import {
   formatRiverLevel,
   formatTemperature,
   formatWindSpeed,
-  formatWindGust,
 } from "@/lib/units";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface Outlook {
   dayLabel: string;
-  bestTimes: string | null;
   rangesText: string;
 }
 
 interface SummaryRequest {
   conditions: KayakConditions;
   hourlyForecast?: string | null;
-  sunrise?: string | null;
-  sunset?: string | null;
   currentlyDark?: boolean;
   currentTime?: string;
   model?: string;
   outlook?: Outlook | null;
-  bestConditionsLine?: string | null;
-  gapConditionsLine?: string | null;
 }
 
 // ── Prompt ────────────────────────────────────────────────────────────────────
 
 const BRIEFING_PROMPT = `\
-You are writing a short conditions briefing for members of a kayaking club on the River Severn at Worcester. You are given an hour-by-hour forecast, plus the club's current conditions when it isn't currently dark. Normally this covers today's remaining daylight hours; if it is currently dark, it instead covers the next available daylight window (later today or tomorrow) – determine which from the date/time on the entries provided, not by guessing.
+You are writing a single-sentence weather vibe for members of a kayaking club on the River Severn at Worcester, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day, with warmer weather on the way.").
 
-Each hour carries a status. From best to worst: Light Green, Dark Green, Amber, Red, No Paddling.
+Write ONE short, natural sentence (roughly 15-25 words) capturing the overall feel of paddling conditions and how they're trending across the period being summarised - today's remaining daylight hours, or if it's currently dark, the next available daylight window (later today or tomorrow, stated plainly, e.g. "Tomorrow looks..." or "Later today looks..."). Get the trend right (staying good, improving, or turning worse for paddling) from the data below, and mention the standout factor in plain everyday language if there is one (e.g. breezy, a chance of rain, a weather warning) - not exact figures, times, or window boundaries. Don't enumerate individual dips, gaps, or hours; just capture the overall shape of the day.
 
-The data includes a line starting "Best conditions ...:" giving the definitive, already-computed best-conditions window(s) for the period, with correct sunrise/sunset boundary handling already applied, and, if that window has any breaks in it, a line starting "Gap(s) within the best-conditions window:" giving the status, time range, and reason for each break. Together these are the facts – always rely on them rather than recomputing your own windows or gaps from the hour-by-hour table, and never silently drop a distinct window or gap that's given, even if you don't end up citing its exact time. Do not merge hours of different statuses into a single window.
+Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising.
 
-Turn those facts into natural, flowing prose the way an experienced forecaster would talk, not a mechanical list of boundaries. Always make clear when conditions are good, when and why they dip (name the status it drops to and the reason if one is given), and that they pick back up again – all within the same sentence as the window it's part of. Never state the green ranges on their own first and explain the reason(s) for the dip(s) in a separate, later sentence – that split is wrong even if the timing itself is loosely phrased.
-
-Express timing however reads most naturally, rather than always citing an exact clock time for every single boundary. An exact time reads fine for a single simple dip, e.g. "light green from sunrise until 17:00, dropping to dark green until 20:00 for high winds, then light green again until sunset". Several dips read better compressed with looser timing instead of citing every individual boundary, e.g. "mostly light green through the day, with a couple of brief windy dips around midday and again mid-afternoon for gusty winds, before settling back down for the evening" – not "light green until 12:00, 14:00 to 15:00, and 16:00 until sunset, with the gaps caused by high winds" (technically complete, but reads as two disconnected lists rather than one description). Never chain more than two clauses like this in a row.
-
-Whenever a window boundary is given as "sunrise" or "sunset" rather than a clock time, always state its actual time too, using the Sunrise/Sunset lines given in the data, worked naturally into the sentence without parentheses – e.g. "light green from sunrise at 05:03 until 17:00" or "light green until sunset at 21:14", never a bare "sunrise" or "sunset" with no time attached.
-
-Each hour-by-hour entry covers conditions from that hour until the next entry begins. The list covers daylight hours only – later hours are omitted because it gets dark. The final listed hour's conditions extend to sunset, which is always provided in the data – use that time as the window's end. This means each hour slot represents that full hour. For example, if light green is listed from sunrise until 18:00 and then dark green starts at 19:00, the light green window runs all the way until 19:00 (since the 18:00 slot lasts until 19:00). Never subtract an hour or say "until 18:00" when the 18:00 hour slot is still light green.
-
-Write 2–3 short sentences giving a broad sweep of how conditions look across the period being summarised; stretch to 4 only when there's genuinely a lot of distinct information to cover (e.g. a multi-dip day plus a launch note and a rain note) – use the extra sentence for breathing room rather than cramming everything into one overloaded sentence to stay near the low end. The first sentence should naturally weave in the best window and its status colour, plus the headline figures (river level, temperature range, wind). This length applies whether you're summarising today's remaining hours or a future window. If there are no green conditions (i.e. the best available status is amber, red, or no paddling), note this instead of highlighting a best window. Only call something a "warning" if it is one of the official Met Office weather warnings supplied in the data; only mention those that are active or upcoming within the specific period you are summarising, briefly noting the most severe one and how it might impact paddling (e.g. "be aware of the red heat warning"). A plain spell of higher wind (or any other dip shown only in the hour-by-hour reasons, with no matching Met Office warning) is not a "warning" – describe it plainly instead (e.g. "it turns windier around 17:00"). Be punchy and avoid verbosity.
-
-Don't chain more than two comma-separated clauses into one sentence. When you have several distinct things to say - the conditions/window summary, the launch message, a rain note - give each its own short sentence rather than stringing them all together with commas into one long run-on sentence.
-
-If a status name would fall at the very start of a sentence, rephrase to avoid leading with it. Use specific figures with this exact unit formatting: river level as value m (space before the unit, e.g. "1.20 m"), temperature as value°C (no space, e.g. "18.1°C"), wind speed as value mph (space before the unit, e.g. "6.9 mph"), time in 24-hour format (e.g. 14:00). Temperature can vary a fair amount across the period being summarised, so phrase it as "between X°C and Y°C" rather than a single figure. If the best window is already under way, say "now" rather than giving the start time (e.g. "…light green now until 20:00…").
-
-Wind gusts are given separately from sustained wind speed and are not part of the status calculation - never treat a gust figure as raising or changing the status. Only mention gusts when they're provided, and fold them in right alongside the wind speed figure itself (e.g. "wind around 12 mph, gusting up to 24 mph") rather than as a separate sentence elsewhere.
-
-Rain that's flagged as occurring at a warm temperature is deliberately excluded from the status calculation - it's only mentioned as a courtesy heads-up, never as something that lowers the status. When this is flagged, briefly mention that it's raining alongside the temperature figure (e.g. "a warm 18°C with some rain") rather than treating it as a mark against conditions.
-
-Strict negative constraint: Do not use any parenthetical or bracketed text to explain or contain figures, speeds, reasons, or notes in the output (for example, avoid "(15 mph)" or "[due to wind]"). All details must flow naturally as part of the sentence itself.
-
-The overall status already captures safety – don't add your own risk commentary on individual figures like river level. When a "Launch message" line is provided (only present when summarising today's remaining hours), it contains specific landmark observations (e.g. water over a step) and should be summarised accurately as an approximation for access, without inventing club divisions like "sections" or "lanes". When instead summarising a future outlook (no "Launch message" line provided), use the "launch:" note attached to each hour-by-hour entry, since it reflects the forecast river level for that hour rather than today's current level – if it stays materially the same across the window, give one brief representative sentence; if it changes noticeably during the window, say so briefly rather than presenting one hour's note as constant throughout.
-
-Mention the river trend if it is notable (rising or falling); strictly avoid any mention of the river trend, stability, or level changes if the trend is described as steady.
-
-If it is currently dark, no current-conditions figures are provided at all (they wouldn't apply to the period you're summarising) – go straight to the outlook for the next available paddling window, using only the forecast data given. This is later today if it's currently post-midnight (before sunrise), or tomorrow if it's currently pre-midnight (after sunset). Use the figures provided for that period. State upfront, in the first sentence, which period this is for, using the same wording given in the data (e.g. "Tomorrow's light green window..." or "Later today, light green conditions..."), so members can tell at a glance that this isn't describing right now.
-
-If it is not currently dark, current-conditions figures (overall status, wind, etc.) are provided – that's your signal you're summarising today, right now, even if the best window itself starts a little later in the day. In that case never use the "Tomorrow's..."/"Later today..." framing or any other day label; just describe the window plainly with its actual time (e.g. "Light green conditions run from 09:00 until 16:00..."). That framing is reserved strictly for when current-conditions figures are absent.
-
-Don't mention or speculate about any dates or periods for which no data has been provided.
-
-Write only the summary – no headings, bullet points, or introductory labels. Use British English throughout (metres, colour, favourable, summarise, etc.). Keep the tone friendly and accessible; members range from beginners to experienced paddlers.`;
+Write only the sentence - no headings, labels, or quote marks. Use British English (mild, favourable, etc.) and a friendly, accessible tone for members ranging from beginners to experienced paddlers.`;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function buildConditionsParts(req: SummaryRequest): string {
-  const {
-    conditions,
-    hourlyForecast,
-    sunrise,
-    sunset,
-    currentlyDark,
-    currentTime,
-    outlook,
-    bestConditionsLine,
-    gapConditionsLine,
-  } = req;
+  const { conditions, hourlyForecast, currentlyDark, currentTime, outlook } = req;
 
   const windDir =
     conditions.windDirection !== undefined
@@ -113,32 +63,14 @@ function buildConditionsParts(req: SummaryRequest): string {
     !currentlyDark && conditions.riverLevel !== undefined
       ? `River level: ${formatRiverLevel(conditions.riverLevel)}`
       : null,
-    !currentlyDark && conditions.levelChange
-      ? (() => {
-          const val = conditions.levelChange.value;
-          const absVal = Math.abs(val);
-          if (absVal <= THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD) {
-            return "River trend: steady";
-          }
-          const trend = val > 0 ? "rising" : "falling";
-          return `River trend: ${val >= 0 ? "+" : ""}${formatRiverLevel(val)} over ${conditions.levelChange.period} (${trend})`;
-        })()
-      : null,
     !currentlyDark && conditions.temperature !== undefined
       ? `Air temperature: ${formatTemperature(conditions.temperature)}`
       : null,
     !currentlyDark && conditions.windSpeed !== undefined
       ? `Wind: ${formatWindSpeed(conditions.windSpeed)}${windDir ? ` from the ${windDir}` : ""}`
       : null,
-    !currentlyDark &&
-    conditions.windGust !== undefined &&
-    conditions.windGust >= THRESHOLDS.WIND_GUST_NOTABLE
-      ? `Wind gusts: ${formatWindGust(conditions.windGust)} (gusts only - not sustained wind, and not part of the status calculation)`
-      : null,
     !currentlyDark && conditions.rain
-      ? conditions.rainWhileWarm
-        ? `Rain: ${conditions.weatherDescription || "yes"} (occurring at a warm temperature - deliberately not part of the status calculation, mention only as a brief heads-up)`
-        : `Rain: ${conditions.weatherDescription || "yes"}`
+      ? `Rain: ${conditions.weatherDescription || "yes"}`
       : null,
     !currentlyDark &&
     conditions.visibilityDescription &&
@@ -149,22 +81,11 @@ function buildConditionsParts(req: SummaryRequest): string {
     !currentlyDark && conditions.reasons?.length
       ? `Reasons for status: ${conditions.reasons.join("; ")}`
       : null,
-    conditions.launchMessage && !currentlyDark
-      ? `Launch message: ${conditions.launchMessage}`
-      : null,
-    sunrise ? `Sunrise: ${sunrise}` : null,
-    sunset ? `Sunset: ${sunset}` : null,
     hourlyForecast
       ? `Hour-by-hour forecast for the summarized daylight window:\n${hourlyForecast}`
       : null,
     currentlyDark && outlook
       ? `It is currently dark. The outlook for ${outlook.dayLabel} is: ${outlook.rangesText}.`
-      : null,
-    bestConditionsLine
-      ? `${bestConditionsLine} — this is the definitive, already-computed best-conditions window(s) for the period; use its exact time boundaries and status colour rather than recomputing your own from the hour-by-hour table.`
-      : null,
-    gapConditionsLine
-      ? `Gap(s) within the best-conditions window: ${gapConditionsLine}`
       : null,
     currentlyDark && !outlook
       ? `It is currently dark and no daytime forecast is available.`

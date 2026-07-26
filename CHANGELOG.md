@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.5](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.4...paddlecheck-v1.22.5) (2026-07-26)
+
+
+### Bug Fixes
+
+* allow up to three short sentences so the summary stops comma-chaining ([1a174fc](https://github.com/dylanr97/Paddlecheck/commit/1a174fce19580c08d2397ffe7b35d96eb458c8ac))
+* drop the explicit word count, keep "one short sentence" ([dff382a](https://github.com/dylanr97/Paddlecheck/commit/dff382a5c4d82850078eee03db228d9a02c8daf2))
+* keep the AI sentence descriptive only - no advice or suitability verdicts ([ef478cf](https://github.com/dylanr97/Paddlecheck/commit/ef478cf3d1febe4e5e20029b2fab81b382ff84e6))
+* only forbid paddle-suitability verdicts, not incidental tips ([2e66444](https://github.com/dylanr97/Paddlecheck/commit/2e664441db33862d2775e3cb0a45f23ee1f6c8b6))
+* phrase the starting status colour causally, not as a weather attribute ([102f26f](https://github.com/dylanr97/Paddlecheck/commit/102f26f9562515cffaac9f01d08247601a8cb458))
+* pin down no-space temperature formatting in the AI sentence ([82ab81d](https://github.com/dylanr97/Paddlecheck/commit/82ab81dd89aab5a0b0fe9782545b44b1b8fff573))
+
+
+### Code Refactoring
+
+* drop RAG status from the AI summary entirely ([0d8df20](https://github.com/dylanr97/Paddlecheck/commit/0d8df20732f37b3127ab1446ed408d0dc6a6fd23))
+* tighten the vibe-sentence paragraph to cut duplicate examples ([602497c](https://github.com/dylanr97/Paddlecheck/commit/602497cd59f75b5caf78ce6c5aa4be1c70045e6a))
+
 ## [1.22.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.3...paddlecheck-v1.22.4) (2026-07-26)
 
 

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.6](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.5...paddlecheck-v1.22.6) (2026-07-26)
+
+
+### Bug Fixes
+
+* close the semicolon loophole and ban vague-figure unit hybrids ([223553d](https://github.com/dylanr97/Paddlecheck/commit/223553d1132b97b5391c35f2c42d432ab3e27f4a))
+* state the temperature-unit rule positively to stop example contamination ([f870539](https://github.com/dylanr97/Paddlecheck/commit/f870539057aa3338d5c171977f438f07af3e5860))
+
 ## [1.22.5](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.4...paddlecheck-v1.22.5) (2026-07-26)
 
 

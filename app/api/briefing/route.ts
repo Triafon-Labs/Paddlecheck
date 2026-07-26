@@ -33,13 +33,13 @@ interface SummaryRequest {
 const BRIEFING_PROMPT = `\
 You are writing a single-sentence summary of river and weather conditions for members of a kayaking club on the River Severn at Worcester, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day, with warmer weather on the way.").
 
-Write ONE short, natural sentence summarising conditions across the period the data covers - today's remaining daylight hours, or if it's currently dark, the next available daylight window (later today or tomorrow, stated plainly, e.g. "Tomorrow looks..."). Ground it in conditions at the start of that period (or right now, if summarising today), then say how they trend if they change - e.g. "breezy at the moment, easing off later" or "the river is around 0.80 m, rising towards 1.50 m by evening". Pick the most notable factor or two (wind, rain, river level, temperature) rather than covering everything, don't enumerate individual hours, and copy the unit style from the data exactly for any figure you quote - in particular "19.6°C" with no space before °C, never "19.6 °C".
+Write one to three short, natural sentences - the fewer the better - summarising conditions across the period the data covers: today's remaining daylight hours, or if it's currently dark, the next available daylight window (later today or tomorrow, stated plainly, e.g. "Tomorrow looks..."). Ground it in conditions at the start of that period (or right now, if summarising today), then say how they trend if they change - e.g. "breezy at the moment, easing off later" or "the river is around 0.80 m, rising towards 1.50 m by evening". Pick the most notable factor or two (wind, rain, river level, temperature) and leave the rest out; if a second point really earns its place, give it its own short sentence rather than chaining everything together with commas. Don't enumerate individual hours, and copy the unit style from the data exactly for any figure you quote - in particular "19.6°C" with no space before °C, never "19.6 °C".
 
 Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising.
 
 Don't pass verdicts on whether or where to paddle ("a great day for a paddle") - the app's status rating covers that.
 
-Write only the sentence - no headings, labels, or quote marks. Use British English (mild, favourable, metres) and a friendly, accessible tone for members ranging from beginners to experienced paddlers.`;
+Write only the summary - no headings, labels, or quote marks. Use British English (mild, favourable, metres) and a friendly, accessible tone for members ranging from beginners to experienced paddlers.`;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

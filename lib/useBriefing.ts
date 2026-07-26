@@ -2,11 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
-import {
-  buildHourlyForecastText,
-  buildNextDaytimeOutlook,
-  buildBestPaddlingTimes,
-} from "@/lib/forecast";
+import { buildHourlyForecastText, buildNextDaytimeOutlook } from "@/lib/forecast";
 import { getLondonHHMM, hhmmOfISO } from "@/lib/time";
 import { londonNow, isWarningNotExpired } from "@/lib/warnings";
 
@@ -41,32 +37,8 @@ async function streamBriefing(
     }
   }
 
-  const sunrise = targetDay?.sunrise ? hhmmOfISO(targetDay.sunrise) : null;
-  const sunset = targetDay?.sunset ? hhmmOfISO(targetDay.sunset) : null;
-
   const hourlyForecast = targetDay ? buildHourlyForecastText(targetDay) : null;
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
-
-  const bestPaddlingToday =
-    !currentlyDark && todayForecast
-      ? buildBestPaddlingTimes(todayForecast, conditions.overallStatus)
-      : null;
-
-  // The same deterministic best-window text shown in the share dialog, passed
-  // to the AI as ground truth so it doesn't recompute (and potentially
-  // mis-derive) its own window boundaries from the raw hourly table.
-  const bestConditionsLine = currentlyDark
-    ? outlook?.bestTimes
-      ? `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`
-      : null
-    : (bestPaddlingToday?.text ?? null);
-
-  // Likewise, the deterministic description of any worse-status gap(s)
-  // between best-status windows, so the AI doesn't have to derive the gap's
-  // status/time/reason itself from the raw hourly table.
-  const gapConditionsLine = currentlyDark
-    ? (outlook?.gapsText ?? null)
-    : (bestPaddlingToday?.gapsText ?? null);
 
   // Filter for warnings that are active or upcoming (i.e. haven't expired yet)
   const now = londonNow();
@@ -84,14 +56,12 @@ async function streamBriefing(
     body: JSON.stringify({
       conditions: conditionsWithRelevantWarnings,
       hourlyForecast,
-      sunrise,
-      sunset,
       currentlyDark,
       currentTime,
       model,
-      outlook,
-      bestConditionsLine,
-      gapConditionsLine
+      outlook: outlook
+        ? { dayLabel: outlook.dayLabel, rangesText: outlook.rangesText }
+        : null,
     }),
     signal,
   });

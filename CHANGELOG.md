@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.3...paddlecheck-v1.22.4) (2026-07-26)
+
+
+### Bug Fixes
+
+* show actual sunrise/sunset times in share dialog instead of the word ([36c1a38](https://github.com/dylanr97/Paddlecheck/commit/36c1a38f680ed4f9ff3c9374f71b02b6e5e52040))
+
 ## [1.22.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.2...paddlecheck-v1.22.3) (2026-07-26)
 
 

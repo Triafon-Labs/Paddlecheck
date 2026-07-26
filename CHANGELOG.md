@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.2...paddlecheck-v1.22.3) (2026-07-26)
+
+
+### Bug Fixes
+
+* anchor the vibe sentence in the starting condition, not just the destination ([2fe524d](https://github.com/dylanr97/Paddlecheck/commit/2fe524d85ed3f5d6ecab47ab6d1659e9d2ac298b))
+* keep gap reasons in the same sentence, and give room to avoid comma-cramming ([af6cf4e](https://github.com/dylanr97/Paddlecheck/commit/af6cf4eafc2f381173588a7cfaf4554c98a676b5))
+* re-teach the RAG colour ranking that got dropped in the simplification ([ae7492c](https://github.com/dylanr97/Paddlecheck/commit/ae7492c347a20b81aca97ee4561f300618357ac6))
+* write the window/gap description as natural prose, not a boundary checklist ([8a66c96](https://github.com/dylanr97/Paddlecheck/commit/8a66c96cf19abdf72901533f89c46c66b5941191))
+
+
+### Code Refactoring
+
+* replace the detailed AI briefing with a single vibe sentence ([13822a0](https://github.com/dylanr97/Paddlecheck/commit/13822a0d5c56f4d2c8e4003a79caa32ef4b46567))
+
 ## [1.22.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.1...paddlecheck-v1.22.2) (2026-07-25)
 
 

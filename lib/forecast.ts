@@ -103,14 +103,14 @@ function formatWindow(
   if (isNow) {
     start = "now";
   } else if (isSunrise) {
-    start = "sunrise";
+    start = sunriseHHMM;
   } else {
     start = fmtHour(w.startHour);
   }
 
   const next = slotAtHour(graphData, w.endHour + 1);
   const isSunset = sunsetHHMM && next && isDarkOnly(next.reasons);
-  const end = isSunset ? "sunset" : fmtHour(w.endHour + 1);
+  const end = isSunset ? sunsetHHMM : fmtHour(w.endHour + 1);
 
   return { start, end };
 }

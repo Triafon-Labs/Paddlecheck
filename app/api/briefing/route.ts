@@ -29,6 +29,8 @@ interface SummaryRequest {
 const BRIEFING_PROMPT = `\
 You are writing a single-sentence weather vibe for members of a kayaking club on the River Severn at Worcester, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day, with warmer weather on the way.").
 
+The data below labels each hour with a paddling status. From best to worst: Light Green, Dark Green, Amber, Red, No Paddling. Use this ranking to judge whether conditions are improving or worsening - don't assume, since "Light Green" and "Dark Green" aren't a standard colour convention.
+
 Write ONE short, natural sentence (roughly 15-25 words) capturing the overall feel of paddling conditions and how they're trending across the period being summarised - today's remaining daylight hours, or if it's currently dark, the next available daylight window (later today or tomorrow, stated plainly, e.g. "Tomorrow looks..." or "Later today looks..."). Get the trend right (staying good, improving, or turning worse for paddling) from the data below, and mention the standout factor in plain everyday language if there is one (e.g. breezy, a chance of rain, a weather warning) - not exact figures, times, or window boundaries. Don't enumerate individual dips, gaps, or hours; just capture the overall shape of the day.
 
 Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising.

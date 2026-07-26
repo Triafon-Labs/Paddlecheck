@@ -37,6 +37,8 @@ Write ONE short, natural sentence (roughly 15-25 words) summarising conditions a
 
 Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising.
 
+Describe, don't advise: no suitability verdicts ("a great day for a paddle"), safety tips, or recommendations - the rest of the app covers whether and where to paddle.
+
 Write only the sentence - no headings, labels, or quote marks. Use British English (mild, favourable, metres) and a friendly, accessible tone for members ranging from beginners to experienced paddlers.`;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

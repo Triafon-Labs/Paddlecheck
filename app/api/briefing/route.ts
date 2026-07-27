@@ -43,13 +43,27 @@ Write only the summary - no headings, labels, or quote marks. Use British Englis
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+// Spelled-out compass directions: the model garbles bare abbreviations when
+// turning them into prose ("west-westerly"), so hand it the words instead.
+const COMPASS_WORDS: Record<string, string> = {
+  N: "north",
+  NE: "north-east",
+  E: "east",
+  SE: "south-east",
+  S: "south",
+  SW: "south-west",
+  W: "west",
+  NW: "north-west",
+};
+
 function buildConditionsParts(req: SummaryRequest): string {
   const { conditions, hourlyForecast, currentlyDark, currentTime, outlook } = req;
 
-  const windDir =
+  const compass =
     conditions.windDirection !== undefined
       ? degreesToCompass(conditions.windDirection)
       : null;
+  const windDir = compass ? (COMPASS_WORDS[compass] ?? compass) : null;
 
   const weatherWarnings = conditions.warnings?.length
     ? `Met Office weather warnings for Worcestershire:\n${conditions.warnings

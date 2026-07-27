@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.7](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.6...paddlecheck-v1.22.7) (2026-07-27)
+
+
+### Bug Fixes
+
+* give the model a peak-figure temperature template ([487b224](https://github.com/dylanr97/Paddlecheck/commit/487b224517aaee5c989f2f9f99d2e24adbcaed8c))
+* raise briefing reasoning effort to high ([2101f02](https://github.com/dylanr97/Paddlecheck/commit/2101f0270eb004d36b2f4764b9ef4ee9751b1dba))
+* revert reasoning effort, relax the temperature-unit rule ([1430c86](https://github.com/dylanr97/Paddlecheck/commit/1430c86bc99133d847152af021b58d4fc1722fbc))
+
 ## [1.22.6](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.5...paddlecheck-v1.22.6) (2026-07-26)
 
 

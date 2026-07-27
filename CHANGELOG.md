@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.22.8](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.7...paddlecheck-v1.22.8) (2026-07-27)
+
+
+### Bug Fixes
+
+* send spelled-out wind directions to the AI summary ([a789619](https://github.com/dylanr97/Paddlecheck/commit/a789619bc0ed578df06dd4c3efe44e33f2bec190))
+
 ## [1.22.7](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.6...paddlecheck-v1.22.7) (2026-07-27)
 
 

@@ -195,6 +195,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
       {} as Record<PaddlerType, boolean>
     )
   );
+  const [selectedLevel, setSelectedLevel] = useState<PaddlerType | null>(null);
 
   useEffect(() => {
     const openStateForLevel = (level: PaddlerType | null) =>
@@ -212,6 +213,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpen(openStateForLevel(savedLevel));
+    setSelectedLevel(savedLevel);
 
     // Custom event fires in this same tab (the "storage" event only fires in
     // *other* tabs per spec), so the matrix updates immediately when the
@@ -221,11 +223,14 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
         STORAGE_KEYS.PADDLER_LEVEL
       ) as PaddlerType | null;
       setOpen(openStateForLevel(newLevel));
+      setSelectedLevel(newLevel);
     };
 
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === STORAGE_KEYS.PADDLER_LEVEL) {
-        setOpen(openStateForLevel(event.newValue as PaddlerType | null));
+        const newLevel = event.newValue as PaddlerType | null;
+        setOpen(openStateForLevel(newLevel));
+        setSelectedLevel(newLevel);
       }
     };
 
@@ -324,6 +329,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
               const ui = statusInfo ? STATUS_UI[statusInfo.status] : UNKNOWN_UI;
               const StatusIcon = ui.icon;
               const isOpen = open[paddler];
+              const isSelected = paddler === selectedLevel;
               return (
                 <Box
                   key={paddler}
@@ -331,6 +337,8 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                     backgroundColor: "action.hover",
                     borderRadius: 1.5,
                     overflow: "hidden",
+                    border: "1.5px solid",
+                    borderColor: isSelected ? ui.color : "transparent",
                   }}
                 >
                   <Box

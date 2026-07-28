@@ -470,7 +470,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                     width: 10,
                     height: 10,
                     borderRadius: "50%",
-                    backgroundColor: "text.disabled",
+                    backgroundColor: "text.secondary",
                   }}
                 />
               }

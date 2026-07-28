@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.23.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.8...paddlecheck-v1.23.0) (2026-07-28)
+
+
+### Features
+
+* highlight the selected paddler level in Who Can Paddle ([0920660](https://github.com/dylanr97/Paddlecheck/commit/0920660fc16a46e8e0d0722d3e99f14dfebb57c6))
+
+
+### Bug Fixes
+
+* don't mark the sunrise/sunset hour itself as Dark ([3c4a317](https://github.com/dylanr97/Paddlecheck/commit/3c4a317ef6cc2bf1c4ecbbde2d7b1cd5785433bc))
+* prevent number/unit wrap and align gust dot colour ([061d5c1](https://github.com/dylanr97/Paddlecheck/commit/061d5c16871a4b2d3c8ce9e124fb4ba094f3de61))
+
 ## [1.22.8](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.7...paddlecheck-v1.22.8) (2026-07-27)
 
 

@@ -383,8 +383,12 @@ export const useKayakData = () => {
             );
           }
 
-          const darkBeforeSunrise = sunriseHour !== null && h <= sunriseHour;
-          const darkAfterSunset = sunsetHour !== null && h >= sunsetHour;
+          // The hour containing the actual sunrise/sunset crossing is left
+          // out of "Dark" - it's still (partly) daylight, and formatWindow
+          // (lib/forecast.ts) trims its displayed start/end to the precise
+          // sunrise/sunset time using the neighbouring dark-only hour.
+          const darkBeforeSunrise = sunriseHour !== null && h < sunriseHour;
+          const darkAfterSunset = sunsetHour !== null && h > sunsetHour;
           const dark = darkBeforeSunrise || darkAfterSunset;
 
           const forecastConditions: Partial<KayakConditions> = {

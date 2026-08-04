@@ -305,6 +305,17 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return closest.level - currentLevel;
   }, [forecastData, data]);
 
+  // Change tile matching the currently selected toggle range, so the same
+  // period isn't shown twice (once via the toggle, once as a static tile).
+  const selectedRangeChange = (
+    {
+      "1h": { period: "1h Change", change: change1h, icon: <History /> },
+      "8h": { period: "8h Change", change: change8h, icon: <History /> },
+      "24h": { period: "24h Change", change: change24h, icon: <History /> },
+      "5d": { period: "5d Change", change: change5d, icon: <CalendarToday /> },
+    } as Record<string, { period: string; change: number | null; icon: React.ReactNode }>
+  )[timeRange];
+
   const formatXAxis = (tickItem: number) => {
     const date = new Date(tickItem);
     if (timeRange === "5d") {
@@ -506,37 +517,19 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
+            gridTemplateColumns: selectedRangeChange ? "repeat(2, 1fr)" : "1fr",
             gap: 2,
             mt: 2,
           }}
         >
-          <ChangeIndicator
-            period="1h Change"
-            change={change1h}
-            icon={<History />}
-            loading={loading}
-          />
-          <ChangeIndicator
-            period="8h Change"
-            change={change8h}
-            icon={<History />}
-            loading={loading}
-          />
-          <ChangeIndicator
-            period="24h Change"
-            change={change24h}
-            icon={<History />}
-            loading={loading}
-          />
-          <ChangeIndicator
-            period="5d Change"
-            change={change5d}
-            icon={<CalendarToday />}
-            loading={loading}
-          />
-        </Box>
-        <Box sx={{ mt: 2 }}>
+          {selectedRangeChange && (
+            <ChangeIndicator
+              period={selectedRangeChange.period}
+              change={selectedRangeChange.change}
+              icon={selectedRangeChange.icon}
+              loading={loading}
+            />
+          )}
           <ChangeIndicator
             period="24h Forecast"
             change={forecastedChange24h}

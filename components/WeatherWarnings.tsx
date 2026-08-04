@@ -1,7 +1,8 @@
 import React from "react";
-import { Stack, Typography, Link, Box, Divider, Paper } from "@mui/material";
+import { Stack, Typography, Link, Box, Divider } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import { WeatherWarning, WarningSeverity } from "@/types";
+import InfoPanel from "./InfoPanel";
 import { formatMetTime } from "@/lib/weather";
 import { WARNING_COLORS } from "@/lib/config";
 import { londonNow, isWarningActiveNow } from "@/lib/warnings";
@@ -57,17 +58,7 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
               : WARNING_COLORS.Yellow;
 
           return (
-            <Paper
-              key={severity}
-              elevation={0}
-              sx={{
-                p: 1.5,
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 1,
-                backgroundColor: "action.hover",
-              }}
-            >
+            <InfoPanel key={severity} align="flex-start">
               <WarningIcon
                 fontSize="small"
                 sx={{ color: iconColor, mt: "2px" }}
@@ -122,7 +113,7 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
                   </Box>
                 ))}
               </Stack>
-            </Paper>
+            </InfoPanel>
           );
         })}
       </Stack>

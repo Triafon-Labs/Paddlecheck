@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -25,6 +25,27 @@ import {
   hasDaylightRemaining,
 } from "@/lib/forecast";
 import { getRelativeTimeString } from "@/lib/time";
+
+const StatusBanner: React.FC<{
+  severity: "warning" | "error";
+  children: React.ReactNode;
+}> = ({ severity, children }) => (
+  <Box
+    sx={{
+      bgcolor: `${severity}.main`,
+      color: `${severity}.contrastText`,
+      py: 0.5,
+      px: 2,
+      textAlign: "center",
+      fontSize: "0.75rem",
+      fontWeight: 600,
+      letterSpacing: "0.02em",
+      borderBottom: "1px solid rgba(0,0,0,0.08)",
+    }}
+  >
+    {children}
+  </Box>
+);
 
 const buildShareText = (
   conditions: ReturnType<typeof useKayakContext>["conditions"],
@@ -159,57 +180,21 @@ const TopNavBar = () => {
   return (
     <>
       {isOffline && (
-        <Box
-          sx={{
-            bgcolor: "warning.main",
-            color: "warning.contrastText",
-            py: 0.5,
-            px: 2,
-            textAlign: "center",
-            fontSize: "0.75rem",
-            fontWeight: 600,
-            letterSpacing: "0.02em",
-            borderBottom: "1px solid rgba(0,0,0,0.08)",
-          }}
-        >
+        <StatusBanner severity="warning">
           Offline – showing cached data
           {relativeLastUpdated ? ` (updated ${relativeLastUpdated})` : ""}
-        </Box>
+        </StatusBanner>
       )}
       {!isOffline && usingCachedData && (
-        <Box
-          sx={{
-            bgcolor: "warning.main",
-            color: "warning.contrastText",
-            py: 0.5,
-            px: 2,
-            textAlign: "center",
-            fontSize: "0.75rem",
-            fontWeight: 600,
-            letterSpacing: "0.02em",
-            borderBottom: "1px solid rgba(0,0,0,0.08)",
-          }}
-        >
+        <StatusBanner severity="warning">
           Live update failed – showing cached data
           {relativeLastUpdated ? ` (updated ${relativeLastUpdated})` : ""}
-        </Box>
+        </StatusBanner>
       )}
       {isOfflineError && (
-        <Box
-          sx={{
-            bgcolor: "error.main",
-            color: "error.contrastText",
-            py: 0.5,
-            px: 2,
-            textAlign: "center",
-            fontSize: "0.75rem",
-            fontWeight: 600,
-            letterSpacing: "0.02em",
-            borderBottom: "1px solid rgba(0,0,0,0.08)",
-          }}
-        >
+        <StatusBanner severity="error">
           Offline – no cached data (reconnect and refresh)
-        </Box>
+        </StatusBanner>
       )}
       <AppBar position="static" color="inherit" elevation={0}>
         <Toolbar sx={{ justifyContent: "space-between" }}>

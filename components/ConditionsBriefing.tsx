@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { KayakConditions } from "@/types";
+import InfoPanel from "./InfoPanel";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { useBriefing } from "@/lib/useBriefing";
 import { DEFAULT_AI_MODEL } from "@/lib/config";
@@ -38,16 +39,7 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_AI_MODE
   if (!AI_SUMMARY_ENABLED) return null;
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 1.5,
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 1,
-        backgroundColor: "action.hover",
-      }}
-    >
+    <InfoPanel align="flex-start">
       <AutoAwesomeIcon
         fontSize="small"
         sx={{ color: "primary.main", mt: "2px" }}
@@ -89,6 +81,6 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_AI_MODE
           )}
         </Typography>
       )}
-    </Paper>
+    </InfoPanel>
   );
 }

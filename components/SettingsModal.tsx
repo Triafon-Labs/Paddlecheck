@@ -7,7 +7,6 @@ import {
   FormControl,
   Select,
   MenuItem,
-  Button,
   SelectChangeEvent,
   Box,
   Divider,
@@ -23,6 +22,8 @@ import {
   AccordionDetails,
   FormControlLabel,
   Switch,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
@@ -159,6 +160,7 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({
 );
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
+  const [activeTab, setActiveTab] = useState<"settings" | "info">("settings");
   const { themeMode, setThemeMode } = useAppTheme();
   const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">(() =>
     typeof window !== "undefined"
@@ -188,12 +190,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     setPaddlerLevel(level);
     if (level) localStorage.setItem(STORAGE_KEYS.PADDLER_LEVEL, level);
     else localStorage.removeItem(STORAGE_KEYS.PADDLER_LEVEL);
-    window.dispatchEvent(new Event(PADDLER_LEVEL_CHANGED_EVENT));
-  };
-
-  const handleClearLevel = () => {
-    setPaddlerLevel("");
-    localStorage.removeItem(STORAGE_KEYS.PADDLER_LEVEL);
     window.dispatchEvent(new Event(PADDLER_LEVEL_CHANGED_EVENT));
   };
 
@@ -239,7 +235,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         </IconButton>
       </Box>
 
+      <Tabs
+        value={activeTab}
+        onChange={(_, val: "settings" | "info") => setActiveTab(val)}
+        variant="fullWidth"
+        sx={{ px: 2, flexShrink: 0, borderBottom: 1, borderColor: "divider" }}
+      >
+        <Tab value="settings" label="Settings" />
+        <Tab value="info" label="Info" />
+      </Tabs>
+
       <Box sx={{ overflowY: "auto", px: 2, pb: 3 }}>
+      {activeTab === "settings" && (
+        <>
         <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
           Theme
         </Typography>
@@ -270,6 +278,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             displayEmpty
             inputProps={{ "aria-label": "Paddling Level" }}
           >
+            <MenuItem value="">
+              <em>No preference</em>
+            </MenuItem>
             {paddlerTypes.map((level) => (
               <MenuItem key={level} value={level}>
                 {level}
@@ -277,14 +288,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             ))}
           </Select>
         </FormControl>
-        <Button
-          onClick={handleClearLevel}
-          disabled={!paddlerLevel}
-          fullWidth
-          variant="outlined"
-        >
-          Clear Selection
-        </Button>
 
         {process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY !== "false" && (
           <>
@@ -313,10 +316,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             </Typography>
           </>
         )}
+        </>
+      )}
 
-        <Divider sx={{ my: 2 }} />
-
-        <Typography variant="h6" gutterBottom>
+      {activeTab === "info" && (
+        <>
+        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
           Useful Links
         </Typography>
         <List disablePadding>
@@ -601,6 +606,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             Feedback welcome here!
           </Link>
         </Typography>
+        </>
+      )}
       </Box>
     </Drawer>
   );

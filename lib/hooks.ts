@@ -5,6 +5,8 @@ import {
   DayForecast,
   WeatherData,
   FutureWeatherData,
+  RiverDataResult,
+  ConditionsApiResponse,
 } from "@/types";
 import {
   calculateFinalRagStatus,
@@ -15,26 +17,9 @@ import {
   RAG_STATUS_MAP,
   ragHeight,
 } from "@/lib/rag";
-import {
-  fetchRiverData,
-  forecastRiverLevel,
-  fetchBewdleyForecast,
-  getBewdleyBasedWorcesterLevel,
-} from "@/lib/river";
-import {
-  fetchWeatherData,
-  getVisibilityDescription,
-  getWeatherDescription,
-  fetchFutureWeatherData,
-} from "@/lib/weather";
-import {
-  RIVER_STATION_ID,
-  LATITUDE,
-  LONGITUDE,
-  HISTORICAL_DAYS,
-  isRainy,
-  TIME_PERIODS,
-} from "@/lib/config";
+import { forecastRiverLevel, getBewdleyBasedWorcesterLevel } from "@/lib/river";
+import { getVisibilityDescription, getWeatherDescription } from "@/lib/weather";
+import { isRainy, TIME_PERIODS } from "@/lib/config";
 import { getLondonHHMM, getLondonHour, hhmmOfISO } from "@/lib/time";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 
@@ -74,7 +59,6 @@ export const useKayakData = () => {
   const [riverChange5d, setRiverChange5d] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
-  const [usingCachedData, setUsingCachedData] = useState(false);
   // True for the full duration of any fetch attempt - initial, background,
   // or manual refresh - mirrored by loading/forecastLoading below.
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -187,58 +171,62 @@ export const useKayakData = () => {
         }
       };
 
-      // River, weather and future-weather are fetched independently so a
-      // failure in one (e.g. the EA river API blipping) doesn't discard data
-      // that arrived fine from the others. Each falls back to its own
-      // last-known cached value rather than the whole update failing.
-      // Bewdley and warnings were already isolated this way.
-      const [
-        riverOutcome,
-        weatherOutcome,
-        futureWeatherOutcome,
-        bewdleyData,
-        warningsData,
-      ] = await Promise.all([
-        withRetry(() => fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS))
-          .then((data) => ({ ok: true as const, data }))
-          .catch((err) => ({ ok: false as const, err })),
-        withRetry(() => fetchWeatherData(LATITUDE, LONGITUDE))
-          .then((data) => ({ ok: true as const, data }))
-          .catch((err) => ({ ok: false as const, err })),
-        withRetry(() => fetchFutureWeatherData(LATITUDE, LONGITUDE))
-          .then((data) => ({ ok: true as const, data }))
-          .catch((err) => ({ ok: false as const, err })),
-        withRetry(() => fetchBewdleyForecast()).catch(() => ({
-          forecasts: [],
-          observations: [],
-          currentLevel: null,
-        })),
-        fetch("/api/weather/warnings")
-          .then((res) => (res.ok ? res.json() : []))
-          .catch(() => []),
-      ]);
+      // The server fetches and caches river, weather, future-weather, Bewdley
+      // and warnings data every 15 minutes (see /api/conditions), so this is
+      // normally a fast cache hit rather than a live call to three external
+      // APIs. If the request to our own API fails outright, each source
+      // falls back independently to its own last-known cached value rather
+      // than the whole update failing.
+      const apiResponse = await withRetry(async () => {
+        const res = await fetch("/api/conditions");
+        if (!res.ok)
+          throw new Error(`Conditions API fetch failed: ${res.status}`);
+        return (await res.json()) as ConditionsApiResponse;
+      }).catch((err) => {
+        console.error("Failed to fetch /api/conditions:", err);
+        return null;
+      });
 
-      const riverData = riverOutcome.ok
-        ? riverOutcome.data
-        : readRawCache<Awaited<ReturnType<typeof fetchRiverData>>>(
-            STORAGE_KEYS.RIVER_DATA_RAW
-          );
-      const weatherData = weatherOutcome.ok
-        ? weatherOutcome.data
-        : readRawCache<WeatherData>(STORAGE_KEYS.WEATHER_DATA_RAW);
-      const futureWeatherData = futureWeatherOutcome.ok
-        ? futureWeatherOutcome.data
-        : readRawCache<FutureWeatherData>(STORAGE_KEYS.FUTURE_WEATHER_DATA_RAW);
+      const riverData =
+        apiResponse?.river ??
+        readRawCache<RiverDataResult>(STORAGE_KEYS.RIVER_DATA_RAW);
+      const weatherData =
+        apiResponse?.weather ??
+        readRawCache<WeatherData>(STORAGE_KEYS.WEATHER_DATA_RAW);
+      const futureWeatherData =
+        apiResponse?.futureWeather ??
+        readRawCache<FutureWeatherData>(STORAGE_KEYS.FUTURE_WEATHER_DATA_RAW);
+      const bewdleyRaw = apiResponse?.bewdley ?? {
+        forecasts: [],
+        observations: [],
+        currentLevel: null,
+      };
+      const bewdleyData = {
+        currentLevel: bewdleyRaw.currentLevel,
+        forecasts: bewdleyRaw.forecasts.map((f) => ({
+          timestamp: new Date(f.timestamp),
+          level: f.level,
+        })),
+        observations: bewdleyRaw.observations.map((o) => ({
+          timestamp: new Date(o.timestamp),
+          level: o.level,
+        })),
+      };
+      const warningsData = apiResponse?.warnings ?? [];
+      // Reflects when the data was actually fetched from upstream (so a
+      // 15-minute-old cache hit still reports its true age), falling back to
+      // the previous cached conditions' timestamp if this request failed
+      // entirely.
+      const fetchedAt =
+        apiResponse?.fetchedAt ??
+        readRawCache<KayakConditions>(STORAGE_KEYS.CONDITIONS)?.lastUpdated ??
+        new Date().toISOString();
 
       if (!riverData || !weatherData || !futureWeatherData) {
         throw new Error(
           "One or more data sources failed and no cached fallback was available"
         );
       }
-
-      setUsingCachedData(
-        !riverOutcome.ok || !weatherOutcome.ok || !futureWeatherOutcome.ok
-      );
 
       // Process current conditions
       setRiverGraphData(riverData.historicalData);
@@ -297,7 +285,7 @@ export const useKayakData = () => {
           period: "8h",
         },
         launchMessage: findLevelDescription(riverData.latestLevel ?? 0),
-        lastUpdated: new Date().toISOString(),
+        lastUpdated: fetchedAt,
         visibilityDescription,
         weatherDescription,
       };
@@ -516,7 +504,6 @@ export const useKayakData = () => {
             ? null
             : "Failed to load conditions. Check your connection and tap refresh to try again."
       );
-      if (hasCache) setUsingCachedData(true);
     } finally {
       setLoading(false);
       setForecastLoading(false);
@@ -541,7 +528,6 @@ export const useKayakData = () => {
     riverChange5d,
     error,
     isOffline,
-    usingCachedData,
     isRefreshing,
     refetch: fetchData,
   };

@@ -91,6 +91,41 @@ export interface FutureWeatherData {
   daily: DailyData;
 }
 
+export interface RiverDataResult {
+  latestLevel: number | null;
+  change1h: number | null;
+  change24h: number | null;
+  change8h: number | null;
+  change5d: number | null;
+  historicalData: ChartDataPoint[];
+}
+
+// Bewdley forecast/observation points as they travel over JSON - timestamp is
+// an ISO string on the wire, revived to a Date on the client before use.
+export interface BewdleyForecastPointDTO {
+  timestamp: string;
+  level: number;
+}
+
+export interface BewdleyData {
+  forecasts: BewdleyForecastPointDTO[];
+  observations: BewdleyForecastPointDTO[];
+  currentLevel: number | null;
+}
+
+// Combined payload served by /api/conditions. Each source is fetched and
+// cached independently server-side, so any one of them can be null if its
+// upstream API failed - the client falls back to its own last-known cache
+// for just that source.
+export interface ConditionsApiResponse {
+  river: RiverDataResult | null;
+  weather: WeatherData | null;
+  futureWeather: FutureWeatherData | null;
+  bewdley: BewdleyData;
+  warnings: WeatherWarning[];
+  fetchedAt: string;
+}
+
 export interface ForecastGraphDataPoint {
   time: string;
   status: Status;

@@ -21,7 +21,9 @@ export const fetchBewdleyForecast = async (): Promise<{
   observations: BewdleyForecastPoint[];
   currentLevel: number | null;
 }> => {
-  const response = await fetch(BEWDLEY_CSV_URL);
+  const response = await fetch(BEWDLEY_CSV_URL, {
+    next: { revalidate: 900 }, // Cache for 15 minutes
+  });
   if (!response.ok)
     throw new Error(`Bewdley CSV fetch failed: ${response.status}`);
   const text = await response.text();
@@ -125,7 +127,8 @@ export const fetchRiverData = async (
     new Date().getTime() - days * TIME_PERIODS.TWENTY_FOUR_HOURS
   ).toISOString();
   const response = await fetch(
-    `${API_ENDPOINTS.RIVER}/${stationId}/readings?since=${sinceDate}`
+    `${API_ENDPOINTS.RIVER}/${stationId}/readings?since=${sinceDate}`,
+    { next: { revalidate: 900 } } // Cache for 15 minutes
   );
   if (!response.ok)
     throw new Error(`River API fetch failed: ${response.status}`);

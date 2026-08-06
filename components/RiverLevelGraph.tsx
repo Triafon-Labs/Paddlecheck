@@ -19,6 +19,7 @@ import {
   Paper,
   ToggleButtonGroup,
   ToggleButton,
+  Divider,
 } from "@mui/material";
 import {
   ComposedChart,
@@ -503,6 +504,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           </>
         )}
         {renderContent()}
+        <Divider sx={{ mt: 2 }} />
         <Box
           sx={{
             display: "grid",

@@ -6,7 +6,8 @@ export const fetchWeatherData = async (
   longitude: number
 ): Promise<WeatherData> => {
   const response = await fetch(
-    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,visibility,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon`
+    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,visibility,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon`,
+    { next: { revalidate: 900 } } // Cache for 15 minutes
   );
   if (!response.ok)
     throw new Error(`Weather API fetch failed: ${response.status}`);
@@ -95,7 +96,8 @@ export const fetchFutureWeatherData = async (
   longitude: number
 ): Promise<FutureWeatherData> => {
   const response = await fetch(
-    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation,visibility,wind_speed_10m,wind_gusts_10m,weather_code&daily=sunrise,sunset&wind_speed_unit=mph&forecast_days=5&timezone=Europe%2FLondon`
+    `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation,visibility,wind_speed_10m,wind_gusts_10m,weather_code&daily=sunrise,sunset&wind_speed_unit=mph&forecast_days=5&timezone=Europe%2FLondon`,
+    { next: { revalidate: 900 } } // Cache for 15 minutes
   );
   if (!response.ok)
     throw new Error(`Future weather API fetch failed: ${response.status}`);

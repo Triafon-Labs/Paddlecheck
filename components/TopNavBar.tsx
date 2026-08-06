@@ -24,7 +24,7 @@ import {
   buildNextDaytimeOutlook,
   hasDaylightRemaining,
 } from "@/lib/forecast";
-import { getRelativeTimeString } from "@/lib/time";
+import { getRelativeTimeString, getLondonHHMM } from "@/lib/time";
 
 const StatusBanner: React.FC<{
   severity: "warning" | "error";
@@ -182,6 +182,17 @@ const TopNavBar = () => {
     return () => clearInterval(interval);
   }, [conditions?.lastUpdated]);
 
+  // "Updated just now" alone reads as if this instant triggered a live fetch,
+  // when it may just be a fast cache hit on data fetched slightly earlier -
+  // pairing it with the clock time it was actually fetched keeps that honest.
+  const lastUpdatedClockTime = conditions?.lastUpdated
+    ? getLondonHHMM(new Date(conditions.lastUpdated))
+    : null;
+  const freshnessText =
+    lastUpdatedClockTime && relativeLastUpdated
+      ? `${lastUpdatedClockTime} (${relativeLastUpdated})`
+      : relativeLastUpdated;
+
   const handleShare = async () => {
     const text = buildShareText(conditions, forecastDays);
     if (navigator.share) {
@@ -197,13 +208,13 @@ const TopNavBar = () => {
       {isOffline && (
         <StatusBanner severity="warning">
           Offline – showing cached data
-          {relativeLastUpdated ? ` (updated ${relativeLastUpdated})` : ""}
+          {freshnessText ? ` (updated ${freshnessText})` : ""}
         </StatusBanner>
       )}
       {!isOffline && !isOfflineError && isStale && (
         <StatusBanner severity="warning">
           Data may be out of date
-          {relativeLastUpdated ? ` (updated ${relativeLastUpdated})` : ""}
+          {freshnessText ? ` (updated ${freshnessText})` : ""}
         </StatusBanner>
       )}
       {isOfflineError && (
@@ -228,13 +239,13 @@ const TopNavBar = () => {
               >
                 Paddlecheck
               </Typography>
-              {(isRefreshing || relativeLastUpdated) && (
+              {(isRefreshing || freshnessText) && (
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ lineHeight: 1.2, mt: -0.2 }}
                 >
-                  {isRefreshing ? "Updating…" : `Updated ${relativeLastUpdated}`}
+                  {isRefreshing ? "Updating…" : `Updated ${freshnessText}`}
                 </Typography>
               )}
             </Box>

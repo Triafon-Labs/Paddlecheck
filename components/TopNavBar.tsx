@@ -24,7 +24,7 @@ import {
   buildNextDaytimeOutlook,
   hasDaylightRemaining,
 } from "@/lib/forecast";
-import { getRelativeTimeString } from "@/lib/time";
+import { getRelativeTimeString, getLondonHHMM } from "@/lib/time";
 
 const StatusBanner: React.FC<{
   severity: "warning" | "error";
@@ -131,6 +131,17 @@ const buildShareText = (
   return lines.join("\n");
 };
 
+// Data older than this is flagged as stale regardless of why - a momentary
+// blip that still leaves recent data on screen isn't worth alarming users
+// over, but the underlying sources (server-side, cached for 15 minutes) have
+// genuinely gone quiet for a while by this point.
+const STALE_THRESHOLD_MS = 30 * 60 * 1000;
+
+const isDataStale = (lastUpdated: string | undefined): boolean => {
+  if (!lastUpdated) return false;
+  return Date.now() - new Date(lastUpdated).getTime() > STALE_THRESHOLD_MS;
+};
+
 const TopNavBar = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -140,7 +151,6 @@ const TopNavBar = () => {
     forecastDays,
     isOffline,
     error,
-    usingCachedData,
     isRefreshing,
   } = useKayakContext();
 
@@ -151,6 +161,9 @@ const TopNavBar = () => {
   const [relativeLastUpdated, setRelativeLastUpdated] = useState<string>(() =>
     getRelativeTimeString(conditions?.lastUpdated)
   );
+  const [isStale, setIsStale] = useState<boolean>(() =>
+    isDataStale(conditions?.lastUpdated)
+  );
 
   useEffect(() => {
     const dateStr = conditions?.lastUpdated;
@@ -158,14 +171,27 @@ const TopNavBar = () => {
     // Breaking synchronous context execution using queueMicrotask blocks cascading render lint rules
     queueMicrotask(() => {
       setRelativeLastUpdated(getRelativeTimeString(dateStr));
+      setIsStale(isDataStale(dateStr));
     });
 
     const interval = setInterval(() => {
       setRelativeLastUpdated(getRelativeTimeString(dateStr));
+      setIsStale(isDataStale(dateStr));
     }, 30000);
 
     return () => clearInterval(interval);
   }, [conditions?.lastUpdated]);
+
+  // "Updated just now" alone reads as if this instant triggered a live fetch,
+  // when it may just be a fast cache hit on data fetched slightly earlier -
+  // pairing it with the clock time it was actually fetched keeps that honest.
+  const lastUpdatedClockTime = conditions?.lastUpdated
+    ? getLondonHHMM(new Date(conditions.lastUpdated))
+    : null;
+  const freshnessText =
+    lastUpdatedClockTime && relativeLastUpdated
+      ? `${lastUpdatedClockTime} (${relativeLastUpdated})`
+      : relativeLastUpdated;
 
   const handleShare = async () => {
     const text = buildShareText(conditions, forecastDays);
@@ -182,13 +208,13 @@ const TopNavBar = () => {
       {isOffline && (
         <StatusBanner severity="warning">
           Offline – showing cached data
-          {relativeLastUpdated ? ` (updated ${relativeLastUpdated})` : ""}
+          {freshnessText ? ` (updated ${freshnessText})` : ""}
         </StatusBanner>
       )}
-      {!isOffline && usingCachedData && (
+      {!isOffline && !isOfflineError && isStale && (
         <StatusBanner severity="warning">
-          Live update failed – showing cached data
-          {relativeLastUpdated ? ` (updated ${relativeLastUpdated})` : ""}
+          Data may be out of date
+          {freshnessText ? ` (updated ${freshnessText})` : ""}
         </StatusBanner>
       )}
       {isOfflineError && (
@@ -213,13 +239,13 @@ const TopNavBar = () => {
               >
                 Paddlecheck
               </Typography>
-              {(isRefreshing || relativeLastUpdated) && (
+              {(isRefreshing || freshnessText) && (
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ lineHeight: 1.2, mt: -0.2 }}
                 >
-                  {isRefreshing ? "Updating…" : `Updated ${relativeLastUpdated}`}
+                  {isRefreshing ? "Updating…" : `Updated ${freshnessText}`}
                 </Typography>
               )}
             </Box>

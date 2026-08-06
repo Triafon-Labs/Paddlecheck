@@ -7,7 +7,6 @@ import {
   Typography,
   Box,
   Skeleton,
-  Paper,
 } from "@mui/material";
 import HelpOutlined from "@mui/icons-material/HelpOutlined";
 import Air from "@mui/icons-material/Air";
@@ -15,6 +14,7 @@ import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
+import InfoPanel from "./InfoPanel";
 import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
 import { formatWindGust } from "@/lib/units";
 import ConditionsBriefing from "./ConditionsBriefing";
@@ -154,20 +154,10 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                     windSpeed: conditions.windSpeed,
                   });
                   return (
-                    <Paper
-                      key={index}
-                      elevation={0}
-                      sx={{
-                        p: 1.5,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        backgroundColor: "action.hover",
-                      }}
-                    >
+                    <InfoPanel key={index}>
                       <Icon fontSize="small" sx={{ color: "primary.main" }} />
                       <Typography variant="body2">{label}</Typography>
-                    </Paper>
+                    </InfoPanel>
                   );
                 })}
               </Box>
@@ -180,16 +170,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
                 {conditions.gustStatus && (
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 1.5,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      backgroundColor: "action.hover",
-                    }}
-                  >
+                  <InfoPanel>
                     <Air fontSize="small" sx={{ color: "primary.main" }} />
                     <Typography variant="body2">
                       Gusts up to {formatWindGust(conditions.windGust!)}
@@ -203,24 +184,15 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                         ml: "auto",
                       }}
                     />
-                  </Paper>
+                  </InfoPanel>
                 )}
                 {conditions.rainWhileWarm && (
-                  <Paper
-                    elevation={0}
-                    sx={{
-                      p: 1.5,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      backgroundColor: "action.hover",
-                    }}
-                  >
+                  <InfoPanel>
                     <WaterDrop fontSize="small" sx={{ color: "primary.main" }} />
                     <Typography variant="body2">
                       {conditions.weatherDescription || "Rain"}
                     </Typography>
-                  </Paper>
+                  </InfoPanel>
                 )}
               </Box>
             </Box>

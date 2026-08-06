@@ -1,0 +1,26 @@
+name: Keep Alive
+
+on:
+  schedule:
+    # Every 5 minutes
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping site and warm the conditions cache
+        env:
+          SITE_URL: ${{ vars.SITE_URL || 'https://paddlecheck.vercel.app' }}
+        run: |
+          for path in "/" "/api/conditions"; do
+            url="${SITE_URL}${path}"
+            echo "Pinging $url"
+            status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "$url")
+            echo "Response status: $status"
+            if [ "$status" -lt 200 ] || [ "$status" -ge 400 ]; then
+              echo "$url returned unexpected status $status"
+              exit 1
+            fi
+          done

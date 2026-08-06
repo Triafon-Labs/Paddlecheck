@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.23.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.23.0...paddlecheck-v1.23.1) (2026-08-04)
+
+
+### Code Refactoring
+
+* trim UX clutter in settings, paddler level, and river stats ([d6ab4ab](https://github.com/dylanr97/Paddlecheck/commit/d6ab4ab22fd762e63e2ae50ca0e796940c407cc7))
+
 ## [1.23.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.22.8...paddlecheck-v1.23.0) (2026-07-28)
 
 

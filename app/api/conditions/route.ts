@@ -9,6 +9,12 @@ import {
   HISTORICAL_DAYS,
 } from "@/lib/config";
 
+// Caches the whole handler's output (not just the fetches inside it) so
+// fetchedAt below is frozen at the time the data was actually fetched and
+// replayed as-is on every cache hit, instead of being recomputed - and
+// looking "live" - on every request.
+export const revalidate = 900;
+
 // River, weather and future-weather are fetched independently so a failure in
 // one (e.g. the EA river API blipping) doesn't discard data that arrived fine
 // from the others - each is null'd out on failure and the client falls back
@@ -43,10 +49,6 @@ export async function GET() {
     futureWeather,
     bewdley,
     warnings,
-    // When this response is served from Vercel's Data Cache, fetchedAt still
-    // reflects the time the upstream sources were actually fetched - not when
-    // this particular client request landed - so staleness can be judged
-    // against real data age.
     fetchedAt: new Date().toISOString(),
   });
 }

@@ -29,7 +29,11 @@ const parseMetTimeToISO = (timeStr: string, baseDate: Date) => {
 /** Fetches and parses Met Office RSS warnings affecting Worcestershire. */
 export const fetchWeatherWarnings = async (): Promise<WeatherWarning[]> => {
   const response = await fetch(MET_OFFICE_RSS_URL, {
-    next: { revalidate: 300 }, // Cache for 5 minutes
+    // Kept in step with /api/conditions' own revalidate (15 min) - a route's
+    // effective ISR interval is governed by the shortest revalidate value
+    // used by any fetch within it, so a mismatched value here would silently
+    // drag the whole combined route back down to this cadence.
+    next: { revalidate: 900 },
   });
   if (!response.ok)
     throw new Error(`Met Office RSS fetch failed: ${response.status}`);

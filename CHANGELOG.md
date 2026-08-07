@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.24.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.23.1...paddlecheck-v1.24.0) (2026-08-07)
+
+
+### Features
+
+* force a live re-fetch when the cache is already stale on open ([c9c45b5](https://github.com/dylanr97/Paddlecheck/commit/c9c45b56f91ddb40c36c51eef99c4efb97ed73c7))
+
+
+### Bug Fixes
+
+* actually cache the /api/conditions response, not just its fetches ([4a666ad](https://github.com/dylanr97/Paddlecheck/commit/4a666adbbb570dbe2ea8a1f2a79b331e98c2d817))
+* show clock time alongside relative freshness, not just "just now" ([6ce5265](https://github.com/dylanr97/Paddlecheck/commit/6ce5265c536f1e3d41f94829f8ca61797473fea5))
+
+
+### Performance Improvements
+
+* cache conditions data server-side instead of fetching live per client ([13a96e4](https://github.com/dylanr97/Paddlecheck/commit/13a96e437099c92f769412dae59556f412946500))
+
 ## [1.23.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.23.0...paddlecheck-v1.23.1) (2026-08-04)
 
 

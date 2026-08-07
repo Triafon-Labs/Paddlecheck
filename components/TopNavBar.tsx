@@ -17,7 +17,7 @@ import SettingsModal from "./SettingsModal";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { degreesToCompass } from "@/lib/weather";
 import { ragStatus } from "@/lib/rag";
-import { THRESHOLDS } from "@/lib/config";
+import { THRESHOLDS, DATA_STALE_THRESHOLD_MS } from "@/lib/config";
 import { formatRiverLevel, formatTemperature, formatWindSpeed } from "@/lib/units";
 import {
   buildBestPaddlingTimes,
@@ -131,15 +131,9 @@ const buildShareText = (
   return lines.join("\n");
 };
 
-// Data older than this is flagged as stale regardless of why - a momentary
-// blip that still leaves recent data on screen isn't worth alarming users
-// over, but the underlying sources (server-side, cached for 15 minutes) have
-// genuinely gone quiet for a while by this point.
-const STALE_THRESHOLD_MS = 30 * 60 * 1000;
-
 const isDataStale = (lastUpdated: string | undefined): boolean => {
   if (!lastUpdated) return false;
-  return Date.now() - new Date(lastUpdated).getTime() > STALE_THRESHOLD_MS;
+  return Date.now() - new Date(lastUpdated).getTime() > DATA_STALE_THRESHOLD_MS;
 };
 
 const TopNavBar = () => {

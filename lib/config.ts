@@ -281,5 +281,15 @@ export const TIME_PERIODS = {
   TWENTY_FOUR_HOURS: 24 * 60 * 60 * 1000,
 };
 
+// --- Data Freshness ---
+// Data older than this is flagged as stale regardless of why - a momentary
+// blip that still leaves recent data on screen isn't worth alarming users
+// over, but the underlying sources (server-side, cached for 15 minutes) have
+// genuinely gone quiet for a while by this point. Also the threshold at which
+// the client forces a live re-fetch (see /api/conditions/live) rather than
+// waiting for someone else's request to eventually land after the cache's
+// background revalidation finishes.
+export const DATA_STALE_THRESHOLD_MS = 30 * 60 * 1000;
+
 // --- AI Summary ---
 export const DEFAULT_AI_MODEL = "openai/gpt-oss-120b";

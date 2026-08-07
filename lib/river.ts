@@ -6,6 +6,7 @@ import {
   BEWDLEY_CSV_URL,
   BEWDLEY_TRAVEL_HOURS,
 } from "@/lib/config";
+import { FetchLiveness, fetchCacheOptions } from "@/lib/fetchCache";
 
 export interface BewdleyForecastPoint {
   timestamp: Date;
@@ -16,14 +17,14 @@ export interface BewdleyForecastPoint {
  * Fetches the upstream Bewdley river level forecast and observations.
  * The forecast is limited to 24 hours ahead from the current time.
  */
-export const fetchBewdleyForecast = async (): Promise<{
+export const fetchBewdleyForecast = async (
+  liveness: FetchLiveness = {}
+): Promise<{
   forecasts: BewdleyForecastPoint[];
   observations: BewdleyForecastPoint[];
   currentLevel: number | null;
 }> => {
-  const response = await fetch(BEWDLEY_CSV_URL, {
-    next: { revalidate: 900 }, // Cache for 15 minutes
-  });
+  const response = await fetch(BEWDLEY_CSV_URL, fetchCacheOptions(liveness));
   if (!response.ok)
     throw new Error(`Bewdley CSV fetch failed: ${response.status}`);
   const text = await response.text();
@@ -121,14 +122,15 @@ export const getBewdleyBasedWorcesterLevel = (
 
 export const fetchRiverData = async (
   stationId: string = RIVER_STATION_ID,
-  days: number = 1
+  days: number = 1,
+  liveness: FetchLiveness = {}
 ) => {
   const sinceDate = new Date(
     new Date().getTime() - days * TIME_PERIODS.TWENTY_FOUR_HOURS
   ).toISOString();
   const response = await fetch(
     `${API_ENDPOINTS.RIVER}/${stationId}/readings?since=${sinceDate}`,
-    { next: { revalidate: 900 } } // Cache for 15 minutes
+    fetchCacheOptions(liveness)
   );
   if (!response.ok)
     throw new Error(`River API fetch failed: ${response.status}`);

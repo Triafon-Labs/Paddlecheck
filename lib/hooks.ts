@@ -19,7 +19,7 @@ import {
 } from "@/lib/rag";
 import { forecastRiverLevel, getBewdleyBasedWorcesterLevel } from "@/lib/river";
 import { getVisibilityDescription, getWeatherDescription } from "@/lib/weather";
-import { isRainy, TIME_PERIODS } from "@/lib/config";
+import { isRainy, TIME_PERIODS, DATA_STALE_THRESHOLD_MS } from "@/lib/config";
 import { getLondonHHMM, getLondonHour, hhmmOfISO } from "@/lib/time";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 
@@ -177,7 +177,7 @@ export const useKayakData = () => {
       // APIs. If the request to our own API fails outright, each source
       // falls back independently to its own last-known cached value rather
       // than the whole update failing.
-      const apiResponse = await withRetry(async () => {
+      let apiResponse = await withRetry(async () => {
         const res = await fetch("/api/conditions");
         if (!res.ok)
           throw new Error(`Conditions API fetch failed: ${res.status}`);
@@ -186,6 +186,26 @@ export const useKayakData = () => {
         console.error("Failed to fetch /api/conditions:", err);
         return null;
       });
+
+      // A cache that's gone stale (e.g. the first open after an overnight
+      // gap with no visitors) would otherwise sit stale until someone else's
+      // request happens to land after Vercel's background revalidation
+      // finishes - force one genuinely live fetch instead of waiting on that.
+      const isStale =
+        !apiResponse ||
+        Date.now() - new Date(apiResponse.fetchedAt).getTime() >
+          DATA_STALE_THRESHOLD_MS;
+      if (isStale) {
+        const liveResponse = await fetch("/api/conditions/live")
+          .then((res) =>
+            res.ok ? (res.json() as Promise<ConditionsApiResponse>) : null
+          )
+          .catch((err) => {
+            console.error("Failed to force-refresh /api/conditions/live:", err);
+            return null;
+          });
+        if (liveResponse) apiResponse = liveResponse;
+      }
 
       const riverData =
         apiResponse?.river ??

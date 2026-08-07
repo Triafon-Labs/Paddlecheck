@@ -2,6 +2,7 @@ import { parseStringPromise } from "xml2js";
 import { parse, formatISO } from "date-fns";
 import { tz } from "@date-fns/tz";
 import { WeatherWarning, WarningSeverity } from "@/types";
+import { FetchLiveness, fetchCacheOptions } from "@/lib/fetchCache";
 
 const MET_OFFICE_RSS_URL =
   "https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm";
@@ -27,14 +28,10 @@ const parseMetTimeToISO = (timeStr: string, baseDate: Date) => {
 };
 
 /** Fetches and parses Met Office RSS warnings affecting Worcestershire. */
-export const fetchWeatherWarnings = async (): Promise<WeatherWarning[]> => {
-  const response = await fetch(MET_OFFICE_RSS_URL, {
-    // Kept in step with /api/conditions' own revalidate (15 min) - a route's
-    // effective ISR interval is governed by the shortest revalidate value
-    // used by any fetch within it, so a mismatched value here would silently
-    // drag the whole combined route back down to this cadence.
-    next: { revalidate: 900 },
-  });
+export const fetchWeatherWarnings = async (
+  liveness: FetchLiveness = {}
+): Promise<WeatherWarning[]> => {
+  const response = await fetch(MET_OFFICE_RSS_URL, fetchCacheOptions(liveness));
   if (!response.ok)
     throw new Error(`Met Office RSS fetch failed: ${response.status}`);
 

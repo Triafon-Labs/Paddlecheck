@@ -201,14 +201,17 @@ const TopNavBar = () => {
     <>
       {isOffline && (
         <StatusBanner severity="warning">
-          Offline – showing cached data
-          {freshnessText ? ` (updated ${freshnessText})` : ""}
+          Offline{freshnessText ? ` – showing data from ${freshnessText}` : " – showing cached data"}
         </StatusBanner>
       )}
-      {!isOffline && !isOfflineError && isStale && (
+      {/* A stale cache is normally self-healed by a live re-fetch on load (see
+          useKayakData), so this only fires once that attempt has actually
+          finished and genuinely couldn't get fresh data - not while one may
+          still be in flight. */}
+      {!isOffline && !isOfflineError && !isRefreshing && isStale && (
         <StatusBanner severity="warning">
-          Data may be out of date
-          {freshnessText ? ` (updated ${freshnessText})` : ""}
+          Live update failed
+          {freshnessText ? ` – showing data from ${freshnessText}` : ""}
         </StatusBanner>
       )}
       {isOfflineError && (

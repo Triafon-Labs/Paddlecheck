@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.24.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.24.0...paddlecheck-v1.24.1) (2026-08-08)
+
+
+### Bug Fixes
+
+* drop the double-bracketed staleness banner text, gate on refresh ([085496a](https://github.com/dylanr97/Paddlecheck/commit/085496a2ec56139c6643a991e839c70c4a222010))
+
 ## [1.24.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.23.1...paddlecheck-v1.24.0) (2026-08-07)
 
 

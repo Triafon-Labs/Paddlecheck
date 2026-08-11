@@ -79,13 +79,25 @@ const SlidingToggleButtonGroup = React.forwardRef<
             position: "absolute",
             top: GROUP_PADDING,
             bottom: GROUP_PADDING,
+            left: 0,
             borderRadius: 9999,
             bgcolor: "primary.main",
-            transition: `left ${m3Duration.short4}ms ${m3Easing.standard}, width ${m3Duration.short4}ms ${m3Easing.standard}`,
+            // translateX is GPU-composited, unlike `left`/`width` (both
+            // layout-triggering) - those looked fine at 60Hz but visibly
+            // stuttered on high-refresh displays, since redoing layout on
+            // every frame doesn't fit in an 8ms budget at 120Hz+. Width is
+            // still set directly (not transitioned): every current usage
+            // has equal-width segments, so it's only ever set once and
+            // never actually animates - only position needs to slide.
+            transition: `transform ${m3Duration.short4}ms ${m3Easing.standard}`,
+            willChange: "transform",
             pointerEvents: "none",
             zIndex: 0,
           }}
-          style={{ left: pill.left, width: pill.width }}
+          style={{
+            width: pill.width,
+            transform: `translateX(${pill.left}px)`,
+          }}
         />
       )}
       {children}

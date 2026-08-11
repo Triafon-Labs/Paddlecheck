@@ -24,3 +24,38 @@ jobs:
               exit 1
             fi
           done
+
+      # The app fails soft when an upstream feed dies (each source falls back
+      # to its last cached value), so without this check the only signal
+      # would be the stale banner in the UI. A failed run here sends a GitHub
+      # notification instead.
+      - name: Check upstream data sources are alive and fresh
+        env:
+          SITE_URL: ${{ vars.SITE_URL || 'https://paddlecheck.vercel.app' }}
+          MAX_AGE_MINUTES: "45"
+        run: |
+          payload=$(curl -s --max-time 20 "${SITE_URL}/api/conditions")
+
+          fetched_at=$(echo "$payload" | jq -r '.fetchedAt // empty')
+          if [ -z "$fetched_at" ]; then
+            echo "Payload has no fetchedAt - malformed response"
+            exit 1
+          fi
+          age_seconds=$(( $(date +%s) - $(date -d "$fetched_at" +%s) ))
+          echo "Data fetched at $fetched_at (${age_seconds}s ago)"
+          if [ "$age_seconds" -gt $(( MAX_AGE_MINUTES * 60 )) ]; then
+            echo "Conditions data is older than ${MAX_AGE_MINUTES} minutes"
+            exit 1
+          fi
+
+          # These are null when their upstream fetch failed (see lib/conditions.ts)
+          failed=$(echo "$payload" | jq -r '[
+              (if .river == null then "river (EA gauge)" else empty end),
+              (if .weather == null then "weather (Open-Meteo current)" else empty end),
+              (if .futureWeather == null then "futureWeather (Open-Meteo forecast)" else empty end)
+            ] | join(", ")')
+          if [ -n "$failed" ]; then
+            echo "Upstream source(s) returning no data: $failed"
+            exit 1
+          fi
+          echo "All upstream sources healthy"

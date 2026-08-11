@@ -1,4 +1,9 @@
-import { createTheme, type ThemeOptions } from "@mui/material/styles";
+import {
+  createTheme,
+  type CSSObject,
+  type Theme,
+  type ThemeOptions,
+} from "@mui/material/styles";
 import {
   m3Light,
   m3Dark,
@@ -119,20 +124,48 @@ const m3Typography: ThemeOptions["typography"] = {
   },
 };
 
-// Shared component overrides parameterised by the active M3 palette.
-// Using compound selectors (&.MuiPaper-outlined) ensures higher specificity
-// than MUI's own variant rules, reliably stripping the outlined border from
-// Cards while leaving other Paper components (e.g. chart tooltips) untouched.
-const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
+// Blue-tinted dark surface tokens – keeps the original navy feel while
+// providing the M3 tonal elevation steps that the component overrides need.
+const m3DarkNavy: M3Palette = {
+  ...m3Dark,
+  surface: "#0A1929", // original page background
+  onSurface: "#FFFFFF",
+  surfaceContainerLowest: "#061221",
+  surfaceContainerLow: "#132F4C", // original paper / drawer / AppBar
+  surfaceContainer: "#193A5E", // card background – one step lighter
+  surfaceContainerHigh: "#1E4168",
+  surfaceContainerHighest: "#254B75",
+  outlineVariant: "#2A4F73",
+  onSurfaceVariant: "#9EAAB8",
+};
+
+// Emits one declaration per colour scheme from a single token-keyed rule:
+// the light values apply at the base selector, the dark ones inside the
+// theme's `.dark` scheme selector. Returned as an array so `applyStyles`
+// always lands last, which is what MUI's docs require for correct ordering.
+const perScheme = (
+  theme: Theme,
+  rule: (m3: M3Palette) => CSSObject
+): CSSObject[] => [rule(m3Light), theme.applyStyles("dark", rule(m3DarkNavy))];
+
+// Shared component overrides. Using compound selectors (&.MuiPaper-outlined)
+// ensures higher specificity than MUI's own variant rules, reliably stripping
+// the outlined border from Cards while leaving other Paper components (e.g.
+// chart tooltips) untouched.
+const components: ThemeOptions["components"] = {
   MuiCard: {
     styleOverrides: {
-      root: {
-        backgroundColor: m3.surfaceContainer,
-        borderRadius: 16,
-        // Strip both variant styles so cards always show the tonal surface
-        "&.MuiPaper-outlined": { border: "none" },
-        "&.MuiPaper-elevation": { boxShadow: "none" },
-      },
+      root: ({ theme }) => [
+        {
+          borderRadius: 16,
+          // Strip both variant styles so cards always show the tonal surface
+          "&.MuiPaper-outlined": { border: "none" },
+          "&.MuiPaper-elevation": { boxShadow: "none" },
+        },
+        ...perScheme(theme, (m3) => ({
+          backgroundColor: m3.surfaceContainer,
+        })),
+      ],
     },
   },
   MuiCardContent: {
@@ -144,12 +177,14 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
   },
   MuiAppBar: {
     styleOverrides: {
-      root: {
-        backgroundColor: m3.surfaceContainerLow,
-        color: m3.onSurface,
-        boxShadow: "none",
-        borderBottom: `1px solid ${m3.outlineVariant}`,
-      },
+      root: ({ theme }) => [
+        { boxShadow: "none" },
+        ...perScheme(theme, (m3) => ({
+          backgroundColor: m3.surfaceContainerLow,
+          color: m3.onSurface,
+          borderBottom: `1px solid ${m3.outlineVariant}`,
+        })),
+      ],
     },
   },
   MuiButton: {
@@ -165,15 +200,17 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
   },
   MuiIconButton: {
     styleOverrides: {
-      root: {
-        borderRadius: 9999,
+      root: ({ theme }) => [
+        { borderRadius: 9999 },
         // M3 focus indicator – thin primary outline on keyboard focus
-        "&.Mui-focusVisible": {
-          outline: `3px solid ${m3.primary}`,
-          outlineOffset: 2,
-          transition: `outline ${m3Duration.short2}ms ${m3Easing.standard}`,
-        },
-      },
+        ...perScheme(theme, (m3) => ({
+          "&.Mui-focusVisible": {
+            outline: `3px solid ${m3.primary}`,
+            outlineOffset: 2,
+            transition: `outline ${m3Duration.short2}ms ${m3Easing.standard}`,
+          },
+        })),
+      ],
     },
   },
   MuiChip: {
@@ -184,13 +221,17 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
   // Segmented pill control – container + individual pill buttons
   MuiToggleButtonGroup: {
     styleOverrides: {
-      root: {
-        borderRadius: 9999,
-        padding: 4,
-        backgroundColor: m3.surfaceContainerHighest,
-        border: "none",
-        gap: 4,
-      },
+      root: ({ theme }) => [
+        {
+          borderRadius: 9999,
+          padding: 4,
+          border: "none",
+          gap: 4,
+        },
+        ...perScheme(theme, (m3) => ({
+          backgroundColor: m3.surfaceContainerHighest,
+        })),
+      ],
       grouped: {
         // Remove MUI's inter-button borders; shape is set per-button
         border: "none !important",
@@ -201,40 +242,46 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
   },
   MuiToggleButton: {
     styleOverrides: {
-      root: {
-        borderRadius: 9999,
-        border: "none",
-        textTransform: "none",
-        "&.Mui-selected": {
-          backgroundColor: m3.primary,
-          color: m3.onPrimary,
-          // M3 state layers via pseudo-element overlay
-          position: "relative",
-          overflow: "hidden",
-          "&::after": {
-            content: '""',
-            position: "absolute",
-            inset: 0,
-            borderRadius: "inherit",
-            backgroundColor: m3.onPrimary,
-            opacity: 0,
-            transition: `opacity ${m3Duration.short2}ms ${m3Easing.standard}`,
-            pointerEvents: "none",
-          },
-          "&:hover::after": { opacity: 0.08 },
-          "&.Mui-focusVisible::after": { opacity: 0.12 },
-          "&:active::after": { opacity: 0.12 },
-          "&:hover": { backgroundColor: m3.primary },
+      root: ({ theme }) => [
+        {
+          borderRadius: 9999,
+          border: "none",
+          textTransform: "none",
         },
-      },
+        ...perScheme(theme, (m3) => ({
+          "&.Mui-selected": {
+            backgroundColor: m3.primary,
+            color: m3.onPrimary,
+            // M3 state layers via pseudo-element overlay
+            position: "relative",
+            overflow: "hidden",
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              inset: 0,
+              borderRadius: "inherit",
+              backgroundColor: m3.onPrimary,
+              opacity: 0,
+              transition: `opacity ${m3Duration.short2}ms ${m3Easing.standard}`,
+              pointerEvents: "none",
+            },
+            "&:hover::after": { opacity: 0.08 },
+            "&.Mui-focusVisible::after": { opacity: 0.12 },
+            "&:active::after": { opacity: 0.12 },
+            "&:hover": { backgroundColor: m3.primary },
+          },
+        })),
+      ],
     },
   },
   MuiDrawer: {
     styleOverrides: {
-      paper: {
-        backgroundColor: m3.surfaceContainerLow,
-        backgroundImage: "none",
-      },
+      paper: ({ theme }) => [
+        { backgroundImage: "none" },
+        ...perScheme(theme, (m3) => ({
+          backgroundColor: m3.surfaceContainerLow,
+        })),
+      ],
     },
   },
   MuiAccordion: {
@@ -265,19 +312,22 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
   },
   MuiDivider: {
     styleOverrides: {
-      root: { borderColor: m3.outlineVariant },
+      root: ({ theme }) =>
+        perScheme(theme, (m3) => ({ borderColor: m3.outlineVariant })),
     },
   },
   MuiTableRow: {
     styleOverrides: {
-      root: {
-        "&:last-child td, &:last-child th": { border: 0 },
-        transition: `background-color ${m3Duration.short2}ms ${m3Easing.standard}`,
-        // M3 hover state layer at 4% onSurface
-        "&:hover": {
-          backgroundColor: `${m3.onSurface}0A`,
+      root: ({ theme }) => [
+        {
+          "&:last-child td, &:last-child th": { border: 0 },
+          transition: `background-color ${m3Duration.short2}ms ${m3Easing.standard}`,
         },
-      },
+        // M3 hover state layer at 4% onSurface
+        ...perScheme(theme, (m3) => ({
+          "&:hover": { backgroundColor: `${m3.onSurface}0A` },
+        })),
+      ],
     },
   },
   MuiSelect: {
@@ -288,7 +338,8 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
   MuiOutlinedInput: {
     styleOverrides: {
       root: { borderRadius: 12 },
-      notchedOutline: { borderColor: m3.outline },
+      notchedOutline: ({ theme }) =>
+        perScheme(theme, (m3) => ({ borderColor: m3.outline })),
     },
   },
   MuiAlert: {
@@ -296,7 +347,7 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
       root: { borderRadius: 12 },
     },
   },
-});
+};
 
 // M3-compliant MUI transitions config – propagates to all MUI components
 // that use theme.transitions.create() (Drawer, Accordion, Collapse, Fade…)
@@ -318,61 +369,53 @@ const m3Transitions: ThemeOptions["transitions"] = {
   },
 };
 
-export const lightTheme = createTheme({
-  palette: {
-    mode: "light",
-    primary: { main: m3Light.primary, contrastText: m3Light.onPrimary },
-    secondary: { main: m3Light.secondary, contrastText: m3Light.onSecondary },
-    error: { main: m3Light.error, contrastText: m3Light.onError },
-    background: {
-      default: m3Light.surface,
-      paper: m3Light.surfaceContainerLow,
+// One theme carrying both colour schemes as CSS variables, rather than two
+// themes swapped at runtime. Both schemes' variables are emitted during SSR
+// and InitColorSchemeScript (see app/layout.tsx) picks the right one before
+// first paint, so a dark-mode visitor never sees a flash of light theme.
+// `colorSchemeSelector: "class"` pairs with that script's `attribute="class"`:
+// it toggles a `light`/`dark` class on <html>.
+export const theme = createTheme({
+  cssVariables: { colorSchemeSelector: "class" },
+  colorSchemes: {
+    light: {
+      palette: {
+        primary: { main: m3Light.primary, contrastText: m3Light.onPrimary },
+        secondary: {
+          main: m3Light.secondary,
+          contrastText: m3Light.onSecondary,
+        },
+        error: { main: m3Light.error, contrastText: m3Light.onError },
+        background: {
+          default: m3Light.surface,
+          paper: m3Light.surfaceContainerLow,
+        },
+        text: {
+          primary: m3Light.onSurface,
+          secondary: m3Light.onSurfaceVariant,
+        },
+        divider: m3Light.outlineVariant,
+      },
     },
-    text: {
-      primary: m3Light.onSurface,
-      secondary: m3Light.onSurfaceVariant,
+    dark: {
+      palette: {
+        primary: { main: m3Dark.primary, contrastText: m3Dark.onPrimary },
+        secondary: { main: m3Dark.secondary, contrastText: m3Dark.onSecondary },
+        error: { main: m3Light.error, contrastText: m3Light.onError },
+        background: {
+          default: m3DarkNavy.surface,
+          paper: m3DarkNavy.surfaceContainerLow,
+        },
+        text: {
+          primary: "#FFFFFF",
+          secondary: "#BDBDBD",
+        },
+        divider: m3DarkNavy.outlineVariant,
+      },
     },
-    divider: m3Light.outlineVariant,
   },
   shape: { borderRadius: 12 },
   typography: m3Typography,
   transitions: m3Transitions,
-  components: makeComponents(m3Light),
-});
-
-// Blue-tinted dark surface tokens – keeps the original navy feel while
-// providing the M3 tonal elevation steps that the component overrides need.
-const m3DarkNavy: M3Palette = {
-  ...m3Dark,
-  surface: "#0A1929", // original page background
-  onSurface: "#FFFFFF",
-  surfaceContainerLowest: "#061221",
-  surfaceContainerLow: "#132F4C", // original paper / drawer / AppBar
-  surfaceContainer: "#193A5E", // card background – one step lighter
-  surfaceContainerHigh: "#1E4168",
-  surfaceContainerHighest: "#254B75",
-  outlineVariant: "#2A4F73",
-  onSurfaceVariant: "#9EAAB8",
-};
-
-export const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: { main: m3Dark.primary, contrastText: m3Dark.onPrimary },
-    secondary: { main: m3Dark.secondary, contrastText: m3Dark.onSecondary },
-    error: { main: m3Light.error, contrastText: m3Light.onError },
-    background: {
-      default: m3DarkNavy.surface,
-      paper: m3DarkNavy.surfaceContainerLow,
-    },
-    text: {
-      primary: "#FFFFFF",
-      secondary: "#BDBDBD",
-    },
-    divider: m3DarkNavy.outlineVariant,
-  },
-  shape: { borderRadius: 12 },
-  typography: m3Typography,
-  transitions: m3Transitions,
-  components: makeComponents(m3DarkNavy),
+  components,
 });

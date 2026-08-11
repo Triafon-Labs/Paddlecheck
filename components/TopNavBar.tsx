@@ -190,11 +190,13 @@ const TopNavBar = () => {
 
   const handleShare = async () => {
     const text = buildShareText(conditions, forecastDays);
+    // Give recipients a way back to the app - the summary alone has no link.
+    const url = window.location.origin;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Paddlecheck", text });
+        await navigator.share({ title: "Paddlecheck", text, url });
       } else {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(`${text}\n\n${url}`);
         setSnackbarOpen(true);
       }
     } catch (err) {

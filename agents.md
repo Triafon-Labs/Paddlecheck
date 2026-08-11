@@ -22,7 +22,7 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 | Date handling | date-fns 4                                                                    |
 | AI            | Groq SDK (Briefing feature)                                                   |
 | Analytics     | Vercel Analytics + Speed Insights                                             |
-| PWA           | Workbox 7 (service worker)                                                    |
+| PWA           | Web manifest + hand-rolled service worker (`public/sw.js`)                    |
 | Linting       | ESLint 10, Prettier 3                                                         |
 | Git hooks     | Husky 9 + commitlint (Conventional Commits)                                   |
 | CI            | GitHub Actions (lint + build on PR)                                           |
@@ -34,10 +34,9 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 
 ### Build Requirements
 
-Due to the use of `workbox-webpack-plugin` for PWA service worker generation, production builds **must** use Webpack.
-
-- Production builds should use `next build --webpack`.
-- Development server uses Turbopack by default.
+Both `next build` and `next dev` use Turbopack (see `next.config.ts`). The
+service worker is a plain static file served from `public/`, so no bundler
+plugin or build step generates it.
 
 ### Timezone & Localization
 
@@ -76,6 +75,7 @@ components/
   ThemeRegistry.tsx      Emotion cache + AppThemeProvider for SSR
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners
+  ServiceWorkerRegistration.tsx  Registers public/sw.js in production
 
 lib/
   config.ts              All thresholds, station IDs, descriptions, coordinates
@@ -84,14 +84,14 @@ lib/
   weather.ts             Open-Meteo API calls + utilities
   hooks.ts               useKayakData hook – orchestrates all fetching and state
   KayakDataContext.tsx   React Context wrapping the hook for component tree access
-  ThemeContext.tsx        Light/dark/system mode state + localStorage persistence
+  ThemeContext.tsx       Wraps MUI's colour-scheme provider/hook (light/dark/system)
   m3-palette.ts          Material Design 3 colour palettes
-  themes.ts              MUI theme definitions (light + dark variants)
+  themes.ts              One MUI theme carrying both schemes as CSS variables
 
 types/
   index.ts               All shared TypeScript types
 
-public/                  Static assets – icons, favicon
+public/                  Static assets – icons, favicon, sw.js (offline shell)
 ```
 
 ---
@@ -200,11 +200,15 @@ spinning forever.
 
 ## Local Storage Keys
 
-| Key               | Value                                                               |
-| ----------------- | ------------------------------------------------------------------- |
-| `theme`           | `"light"` \| `"dark"` \| `"system"`                                 |
-| `paddlerLevel`    | `"Beginner"` \| `"Improver"` \| `"Intermediate"` \| `"Independent"` |
-| `riverLevelRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`               |
+Canonical names live in `lib/storageKeys.ts`; cached payload keys are all
+prefixed `paddlecheck_` and omitted here.
+
+| Key                   | Value                                                               |
+| --------------------- | ------------------------------------------------------------------- |
+| `themeMode`           | `"light"` \| `"dark"` \| `"system"` (read/written by MUI)           |
+| `paddlerLevel`        | `"Beginner"` \| `"Improver"` \| `"Intermediate"` \| `"Independent"` |
+| `riverGraphTimeRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`               |
+| `autoSummarise`       | `"true"` \| `"false"` – auto-generate the AI summary on load        |
 
 ---
 

@@ -78,6 +78,12 @@ export const useKayakData = () => {
   // network, never a quietly-stale cache.
   const hasConditionsRef = useRef(false);
   const hasForecastRef = useRef(false);
+  // When the on-screen data was actually fetched upstream (ms epoch), so the
+  // focus/online listeners below can tell whether it's worth refetching.
+  const lastFetchedAtRef = useRef(0);
+  // Guards against overlapping fetches (e.g. regaining focus while the
+  // initial load is still in flight).
+  const fetchInFlightRef = useRef(false);
 
   useEffect(() => {
     setIsOffline(!navigator.onLine);
@@ -118,9 +124,14 @@ export const useKayakData = () => {
         }
       };
 
-      const hasCachedConditions = loadCached(
+      const hasCachedConditions = loadCached<KayakConditions>(
         STORAGE_KEYS.CONDITIONS,
-        setConditions
+        (value) => {
+          setConditions(value);
+          if (value?.lastUpdated) {
+            lastFetchedAtRef.current = new Date(value.lastUpdated).getTime();
+          }
+        }
       );
       if (hasCachedConditions) hasConditionsRef.current = true;
       const hasCachedForecast = loadCached(
@@ -147,6 +158,8 @@ export const useKayakData = () => {
   }, []);
 
   const fetchData = useCallback(async () => {
+    if (fetchInFlightRef.current) return;
+    fetchInFlightRef.current = true;
     let conditionsObj: KayakConditions | null = null;
     try {
       // Every online fetch shows the spinner - initial load, background
@@ -317,6 +330,7 @@ export const useKayakData = () => {
       setConditions(conditionsObj);
       setLoading(false);
       hasConditionsRef.current = true;
+      lastFetchedAtRef.current = new Date(fetchedAt).getTime();
 
       // Build 5-day forecast (today + 4 days ahead)
       const currentHour = getLondonHour();
@@ -530,6 +544,7 @@ export const useKayakData = () => {
             : "Failed to load conditions. Check your connection and tap refresh to try again."
       );
     } finally {
+      fetchInFlightRef.current = false;
       setLoading(false);
       setForecastLoading(false);
       setIsRefreshing(false);
@@ -538,6 +553,25 @@ export const useKayakData = () => {
 
   useEffect(() => {
     fetchData();
+  }, [fetchData]);
+
+  // Self-heal long-lived tabs: a phone re-opening the app (or regaining
+  // signal) with data past the stale threshold refetches immediately instead
+  // of showing the stale banner until someone taps refresh manually.
+  useEffect(() => {
+    const refetchIfStale = () => {
+      if (document.visibilityState !== "visible") return;
+      if (!navigator.onLine) return;
+      const isStale =
+        Date.now() - lastFetchedAtRef.current > DATA_STALE_THRESHOLD_MS;
+      if (isStale) fetchData();
+    };
+    document.addEventListener("visibilitychange", refetchIfStale);
+    window.addEventListener("online", refetchIfStale);
+    return () => {
+      document.removeEventListener("visibilitychange", refetchIfStale);
+      window.removeEventListener("online", refetchIfStale);
+    };
   }, [fetchData]);
 
   return {

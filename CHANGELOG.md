@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.27.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.26.0...paddlecheck-v1.27.0) (2026-08-11)
+
+
+### Features
+
+* offline support, cached AI summaries, and faster first paint ([18f8b92](https://github.com/dylanr97/Paddlecheck/commit/18f8b9241a223b40f6103efed3c27097cf0dffcc))
+
+
+### Bug Fixes
+
+* address code review and UI/UX findings ([c82e6a0](https://github.com/dylanr97/Paddlecheck/commit/c82e6a0a1ce23fc62bc298952db918fa58706a52))
+* reorder river graph tabs, shorten forecast run-up, force 24h labels ([5e53383](https://github.com/dylanr97/Paddlecheck/commit/5e5338345d3f0cd018d43cea1a4e67e5013afcfd))
+* restore per-scheme colours in traffic light and charts ([9bac162](https://github.com/dylanr97/Paddlecheck/commit/9bac162056c069fac0ce3307599255b513e26bf6)), closes [#FFF3E0](https://github.com/dylanr97/Paddlecheck/issues/FFF3E0) [#005AC1](https://github.com/dylanr97/Paddlecheck/issues/005AC1) [#ADC6](https://github.com/dylanr97/Paddlecheck/issues/ADC6) [#2A4F73](https://github.com/dylanr97/Paddlecheck/issues/2A4F73)
+
+
+### Code Refactoring
+
+* remove the chart source disclaimer captions ([de9c343](https://github.com/dylanr97/Paddlecheck/commit/de9c343d3a3578fe8faa889b80330f62437973b2))
+* remove the NEXT_PUBLIC_FEATURE_AI_SUMMARY feature flag ([f5bd28f](https://github.com/dylanr97/Paddlecheck/commit/f5bd28ff914533d9c2877848f74e826c23ddba33))
+
 ## [1.26.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.25.0...paddlecheck-v1.26.0) (2026-08-11)
 
 ### Features

@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
-import { buildHourlyForecastText, buildNextDaytimeOutlook } from "@/lib/forecast";
+import {
+  buildHourlyForecastText,
+  buildNextDaytimeOutlook,
+} from "@/lib/forecast";
 import { getLondonHHMM, hhmmOfISO } from "@/lib/time";
 import { isWarningOnDay } from "@/lib/warnings";
 
@@ -23,7 +26,8 @@ async function streamBriefing(
     : null;
   // Derive dark from sunrise/sunset times rather than conditions.dark, which can be stale
   const currentlyDark = todayForecast
-    ? (todaySunrise !== null && currentTime < todaySunrise) || (todaySunset !== null && currentTime >= todaySunset)
+    ? (todaySunrise !== null && currentTime < todaySunrise) ||
+      (todaySunset !== null && currentTime >= todaySunset)
     : (conditions.dark ?? false);
 
   // Find the target day being summarized
@@ -44,7 +48,8 @@ async function streamBriefing(
   // (today, or the next daylight day if it's currently dark) - a warning for
   // later in the week shouldn't show up in "today's" briefing.
   const relevantWarnings = targetDay
-    ? conditions.warnings?.filter((w) => isWarningOnDay(w, targetDay.date)) || []
+    ? conditions.warnings?.filter((w) => isWarningOnDay(w, targetDay.date)) ||
+      []
     : [];
 
   const conditionsWithRelevantWarnings = {

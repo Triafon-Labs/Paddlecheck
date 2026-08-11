@@ -97,7 +97,10 @@ export const getBewdleyBasedWorcesterLevel = (
     let minDiff = Infinity;
     for (const pt of allPoints) {
       const diff = Math.abs(pt.timestamp.getTime() - target.getTime());
-      if (diff < minDiff) { minDiff = diff; closest = pt; }
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = pt;
+      }
     }
     return closest && minDiff <= 45 * 60 * 1000 ? closest : null;
   };

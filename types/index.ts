@@ -1,10 +1,5 @@
 export type Status =
-  | "Unknown"
-  | "Light Green"
-  | "Dark Green"
-  | "Amber"
-  | "Red"
-  | "No Paddling";
+  "Unknown" | "Light Green" | "Dark Green" | "Amber" | "Red" | "No Paddling";
 
 export interface KayakConditions {
   riverLevel?: number;
@@ -150,10 +145,7 @@ export interface DayForecast {
 }
 
 export type PaddlerType =
-  | "Beginner"
-  | "Improver"
-  | "Intermediate"
-  | "Independent";
+  "Beginner" | "Improver" | "Intermediate" | "Independent";
 
 export type PaddlingStatusValue = "Yes" | "No" | "Discretion" | "Warning";
 

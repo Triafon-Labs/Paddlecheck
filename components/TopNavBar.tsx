@@ -8,6 +8,7 @@ import {
   Box,
   Snackbar,
   Typography,
+  Collapse,
 } from "@mui/material";
 import Image from "next/image";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -18,7 +19,11 @@ import { useKayakContext } from "@/lib/KayakDataContext";
 import { degreesToCompass } from "@/lib/weather";
 import { ragStatus } from "@/lib/rag";
 import { THRESHOLDS, DATA_STALE_THRESHOLD_MS } from "@/lib/config";
-import { formatRiverLevel, formatTemperature, formatWindSpeed } from "@/lib/units";
+import {
+  formatRiverLevel,
+  formatTemperature,
+  formatWindSpeed,
+} from "@/lib/units";
 import {
   buildBestPaddlingTimes,
   buildNextDaytimeOutlook,
@@ -124,7 +129,9 @@ const buildShareText = (
       // Format tomorrow's times directly as "🟢 *Best conditions tomorrow: ...*" or "🟢 *Best conditions later today: ...*"
       // instead of mentioning it is currently dark and outputting raw weather summary text.
       lines.push("");
-      lines.push(`🟢 *Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}*`);
+      lines.push(
+        `🟢 *Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}*`
+      );
     }
   }
 
@@ -139,14 +146,8 @@ const isDataStale = (lastUpdated: string | undefined): boolean => {
 const TopNavBar = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const {
-    refetch,
-    conditions,
-    forecastDays,
-    isOffline,
-    error,
-    isRefreshing,
-  } = useKayakContext();
+  const { refetch, conditions, forecastDays, isOffline, error, isRefreshing } =
+    useKayakContext();
 
   const isOfflineError =
     error === "Offline – no cached data (reconnect and refresh)";
@@ -199,26 +200,32 @@ const TopNavBar = () => {
 
   return (
     <>
-      {isOffline && (
+      <Collapse in={isOffline} unmountOnExit>
         <StatusBanner severity="warning">
-          Offline{freshnessText ? ` – showing data from ${freshnessText}` : " – showing cached data"}
+          Offline
+          {freshnessText
+            ? ` – showing data from ${freshnessText}`
+            : " – showing cached data"}
         </StatusBanner>
-      )}
+      </Collapse>
       {/* A stale cache is normally self-healed by a live re-fetch on load (see
           useKayakData), so this only fires once that attempt has actually
           finished and genuinely couldn't get fresh data - not while one may
           still be in flight. */}
-      {!isOffline && !isOfflineError && !isRefreshing && isStale && (
+      <Collapse
+        in={!isOffline && !isOfflineError && !isRefreshing && isStale}
+        unmountOnExit
+      >
         <StatusBanner severity="warning">
           Live update failed
           {freshnessText ? ` – showing data from ${freshnessText}` : ""}
         </StatusBanner>
-      )}
-      {isOfflineError && (
+      </Collapse>
+      <Collapse in={isOfflineError} unmountOnExit>
         <StatusBanner severity="error">
           Offline – no cached data (reconnect and refresh)
         </StatusBanner>
-      )}
+      </Collapse>
       <AppBar position="static" color="inherit" elevation={0}>
         <Toolbar sx={{ justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -258,7 +265,15 @@ const TopNavBar = () => {
               <SettingsIcon />
             </IconButton>
             <IconButton onClick={() => refetch()} aria-label="refresh">
-              <RefreshIcon />
+              <RefreshIcon
+                sx={{
+                  animation: isRefreshing ? "spin 1s linear infinite" : "none",
+                  "@keyframes spin": {
+                    from: { transform: "rotate(0deg)" },
+                    to: { transform: "rotate(360deg)" },
+                  },
+                }}
+              />
             </IconButton>
           </Box>
         </Toolbar>

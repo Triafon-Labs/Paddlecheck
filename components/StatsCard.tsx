@@ -8,6 +8,7 @@ import {
   Box,
   Tooltip,
   Skeleton,
+  Grow,
 } from "@mui/material";
 import Thermostat from "@mui/icons-material/Thermostat";
 import Visibility from "@mui/icons-material/Visibility";
@@ -20,8 +21,13 @@ import { ChartDataPoint, KayakConditions } from "@/types";
 import { degreesToCompass } from "@/lib/weather";
 import { THRESHOLDS } from "@/lib/config";
 import { ragStatus, LEVEL_DESCRIPTIONS } from "@/lib/rag";
-import { formatRiverLevel, formatTemperature, formatWindSpeed } from "@/lib/units";
+import {
+  formatRiverLevel,
+  formatTemperature,
+  formatWindSpeed,
+} from "@/lib/units";
 import { useNowTicking, formatDataAge } from "@/lib/time";
+import { m3Easing } from "@/lib/m3-palette";
 
 interface StatsCardProps {
   conditions: KayakConditions | null;
@@ -127,7 +133,12 @@ const RiverLevelSection: React.FC<{
   } else {
     rows = [
       ...above.map((l) => ({ ...l, current: false, isReading: false })),
-      { level: riverLevel, desc: "Current level", current: true, isReading: true },
+      {
+        level: riverLevel,
+        desc: "Current level",
+        current: true,
+        isReading: true,
+      },
       ...below.map((l) => ({ ...l, current: false, isReading: false })),
     ];
   }
@@ -151,7 +162,9 @@ const RiverLevelSection: React.FC<{
                 sx={{ display: "inline-flex", alignItems: "center", ml: 0.5 }}
               >
                 🚦
-                <ArrowUpward sx={{ fontSize: "inherit", color: "error.main" }} />
+                <ArrowUpward
+                  sx={{ fontSize: "inherit", color: "error.main" }}
+                />
               </Box>
             )}
           </Typography>
@@ -234,7 +247,9 @@ const RiverLevelSection: React.FC<{
                   height: row.current ? 12 : 8,
                   borderRadius: "50%",
                   backgroundColor: row.current ? markerColor : "text.disabled",
-                  boxShadow: row.current ? `0 0 0 3px ${markerColor}33` : "none",
+                  boxShadow: row.current
+                    ? `0 0 0 3px ${markerColor}33`
+                    : "none",
                   zIndex: 1,
                 }}
               />
@@ -257,7 +272,11 @@ const RiverLevelSection: React.FC<{
                   <Typography
                     component="span"
                     variant="caption"
-                    sx={{ color: "text.secondary", fontStyle: "normal", ml: 0.5 }}
+                    sx={{
+                      color: "text.secondary",
+                      fontStyle: "normal",
+                      ml: 0.5,
+                    }}
                   >
                     ({dataAgeLabel})
                   </Typography>
@@ -312,8 +331,18 @@ const StatsCard: React.FC<StatsCardProps> = ({
                 sx={{ mr: 1.5 }}
               />
               <Box>
-                <Skeleton variant="text" width={80} height={16} animation="wave" />
-                <Skeleton variant="text" width={60} height={24} animation="wave" />
+                <Skeleton
+                  variant="text"
+                  width={80}
+                  height={16}
+                  animation="wave"
+                />
+                <Skeleton
+                  variant="text"
+                  width={60}
+                  height={24}
+                  animation="wave"
+                />
               </Box>
             </Box>
             <Box sx={{ pl: "44px" }}>
@@ -333,7 +362,10 @@ const StatsCard: React.FC<StatsCardProps> = ({
               ))}
             </Box>
             {Array.from({ length: 3 }).map((_, i) => (
-              <Box key={i} sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+              <Box
+                key={i}
+                sx={{ display: "flex", alignItems: "center", mb: 2 }}
+              >
                 <Skeleton
                   variant="circular"
                   width={24}
@@ -342,8 +374,18 @@ const StatsCard: React.FC<StatsCardProps> = ({
                   sx={{ mr: 1.5 }}
                 />
                 <Box>
-                  <Skeleton variant="text" width={90} height={16} animation="wave" />
-                  <Skeleton variant="text" width={70} height={24} animation="wave" />
+                  <Skeleton
+                    variant="text"
+                    width={90}
+                    height={16}
+                    animation="wave"
+                  />
+                  <Skeleton
+                    variant="text"
+                    width={70}
+                    height={24}
+                    animation="wave"
+                  />
                 </Box>
               </Box>
             ))}
@@ -363,55 +405,57 @@ const StatsCard: React.FC<StatsCardProps> = ({
         <Typography variant="h5" component="div" gutterBottom>
           Detailed Stats
         </Typography>
-        <Box sx={{ mt: 1 }}>
-          <RiverLevelSection
-            conditions={conditions}
-            dataAgeLabel={dataAgeLabel}
-            isInfluencing={reasons.some((r) => r.includes("river level"))}
-          />
-          <StatItem
-            icon={<Thermostat />}
-            label="Temperature"
-            value={
-              conditions.temperature !== undefined
-                ? formatTemperature(conditions.temperature)
-                : "N/A"
-            }
-            isInfluencing={reasons.some((r) => r.includes("temperature"))}
-          />
-          <StatItem
-            icon={<Air />}
-            label="Wind Speed"
-            value={
-              conditions.windSpeed !== undefined
-                ? `${formatWindSpeed(conditions.windSpeed)}${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`
-                : "N/A"
-            }
-            isInfluencing={reasons.includes("High winds")}
-          />
-          <StatItem
-            icon={<Visibility />}
-            label="Visibility"
-            value={conditions.visibilityDescription}
-            isInfluencing={reasons.includes("Foggy")}
-          />
-          {conditions.rain && (
-            <StatItem
-              icon={<WaterDrop />}
-              label="Rain"
-              value={conditions.weatherDescription || "Yes"}
-              isInfluencing={reasons.includes("Rain")}
+        <Grow in appear easing={{ enter: m3Easing.decelerate }}>
+          <Box sx={{ mt: 1 }}>
+            <RiverLevelSection
+              conditions={conditions}
+              dataAgeLabel={dataAgeLabel}
+              isInfluencing={reasons.some((r) => r.includes("river level"))}
             />
-          )}
-          {conditions.dark && (
             <StatItem
-              icon={<NightsStay />}
-              label="Dark"
-              value="Yes"
-              isInfluencing={reasons.includes("Dark")}
+              icon={<Thermostat />}
+              label="Temperature"
+              value={
+                conditions.temperature !== undefined
+                  ? formatTemperature(conditions.temperature)
+                  : "N/A"
+              }
+              isInfluencing={reasons.some((r) => r.includes("temperature"))}
             />
-          )}
-        </Box>
+            <StatItem
+              icon={<Air />}
+              label="Wind Speed"
+              value={
+                conditions.windSpeed !== undefined
+                  ? `${formatWindSpeed(conditions.windSpeed)}${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`
+                  : "N/A"
+              }
+              isInfluencing={reasons.includes("High winds")}
+            />
+            <StatItem
+              icon={<Visibility />}
+              label="Visibility"
+              value={conditions.visibilityDescription}
+              isInfluencing={reasons.includes("Foggy")}
+            />
+            {conditions.rain && (
+              <StatItem
+                icon={<WaterDrop />}
+                label="Rain"
+                value={conditions.weatherDescription || "Yes"}
+                isInfluencing={reasons.includes("Rain")}
+              />
+            )}
+            {conditions.dark && (
+              <StatItem
+                icon={<NightsStay />}
+                label="Dark"
+                value="Yes"
+                isInfluencing={reasons.includes("Dark")}
+              />
+            )}
+          </Box>
+        </Grow>
       </CardContent>
     </Card>
   );

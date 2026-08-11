@@ -7,6 +7,8 @@ import {
   Typography,
   Box,
   Skeleton,
+  Grow,
+  Collapse,
 } from "@mui/material";
 import HelpOutlined from "@mui/icons-material/HelpOutlined";
 import Air from "@mui/icons-material/Air";
@@ -17,6 +19,7 @@ import TrafficLight from "./TrafficLight";
 import InfoPanel from "./InfoPanel";
 import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
 import { formatWindGust } from "@/lib/units";
+import { m3Easing } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
 import WeatherWarnings from "./WeatherWarnings";
 
@@ -27,9 +30,9 @@ interface StatusCardProps {
 
 // Mirrors the filtering in TrafficLight.tsx so the skeleton renders the same
 // number of placeholder circles as the real traffic light.
-const TRAFFIC_LIGHT_COUNT = (Object.keys(ragStatus) as (keyof typeof ragStatus)[]).filter(
-  (s) => s !== "Unknown" && s !== "No Paddling"
-).length;
+const TRAFFIC_LIGHT_COUNT = (
+  Object.keys(ragStatus) as (keyof typeof ragStatus)[]
+).filter((s) => s !== "Unknown" && s !== "No Paddling").length;
 
 const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
   const renderContent = () => {
@@ -99,114 +102,136 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
       const NoPaddlingIcon = noPaddlingStatusInfo?.icon;
 
       return (
-        <>
-          {isNoPaddling && NoPaddlingIcon ? (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                textAlign: "center",
-                mb: 2,
-                p: 2,
-                borderRadius: 1,
-                backgroundColor: noPaddlingStatusInfo.backgroundColor,
-                border: `1px solid ${noPaddlingStatusInfo.color}`,
-              }}
-            >
-              <NoPaddlingIcon
-                sx={{ fontSize: 40, color: noPaddlingStatusInfo.color, mb: 1 }}
-              />
-              <Typography
-                variant="h6"
-                sx={{ color: noPaddlingStatusInfo.color, mb: 1 }}
-              >
-                No Paddling
-              </Typography>
-            </Box>
-          ) : (
-            <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
-              <TrafficLight status={conditions.overallStatus} />
-            </Box>
-          )}
-
-          {conditions.reasons && conditions.reasons.length > 0 && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary">
-                Contributing Factors
-              </Typography>
+        <Grow in appear easing={{ enter: m3Easing.decelerate }}>
+          <Box>
+            {isNoPaddling && NoPaddlingIcon ? (
               <Box
                 sx={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, 1fr)",
-                  gap: 1,
-                  mt: 1,
-                  "& > *:last-child:nth-child(odd)": {
-                    gridColumn: "1 / -1",
-                  },
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textAlign: "center",
+                  mb: 2,
+                  p: 2,
+                  borderRadius: 1,
+                  backgroundColor: noPaddlingStatusInfo.backgroundColor,
+                  border: `1px solid ${noPaddlingStatusInfo.color}`,
                 }}
               >
-                {conditions.reasons.map((reason, index) => {
-                  const Icon = reasonIcons[reason] ?? HelpOutlined;
-                  const label = describeReason(reason, {
-                    temperature: conditions.temperature,
-                    windSpeed: conditions.windSpeed,
-                  });
-                  return (
-                    <InfoPanel key={index}>
-                      <Icon fontSize="small" sx={{ color: "primary.main" }} />
-                      <Typography variant="body2">{label}</Typography>
-                    </InfoPanel>
-                  );
-                })}
+                <NoPaddlingIcon
+                  sx={{
+                    fontSize: 40,
+                    color: noPaddlingStatusInfo.color,
+                    mb: 1,
+                  }}
+                />
+                <Typography
+                  variant="h6"
+                  sx={{ color: noPaddlingStatusInfo.color, mb: 1 }}
+                >
+                  No Paddling
+                </Typography>
               </Box>
-            </Box>
-          )}
-          {(conditions.gustStatus || conditions.rainWhileWarm) && (
+            ) : (
+              <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+                <TrafficLight status={conditions.overallStatus} />
+              </Box>
+            )}
+
+            <Collapse
+              in={!!conditions.reasons && conditions.reasons.length > 0}
+              unmountOnExit
+            >
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Contributing Factors
+                </Typography>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, 1fr)",
+                    gap: 1,
+                    mt: 1,
+                    "& > *:last-child:nth-child(odd)": {
+                      gridColumn: "1 / -1",
+                    },
+                  }}
+                >
+                  {conditions.reasons?.map((reason, index) => {
+                    const Icon = reasonIcons[reason] ?? HelpOutlined;
+                    const label = describeReason(reason, {
+                      temperature: conditions.temperature,
+                      windSpeed: conditions.windSpeed,
+                    });
+                    return (
+                      <InfoPanel key={index}>
+                        <Icon fontSize="small" sx={{ color: "primary.main" }} />
+                        <Typography variant="body2">{label}</Typography>
+                      </InfoPanel>
+                    );
+                  })}
+                </Box>
+              </Box>
+            </Collapse>
+            <Collapse
+              in={!!(conditions.gustStatus || conditions.rainWhileWarm)}
+              unmountOnExit
+            >
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Be Aware
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1,
+                    mt: 1,
+                  }}
+                >
+                  {conditions.gustStatus && (
+                    <InfoPanel>
+                      <Air fontSize="small" sx={{ color: "primary.main" }} />
+                      <Typography variant="body2">
+                        Gusts up to {formatWindGust(conditions.windGust!)}
+                      </Typography>
+                      <FiberManualRecord
+                        titleAccess={`Would be ${conditions.gustStatus} if sustained`}
+                        sx={{
+                          fontSize: 8,
+                          color: ragStatus[conditions.gustStatus].color,
+                          flexShrink: 0,
+                          ml: "auto",
+                        }}
+                      />
+                    </InfoPanel>
+                  )}
+                  {conditions.rainWhileWarm && (
+                    <InfoPanel>
+                      <WaterDrop
+                        fontSize="small"
+                        sx={{ color: "primary.main" }}
+                      />
+                      <Typography variant="body2">
+                        {conditions.weatherDescription || "Rain"}
+                      </Typography>
+                    </InfoPanel>
+                  )}
+                </Box>
+              </Box>
+            </Collapse>
+            <WeatherWarnings warnings={conditions.warnings} />
             <Box sx={{ mt: 2 }}>
               <Typography variant="subtitle2" color="text.secondary">
-                Be Aware
+                AI Overview
               </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}>
-                {conditions.gustStatus && (
-                  <InfoPanel>
-                    <Air fontSize="small" sx={{ color: "primary.main" }} />
-                    <Typography variant="body2">
-                      Gusts up to {formatWindGust(conditions.windGust!)}
-                    </Typography>
-                    <FiberManualRecord
-                      titleAccess={`Would be ${conditions.gustStatus} if sustained`}
-                      sx={{
-                        fontSize: 8,
-                        color: ragStatus[conditions.gustStatus].color,
-                        flexShrink: 0,
-                        ml: "auto",
-                      }}
-                    />
-                  </InfoPanel>
-                )}
-                {conditions.rainWhileWarm && (
-                  <InfoPanel>
-                    <WaterDrop fontSize="small" sx={{ color: "primary.main" }} />
-                    <Typography variant="body2">
-                      {conditions.weatherDescription || "Rain"}
-                    </Typography>
-                  </InfoPanel>
-                )}
+              <Box sx={{ mt: 1 }}>
+                <ConditionsBriefing conditions={conditions} />
               </Box>
             </Box>
-          )}
-          <WeatherWarnings warnings={conditions.warnings} />
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle2" color="text.secondary">
-              AI Overview
-            </Typography>
-            <Box sx={{ mt: 1 }}>
-              <ConditionsBriefing conditions={conditions} />
-            </Box>
           </Box>
-        </>
+        </Grow>
       );
     }
     return (

@@ -14,6 +14,8 @@ import {
   Divider,
   Link,
   Stack,
+  Grow,
+  Collapse,
 } from "@mui/material";
 import {
   ComposedChart,
@@ -40,6 +42,7 @@ import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { formatMetTime } from "@/lib/weather";
 import { isWarningOnDay } from "@/lib/warnings";
+import { m3Easing } from "@/lib/m3-palette";
 
 interface ForecastRagGraphProps {
   forecastDays: DayForecast[] | null;
@@ -262,12 +265,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
       currentDay?.date ? isWarningOnDay(w, currentDay.date) : false
     ) || [];
 
-  const renderChart = () => {
-    if (loading) {
-      return (
-        <Skeleton variant="rounded" width="100%" height={200} animation="wave" />
-      );
-    }
+  const renderChartBody = () => {
     if (data && data.length > 0) {
       const sunriseHour = sunrise
         ? parseInt(sunrise.split("T")[1].split(":")[0], 10)
@@ -280,7 +278,8 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         const scaled = d.forecastLevel / 6.0;
         const isBewdley = d.forecastSource === "bewdley";
         const prevSource = i > 0 ? data[i - 1].forecastSource : null;
-        const nextSource = i < data.length - 1 ? data[i + 1].forecastSource : null;
+        const nextSource =
+          i < data.length - 1 ? data[i + 1].forecastSource : null;
         const inBewdleyLine = isBewdley || prevSource === "bewdley";
         const inLinearLine = !isBewdley || nextSource === "linear";
         return {
@@ -378,6 +377,24 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
     );
   };
 
+  const renderChart = () => {
+    if (loading) {
+      return (
+        <Skeleton
+          variant="rounded"
+          width="100%"
+          height={200}
+          animation="wave"
+        />
+      );
+    }
+    return (
+      <Grow in appear easing={{ enter: m3Easing.decelerate }}>
+        <Box>{renderChartBody()}</Box>
+      </Grow>
+    );
+  };
+
   return (
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
@@ -397,17 +414,22 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
             ))}
           </Box>
         ) : (
-          forecastDays && forecastDays.length > 0 && (
+          forecastDays &&
+          forecastDays.length > 0 && (
             <Box sx={{ pt: 2, pb: 2 }}>
               <ToggleButtonGroup
                 value={selectedDay}
                 exclusive
-                onChange={(_, val) => { if (val !== null) setSelectedDay(val); }}
+                onChange={(_, val) => {
+                  if (val !== null) setSelectedDay(val);
+                }}
                 fullWidth
                 size="small"
               >
                 {forecastDays.map((day, i) => (
-                  <ToggleButton key={i} value={i}>{day.label}</ToggleButton>
+                  <ToggleButton key={i} value={i}>
+                    {day.label}
+                  </ToggleButton>
                 ))}
               </ToggleButtonGroup>
             </Box>
@@ -415,37 +437,61 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         )}
 
         {/* Daily warnings display – moved above chart */}
-        {dailyWarnings.length > 0 && (
+        <Collapse in={dailyWarnings.length > 0} unmountOnExit>
           <Box sx={{ mb: 2 }}>
             <Stack spacing={1}>
               {Object.entries(
-                dailyWarnings.reduce((acc, w) => {
-                  if (!acc[w.headline]) acc[w.headline] = [];
-                  acc[w.headline].push(w);
-                  return acc;
-                }, {} as Record<string, WeatherWarning[]>)
+                dailyWarnings.reduce(
+                  (acc, w) => {
+                    if (!acc[w.headline]) acc[w.headline] = [];
+                    acc[w.headline].push(w);
+                    return acc;
+                  },
+                  {} as Record<string, WeatherWarning[]>
+                )
               ).map(([headline, warnings], i) => {
                 const firstWarning = warnings[0];
                 const color =
                   firstWarning.severity === "Red"
                     ? WARNING_COLORS.Red
                     : firstWarning.severity === "Amber"
-                    ? WARNING_COLORS.Amber
-                    : WARNING_COLORS.Yellow;
+                      ? WARNING_COLORS.Amber
+                      : WARNING_COLORS.Yellow;
                 return (
                   <Box key={i}>
-                    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}
+                    >
                       <WarningIcon sx={{ color, fontSize: 16, mt: 0.2 }} />
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="caption" sx={{ fontWeight: "bold", display: "block" }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ fontWeight: "bold", display: "block" }}
+                        >
                           {headline}
                         </Typography>
                         {warnings.map((w, wIdx) => (
-                          <Box key={wIdx} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <Typography variant="caption" color="text.secondary">
-                              {formatMetTime(w.validFrom)}–{formatMetTime(w.validTo)}
+                          <Box
+                            key={wIdx}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {formatMetTime(w.validFrom)}–
+                              {formatMetTime(w.validTo)}
                             </Typography>
-                            <Link href={w.link} target="_blank" rel="noopener" sx={{ fontSize: "0.7rem", fontWeight: "bold" }}>
+                            <Link
+                              href={w.link}
+                              target="_blank"
+                              rel="noopener"
+                              sx={{ fontSize: "0.7rem", fontWeight: "bold" }}
+                            >
                               UK Met Office
                             </Link>
                           </Box>
@@ -458,7 +504,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
             </Stack>
             <Divider sx={{ mt: 1.5 }} />
           </Box>
-        )}
+        </Collapse>
 
         {renderChart()}
 

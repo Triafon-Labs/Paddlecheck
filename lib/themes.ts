@@ -12,6 +12,16 @@ import {
   m3Duration,
 } from "./m3-palette";
 
+// Opts the MUI types into their CSS-theme-variables branch, which is what
+// makes `theme.vars` and the provider's `forceThemeRerender` prop visible to
+// TypeScript. Without it the types describe the non-variables theme even
+// though `cssVariables` is set below.
+declare module "@mui/material/styles" {
+  interface CssThemeVariables {
+    enabled: true;
+  }
+}
+
 // M3 type scale mapped to MUI variants, exploiting Roboto Flex variable axes:
 //   wght (weight 100–900), wdth (width 25–151), opsz (optical size 8–144)
 const m3Typography: ThemeOptions["typography"] = {

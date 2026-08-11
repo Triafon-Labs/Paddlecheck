@@ -1,6 +1,7 @@
 import Groq from "groq-sdk";
 import { KayakConditions } from "@/types";
 import { formatMetTime, degreesToCompass } from "@/lib/weather";
+import { londonNow, isWarningActiveNow } from "@/lib/warnings";
 import {
   THRESHOLDS,
   VISIBILITY_DESCRIPTIONS,
@@ -35,7 +36,7 @@ You are writing a single-sentence summary of river and weather conditions for me
 
 Write one to three short, natural sentences - the fewer the better - summarising conditions across the period the data covers: today's remaining daylight hours, or if it's currently dark, the next available daylight window (later today or tomorrow, stated plainly, e.g. "Tomorrow looks..."). Ground it in conditions at the start of that period (or right now, if summarising today), then say how they trend if they change - e.g. "breezy at the moment, easing off later", "the river is around 0.80 m, rising towards 1.50 m by evening", or "temperatures reaching up to 22.1°C by mid-afternoon" (a single peak figure, not a range). Pick the one or two most notable factors (wind, rain, river level, temperature) and genuinely leave the others out - every figure is already shown elsewhere in the app, so nothing is lost. If a second point earns its place, give it its own short sentence rather than chaining clauses with commas or semicolons. Don't enumerate individual hours. When you quote a figure, keep the units as they appear in the data, and don't add a space between a number and °C.
 
-Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising.
+Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising. Each warning is labelled "(currently active)" or "(upcoming - not yet in force)" - trust that label rather than working out timing from the dates yourself, and if it's upcoming, make that clear (e.g. "a yellow wind warning is in force from Thursday morning") rather than implying it applies right now.
 
 Don't pass verdicts on whether or where to paddle ("a great day for a paddle") - the app's status rating covers that.
 
@@ -65,12 +66,15 @@ function buildConditionsParts(req: SummaryRequest): string {
       : null;
   const windDir = compass ? (COMPASS_WORDS[compass] ?? compass) : null;
 
+  const now = londonNow();
   const weatherWarnings = conditions.warnings?.length
     ? `Met Office weather warnings for Worcestershire:\n${conditions.warnings
-        .map(
-          (w) =>
-            `- ${w.severity} ${w.type}: ${w.headline}. Valid: ${formatMetTime(w.validFrom)} to ${formatMetTime(w.validTo)}`
-        )
+        .map((w) => {
+          const status = isWarningActiveNow(w, now)
+            ? "currently active"
+            : "upcoming - not yet in force";
+          return `- ${w.severity} ${w.type} (${status}): ${w.headline}. Valid: ${formatMetTime(w.validFrom)} to ${formatMetTime(w.validTo)}`;
+        })
         .join("\n")}`
     : null;
 

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.28.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.27.0...paddlecheck-v1.28.0) (2026-08-11)
+
+
+### Features
+
+* slide the active pill between segmented buttons ([d38f348](https://github.com/dylanr97/Paddlecheck/commit/d38f34842dc437f800909ce58c39f21de165965b))
+
+
+### Bug Fixes
+
+* switch sliding pill from left/width to a composited transform ([97fafa3](https://github.com/dylanr97/Paddlecheck/commit/97fafa35daea04c1313cf46a3cc7a8e6cb1d6e0a))
+
 ## [1.27.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.26.0...paddlecheck-v1.27.0) (2026-08-11)
 
 

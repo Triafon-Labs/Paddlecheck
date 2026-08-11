@@ -20,6 +20,7 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   Divider,
+  Grow,
 } from "@mui/material";
 import {
   ComposedChart,
@@ -43,6 +44,7 @@ import { useNowTicking, formatDataAge } from "@/lib/time";
 import { TIME_PERIODS } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
+import { m3Easing } from "@/lib/m3-palette";
 
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
@@ -63,7 +65,8 @@ const ChangeIndicator: React.FC<{
   // Round first so the displayed value and the arrow direction always agree,
   // and so a value that rounds to zero (e.g. -0.001) never renders as "-0.00".
   const rounded = change !== null ? Number(change.toFixed(2)) : null;
-  const changeStr = rounded !== null ? formatRiverLevel(Math.abs(rounded)) : null;
+  const changeStr =
+    rounded !== null ? formatRiverLevel(Math.abs(rounded)) : null;
   const isFlat = rounded !== null && rounded === 0;
 
   return (
@@ -84,7 +87,12 @@ const ChangeIndicator: React.FC<{
       >
         {loading ? (
           <>
-            <Skeleton variant="circular" width={24} height={24} animation="wave" />
+            <Skeleton
+              variant="circular"
+              width={24}
+              height={24}
+              animation="wave"
+            />
             <Skeleton
               variant="text"
               width={70}
@@ -96,7 +104,11 @@ const ChangeIndicator: React.FC<{
         ) : (
           <>
             {icon}
-            <Typography variant="subtitle2" color="text.secondary" sx={{ ml: 0.5 }}>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              sx={{ ml: 0.5 }}
+            >
               {period}
             </Typography>
           </>
@@ -177,7 +189,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
 
   const dataAgeLabel = useMemo(() => {
     if (!data || data.length === 0) return null;
-    return formatDataAge(new Date(data[data.length - 1].dateTime).getTime(), now);
+    return formatDataAge(
+      new Date(data[data.length - 1].dateTime).getTime(),
+      now
+    );
   }, [data, now]);
 
   const filteredData = useMemo(() => {
@@ -204,7 +219,11 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
 
   // Map filteredData to numeric timestamps so the XAxis can use type="number"
   const filteredDataWithTs = useMemo(
-    () => filteredData?.map((d) => ({ ts: new Date(d.dateTime).getTime(), level: d.level })) ?? null,
+    () =>
+      filteredData?.map((d) => ({
+        ts: new Date(d.dateTime).getTime(),
+        level: d.level,
+      })) ?? null,
     [filteredData]
   );
 
@@ -225,11 +244,15 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     if (intervalMs >= TIME_PERIODS.ONE_HOUR) {
       const intervalHours = intervalMs / TIME_PERIODS.ONE_HOUR;
       cursor.setMinutes(0, 0, 0);
-      cursor.setHours(Math.ceil(cursor.getHours() / intervalHours) * intervalHours);
+      cursor.setHours(
+        Math.ceil(cursor.getHours() / intervalHours) * intervalHours
+      );
     } else {
       const intervalMins = intervalMs / (60 * 1000);
       cursor.setSeconds(0, 0);
-      cursor.setMinutes(Math.ceil(cursor.getMinutes() / intervalMins) * intervalMins);
+      cursor.setMinutes(
+        Math.ceil(cursor.getMinutes() / intervalMins) * intervalMins
+      );
     }
     while (cursor.getTime() <= end) {
       ticks.push(cursor.getTime());
@@ -241,10 +264,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   const historicalTicks = useMemo(() => {
     if (!filteredDataWithTs) return [];
     const intervalMs =
-      timeRange === "5d" ? TIME_PERIODS.TWENTY_FOUR_HOURS :
-      timeRange === "24h" ? TIME_PERIODS.SIX_HOURS :
-      timeRange === "8h"  ? TIME_PERIODS.TWO_HOURS :
-                            15 * 60 * 1000; // 1h → every 15 min
+      timeRange === "5d"
+        ? TIME_PERIODS.TWENTY_FOUR_HOURS
+        : timeRange === "24h"
+          ? TIME_PERIODS.SIX_HOURS
+          : timeRange === "8h"
+            ? TIME_PERIODS.TWO_HOURS
+            : 15 * 60 * 1000; // 1h → every 15 min
     return makeTicks(filteredDataWithTs, intervalMs);
   }, [filteredDataWithTs, timeRange]);
 
@@ -270,7 +296,11 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     }));
     if (last24h.length > 0) {
       const latest = last24h[last24h.length - 1];
-      future.unshift({ ts: new Date(latest.dateTime).getTime(), actual: null, forecasted: latest.level });
+      future.unshift({
+        ts: new Date(latest.dateTime).getTime(),
+        actual: null,
+        forecasted: latest.level,
+      });
     }
     return [...historical, ...future];
   }, [data, forecastData]);
@@ -292,7 +322,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
 
   // Forecasted change over the next 24 hours: forecasted level at now+24h minus current actual level
   const forecastedChange24h = useMemo(() => {
-    if (!forecastData || forecastData.length === 0 || !data || data.length === 0) return null;
+    if (
+      !forecastData ||
+      forecastData.length === 0 ||
+      !data ||
+      data.length === 0
+    )
+      return null;
     const currentLevel = data[data.length - 1].level;
     const latestTs = new Date(data[data.length - 1].dateTime).getTime();
     const target = new Date(latestTs + TIME_PERIODS.TWENTY_FOUR_HOURS);
@@ -300,7 +336,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     let minDiff = Infinity;
     for (const pt of forecastData) {
       const diff = Math.abs(new Date(pt.dateTime).getTime() - target.getTime());
-      if (diff < minDiff) { minDiff = diff; closest = pt; }
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = pt;
+      }
     }
     if (!closest) return null;
     return closest.level - currentLevel;
@@ -317,12 +356,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   const formatForecastTick = (ts: number) =>
     new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-  const renderContent = () => {
-    if (loading) {
-      return (
-        <Skeleton variant="rounded" width="100%" height={200} animation="wave" />
-      );
-    }
+  const renderChartBody = () => {
     if (timeRange === "forecast" && combinedForecastData) {
       const nowTs = new Date().getTime();
       return (
@@ -334,11 +368,22 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             >
               <defs>
                 <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0} />
+                  <stop
+                    offset="5%"
+                    stopColor={theme.palette.primary.main}
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor={theme.palette.primary.main}
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={theme.palette.divider}
+              />
               <XAxis
                 dataKey="ts"
                 type="number"
@@ -349,7 +394,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 tick={{ fontSize: 12 }}
                 interval={0}
               />
-              <YAxis stroke={theme.palette.text.secondary} domain={[0, forecastYDomainMax]} />
+              <YAxis
+                stroke={theme.palette.text.secondary}
+                domain={[0, forecastYDomainMax]}
+              />
               <Tooltip content={CustomTooltip} />
               <ReferenceLine
                 x={nowTs}
@@ -445,6 +493,24 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     );
   };
 
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <Skeleton
+          variant="rounded"
+          width="100%"
+          height={200}
+          animation="wave"
+        />
+      );
+    }
+    return (
+      <Grow in appear easing={{ enter: m3Easing.decelerate }}>
+        <Box>{renderChartBody()}</Box>
+      </Grow>
+    );
+  };
+
   return (
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
@@ -469,7 +535,12 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               <Typography
                 variant="caption"
                 color="text.disabled"
-                sx={{ display: "block", textAlign: "right", fontSize: "0.7rem", mt: 1 }}
+                sx={{
+                  display: "block",
+                  textAlign: "right",
+                  fontSize: "0.7rem",
+                  mt: 1,
+                }}
               >
                 As of {dataAgeLabel}
               </Typography>
@@ -485,7 +556,11 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               aria-label="time range"
               sx={{ mt: 0.5, mb: 2, width: "100%" }}
             >
-              <ToggleButton value="forecast" aria-label="forecast" sx={{ flex: 1 }}>
+              <ToggleButton
+                value="forecast"
+                aria-label="forecast"
+                sx={{ flex: 1 }}
+              >
                 <Typography variant="caption">Forecast</Typography>
               </ToggleButton>
               <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>

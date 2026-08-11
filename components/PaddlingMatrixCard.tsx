@@ -6,6 +6,7 @@ import {
   Box,
   Collapse,
   Skeleton,
+  Grow,
 } from "@mui/material";
 import {
   CheckCircleOutlined,
@@ -24,6 +25,7 @@ import {
 import { ragStatus } from "@/lib/rag";
 import { THRESHOLDS } from "@/lib/config";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
+import { m3Easing } from "@/lib/m3-palette";
 
 export const PADDLER_LEVEL_CHANGED_EVENT = "paddlecheck:paddler-level-changed";
 
@@ -125,7 +127,9 @@ const getPaddlingMatrix = (
       improver.details = ["No paddling."];
       if (riverLevel && riverLevel >= THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3) {
         intermediate.status = "No";
-        intermediate.details = ["No paddling above 10 steps from the car park."];
+        intermediate.details = [
+          "No paddling above 10 steps from the car park.",
+        ];
       } else {
         intermediate.status = "Discretion";
         intermediate.details = ["Coach's discretion only.", "PFD required."];
@@ -149,7 +153,8 @@ const getPaddlingMatrix = (
     if (paddler.status === "Yes") paddler.status = "Warning";
     const last = paddler.details[paddler.details.length - 1];
     if (last === "PFD required.") {
-      paddler.details[paddler.details.length - 1] = "PFD required – river is high.";
+      paddler.details[paddler.details.length - 1] =
+        "PFD required – river is high.";
     } else {
       paddler.details.push("PFD required – river is high.");
     }
@@ -238,7 +243,10 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      window.removeEventListener(PADDLER_LEVEL_CHANGED_EVENT, handleLevelChanged);
+      window.removeEventListener(
+        PADDLER_LEVEL_CHANGED_EVENT,
+        handleLevelChanged
+      );
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []); // Empty dependency array to run only on mount and unmount
@@ -254,7 +262,9 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
           Who Can Paddle
         </Typography>
         {loading ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}>
+          <Box
+            sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}
+          >
             {paddlerTypes.map((paddler) => {
               // Mirrors the open-state resolution below (read directly,
               // rather than from `open` state, since that's only populated
@@ -315,7 +325,12 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                         animation="wave"
                         sx={{ mb: 0.75 }}
                       />
-                      <Skeleton variant="text" width="70%" height={20} animation="wave" />
+                      <Skeleton
+                        variant="text"
+                        width="70%"
+                        height={20}
+                        animation="wave"
+                      />
                     </Box>
                   )}
                 </Box>
@@ -323,83 +338,99 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
             })}
           </Box>
         ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}>
-            {paddlerTypes.map((paddler) => {
-              const statusInfo = paddlingMatrix[paddler];
-              const ui = statusInfo ? STATUS_UI[statusInfo.status] : UNKNOWN_UI;
-              const StatusIcon = ui.icon;
-              const isOpen = open[paddler];
-              const isSelected = paddler === selectedLevel;
-              return (
-                <Box
-                  key={paddler}
-                  sx={{
-                    backgroundColor: "action.hover",
-                    borderRadius: 1.5,
-                    overflow: "hidden",
-                    border: "1.5px solid",
-                    borderColor: isSelected ? ui.color : "transparent",
-                  }}
-                >
+          <Grow in appear easing={{ enter: m3Easing.decelerate }}>
+            <Box
+              sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}
+            >
+              {paddlerTypes.map((paddler) => {
+                const statusInfo = paddlingMatrix[paddler];
+                const ui = statusInfo
+                  ? STATUS_UI[statusInfo.status]
+                  : UNKNOWN_UI;
+                const StatusIcon = ui.icon;
+                const isOpen = open[paddler];
+                const isSelected = paddler === selectedLevel;
+                return (
                   <Box
-                    onClick={() => handleToggle(paddler)}
-                    role="button"
-                    tabIndex={0}
-                    aria-expanded={isOpen}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleToggle(paddler);
-                      }
-                    }}
+                    key={paddler}
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      px: 1.5,
-                      py: 1.25,
-                      cursor: "pointer",
+                      backgroundColor: "action.hover",
+                      borderRadius: 1.5,
+                      overflow: "hidden",
+                      border: "1.5px solid",
+                      borderColor: isSelected ? ui.color : "transparent",
                     }}
                   >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <StatusIcon sx={{ color: ui.color, fontSize: 22 }} />
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        {paddler}
-                      </Typography>
-                    </Box>
-                    <ExpandMore
-                      sx={{
-                        color: "text.secondary",
-                        transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                        transition: "transform 200ms cubic-bezier(0.2, 0, 0, 1)",
+                    <Box
+                      onClick={() => handleToggle(paddler)}
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={isOpen}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleToggle(paddler);
+                        }
                       }}
-                    />
-                  </Box>
-                  <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                    {statusInfo && statusInfo.details.length > 0 && (
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        px: 1.5,
+                        py: 1.25,
+                        cursor: "pointer",
+                      }}
+                    >
                       <Box
-                        component="ul"
-                        sx={{
-                          m: 0,
-                          pl: 4.5,
-                          pr: 1.5,
-                          pt: 0.5,
-                          pb: 1.5,
-                          "& li:not(:last-of-type)": { mb: 0.75 },
-                        }}
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
                       >
-                        {statusInfo.details.map((line, index) => (
-                          <Typography key={index} component="li" variant="body2">
-                            {line}
-                          </Typography>
-                        ))}
+                        <StatusIcon sx={{ color: ui.color, fontSize: 22 }} />
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: 600 }}
+                        >
+                          {paddler}
+                        </Typography>
                       </Box>
-                    )}
-                  </Collapse>
-                </Box>
-              );
-            })}
-          </Box>
+                      <ExpandMore
+                        sx={{
+                          color: "text.secondary",
+                          transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                          transition:
+                            "transform 200ms cubic-bezier(0.2, 0, 0, 1)",
+                        }}
+                      />
+                    </Box>
+                    <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                      {statusInfo && statusInfo.details.length > 0 && (
+                        <Box
+                          component="ul"
+                          sx={{
+                            m: 0,
+                            pl: 4.5,
+                            pr: 1.5,
+                            pt: 0.5,
+                            pb: 1.5,
+                            "& li:not(:last-of-type)": { mb: 0.75 },
+                          }}
+                        >
+                          {statusInfo.details.map((line, index) => (
+                            <Typography
+                              key={index}
+                              component="li"
+                              variant="body2"
+                            >
+                              {line}
+                            </Typography>
+                          ))}
+                        </Box>
+                      )}
+                    </Collapse>
+                  </Box>
+                );
+              })}
+            </Box>
+          </Grow>
         )}
       </CardContent>
     </Card>

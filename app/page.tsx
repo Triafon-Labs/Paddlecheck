@@ -1,6 +1,6 @@
 "use client";
 
-import { Container, Stack, Alert } from "@mui/material";
+import { Container, Stack, Alert, Collapse } from "@mui/material";
 import StatusCard from "@/components/StatusCard";
 import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";
 import StatsCard from "@/components/StatsCard";
@@ -26,11 +26,17 @@ export default function HomePage() {
   return (
     <Container maxWidth="md">
       <Stack spacing={4}>
-        {error && error !== "Offline – no cached data (reconnect and refresh)" && (
+        <Collapse
+          in={
+            !!error &&
+            error !== "Offline – no cached data (reconnect and refresh)"
+          }
+          unmountOnExit
+        >
           <Alert severity="error" sx={{ borderRadius: 1 }}>
             {error}
           </Alert>
-        )}
+        </Collapse>
         <StatusCard conditions={conditions} loading={loading} />
         <PaddlingMatrixCard
           loading={loading}

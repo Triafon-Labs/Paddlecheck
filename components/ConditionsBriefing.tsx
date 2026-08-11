@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Fade } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { KayakConditions } from "@/types";
 import InfoPanel from "./InfoPanel";
@@ -17,9 +17,13 @@ interface Props {
   model?: string;
 }
 
-const AI_SUMMARY_ENABLED = process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY !== "false";
+const AI_SUMMARY_ENABLED =
+  process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY !== "false";
 
-export default function ConditionsBriefing({ conditions, model = DEFAULT_AI_MODEL }: Props) {
+export default function ConditionsBriefing({
+  conditions,
+  model = DEFAULT_AI_MODEL,
+}: Props) {
   const { forecastDays } = useKayakContext();
   const [auto, setAuto] = useState(
     () =>
@@ -34,7 +38,12 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_AI_MODE
     return () => window.removeEventListener(SETTINGS_CHANGED_EVENT, handler);
   }, []);
 
-  const { text, loading, failed, triggered, trigger } = useBriefing(conditions, forecastDays, auto, model);
+  const { text, loading, failed, triggered, trigger } = useBriefing(
+    conditions,
+    forecastDays,
+    auto,
+    model
+  );
 
   if (!AI_SUMMARY_ENABLED) return null;
 
@@ -49,37 +58,56 @@ export default function ConditionsBriefing({ conditions, model = DEFAULT_AI_MODE
           variant="body2"
           color="text.secondary"
           onClick={trigger}
-          sx={{ cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted" }}
+          sx={{
+            cursor: "pointer",
+            textDecoration: "underline",
+            textDecorationStyle: "dotted",
+          }}
         >
           Generate AI Summary
         </Typography>
       ) : (
-        <Typography variant="body2" sx={{ lineHeight: 1.65 }}>
-          {failed ? (
-            <>
-              Summary unavailable.{" "}
+        <Fade in appear>
+          <Typography variant="body2" sx={{ lineHeight: 1.65 }}>
+            {failed ? (
+              <>
+                Summary unavailable.{" "}
+                <Box
+                  component="span"
+                  onClick={trigger}
+                  sx={{
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    textDecorationStyle: "dotted",
+                  }}
+                >
+                  Try again?
+                </Box>
+              </>
+            ) : loading && !text.trim() ? (
               <Box
                 component="span"
-                onClick={trigger}
-                sx={{ cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted" }}
+                sx={{
+                  fontStyle: "italic",
+                  animation: "thinking 2s ease-in-out infinite",
+                  "@keyframes thinking": {
+                    "0%, 100%": { opacity: 0.15 },
+                    "50%": { opacity: 0.65 },
+                  },
+                }}
               >
-                Try again?
+                Thinking…
               </Box>
-            </>
-          ) : loading && !text.trim()
-            ? <Box component="span" sx={{
-                fontStyle: "italic",
-                animation: "thinking 2s ease-in-out infinite",
-                "@keyframes thinking": {
-                  "0%, 100%": { opacity: 0.15 },
-                  "50%":      { opacity: 0.65 },
-                },
-              }}>Thinking…</Box>
-            : text}
-          {loading && text.trim() && (
-            <Box component="span" sx={{ opacity: 0.35 }}>▋</Box>
-          )}
-        </Typography>
+            ) : (
+              text
+            )}
+            {loading && text.trim() && (
+              <Box component="span" sx={{ opacity: 0.35 }}>
+                ▋
+              </Box>
+            )}
+          </Typography>
+        </Fade>
       )}
     </InfoPanel>
   );

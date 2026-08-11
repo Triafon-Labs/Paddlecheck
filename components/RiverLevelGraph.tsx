@@ -383,81 +383,72 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     if (timeRange === "forecast" && combinedForecastData) {
       const nowTs = new Date().getTime();
       return (
-        <>
-          <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart
-              data={combinedForecastData}
-              // Wider right margin than the historical views: this axis can
-              // place a tick on the very last point, and half of that centred
-              // label would otherwise be clipped by the chart edge.
-              margin={{ top: 5, right: 32, left: 5, bottom: 5 }}
-            >
-              <defs>
-                <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor={theme.palette.primary.main}
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor={theme.palette.primary.main}
-                    stopOpacity={0}
-                  />
-                </linearGradient>
-              </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={theme.palette.divider}
-              />
-              <XAxis
-                dataKey="ts"
-                type="number"
-                scale="time"
-                domain={["dataMin", "dataMax"]}
-                ticks={forecastTicks}
-                tickFormatter={formatForecastTick}
-                tick={{ fontSize: 12 }}
-                interval={0}
-              />
-              <YAxis
-                stroke={theme.palette.text.secondary}
-                domain={[0, forecastYDomainMax]}
-              />
-              <Tooltip content={CustomTooltip} />
-              <ReferenceLine
-                x={nowTs}
-                stroke={theme.palette.text.disabled}
-                strokeDasharray="3 3"
-              />
-              <Area
-                type="monotone"
-                dataKey="actual"
-                stroke={theme.palette.primary.main}
-                fillOpacity={1}
-                fill="url(#colorActual)"
-                connectNulls={false}
-                dot={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="forecasted"
-                stroke={theme.palette.primary.main}
-                strokeDasharray="5 5"
-                strokeOpacity={0.7}
-                dot={false}
-                connectNulls={false}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ display: "block", textAlign: "center", mt: 1 }}
+        <ResponsiveContainer width="100%" height={200}>
+          <ComposedChart
+            data={combinedForecastData}
+            // Wider right margin than the historical views: this axis can
+            // place a tick on the very last point, and half of that centred
+            // label would otherwise be clipped by the chart edge.
+            margin={{ top: 5, right: 32, left: 5, bottom: 5 }}
           >
-            Dashed line uses Bewdley upstream forecast (24h). For guidance only.
-          </Typography>
-        </>
+            <defs>
+              <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor={theme.palette.primary.main}
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={theme.palette.primary.main}
+                  stopOpacity={0}
+                />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={theme.palette.divider}
+            />
+            <XAxis
+              dataKey="ts"
+              type="number"
+              scale="time"
+              domain={["dataMin", "dataMax"]}
+              ticks={forecastTicks}
+              tickFormatter={formatForecastTick}
+              tick={{ fontSize: 12 }}
+              interval={0}
+            />
+            <YAxis
+              stroke={theme.palette.text.secondary}
+              domain={[0, forecastYDomainMax]}
+            />
+            <Tooltip content={CustomTooltip} />
+            <ReferenceLine
+              x={nowTs}
+              stroke={theme.palette.text.disabled}
+              strokeDasharray="3 3"
+            />
+            <Area
+              type="monotone"
+              dataKey="actual"
+              stroke={theme.palette.primary.main}
+              fillOpacity={1}
+              fill="url(#colorActual)"
+              connectNulls={false}
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="forecasted"
+              stroke={theme.palette.primary.main}
+              strokeDasharray="5 5"
+              strokeOpacity={0.7}
+              dot={false}
+              connectNulls={false}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
       );
     }
 

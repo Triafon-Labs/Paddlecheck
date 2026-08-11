@@ -42,7 +42,7 @@ import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { formatMetTime } from "@/lib/weather";
 import { isWarningOnDay } from "@/lib/warnings";
-import { m3Easing } from "@/lib/m3-palette";
+import { m3Easing, m3Duration } from "@/lib/m3-palette";
 
 interface ForecastRagGraphProps {
   forecastDays: DayForecast[] | null;
@@ -171,6 +171,16 @@ interface BarLabelProps {
   data: ForecastGraphDataPoint[];
 }
 
+// Markers sit above the bars themselves, which recharts already animates in
+// via height/position - without this they'd otherwise just snap into place.
+const popIn = {
+  animation: `barLabelPopIn ${m3Duration.short4}ms ${m3Easing.decelerate} both`,
+  "@keyframes barLabelPopIn": {
+    from: { opacity: 0, transform: "scale(0.4)" },
+    to: { opacity: 1, transform: "scale(1)" },
+  },
+} as const;
+
 const BarLabel = (props: BarLabelProps) => {
   const { x, y, width, index, data } = props;
   const theme = useTheme();
@@ -201,7 +211,9 @@ const BarLabel = (props: BarLabelProps) => {
           width={24}
           height={24}
         >
-          <Icon sx={{ color: theme.palette.error.main, fontSize: 24 }} />
+          <Icon
+            sx={{ color: theme.palette.error.main, fontSize: 24, ...popIn }}
+          />
         </foreignObject>
       );
       clearAbove = 28;
@@ -228,6 +240,7 @@ const BarLabel = (props: BarLabelProps) => {
             justifyContent: "center",
             width: 12,
             height: 12,
+            ...popIn,
           }}
         >
           <FiberManualRecord

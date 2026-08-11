@@ -245,6 +245,24 @@ const makeComponents = (m3: M3Palette): ThemeOptions["components"] => ({
       },
     },
   },
+  // MUI's own defaults animate the summary row (height/margin/chevron) at
+  // theme.transitions.duration.shortest (50ms), far quicker than the
+  // auto-height Collapse driving the details panel below it - the header
+  // snaps into its expanded shape well before the body finishes unfurling.
+  // Slowing the summary row to match keeps both halves reading as one motion.
+  MuiAccordionSummary: {
+    styleOverrides: {
+      root: {
+        transition: `min-height ${m3Duration.short3}ms ${m3Easing.standard}, background-color ${m3Duration.short3}ms ${m3Easing.standard}`,
+      },
+      content: {
+        transition: `margin ${m3Duration.short3}ms ${m3Easing.standard}`,
+      },
+      expandIconWrapper: {
+        transition: `transform ${m3Duration.short3}ms ${m3Easing.standard}`,
+      },
+    },
+  },
   MuiDivider: {
     styleOverrides: {
       root: { borderColor: m3.outlineVariant },

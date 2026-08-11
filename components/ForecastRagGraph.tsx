@@ -42,7 +42,7 @@ import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { formatMetTime } from "@/lib/weather";
 import { isWarningOnDay } from "@/lib/warnings";
-import { m3Easing, m3Duration } from "@/lib/m3-palette";
+import { m3Easing } from "@/lib/m3-palette";
 
 interface ForecastRagGraphProps {
   forecastDays: DayForecast[] | null;
@@ -171,10 +171,14 @@ interface BarLabelProps {
   data: ForecastGraphDataPoint[];
 }
 
-// Markers sit above the bars themselves, which recharts already animates in
-// via height/position - without this they'd otherwise just snap into place.
+// Matches the <Bar> below's animationDuration/animationEasing so the No
+// Paddling icon and gust dot fade in over the same span the bar itself
+// grows in, rather than settling before (or after) the bar finishes.
+const BAR_ANIMATION_DURATION = 400;
+const BAR_ANIMATION_EASING = "ease";
+
 const popIn = {
-  animation: `barLabelPopIn ${m3Duration.short4}ms ${m3Easing.decelerate} both`,
+  animation: `barLabelPopIn ${BAR_ANIMATION_DURATION}ms ${BAR_ANIMATION_EASING} both`,
   "@keyframes barLabelPopIn": {
     from: { opacity: 0, transform: "scale(0.4)" },
     to: { opacity: 1, transform: "scale(1)" },
@@ -348,7 +352,11 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                 }
               />
             )}
-            <Bar dataKey="value">
+            <Bar
+              dataKey="value"
+              animationDuration={BAR_ANIMATION_DURATION}
+              animationEasing={BAR_ANIMATION_EASING}
+            >
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}

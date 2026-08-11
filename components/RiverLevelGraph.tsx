@@ -136,13 +136,31 @@ const ChangeIndicator: React.FC<{
   );
 };
 
+// Axis labels are pinned to en-GB rather than the viewer's locale: this is a
+// UK club app that shows 24-hour times everywhere else (the tooltip below,
+// the forecast graph, lib/time.ts), and an empty locale would render "04:00
+// PM" and "Aug 12" for anyone whose browser is set to a 12-hour locale.
+const formatAxisTime = (date: Date) =>
+  date.toLocaleTimeString("en-GB", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+const formatAxisDate = (date: Date) =>
+  date.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
+
 const CustomTooltip = ({
   active,
   payload,
   label,
 }: TooltipContentProps<ValueType, NameType>) => {
-  if (active && payload && payload.length && label) {
-    const value = payload[0].value as number;
+  if (active && payload && payload.length && label != null) {
+    // The forecast view charts two series ("actual" and "forecasted") where
+    // one is always null, so take the first entry that actually has a value.
+    const value = payload.find((p) => typeof p.value === "number")?.value as
+      number | undefined;
+    if (value === undefined) return null;
     // label is either an ISO string (historical views) or a numeric timestamp (forecast view)
     const date = new Date(typeof label === "number" ? label : label);
     const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(
@@ -274,17 +292,21 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return makeTicks(filteredDataWithTs, intervalMs);
   }, [filteredDataWithTs, timeRange]);
 
-  // Combined dataset for the "forecast" view: last 24h of actual readings followed
-  // by the full forecast series, joined at the current level so the line is continuous.
+  // Combined dataset for the "forecast" view: a short run-up of actual readings
+  // followed by the full forecast series, joined at the current level so the
+  // line is continuous. The run-up is deliberately shorter than the forecast
+  // it precedes - just enough to read the current trend into the forecast,
+  // without giving equal billing to history in a view that's about what's
+  // coming next.
   const combinedForecastData = useMemo(() => {
     if (!data || !forecastData) return null;
     const now = new Date();
-    const last24h = data.filter(
+    const runUp = data.filter(
       (d) =>
         new Date(d.dateTime) >
-        new Date(now.getTime() - TIME_PERIODS.TWENTY_FOUR_HOURS)
+        new Date(now.getTime() - TIME_PERIODS.EIGHT_HOURS)
     );
-    const historical = last24h.map((d) => ({
+    const historical = runUp.map((d) => ({
       ts: new Date(d.dateTime).getTime(),
       actual: d.level,
       forecasted: null as number | null,
@@ -294,8 +316,8 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
       actual: null as number | null,
       forecasted: d.level,
     }));
-    if (last24h.length > 0) {
-      const latest = last24h[last24h.length - 1];
+    if (runUp.length > 0) {
+      const latest = runUp[runUp.length - 1];
       future.unshift({
         ts: new Date(latest.dateTime).getTime(),
         actual: null,
@@ -314,10 +336,12 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return Math.max(Math.ceil(Math.max(...allLevels)), 1);
   }, [combinedForecastData]);
 
-  // Evenly-spaced ticks every 12 hours for the forecast view
+  // Every 8 hours across the forecast view's ~32h span, which keeps roughly
+  // the same label density as the 24h historical view. (At the previous 12h
+  // spacing the shorter span would only fit two or three labels.)
   const forecastTicks = useMemo(() => {
     if (!combinedForecastData) return [];
-    return makeTicks(combinedForecastData, TIME_PERIODS.TWELVE_HOURS);
+    return makeTicks(combinedForecastData, TIME_PERIODS.EIGHT_HOURS);
   }, [combinedForecastData]);
 
   // Forecasted change over the next 24 hours: forecasted level at now+24h minus current actual level
@@ -348,90 +372,83 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   const formatXAxis = (tickItem: number) => {
     const date = new Date(tickItem);
     if (timeRange === "5d") {
-      return date.toLocaleDateString([], { month: "short", day: "numeric" });
+      return formatAxisDate(date);
     }
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return formatAxisTime(date);
   };
 
-  const formatForecastTick = (ts: number) =>
-    new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const formatForecastTick = (ts: number) => formatAxisTime(new Date(ts));
 
   const renderChartBody = () => {
     if (timeRange === "forecast" && combinedForecastData) {
       const nowTs = new Date().getTime();
       return (
-        <>
-          <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart
-              data={combinedForecastData}
-              margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
-            >
-              <defs>
-                <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor={theme.palette.primary.main}
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor={theme.palette.primary.main}
-                    stopOpacity={0}
-                  />
-                </linearGradient>
-              </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke={theme.palette.divider}
-              />
-              <XAxis
-                dataKey="ts"
-                type="number"
-                scale="time"
-                domain={["dataMin", "dataMax"]}
-                ticks={forecastTicks}
-                tickFormatter={formatForecastTick}
-                tick={{ fontSize: 12 }}
-                interval={0}
-              />
-              <YAxis
-                stroke={theme.palette.text.secondary}
-                domain={[0, forecastYDomainMax]}
-              />
-              <Tooltip content={CustomTooltip} />
-              <ReferenceLine
-                x={nowTs}
-                stroke={theme.palette.text.disabled}
-                strokeDasharray="3 3"
-              />
-              <Area
-                type="monotone"
-                dataKey="actual"
-                stroke={theme.palette.primary.main}
-                fillOpacity={1}
-                fill="url(#colorActual)"
-                connectNulls={false}
-                dot={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="forecasted"
-                stroke={theme.palette.primary.main}
-                strokeDasharray="5 5"
-                strokeOpacity={0.7}
-                dot={false}
-                connectNulls={false}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ display: "block", textAlign: "center", mt: 1 }}
+        <ResponsiveContainer width="100%" height={200}>
+          <ComposedChart
+            data={combinedForecastData}
+            // Wider right margin than the historical views: this axis can
+            // place a tick on the very last point, and half of that centred
+            // label would otherwise be clipped by the chart edge.
+            margin={{ top: 5, right: 32, left: 5, bottom: 5 }}
           >
-            Dashed line uses Bewdley upstream forecast (24h). For guidance only.
-          </Typography>
-        </>
+            <defs>
+              <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor={theme.palette.primary.main}
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={theme.palette.primary.main}
+                  stopOpacity={0}
+                />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={theme.palette.divider}
+            />
+            <XAxis
+              dataKey="ts"
+              type="number"
+              scale="time"
+              domain={["dataMin", "dataMax"]}
+              ticks={forecastTicks}
+              tickFormatter={formatForecastTick}
+              tick={{ fontSize: 12 }}
+              interval={0}
+            />
+            <YAxis
+              stroke={theme.palette.text.secondary}
+              domain={[0, forecastYDomainMax]}
+            />
+            <Tooltip content={CustomTooltip} />
+            <ReferenceLine
+              x={nowTs}
+              stroke={theme.palette.text.disabled}
+              strokeDasharray="3 3"
+            />
+            <Area
+              type="monotone"
+              dataKey="actual"
+              stroke={theme.palette.primary.main}
+              fillOpacity={1}
+              fill="url(#colorActual)"
+              connectNulls={false}
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="forecasted"
+              stroke={theme.palette.primary.main}
+              strokeDasharray="5 5"
+              strokeOpacity={0.7}
+              dot={false}
+              connectNulls={false}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
       );
     }
 
@@ -556,13 +573,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               aria-label="time range"
               sx={{ mt: 0.5, mb: 2, width: "100%" }}
             >
-              <ToggleButton
-                value="forecast"
-                aria-label="forecast"
-                sx={{ flex: 1 }}
-              >
-                <Typography variant="caption">Forecast</Typography>
-              </ToggleButton>
+              {/* Ordered as a timeline: furthest back on the left through to
+                  the forecast on the right, so moving right always means
+                  moving forward in time. */}
               <ToggleButton value="5d" aria-label="5 days" sx={{ flex: 1 }}>
                 <Typography variant="caption">5d</Typography>
               </ToggleButton>
@@ -574,6 +587,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               </ToggleButton>
               <ToggleButton value="1h" aria-label="1 hour" sx={{ flex: 1 }}>
                 <Typography variant="caption">1h</Typography>
+              </ToggleButton>
+              <ToggleButton
+                value="forecast"
+                aria-label="forecast"
+                sx={{ flex: 1 }}
+              >
+                <Typography variant="caption">Forecast</Typography>
               </ToggleButton>
             </ToggleButtonGroup>
           </>

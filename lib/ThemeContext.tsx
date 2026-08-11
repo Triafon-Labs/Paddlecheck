@@ -1,85 +1,45 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useMemo,
-  ReactNode,
-} from "react";
-import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
-import { lightTheme, darkTheme } from "./themes";
+import { ReactNode } from "react";
+import { ThemeProvider, useColorScheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { GlobalStyles } from "@mui/material";
+import { theme } from "./themes";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 export type ThemeMode = "light" | "dark" | "system";
 
-interface ThemeContextType {
-  themeMode: ThemeMode;
-  setThemeMode: (mode: ThemeMode) => void;
-}
+export const AppThemeProvider = ({ children }: { children: ReactNode }) => (
+  // modeStorageKey keeps MUI reading and writing the same localStorage key the
+  // app used before CSS theme variables, so existing saved preferences (which
+  // already use MUI's own "light" | "dark" | "system" vocabulary) carry over.
+  //
+  // forceThemeRerender is required, not optional polish: with CSS variables
+  // alone, `theme.palette` stays pinned to the default (light) scheme, so
+  // anything reading a colour in JS rather than through CSS gets light values
+  // in dark mode. That silently broke the traffic light (light pastel fills
+  // on navy) and both Recharts graphs, which pass colours as SVG attributes -
+  // dark-blue lines and dark-grey axis labels on a navy background. This
+  // recalculates theme values when the mode changes so those reads are
+  // correct; the CSS variables still drive first paint, so no flash returns.
+  <ThemeProvider
+    theme={theme}
+    defaultMode="system"
+    modeStorageKey={STORAGE_KEYS.THEME_MODE}
+    forceThemeRerender
+  >
+    <CssBaseline />
+    {children}
+  </ThemeProvider>
+);
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
+// Thin wrapper over MUI's useColorScheme, preserving the API the settings
+// drawer already uses. `mode` is undefined until hydration finishes; treating
+// that as "system" matches the pre-hydration default rather than flipping the
+// toggle group to a wrong value for a frame.
 export const useAppTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useAppTheme must be used within an AppThemeProvider");
-  }
-  return context;
-};
-
-export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [themeMode, setThemeMode] = useState<ThemeMode>("system");
-  const [systemPrefersDark, setSystemPrefersDark] = useState(false);
-
-  useEffect(() => {
-    // Restore saved preference
-    const savedTheme = localStorage.getItem(
-      STORAGE_KEYS.THEME_MODE
-    ) as ThemeMode | null;
-    if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setThemeMode(savedTheme);
-    }
-
-    // Detect and track system preference
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    setSystemPrefersDark(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setSystemPrefersDark(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.THEME_MODE, themeMode);
-  }, [themeMode]);
-
-  const resolvedMode =
-    themeMode === "system" ? (systemPrefersDark ? "dark" : "light") : themeMode;
-
-  const activeTheme = useMemo(() => {
-    return resolvedMode === "dark" ? darkTheme : lightTheme;
-  }, [resolvedMode]);
-
-  const contextValue = useMemo(
-    () => ({ themeMode, setThemeMode }),
-    [themeMode]
-  );
-
-  return (
-    <ThemeContext.Provider value={contextValue}>
-      <MuiThemeProvider theme={activeTheme}>
-        <CssBaseline />
-        <GlobalStyles
-          styles={{
-            body: { backgroundColor: activeTheme.palette.background.default },
-          }}
-        />
-        {children}
-      </MuiThemeProvider>
-    </ThemeContext.Provider>
-  );
+  const { mode, setMode } = useColorScheme();
+  return {
+    themeMode: (mode ?? "system") as ThemeMode,
+    setThemeMode: (nextMode: ThemeMode) => setMode(nextMode),
+  };
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Typography, Fade } from "@mui/material";
+import { Box, Link, Typography, Fade } from "@mui/material";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { KayakConditions } from "@/types";
 import InfoPanel from "./InfoPanel";
@@ -16,9 +16,6 @@ interface Props {
   conditions: KayakConditions;
   model?: string;
 }
-
-const AI_SUMMARY_ENABLED =
-  process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY !== "false";
 
 export default function ConditionsBriefing({
   conditions,
@@ -45,8 +42,6 @@ export default function ConditionsBriefing({
     model
   );
 
-  if (!AI_SUMMARY_ENABLED) return null;
-
   return (
     <InfoPanel align="flex-start">
       <AutoAwesomeIcon
@@ -54,7 +49,9 @@ export default function ConditionsBriefing({
         sx={{ color: "primary.main", mt: "2px" }}
       />
       {!triggered ? (
-        <Typography
+        <Link
+          component="button"
+          type="button"
           variant="body2"
           color="text.secondary"
           onClick={trigger}
@@ -62,27 +59,33 @@ export default function ConditionsBriefing({
             cursor: "pointer",
             textDecoration: "underline",
             textDecorationStyle: "dotted",
+            textDecorationColor: "inherit",
           }}
         >
           Generate AI Summary
-        </Typography>
+        </Link>
       ) : (
         <Fade in appear>
           <Typography variant="body2" sx={{ lineHeight: 1.65 }}>
             {failed ? (
               <>
                 Summary unavailable.{" "}
-                <Box
-                  component="span"
+                <Link
+                  component="button"
+                  type="button"
+                  variant="body2"
+                  color="inherit"
                   onClick={trigger}
                   sx={{
                     cursor: "pointer",
                     textDecoration: "underline",
                     textDecorationStyle: "dotted",
+                    textDecorationColor: "inherit",
+                    verticalAlign: "baseline",
                   }}
                 >
                   Try again?
-                </Box>
+                </Link>
               </>
             ) : loading && !text.trim() ? (
               <Box

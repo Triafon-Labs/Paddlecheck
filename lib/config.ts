@@ -293,3 +293,6 @@ export const DATA_STALE_THRESHOLD_MS = 30 * 60 * 1000;
 
 // --- AI Summary ---
 export const DEFAULT_AI_MODEL = "openai/gpt-oss-120b";
+// Models /api/briefing will accept from the client. Anything else falls back
+// to DEFAULT_AI_MODEL so visitors can't run arbitrary models on our API key.
+export const ALLOWED_AI_MODELS = [DEFAULT_AI_MODEL];

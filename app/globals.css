@@ -21,8 +21,6 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-}
+/* color-scheme is set per colour scheme by MUI's CSS theme variables (see
+   lib/themes.ts). Declaring it here from the OS preference too would fight
+   an explicitly chosen theme that disagrees with the OS. */

@@ -69,7 +69,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                 gridTemplateColumns: "repeat(2, 1fr)",
                 gap: 1,
                 mt: 1,
-                "& > *:last-child:nth-child(odd)": {
+                "& > *:last-of-type:nth-of-type(odd)": {
                   gridColumn: "1 / -1",
                 },
               }}
@@ -153,7 +153,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                     gridTemplateColumns: "repeat(2, 1fr)",
                     gap: 1,
                     mt: 1,
-                    "& > *:last-child:nth-child(odd)": {
+                    "& > *:last-of-type:nth-of-type(odd)": {
                       gridColumn: "1 / -1",
                     },
                   }}

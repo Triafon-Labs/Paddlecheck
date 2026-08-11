@@ -12,20 +12,20 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 
 ## Tech Stack
 
-| Layer         | Technology                                             |
-| ------------- | ------------------------------------------------------ |
-| Framework     | Next.js 16 (App Router)                                |
-| Library       | React 19                                               |
-| Language      | TypeScript 6 (strict mode)                             |
-| UI Library    | Material UI (MUI) 7 + Emotion                          |
-| Charts        | Recharts 3                                             |
-| Date handling | date-fns 4                                             |
-| AI            | Groq SDK (Briefing feature)                            |
-| Analytics     | Vercel Analytics + Speed Insights                      |
-| PWA           | Workbox 7 (service worker)                             |
-| Linting       | ESLint 10, Prettier 3                                  |
-| Git hooks     | Husky 9 + commitlint (Conventional Commits)            |
-| CI            | GitHub Actions (lint + build on PR)                    |
+| Layer         | Technology                                                                    |
+| ------------- | ----------------------------------------------------------------------------- |
+| Framework     | Next.js 16 (App Router)                                                       |
+| Library       | React 19                                                                      |
+| Language      | TypeScript 6 (strict mode)                                                    |
+| UI Library    | Material UI (MUI) 7 + Emotion                                                 |
+| Charts        | Recharts 3                                                                    |
+| Date handling | date-fns 4                                                                    |
+| AI            | Groq SDK (Briefing feature)                                                   |
+| Analytics     | Vercel Analytics + Speed Insights                                             |
+| PWA           | Web manifest + hand-rolled service worker (`public/sw.js`)                    |
+| Linting       | ESLint 10, Prettier 3                                                         |
+| Git hooks     | Husky 9 + commitlint (Conventional Commits)                                   |
+| CI            | GitHub Actions (lint + build on PR)                                           |
 | Releases      | commit-and-tag-version (auto version bump + changelog + tag on merge to main) |
 
 ---
@@ -34,10 +34,9 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 
 ### Build Requirements
 
-Due to the use of `workbox-webpack-plugin` for PWA service worker generation, production builds **must** use Webpack.
-
-- Production builds should use `next build --webpack`.
-- Development server uses Turbopack by default.
+Both `next build` and `next dev` use Turbopack (see `next.config.ts`). The
+service worker is a plain static file served from `public/`, so no bundler
+plugin or build step generates it.
 
 ### Timezone & Localization
 
@@ -76,6 +75,7 @@ components/
   ThemeRegistry.tsx      Emotion cache + AppThemeProvider for SSR
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners
+  ServiceWorkerRegistration.tsx  Registers public/sw.js in production
 
 lib/
   config.ts              All thresholds, station IDs, descriptions, coordinates
@@ -84,14 +84,14 @@ lib/
   weather.ts             Open-Meteo API calls + utilities
   hooks.ts               useKayakData hook – orchestrates all fetching and state
   KayakDataContext.tsx   React Context wrapping the hook for component tree access
-  ThemeContext.tsx        Light/dark/system mode state + localStorage persistence
+  ThemeContext.tsx       Wraps MUI's colour-scheme provider/hook (light/dark/system)
   m3-palette.ts          Material Design 3 colour palettes
-  themes.ts              MUI theme definitions (light + dark variants)
+  themes.ts              One MUI theme carrying both schemes as CSS variables
 
 types/
   index.ts               All shared TypeScript types
 
-public/                  Static assets – icons, favicon
+public/                  Static assets – icons, favicon, sw.js (offline shell)
 ```
 
 ---
@@ -110,11 +110,11 @@ public/                  Static assets – icons, favicon
 
 ## Data Sources
 
-| Data                             | API                                                                          | Notes                                          |
-| -------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
-| River level readings             | Environment Agency Flood-Monitoring API – station `2642` (Diglis, Worcester) | Historical readings                            |
+| Data                             | API                                                                          | Notes                                        |
+| -------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------- |
+| River level readings             | Environment Agency Flood-Monitoring API – station `2642` (Diglis, Worcester) | Historical readings                          |
 | Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)               | Used for 0–24 h forecast with 6 h travel lag |
-| Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                  | No API key required                            |
+| Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                  | No API key required                          |
 
 There are no environment variables required for local development.
 
@@ -186,7 +186,7 @@ cached value (`paddlecheck_riverDataRaw` / `paddlecheck_weatherDataRaw` /
 `paddlecheck_futureWeatherDataRaw` in `localStorage`) on failure. This means a single
 source blipping doesn't discard data that arrived fine from the others.
 
-`loading` / `forecastLoading` intentionally show a spinner for *every* online fetch –
+`loading` / `forecastLoading` intentionally show a spinner for _every_ online fetch –
 initial load, background refetch, manual refresh alike – so the spinner disappearing is
 always a guarantee the data on screen just came from the network, never a silently-stale
 cache. The one exception is being fully offline with a cache already loaded: there's no
@@ -200,26 +200,30 @@ spinning forever.
 
 ## Local Storage Keys
 
-| Key               | Value                                                               |
-| ----------------- | ------------------------------------------------------------------- |
-| `theme`           | `"light"` \| `"dark"` \| `"system"`                                 |
-| `paddlerLevel`    | `"Beginner"` \| `"Improver"` \| `"Intermediate"` \| `"Independent"` |
-| `riverLevelRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`                |
+Canonical names live in `lib/storageKeys.ts`; cached payload keys are all
+prefixed `paddlecheck_` and omitted here.
+
+| Key                   | Value                                                               |
+| --------------------- | ------------------------------------------------------------------- |
+| `themeMode`           | `"light"` \| `"dark"` \| `"system"` (read/written by MUI)           |
+| `paddlerLevel`        | `"Beginner"` \| `"Improver"` \| `"Intermediate"` \| `"Independent"` |
+| `riverGraphTimeRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`               |
+| `autoSummarise`       | `"true"` \| `"false"` – auto-generate the AI summary on load        |
 
 ---
 
 ## TypeScript Types (`types/index.ts`)
 
-| Type                      | Description                                                                           |
-| ------------------------- | ------------------------------------------------------------------------------------- |
-| `Status`                  | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"`     |
-| `KayakConditions`         | Full snapshot – status, river level, weather readings, reasons, timestamps            |
-| `DayForecast`             | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                 |
-| `ForecastGraphDataPoint`  | Single hourly forecast – status, level, reasons, source (`"bewdley"` \| `"linear"`)   |
-| `RiverReading`            | `{ dateTime: string; value: number }`                                                 |
-| `WeatherData`             | Current weather snapshot                                                              |
-| `FutureWeatherData`       | 5-day hourly forecast + daily sunrise/sunset                                          |
-| `PaddlingMatrix`          | Skill level → status mapping with guidance text                                       |
+| Type                     | Description                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `Status`                 | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"`   |
+| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps          |
+| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                               |
+| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"bewdley"` \| `"linear"`) |
+| `RiverReading`           | `{ dateTime: string; value: number }`                                               |
+| `WeatherData`            | Current weather snapshot                                                            |
+| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                        |
+| `PaddlingMatrix`         | Skill level → status mapping with guidance text                                     |
 
 ---
 

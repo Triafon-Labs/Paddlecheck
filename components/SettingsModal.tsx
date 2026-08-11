@@ -319,33 +319,29 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               </Select>
             </FormControl>
 
-            {process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY !== "false" && (
-              <>
-                <Divider sx={{ my: 2 }} />
+            <Divider sx={{ my: 2 }} />
 
-                <Typography variant="h6" gutterBottom>
-                  AI Summary
-                </Typography>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={autoSummarise}
-                      onChange={handleAutoSummariseChange}
-                    />
-                  }
-                  label="Auto-summarise conditions on load"
+            <Typography variant="h6" gutterBottom>
+              AI Summary
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={autoSummarise}
+                  onChange={handleAutoSummariseChange}
                 />
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  display="block"
-                  sx={{ mt: 0.5 }}
-                >
-                  When off, tap &ldquo;Generate AI Summary&rdquo; inside the
-                  status card to generate one on demand.
-                </Typography>
-              </>
-            )}
+              }
+              label="Auto-summarise conditions on load"
+            />
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+              sx={{ mt: 0.5 }}
+            >
+              When off, tap &ldquo;Generate AI Summary&rdquo; inside the status
+              card to generate one on demand.
+            </Typography>
           </Box>
         </Box>
 

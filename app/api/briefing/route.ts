@@ -6,6 +6,7 @@ import {
   THRESHOLDS,
   VISIBILITY_DESCRIPTIONS,
   DEFAULT_AI_MODEL,
+  ALLOWED_AI_MODELS,
 } from "@/lib/config";
 import {
   formatRiverLevel,
@@ -58,7 +59,8 @@ const COMPASS_WORDS: Record<string, string> = {
 };
 
 function buildConditionsParts(req: SummaryRequest): string {
-  const { conditions, hourlyForecast, currentlyDark, currentTime, outlook } = req;
+  const { conditions, hourlyForecast, currentlyDark, currentTime, outlook } =
+    req;
 
   const compass =
     conditions.windDirection !== undefined
@@ -167,22 +169,94 @@ async function* stripThinkTags(
   if (!inThink && buf) yield buf;
 }
 
+// ── Summary cache ─────────────────────────────────────────────────────────────
+
+// Every visitor in the same 15-minute data window is summarising identical
+// inputs, so completed summaries are cached and replayed instead of paying
+// for a fresh model call per visitor. Keyed by a hash of the full request
+// inputs (minus the ever-changing clock time), so a manipulated payload can
+// only ever poison its own cache slot, never another visitor's.
+//
+// The map lives in module scope: on serverless hosting each warm instance
+// keeps its own copy, so this is best-effort dedup rather than a guarantee -
+// which is fine, it exists to cut costs, not for correctness.
+const summaryCache = new Map<
+  string,
+  { promise: Promise<string>; expires: number }
+>();
+const SUMMARY_CACHE_TTL_MS = 20 * 60 * 1000;
+const SUMMARY_CACHE_MAX_ENTRIES = 50;
+
+async function summaryCacheKey(
+  body: SummaryRequest,
+  model: string
+): Promise<string> {
+  // currentTime advances every minute and would defeat the cache; within one
+  // data window a summary generated a few minutes ago is still the summary.
+  const input = JSON.stringify({
+    conditions: body.conditions,
+    hourlyForecast: body.hourlyForecast ?? null,
+    currentlyDark: body.currentlyDark ?? false,
+    outlook: body.outlook ?? null,
+    model,
+  });
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(input)
+  );
+  return Buffer.from(digest).toString("hex");
+}
+
+function pruneSummaryCache() {
+  const now = Date.now();
+  for (const [key, entry] of summaryCache) {
+    if (entry.expires <= now) summaryCache.delete(key);
+  }
+  // Map iterates in insertion order, so evicting from the front drops the
+  // oldest entries first if pruning expired ones wasn't enough.
+  while (summaryCache.size > SUMMARY_CACHE_MAX_ENTRIES) {
+    const oldest = summaryCache.keys().next().value;
+    if (oldest === undefined) break;
+    summaryCache.delete(oldest);
+  }
+}
+
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
-  if (process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY === "false") {
-    return new Response("AI Summary is disabled", { status: 503 });
-  }
   if (!process.env.GROQ_API_KEY) {
     return new Response("API key not configured", { status: 503 });
   }
 
   const body: SummaryRequest = await request.json();
+
+  // The model name arrives from the client, so it can't be trusted as-is -
+  // anything outside the allowlist would let arbitrary visitors run whichever
+  // Groq model they like on this deployment's API key.
+  const model = ALLOWED_AI_MODELS.includes(body.model ?? DEFAULT_AI_MODEL)
+    ? (body.model ?? DEFAULT_AI_MODEL)
+    : DEFAULT_AI_MODEL;
+
+  pruneSummaryCache();
+  const cacheKey = await summaryCacheKey(body, model);
+  const cached = summaryCache.get(cacheKey);
+  if (cached) {
+    try {
+      const text = await cached.promise;
+      return new Response(text, {
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
+    } catch {
+      // The generation this entry pointed at failed; fall through to retry.
+      summaryCache.delete(cacheKey);
+    }
+  }
+
   const conditionsParts = buildConditionsParts(body);
 
   const client = new Groq();
   const groqStream = await client.chat.completions.create({
-    model: body.model ?? DEFAULT_AI_MODEL,
+    model,
     temperature: 0.7,
     top_p: 0.95,
     max_tokens: 2048,
@@ -193,13 +267,40 @@ export async function POST(request: Request) {
     ],
   });
 
+  // Registered before the first chunk arrives so concurrent requests for the
+  // same inputs await this generation instead of starting their own.
+  let resolveSummary!: (text: string) => void;
+  let rejectSummary!: (err: unknown) => void;
+  const summaryPromise = new Promise<string>((resolve, reject) => {
+    resolveSummary = resolve;
+    rejectSummary = reject;
+  });
+  // An abandoned (client-cancelled) generation rejects this promise; without
+  // a handler of its own that's an unhandled rejection crash.
+  summaryPromise.catch(() => {});
+  summaryCache.set(cacheKey, {
+    promise: summaryPromise,
+    expires: Date.now() + SUMMARY_CACHE_TTL_MS,
+  });
+
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
-      for await (const text of stripThinkTags(groqStream)) {
-        controller.enqueue(encoder.encode(text));
+      let fullText = "";
+      try {
+        for await (const text of stripThinkTags(groqStream)) {
+          fullText += text;
+          controller.enqueue(encoder.encode(text));
+        }
+        controller.close();
+        resolveSummary(fullText);
+      } catch (err) {
+        // Incomplete generations (Groq error, client disconnect) must not be
+        // served to the next visitor.
+        summaryCache.delete(cacheKey);
+        rejectSummary(err);
+        controller.error(err);
       }
-      controller.close();
     },
   });
 

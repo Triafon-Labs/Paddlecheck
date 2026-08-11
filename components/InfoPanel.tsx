@@ -12,7 +12,11 @@ interface InfoPanelProps {
 // Shared wrapper for the "icon + text on a muted background" panels used
 // across StatusCard, ConditionsBriefing and WeatherWarnings, so the same
 // padding/spacing/background doesn't get hand-duplicated at each call site.
-const InfoPanel: React.FC<InfoPanelProps> = ({ children, align = "center", sx }) => (
+const InfoPanel: React.FC<InfoPanelProps> = ({
+  children,
+  align = "center",
+  sx,
+}) => (
   <Paper
     elevation={0}
     sx={{

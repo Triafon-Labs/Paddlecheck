@@ -6,7 +6,7 @@ import {
   formatWindSpeed,
   formatWindGust,
 } from "@/lib/units";
-import { getLondonHour, hhmmOfISO } from "@/lib/time";
+import { getLondonHHMM, getLondonHour, hhmmOfISO } from "@/lib/time";
 
 const PREFERRED: Status[] = ["Light Green", "Dark Green"];
 
@@ -126,7 +126,8 @@ function formatGaps(
   const describeBlock = (b: StatusBlock) => {
     const { start, end } = formatWindow(graphData, b, null, null, false);
     const label = b.status.toLowerCase();
-    const reasonText = b.reasons.length > 0 ? ` due to ${b.reasons.join(", ")}` : "";
+    const reasonText =
+      b.reasons.length > 0 ? ` due to ${b.reasons.join(", ")}` : "";
     return `${start}–${end} ${label}${reasonText}`;
   };
 
@@ -152,7 +153,6 @@ export function buildBestPaddlingTimes(
 ): BestPaddlingTimes | null {
   if (!todayForecast) return null;
 
-  const now = new Date();
   const nowHour = getLondonHour();
   const futureSlots = todayForecast.graphData.filter(
     (pt) => hourOf(pt.time) >= nowHour && !pt.reasons.includes("Dark")
@@ -168,7 +168,9 @@ export function buildBestPaddlingTimes(
   const sunriseHHMM = todayForecast.sunrise
     ? hhmmOfISO(todayForecast.sunrise)
     : null;
-  const sunsetHHMM = todayForecast.sunset ? hhmmOfISO(todayForecast.sunset) : null;
+  const sunsetHHMM = todayForecast.sunset
+    ? hhmmOfISO(todayForecast.sunset)
+    : null;
   const label = bestStatus === "Light Green" ? "light green" : "dark green";
 
   const ranges = windows
@@ -182,9 +184,11 @@ export function buildBestPaddlingTimes(
       );
       let note = "";
       if (start === "now") {
+        // Window times are London clock times, so "now" must be too - the
+        // visitor's local getHours() would skew this outside UK time.
+        const [nowH, nowM] = getLondonHHMM().split(":").map(Number);
         const [endH, endM] = end.split(":").map(Number);
-        const remaining =
-          endH * 60 + endM - (now.getHours() * 60 + now.getMinutes());
+        const remaining = endH * 60 + endM - (nowH * 60 + nowM);
         if (remaining > 0 && remaining < 60) {
           note = ` – only ~${remaining} mins remaining`;
         }
@@ -210,7 +214,9 @@ export function buildHourlyForecastText(
   );
   if (slots.length === 0) return null;
 
-  const sunsetHHMM = todayForecast.sunset ? hhmmOfISO(todayForecast.sunset) : null;
+  const sunsetHHMM = todayForecast.sunset
+    ? hhmmOfISO(todayForecast.sunset)
+    : null;
 
   const lines = slots.map((pt, i) => {
     const h = hourOf(pt.time);
@@ -227,9 +233,7 @@ export function buildHourlyForecastText(
         ? `gusts up to ${formatWindGust(pt.windGust)}`
         : null;
     const weather = pt.weatherDescription ?? null;
-    const stats = [level, temp, wind, gust, weather]
-      .filter(Boolean)
-      .join(", ");
+    const stats = [level, temp, wind, gust, weather].filter(Boolean).join(", ");
     // The final daylight hour's conditions persist until sunset; later hours
     // are omitted only because it gets dark.
     const sunsetNote =
@@ -323,7 +327,13 @@ export function buildNextDaytimeOutlook(
     ? "warm rain at times"
     : null;
 
-  const rangesText = [levelText, tempText, windText, gustText, rainWhileWarmText]
+  const rangesText = [
+    levelText,
+    tempText,
+    windText,
+    gustText,
+    rainWhileWarmText,
+  ]
     .filter(Boolean)
     .join(", ");
 

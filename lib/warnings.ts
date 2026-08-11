@@ -23,7 +23,10 @@ export const isWarningActiveNow = (w: WeatherWarning, now: TZDate): boolean => {
 };
 
 // True if the warning hasn't expired yet (ignores whether it has started).
-export const isWarningNotExpired = (w: WeatherWarning, now: TZDate): boolean => {
+export const isWarningNotExpired = (
+  w: WeatherWarning,
+  now: TZDate
+): boolean => {
   if (!w.validToISO) return true;
   try {
     return parseLondonISO(w.validToISO) > now;
@@ -33,7 +36,10 @@ export const isWarningNotExpired = (w: WeatherWarning, now: TZDate): boolean => 
 };
 
 // True if the warning's valid window overlaps the given calendar day ("YYYY-MM-DD").
-export const isWarningOnDay = (w: WeatherWarning, dayISODate: string): boolean => {
+export const isWarningOnDay = (
+  w: WeatherWarning,
+  dayISODate: string
+): boolean => {
   if (!w.validFromISO || !w.validToISO) return false;
   const dayDate = parseLondonISO(dayISODate);
   const start = parseLondonISO(w.validFromISO);

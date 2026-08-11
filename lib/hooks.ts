@@ -25,6 +25,11 @@ import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+// Exported so the UI (offline banner, error alert) can recognise this exact
+// failure mode instead of string-matching a copy of the message.
+export const OFFLINE_NO_CACHE_ERROR =
+  "Offline – no cached data (reconnect and refresh)";
+
 const withRetry = async <T>(
   fn: () => Promise<T>,
   maxRetries = 2
@@ -73,6 +78,12 @@ export const useKayakData = () => {
   // network, never a quietly-stale cache.
   const hasConditionsRef = useRef(false);
   const hasForecastRef = useRef(false);
+  // When the on-screen data was actually fetched upstream (ms epoch), so the
+  // focus/online listeners below can tell whether it's worth refetching.
+  const lastFetchedAtRef = useRef(0);
+  // Guards against overlapping fetches (e.g. regaining focus while the
+  // initial load is still in flight).
+  const fetchInFlightRef = useRef(false);
 
   useEffect(() => {
     setIsOffline(!navigator.onLine);
@@ -98,7 +109,7 @@ export const useKayakData = () => {
       // Each key is parsed independently so one corrupted entry (e.g. from an
       // older app version's schema) doesn't prevent the other, valid, cached
       // values from loading.
-      const loadCached = <T,>(
+      const loadCached = <T>(
         key: string,
         setter: (value: T) => void
       ): boolean => {
@@ -113,9 +124,14 @@ export const useKayakData = () => {
         }
       };
 
-      const hasCachedConditions = loadCached(
+      const hasCachedConditions = loadCached<KayakConditions>(
         STORAGE_KEYS.CONDITIONS,
-        setConditions
+        (value) => {
+          setConditions(value);
+          if (value?.lastUpdated) {
+            lastFetchedAtRef.current = new Date(value.lastUpdated).getTime();
+          }
+        }
       );
       if (hasCachedConditions) hasConditionsRef.current = true;
       const hasCachedForecast = loadCached(
@@ -142,6 +158,8 @@ export const useKayakData = () => {
   }, []);
 
   const fetchData = useCallback(async () => {
+    if (fetchInFlightRef.current) return;
+    fetchInFlightRef.current = true;
     let conditionsObj: KayakConditions | null = null;
     try {
       // Every online fetch shows the spinner - initial load, background
@@ -160,7 +178,7 @@ export const useKayakData = () => {
       }
       setError(null);
 
-      const readRawCache = <T,>(key: string): T | null => {
+      const readRawCache = <T>(key: string): T | null => {
         if (typeof window === "undefined") return null;
         const raw = localStorage.getItem(key);
         if (!raw) return null;
@@ -312,6 +330,7 @@ export const useKayakData = () => {
       setConditions(conditionsObj);
       setLoading(false);
       hasConditionsRef.current = true;
+      lastFetchedAtRef.current = new Date(fetchedAt).getTime();
 
       // Build 5-day forecast (today + 4 days ahead)
       const currentHour = getLondonHour();
@@ -519,12 +538,13 @@ export const useKayakData = () => {
         offline
           ? hasCache
             ? null
-            : "Offline – no cached data (reconnect and refresh)"
+            : OFFLINE_NO_CACHE_ERROR
           : hasCache
             ? null
             : "Failed to load conditions. Check your connection and tap refresh to try again."
       );
     } finally {
+      fetchInFlightRef.current = false;
       setLoading(false);
       setForecastLoading(false);
       setIsRefreshing(false);
@@ -533,6 +553,25 @@ export const useKayakData = () => {
 
   useEffect(() => {
     fetchData();
+  }, [fetchData]);
+
+  // Self-heal long-lived tabs: a phone re-opening the app (or regaining
+  // signal) with data past the stale threshold refetches immediately instead
+  // of showing the stale banner until someone taps refresh manually.
+  useEffect(() => {
+    const refetchIfStale = () => {
+      if (document.visibilityState !== "visible") return;
+      if (!navigator.onLine) return;
+      const isStale =
+        Date.now() - lastFetchedAtRef.current > DATA_STALE_THRESHOLD_MS;
+      if (isStale) fetchData();
+    };
+    document.addEventListener("visibilitychange", refetchIfStale);
+    window.addEventListener("online", refetchIfStale);
+    return () => {
+      document.removeEventListener("visibilitychange", refetchIfStale);
+      window.removeEventListener("online", refetchIfStale);
+    };
   }, [fetchData]);
 
   return {

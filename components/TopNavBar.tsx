@@ -16,6 +16,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ShareIcon from "@mui/icons-material/Share";
 import SettingsModal from "./SettingsModal";
 import { useKayakContext } from "@/lib/KayakDataContext";
+import { OFFLINE_NO_CACHE_ERROR } from "@/lib/hooks";
 import { degreesToCompass } from "@/lib/weather";
 import { ragStatus } from "@/lib/rag";
 import { THRESHOLDS, DATA_STALE_THRESHOLD_MS } from "@/lib/config";
@@ -149,8 +150,7 @@ const TopNavBar = () => {
   const { refetch, conditions, forecastDays, isOffline, error, isRefreshing } =
     useKayakContext();
 
-  const isOfflineError =
-    error === "Offline – no cached data (reconnect and refresh)";
+  const isOfflineError = error === OFFLINE_NO_CACHE_ERROR;
 
   // Initialize state dynamically based on the current context value on render
   const [relativeLastUpdated, setRelativeLastUpdated] = useState<string>(() =>
@@ -190,11 +190,21 @@ const TopNavBar = () => {
 
   const handleShare = async () => {
     const text = buildShareText(conditions, forecastDays);
-    if (navigator.share) {
-      await navigator.share({ title: "Paddlecheck", text });
-    } else {
-      await navigator.clipboard.writeText(text);
-      setSnackbarOpen(true);
+    // Give recipients a way back to the app - the summary alone has no link.
+    const url = window.location.origin;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Paddlecheck", text, url });
+      } else {
+        await navigator.clipboard.writeText(`${text}\n\n${url}`);
+        setSnackbarOpen(true);
+      }
+    } catch (err) {
+      // Dismissing the native share sheet rejects with AbortError - that's
+      // a normal cancel, not a failure worth surfacing.
+      if ((err as DOMException)?.name !== "AbortError") {
+        console.error("Share failed:", err);
+      }
     }
   };
 
@@ -222,9 +232,7 @@ const TopNavBar = () => {
         </StatusBanner>
       </Collapse>
       <Collapse in={isOfflineError} unmountOnExit>
-        <StatusBanner severity="error">
-          Offline – no cached data (reconnect and refresh)
-        </StatusBanner>
+        <StatusBanner severity="error">{OFFLINE_NO_CACHE_ERROR}</StatusBanner>
       </Collapse>
       <AppBar position="static" color="inherit" elevation={0}>
         <Toolbar sx={{ justifyContent: "space-between" }}>

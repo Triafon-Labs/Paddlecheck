@@ -11,7 +11,6 @@ import {
   Box,
   Divider,
   Link,
-  ToggleButtonGroup,
   ToggleButton,
   IconButton,
   Chip,
@@ -59,6 +58,7 @@ import {
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { m3Duration, m3Easing } from "@/lib/m3-palette";
+import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 
 interface SettingsModalProps {
   open: boolean;
@@ -281,7 +281,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
               Theme
             </Typography>
-            <ToggleButtonGroup
+            <SlidingToggleButtonGroup
               value={themeMode}
               exclusive
               onChange={(_, val: ThemeMode | null) => {
@@ -293,7 +293,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               <ToggleButton value="light">Light</ToggleButton>
               <ToggleButton value="system">System</ToggleButton>
               <ToggleButton value="dark">Dark</ToggleButton>
-            </ToggleButtonGroup>
+            </SlidingToggleButtonGroup>
 
             <Divider sx={{ my: 2 }} />
 

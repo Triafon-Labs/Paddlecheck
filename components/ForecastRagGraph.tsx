@@ -9,7 +9,6 @@ import {
   Skeleton,
   Paper,
   useTheme,
-  ToggleButtonGroup,
   ToggleButton,
   Divider,
   Link,
@@ -43,6 +42,7 @@ import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { formatMetTime } from "@/lib/weather";
 import { isWarningOnDay } from "@/lib/warnings";
 import { m3Easing } from "@/lib/m3-palette";
+import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 
 interface ForecastRagGraphProps {
   forecastDays: DayForecast[] | null;
@@ -438,7 +438,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
           forecastDays &&
           forecastDays.length > 0 && (
             <Box sx={{ pt: 2, pb: 2 }}>
-              <ToggleButtonGroup
+              <SlidingToggleButtonGroup
                 value={selectedDay}
                 exclusive
                 onChange={(_, val) => {
@@ -452,7 +452,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                     {day.label}
                   </ToggleButton>
                 ))}
-              </ToggleButtonGroup>
+              </SlidingToggleButtonGroup>
             </Box>
           )
         )}

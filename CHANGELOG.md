@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.25.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.24.1...paddlecheck-v1.25.0) (2026-08-11)
+
+
+### Features
+
+* show a coloured warning indicator on day buttons with warnings ([127c207](https://github.com/dylanr97/Paddlecheck/commit/127c2078a2723744339aaf34f0d9b6c2fb647b2e))
+
+
+### Bug Fixes
+
+* align day-button warning indicator next to the label ([22cf2f2](https://github.com/dylanr97/Paddlecheck/commit/22cf2f2b836f521433d6383a7aff28bf4f143f4a))
+* only surface weather warnings within the day being briefed ([43e9c0c](https://github.com/dylanr97/Paddlecheck/commit/43e9c0c95018fa4466cbcda536e01bbe4feeb193))
+* stop AI briefing treating upcoming weather warnings as active now ([903050e](https://github.com/dylanr97/Paddlecheck/commit/903050ef800225caf95f9ccbc8b28818f09ac5d9))
+* stop warning indicator wrapping day labels on narrow screens ([32c7f77](https://github.com/dylanr97/Paddlecheck/commit/32c7f772ca8f3863a0cd44a7c5b4680fa0711d36))
+
 ## [1.24.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.24.0...paddlecheck-v1.24.1) (2026-08-08)
 
 

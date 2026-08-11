@@ -14,6 +14,7 @@ import {
   Divider,
   Link,
   Stack,
+  Badge,
 } from "@mui/material";
 import {
   ComposedChart,
@@ -429,15 +430,23 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                   const warningColor = daySeverityColor(day, warnings);
                   return (
                     <ToggleButton key={i} value={i}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                        {day.label}
-                        {warningColor && (
-                          <WarningIcon
-                            titleAccess="Weather warning in force"
-                            sx={{ fontSize: 14, color: warningColor }}
-                          />
-                        )}
-                      </Box>
+                      {warningColor ? (
+                        <Badge
+                          variant="dot"
+                          title="Weather warning in force"
+                          sx={{
+                            "& .MuiBadge-badge": {
+                              backgroundColor: warningColor,
+                              top: -2,
+                              right: -6,
+                            },
+                          }}
+                        >
+                          {day.label}
+                        </Badge>
+                      ) : (
+                        day.label
+                      )}
                     </ToggleButton>
                   );
                 })}

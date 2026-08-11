@@ -17,7 +17,6 @@ import {
   Skeleton,
   useTheme,
   Paper,
-  ToggleButtonGroup,
   ToggleButton,
   Divider,
   Grow,
@@ -45,6 +44,7 @@ import { TIME_PERIODS } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { m3Easing } from "@/lib/m3-palette";
+import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
@@ -562,7 +562,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 As of {dataAgeLabel}
               </Typography>
             )}
-            <ToggleButtonGroup
+            <SlidingToggleButtonGroup
               value={timeRange}
               exclusive
               onChange={(_event, newTimeRange) => {
@@ -595,7 +595,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               >
                 <Typography variant="caption">Forecast</Typography>
               </ToggleButton>
-            </ToggleButtonGroup>
+            </SlidingToggleButtonGroup>
           </>
         )}
         {renderContent()}

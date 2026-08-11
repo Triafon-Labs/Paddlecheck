@@ -257,6 +257,9 @@ const components: ThemeOptions["components"] = {
           borderRadius: 9999,
           border: "none",
           textTransform: "none",
+          // Lets label/icon colour recolour in step with SlidingToggleButtonGroup's
+          // pill sliding underneath, rather than flipping instantly.
+          transition: `color ${m3Duration.short4}ms ${m3Easing.standard}`,
         },
         ...perScheme(theme, (m3) => ({
           "&.Mui-selected": {

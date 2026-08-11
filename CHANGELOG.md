@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.26.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.25.0...paddlecheck-v1.26.0) (2026-08-11)
+
+
+### Features
+
+* add entrance and state-change animations across the app ([b4ee98d](https://github.com/dylanr97/Paddlecheck/commit/b4ee98d3b85c2eb1afedfe8b38c7bb927aeceb71))
+
+
+### Bug Fixes
+
+* replace ResizeObserver height-sync with a proper FLIP transition ([6c32532](https://github.com/dylanr97/Paddlecheck/commit/6c325327b5b7d293ce910fc34c33c245c24bdf98))
+* smooth out settings tab switch, key accordion, and forecast dots ([378edef](https://github.com/dylanr97/Paddlecheck/commit/378edef69303bd4600792af500bcc1ae22248984))
+* stop animating the settings drawer height, match tallest tab instead ([a192e92](https://github.com/dylanr97/Paddlecheck/commit/a192e9227a83861ed500a514ee5c57d917566215))
+* sync forecast bar markers to bar growth, animate settings drawer height ([01b7575](https://github.com/dylanr97/Paddlecheck/commit/01b7575201fcd53b3bcf2b72b402cd4ee56bb27c))
+
 ## [1.25.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.24.1...paddlecheck-v1.25.0) (2026-08-11)
 
 

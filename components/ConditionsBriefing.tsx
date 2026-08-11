@@ -7,7 +7,7 @@ import { KayakConditions } from "@/types";
 import InfoPanel from "./InfoPanel";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { useBriefing } from "@/lib/useBriefing";
-import { AI_SUMMARY_ENABLED, DEFAULT_AI_MODEL } from "@/lib/config";
+import { DEFAULT_AI_MODEL } from "@/lib/config";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 export const SETTINGS_CHANGED_EVENT = "paddlecheck:settings-changed";
@@ -41,8 +41,6 @@ export default function ConditionsBriefing({
     auto,
     model
   );
-
-  if (!AI_SUMMARY_ENABLED) return null;
 
   return (
     <InfoPanel align="flex-start">

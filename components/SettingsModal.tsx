@@ -47,7 +47,6 @@ import { SETTINGS_CHANGED_EVENT } from "@/components/ConditionsBriefing";
 import { PADDLER_LEVEL_CHANGED_EVENT } from "@/components/PaddlingMatrixCard";
 import { PaddlerType, Status } from "@/types";
 import {
-  AI_SUMMARY_ENABLED,
   RAG_STATUS_UI,
   THRESHOLDS,
   VISIBILITY_DESCRIPTIONS,
@@ -320,33 +319,29 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               </Select>
             </FormControl>
 
-            {AI_SUMMARY_ENABLED && (
-              <>
-                <Divider sx={{ my: 2 }} />
+            <Divider sx={{ my: 2 }} />
 
-                <Typography variant="h6" gutterBottom>
-                  AI Summary
-                </Typography>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={autoSummarise}
-                      onChange={handleAutoSummariseChange}
-                    />
-                  }
-                  label="Auto-summarise conditions on load"
+            <Typography variant="h6" gutterBottom>
+              AI Summary
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={autoSummarise}
+                  onChange={handleAutoSummariseChange}
                 />
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  display="block"
-                  sx={{ mt: 0.5 }}
-                >
-                  When off, tap &ldquo;Generate AI Summary&rdquo; inside the
-                  status card to generate one on demand.
-                </Typography>
-              </>
-            )}
+              }
+              label="Auto-summarise conditions on load"
+            />
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+              sx={{ mt: 0.5 }}
+            >
+              When off, tap &ldquo;Generate AI Summary&rdquo; inside the status
+              card to generate one on demand.
+            </Typography>
           </Box>
         </Box>
 

@@ -7,7 +7,6 @@ import {
   VISIBILITY_DESCRIPTIONS,
   DEFAULT_AI_MODEL,
   ALLOWED_AI_MODELS,
-  AI_SUMMARY_ENABLED,
 } from "@/lib/config";
 import {
   formatRiverLevel,
@@ -173,9 +172,6 @@ async function* stripThinkTags(
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
-  if (!AI_SUMMARY_ENABLED) {
-    return new Response("AI Summary is disabled", { status: 503 });
-  }
   if (!process.env.GROQ_API_KEY) {
     return new Response("API key not configured", { status: 503 });
   }

@@ -18,7 +18,6 @@ import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import InfoPanel from "./InfoPanel";
 import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
-import { AI_SUMMARY_ENABLED } from "@/lib/config";
 import { formatWindGust } from "@/lib/units";
 import { m3Easing } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
@@ -223,16 +222,14 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               </Box>
             </Collapse>
             <WeatherWarnings warnings={conditions.warnings} />
-            {AI_SUMMARY_ENABLED && (
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  AI Overview
-                </Typography>
-                <Box sx={{ mt: 1 }}>
-                  <ConditionsBriefing conditions={conditions} />
-                </Box>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" color="text.secondary">
+                AI Overview
+              </Typography>
+              <Box sx={{ mt: 1 }}>
+                <ConditionsBriefing conditions={conditions} />
               </Box>
-            )}
+            </Box>
           </Box>
         </Grow>
       );

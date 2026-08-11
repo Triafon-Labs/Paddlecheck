@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
 import { buildHourlyForecastText, buildNextDaytimeOutlook } from "@/lib/forecast";
 import { getLondonHHMM, hhmmOfISO } from "@/lib/time";
-import { londonNow, isWarningNotExpired } from "@/lib/warnings";
+import { isWarningOnDay } from "@/lib/warnings";
 
 async function streamBriefing(
   conditions: KayakConditions,
@@ -40,10 +40,12 @@ async function streamBriefing(
   const hourlyForecast = targetDay ? buildHourlyForecastText(targetDay) : null;
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
-  // Filter for warnings that are active or upcoming (i.e. haven't expired yet)
-  const now = londonNow();
-  const relevantWarnings =
-    conditions.warnings?.filter((w) => isWarningNotExpired(w, now)) || [];
+  // Only surface warnings that actually fall within the day being summarised
+  // (today, or the next daylight day if it's currently dark) - a warning for
+  // later in the week shouldn't show up in "today's" briefing.
+  const relevantWarnings = targetDay
+    ? conditions.warnings?.filter((w) => isWarningOnDay(w, targetDay.date)) || []
+    : [];
 
   const conditionsWithRelevantWarnings = {
     ...conditions,

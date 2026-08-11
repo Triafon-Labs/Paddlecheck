@@ -428,20 +428,16 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                 {forecastDays.map((day, i) => {
                   const warningColor = daySeverityColor(day, warnings);
                   return (
-                    <ToggleButton key={i} value={i} sx={{ position: "relative" }}>
-                      {day.label}
-                      {warningColor && (
-                        <WarningIcon
-                          titleAccess="Weather warning in force"
-                          sx={{
-                            position: "absolute",
-                            top: 2,
-                            right: 2,
-                            fontSize: 12,
-                            color: warningColor,
-                          }}
-                        />
-                      )}
+                    <ToggleButton key={i} value={i}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                        {day.label}
+                        {warningColor && (
+                          <WarningIcon
+                            titleAccess="Weather warning in force"
+                            sx={{ fontSize: 14, color: warningColor }}
+                          />
+                        )}
+                      </Box>
                     </ToggleButton>
                   );
                 })}

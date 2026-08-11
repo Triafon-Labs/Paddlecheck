@@ -14,7 +14,6 @@ import {
   Divider,
   Link,
   Stack,
-  Badge,
 } from "@mui/material";
 import {
   ComposedChart,
@@ -29,12 +28,7 @@ import {
   ReferenceLine,
   LabelList,
 } from "recharts";
-import {
-  DayForecast,
-  ForecastGraphDataPoint,
-  WeatherWarning,
-  WarningSeverity,
-} from "@/types";
+import { DayForecast, ForecastGraphDataPoint, WeatherWarning } from "@/types";
 import { ragStatus, describeReason } from "@/lib/rag";
 import { REASON_ICONS, WARNING_COLORS } from "@/lib/config";
 import { formatRiverLevel, formatWindGust } from "@/lib/units";
@@ -248,20 +242,6 @@ const BarLabel = (props: BarLabelProps) => {
   return <g>{elements}</g>;
 };
 
-const SEVERITY_ORDER: WarningSeverity[] = ["Red", "Amber", "Yellow"];
-
-// Most severe warning colour for a day, or null if the day has none.
-const daySeverityColor = (
-  day: DayForecast,
-  warnings: WeatherWarning[] | undefined
-): string | null => {
-  const dayWarnings = warnings?.filter((w) => isWarningOnDay(w, day.date)) || [];
-  const severity = SEVERITY_ORDER.find((s) =>
-    dayWarnings.some((w) => w.severity === s)
-  );
-  return severity ? WARNING_COLORS[severity] : null;
-};
-
 const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   forecastDays,
   warnings,
@@ -426,30 +406,9 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                 fullWidth
                 size="small"
               >
-                {forecastDays.map((day, i) => {
-                  const warningColor = daySeverityColor(day, warnings);
-                  return (
-                    <ToggleButton key={i} value={i}>
-                      {warningColor ? (
-                        <Badge
-                          variant="dot"
-                          title="Weather warning in force"
-                          sx={{
-                            "& .MuiBadge-badge": {
-                              backgroundColor: warningColor,
-                              top: -2,
-                              right: -6,
-                            },
-                          }}
-                        >
-                          {day.label}
-                        </Badge>
-                      ) : (
-                        day.label
-                      )}
-                    </ToggleButton>
-                  );
-                })}
+                {forecastDays.map((day, i) => (
+                  <ToggleButton key={i} value={i}>{day.label}</ToggleButton>
+                ))}
               </ToggleButtonGroup>
             </Box>
           )

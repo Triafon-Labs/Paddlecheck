@@ -25,6 +25,11 @@ import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+// Exported so the UI (offline banner, error alert) can recognise this exact
+// failure mode instead of string-matching a copy of the message.
+export const OFFLINE_NO_CACHE_ERROR =
+  "Offline – no cached data (reconnect and refresh)";
+
 const withRetry = async <T>(
   fn: () => Promise<T>,
   maxRetries = 2
@@ -98,7 +103,7 @@ export const useKayakData = () => {
       // Each key is parsed independently so one corrupted entry (e.g. from an
       // older app version's schema) doesn't prevent the other, valid, cached
       // values from loading.
-      const loadCached = <T,>(
+      const loadCached = <T>(
         key: string,
         setter: (value: T) => void
       ): boolean => {
@@ -160,7 +165,7 @@ export const useKayakData = () => {
       }
       setError(null);
 
-      const readRawCache = <T,>(key: string): T | null => {
+      const readRawCache = <T>(key: string): T | null => {
         if (typeof window === "undefined") return null;
         const raw = localStorage.getItem(key);
         if (!raw) return null;
@@ -519,7 +524,7 @@ export const useKayakData = () => {
         offline
           ? hasCache
             ? null
-            : "Offline – no cached data (reconnect and refresh)"
+            : OFFLINE_NO_CACHE_ERROR
           : hasCache
             ? null
             : "Failed to load conditions. Check your connection and tap refresh to try again."

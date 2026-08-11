@@ -141,8 +141,12 @@ const CustomTooltip = ({
   payload,
   label,
 }: TooltipContentProps<ValueType, NameType>) => {
-  if (active && payload && payload.length && label) {
-    const value = payload[0].value as number;
+  if (active && payload && payload.length && label != null) {
+    // The forecast view charts two series ("actual" and "forecasted") where
+    // one is always null, so take the first entry that actually has a value.
+    const value = payload.find((p) => typeof p.value === "number")?.value as
+      number | undefined;
+    if (value === undefined) return null;
     // label is either an ISO string (historical views) or a numeric timestamp (forecast view)
     const date = new Date(typeof label === "number" ? label : label);
     const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(

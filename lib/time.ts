@@ -17,7 +17,13 @@ export const formatDataAge = (latestTs: number, now: Date): string => {
   if (ageMinutes < 60) return `${ageMinutes} min ago`;
   const hours = Math.floor(ageMinutes / 60);
   const minutes = ageMinutes % 60;
-  const duration = minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
+  if (hours < 24) {
+    const duration = minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
+    return `${duration} ago`;
+  }
+  const days = Math.floor(hours / 24);
+  const remHours = hours % 24;
+  const duration = remHours === 0 ? `${days}d` : `${days}d ${remHours}h`;
   return `${duration} ago`;
 };
 
@@ -35,7 +41,11 @@ export const getRelativeTimeString = (
   if (diffMins < 60) return `${diffMins} minutes ago`;
 
   const diffHours = Math.floor(diffMins / 60);
-  return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
+  if (diffHours < 24)
+    return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  return diffDays === 1 ? "1 day ago" : `${diffDays} days ago`;
 };
 
 // Current time in Europe/London as "HH:MM", regardless of the runtime's local timezone.

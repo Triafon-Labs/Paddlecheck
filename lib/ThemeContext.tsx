@@ -40,7 +40,11 @@ export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
     const savedTheme = localStorage.getItem(
       STORAGE_KEYS.THEME_MODE
     ) as ThemeMode | null;
-    if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") {
+    if (
+      savedTheme === "light" ||
+      savedTheme === "dark" ||
+      savedTheme === "system"
+    ) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeMode(savedTheme);
     }
@@ -75,6 +79,11 @@ export const AppThemeProvider = ({ children }: { children: ReactNode }) => {
         <CssBaseline />
         <GlobalStyles
           styles={{
+            // globals.css guesses color-scheme from the OS preference before
+            // hydration; once the real theme is resolved (which may be the
+            // opposite of the OS, if explicitly chosen) this corrects it so
+            // scrollbars and form controls match the active theme.
+            html: { colorScheme: resolvedMode },
             body: { backgroundColor: activeTheme.palette.background.default },
           }}
         />

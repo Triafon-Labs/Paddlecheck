@@ -18,6 +18,7 @@ import { KayakConditions } from "@/types";
 import TrafficLight from "./TrafficLight";
 import InfoPanel from "./InfoPanel";
 import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
+import { AI_SUMMARY_ENABLED } from "@/lib/config";
 import { formatWindGust } from "@/lib/units";
 import { m3Easing } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
@@ -69,7 +70,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                 gridTemplateColumns: "repeat(2, 1fr)",
                 gap: 1,
                 mt: 1,
-                "& > *:last-child:nth-child(odd)": {
+                "& > *:last-of-type:nth-of-type(odd)": {
                   gridColumn: "1 / -1",
                 },
               }}
@@ -153,7 +154,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                     gridTemplateColumns: "repeat(2, 1fr)",
                     gap: 1,
                     mt: 1,
-                    "& > *:last-child:nth-child(odd)": {
+                    "& > *:last-of-type:nth-of-type(odd)": {
                       gridColumn: "1 / -1",
                     },
                   }}
@@ -222,14 +223,16 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               </Box>
             </Collapse>
             <WeatherWarnings warnings={conditions.warnings} />
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary">
-                AI Overview
-              </Typography>
-              <Box sx={{ mt: 1 }}>
-                <ConditionsBriefing conditions={conditions} />
+            {AI_SUMMARY_ENABLED && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  AI Overview
+                </Typography>
+                <Box sx={{ mt: 1 }}>
+                  <ConditionsBriefing conditions={conditions} />
+                </Box>
               </Box>
-            </Box>
+            )}
           </Box>
         </Grow>
       );

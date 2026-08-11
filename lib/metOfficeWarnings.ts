@@ -17,9 +17,27 @@ const parseMetTimeToISO = (timeStr: string, baseDate: Date) => {
     // Format is "HHmm EEE d MMM"
     // We need to append the year because the Met Office RSS doesn't include it
     const year = baseDate.getFullYear();
-    const parsed = parse(`${timeStr} ${year}`, "HHmm EEE d MMM yyyy", new Date(), {
-      in: tz("Europe/London"),
-    });
+    let parsed = parse(
+      `${timeStr} ${year}`,
+      "HHmm EEE d MMM yyyy",
+      new Date(),
+      {
+        in: tz("Europe/London"),
+      }
+    );
+    // Year rollover: a warning published in late December can be valid into
+    // early January. Naively stamping it with the publication year would date
+    // it ~a year in the past, so anything far behind the publication date
+    // must really mean next year.
+    const SIX_MONTHS_MS = 182 * 24 * 60 * 60 * 1000;
+    if (baseDate.getTime() - parsed.getTime() > SIX_MONTHS_MS) {
+      parsed = parse(
+        `${timeStr} ${year + 1}`,
+        "HHmm EEE d MMM yyyy",
+        new Date(),
+        { in: tz("Europe/London") }
+      );
+    }
     return formatISO(parsed);
   } catch (e) {
     console.error("Failed to parse Met Office time:", timeStr, e);
@@ -83,7 +101,9 @@ export const fetchWeatherWarnings = async (
     Yellow: 2,
   };
 
-  warnings.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
+  warnings.sort(
+    (a, b) => severityOrder[a.severity] - severityOrder[b.severity]
+  );
 
   return warnings;
 };

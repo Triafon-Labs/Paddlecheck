@@ -47,6 +47,7 @@ import { SETTINGS_CHANGED_EVENT } from "@/components/ConditionsBriefing";
 import { PADDLER_LEVEL_CHANGED_EVENT } from "@/components/PaddlingMatrixCard";
 import { PaddlerType, Status } from "@/types";
 import {
+  AI_SUMMARY_ENABLED,
   RAG_STATUS_UI,
   THRESHOLDS,
   VISIBILITY_DESCRIPTIONS,
@@ -319,7 +320,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               </Select>
             </FormControl>
 
-            {process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY !== "false" && (
+            {AI_SUMMARY_ENABLED && (
               <>
                 <Divider sx={{ my: 2 }} />
 

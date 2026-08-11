@@ -6,6 +6,8 @@ import {
   THRESHOLDS,
   VISIBILITY_DESCRIPTIONS,
   DEFAULT_AI_MODEL,
+  ALLOWED_AI_MODELS,
+  AI_SUMMARY_ENABLED,
 } from "@/lib/config";
 import {
   formatRiverLevel,
@@ -58,7 +60,8 @@ const COMPASS_WORDS: Record<string, string> = {
 };
 
 function buildConditionsParts(req: SummaryRequest): string {
-  const { conditions, hourlyForecast, currentlyDark, currentTime, outlook } = req;
+  const { conditions, hourlyForecast, currentlyDark, currentTime, outlook } =
+    req;
 
   const compass =
     conditions.windDirection !== undefined
@@ -170,7 +173,7 @@ async function* stripThinkTags(
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: Request) {
-  if (process.env.NEXT_PUBLIC_FEATURE_AI_SUMMARY === "false") {
+  if (!AI_SUMMARY_ENABLED) {
     return new Response("AI Summary is disabled", { status: 503 });
   }
   if (!process.env.GROQ_API_KEY) {
@@ -180,9 +183,16 @@ export async function POST(request: Request) {
   const body: SummaryRequest = await request.json();
   const conditionsParts = buildConditionsParts(body);
 
+  // The model name arrives from the client, so it can't be trusted as-is -
+  // anything outside the allowlist would let arbitrary visitors run whichever
+  // Groq model they like on this deployment's API key.
+  const model = ALLOWED_AI_MODELS.includes(body.model ?? DEFAULT_AI_MODEL)
+    ? (body.model ?? DEFAULT_AI_MODEL)
+    : DEFAULT_AI_MODEL;
+
   const client = new Groq();
   const groqStream = await client.chat.completions.create({
-    model: body.model ?? DEFAULT_AI_MODEL,
+    model,
     temperature: 0.7,
     top_p: 0.95,
     max_tokens: 2048,

@@ -7,6 +7,7 @@ import StatsCard from "@/components/StatsCard";
 import RiverLevelGraph from "@/components/RiverLevelGraph";
 import ForecastRagGraph from "@/components/ForecastRagGraph";
 import { useKayakContext } from "@/lib/KayakDataContext";
+import { OFFLINE_NO_CACHE_ERROR } from "@/lib/hooks";
 
 export default function HomePage() {
   const {
@@ -27,10 +28,7 @@ export default function HomePage() {
     <Container maxWidth="md">
       <Stack spacing={4}>
         <Collapse
-          in={
-            !!error &&
-            error !== "Offline – no cached data (reconnect and refresh)"
-          }
+          in={!!error && error !== OFFLINE_NO_CACHE_ERROR}
           unmountOnExit
         >
           <Alert severity="error" sx={{ borderRadius: 1 }}>

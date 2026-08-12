@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.29.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.28.0...paddlecheck-v1.29.0) (2026-08-12)
+
+
+### Features
+
+* require high vis for paddlers below Independent ([5e17ed0](https://github.com/dylanr97/Paddlecheck/commit/5e17ed06d831b0428b2fcd307e8fc47dc9c27210))
+
+
+### Bug Fixes
+
+* reword visibility rule away from PPE-grade hi vis ([7aa50bb](https://github.com/dylanr97/Paddlecheck/commit/7aa50bbb5224c9725e1a6346b32dcced024a6358))
+* simplify visibility rule to a fluorescent top or bib ([2f6bbeb](https://github.com/dylanr97/Paddlecheck/commit/2f6bbebed8f0d9f6ee9d828fdd200d29c8190964))
+
 ## [1.28.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.27.0...paddlecheck-v1.28.0) (2026-08-11)
 
 

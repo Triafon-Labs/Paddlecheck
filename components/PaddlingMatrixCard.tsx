@@ -171,14 +171,12 @@ const getPaddlingMatrix = (
 
   // Everyone below Independent needs to be easy to spot from the bank and
   // from other boats, whatever the conditions. This isn't PPE-grade hi-vis -
-  // any bright or fluorescent layer counts, and there are mesh bibs in the
-  // stores to pull over your kit. Applied after the PFD rules above so it
-  // lands last in the list and doesn't disturb their "PFD required." lookups.
+  // a fluorescent top, or a bib pulled over your kit, is enough. Applied
+  // after the PFD rules above so it lands last in the list and doesn't
+  // disturb their "PFD required." lookups.
   for (const paddler of [beginner, improver, intermediate]) {
     if (paddler.status !== "No") {
-      paddler.details.push(
-        "Wear something bright or fluorescent – bibs in the stores."
-      );
+      paddler.details.push("Wear a fluorescent top or bib.");
     }
   }
 

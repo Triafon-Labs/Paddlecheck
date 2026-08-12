@@ -169,6 +169,15 @@ const getPaddlingMatrix = (
     addHighWaterPfdWarning(intermediate);
   }
 
+  // Everyone below Independent must be easily visible to other river users,
+  // whatever the conditions. Applied after the PFD rules above so it lands
+  // last in the list and doesn't disturb their "PFD required." lookups.
+  for (const paddler of [beginner, improver, intermediate]) {
+    if (paddler.status !== "No") {
+      paddler.details.push("High vis vest or top required.");
+    }
+  }
+
   matrix["Beginner"] = beginner;
   matrix["Improver"] = improver;
   matrix["Intermediate"] = intermediate;

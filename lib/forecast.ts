@@ -257,8 +257,15 @@ export function hasDaylightRemaining(
   );
 }
 
+// How a forecast day reads in prose, relative to today. Only the first two
+// days are ever reachable: it's dark either before sunrise (daylight still to
+// come today) or after sunset (the next daylight is tomorrow's), and no day
+// here is dark throughout.
+export const relativeDayLabel = (dayIndex: number): string =>
+  dayIndex === 0 ? "later today" : "tomorrow";
+
 export interface DaytimeOutlook {
-  dayLabel: string; // "later today" | "tomorrow" | day label
+  dayLabel: string; // "later today" | "tomorrow"
   bestTimes: string | null; // "09:00–17:00 (light green)" or null
   rangesText: string; // "river level between 0.55 m and 0.62 m, air temperature between 11.0°C and 18.0°C, wind up to 14.0 mph"
   gapsText: string | null; // "17:00–18:00 dark green due to High winds"
@@ -280,12 +287,7 @@ export function buildNextDaytimeOutlook(
   const daySlots = day.graphData.filter((pt) => !pt.reasons.includes("Dark"));
   if (daySlots.length === 0) return null;
 
-  const dayLabel =
-    dayIndex === 0
-      ? "later today"
-      : dayIndex === 1
-        ? "tomorrow"
-        : day.label.toLowerCase();
+  const dayLabel = relativeDayLabel(dayIndex);
 
   const levels = daySlots.map((s) => s.forecastLevel);
   const minL = Math.min(...levels);

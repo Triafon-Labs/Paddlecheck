@@ -5,6 +5,7 @@ import { KayakConditions, DayForecast } from "@/types";
 import {
   buildHourlyForecastText,
   buildNextDaytimeOutlook,
+  relativeDayLabel,
 } from "@/lib/forecast";
 import { getLondonHHMM, hhmmOfISO } from "@/lib/time";
 import { isWarningOnDay } from "@/lib/warnings";
@@ -32,14 +33,25 @@ async function streamBriefing(
 
   // Find the target day being summarized
   let targetDay = todayForecast;
+  let targetDayIndex = 0;
   if (currentlyDark && forecastDays) {
     const dayIndex = forecastDays.findIndex((day) =>
       day.graphData.some((pt) => !pt.reasons.includes("Dark"))
     );
     if (dayIndex !== -1) {
       targetDay = forecastDays[dayIndex];
+      targetDayIndex = dayIndex;
     }
   }
+
+  // Naming the period explicitly keeps the summary from reading as if a future
+  // day's figures apply right now ("levels will stay low, around 0.33 m in the
+  // morning" when the morning in question is tomorrow's).
+  const period = !targetDay
+    ? null
+    : currentlyDark
+      ? relativeDayLabel(targetDayIndex)
+      : "the rest of today";
 
   const hourlyForecast = targetDay ? buildHourlyForecastText(targetDay) : null;
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
@@ -66,6 +78,7 @@ async function streamBriefing(
       currentlyDark,
       currentTime,
       model,
+      period,
       outlook: outlook
         ? { dayLabel: outlook.dayLabel, rangesText: outlook.rangesText }
         : null,

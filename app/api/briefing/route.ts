@@ -27,6 +27,9 @@ interface SummaryRequest {
   currentlyDark?: boolean;
   currentTime?: string;
   model?: string;
+  // The daylight window the summary covers: "the rest of today", or - when
+  // it's already dark - "later today" or "tomorrow".
+  period?: string | null;
   outlook?: Outlook | null;
 }
 
@@ -35,9 +38,15 @@ interface SummaryRequest {
 const BRIEFING_PROMPT = `\
 You are writing a single-sentence summary of river and weather conditions for members of a kayaking club on the River Severn at Worcester, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day, with warmer weather on the way.").
 
-Write one to three short, natural sentences - the fewer the better - summarising conditions across the period the data covers: today's remaining daylight hours, or if it's currently dark, the next available daylight window (later today or tomorrow, stated plainly, e.g. "Tomorrow looks..."). Ground it in conditions at the start of that period (or right now, if summarising today), then say how they trend if they change - e.g. "breezy at the moment, easing off later", "the river is around 0.80 m, rising towards 1.50 m by evening", or "temperatures reaching up to 22.1°C by mid-afternoon" (a single peak figure, not a range). Pick the one or two most notable factors (wind, rain, river level, temperature) and genuinely leave the others out - every figure is already shown elsewhere in the app, so nothing is lost. If a second point earns its place, give it its own short sentence rather than chaining clauses with commas or semicolons. Don't enumerate individual hours. When you quote a figure, keep the units as they appear in the data, and don't add a space between a number and °C.
+Write one to three short, natural sentences - the fewer the better - summarising conditions across the period the data names ("Period to summarise"): the rest of today, or, if it's currently dark, the next daylight window - later today or tomorrow.
 
-Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising. Each warning is labelled "(currently active)" or "(upcoming - not yet in force)" - trust that label rather than working out timing from the dates yourself, and if it's upcoming, make that clear (e.g. "a yellow wind warning is in force from Thursday morning") rather than implying it applies right now.
+Unless that period is the rest of today, your first sentence must open by naming it: "Tomorrow, the river stays low...", "Later today...". Every figure and time of day you then mention (morning, mid-afternoon, evening) belongs to that period, so the reader is never left working out which day they apply to - "levels stay low, around 0.33 m in the morning" is wrong when the morning in question is tomorrow's. Naming the period once at the start is enough; don't repeat it in every sentence.
+
+Ground it in conditions at the start of that period (or right now, if summarising today), then say how they trend if they change - e.g. "breezy at the moment, easing off later", "the river is around 0.80 m, rising towards 1.50 m by evening", or "temperatures reaching up to 22.1°C by mid-afternoon" (a single peak figure, not a range). Pick the one or two most notable factors (wind, rain, river level, temperature) and genuinely leave the others out - every figure is already shown elsewhere in the app, so nothing is lost. If a second point earns its place, give it its own short sentence rather than chaining clauses with commas or semicolons. Don't enumerate individual hours.
+
+Quote figures exactly as the data writes them - "36.3°C", "0.33 m", "12.3 mph" - spacing included: no space before °C, a space before m and mph. Never soften a figure into a vague band: "mid-30s", "the high teens", "around 30-odd degrees" are all wrong, and a band with a unit attached ("mid-30s°C") doubly so. A figure not worth stating precisely is better left out than blurred.
+
+Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising. Each warning is labelled "(currently active)" or "(upcoming - not yet in force)" - trust that label rather than working out timing from the dates yourself, and if it's upcoming, make that clear rather than implying it applies right now. Every warning supplied falls in the period you're summarising, so time it against that period - "an amber heat warning comes into force tomorrow morning", never by weekday ("from Thursday morning"), which sounds like a different day again.
 
 Don't pass verdicts on whether or where to paddle ("a great day for a paddle") - the app's status rating covers that.
 
@@ -59,8 +68,14 @@ const COMPASS_WORDS: Record<string, string> = {
 };
 
 function buildConditionsParts(req: SummaryRequest): string {
-  const { conditions, hourlyForecast, currentlyDark, currentTime, outlook } =
-    req;
+  const {
+    conditions,
+    hourlyForecast,
+    currentlyDark,
+    currentTime,
+    period,
+    outlook,
+  } = req;
 
   const compass =
     conditions.windDirection !== undefined
@@ -77,7 +92,13 @@ function buildConditionsParts(req: SummaryRequest): string {
             : "upcoming - not yet in force";
           return `- ${w.severity} ${w.type} (${status}): ${w.headline}. Valid: ${formatMetTime(w.validFrom)} to ${formatMetTime(w.validTo)}`;
         })
-        .join("\n")}`
+        .join("\n")}${
+        // Every warning here has already been filtered to the day being
+        // summarised, so a weekday name only makes it sound like some other day.
+        period
+          ? `\nAll of these fall within ${period}, so pin a warning's timing to that period rather than naming its weekday.`
+          : ""
+      }`
     : null;
 
   // Current-conditions readings (as opposed to forecast/outlook data) only
@@ -85,6 +106,9 @@ function buildConditionsParts(req: SummaryRequest): string {
   // summary is for a future window instead – nothing here would apply.
   const lines: (string | null)[] = [
     currentTime ? `Current time: ${currentTime}` : null,
+    period
+      ? `Period to summarise: ${period}, daylight hours only. Every forecast figure below falls in this period, so any time of day you mention in the summary refers to it.`
+      : null,
     !currentlyDark && conditions.riverLevel !== undefined
       ? `River level: ${formatRiverLevel(conditions.riverLevel)}`
       : null,
@@ -114,7 +138,7 @@ function buildConditionsParts(req: SummaryRequest): string {
       ? `Visibility: ${conditions.visibilityDescription}`
       : null,
     hourlyForecast
-      ? `Hour-by-hour forecast for the summarized daylight window:\n${hourlyForecast}`
+      ? `Hour-by-hour forecast for ${period ?? "the summarised daylight window"}:\n${hourlyForecast}`
       : null,
     currentlyDark && outlook
       ? `It is currently dark. The outlook for ${outlook.dayLabel} is: ${outlook.rangesText}.`
@@ -169,6 +193,35 @@ async function* stripThinkTags(
   if (!inThink && buf) yield buf;
 }
 
+// Degrees are written tight against the number ("36.3°C") everywhere else in
+// the app, but the model drifts into "36.3 °C" often enough that asking it
+// nicely isn't sufficient - so the spacing is closed here regardless.
+const DEGREE_SPACE = /(\d)[ \t\u00A0\u202F]*(°)[ \t\u00A0\u202F]*([CF])\b/g;
+// A chunk can end part-way through a figure ("36.3 " with "°C" still to come),
+// so any tail that could still grow into one waits for the next chunk.
+const PARTIAL_DEGREE = /\d[ \t\u00A0\u202F]*(?:°[ \t\u00A0\u202F]*)?$/;
+
+const closeDegreeSpacing = (text: string) =>
+  text.replace(DEGREE_SPACE, "$1$2$3");
+
+async function* normaliseUnits(
+  stream: AsyncIterable<string>
+): AsyncGenerator<string> {
+  let held = "";
+
+  for await (const chunk of stream) {
+    const buf = held + chunk;
+    const partial = PARTIAL_DEGREE.exec(buf);
+    const cut = partial ? partial.index : buf.length;
+    held = buf.slice(cut);
+
+    const out = closeDegreeSpacing(buf.slice(0, cut));
+    if (out) yield out;
+  }
+
+  if (held) yield closeDegreeSpacing(held);
+}
+
 // ── Summary cache ─────────────────────────────────────────────────────────────
 
 // Every visitor in the same 15-minute data window is summarising identical
@@ -197,6 +250,7 @@ async function summaryCacheKey(
     conditions: body.conditions,
     hourlyForecast: body.hourlyForecast ?? null,
     currentlyDark: body.currentlyDark ?? false,
+    period: body.period ?? null,
     outlook: body.outlook ?? null,
     model,
   });
@@ -288,7 +342,7 @@ export async function POST(request: Request) {
     async start(controller) {
       let fullText = "";
       try {
-        for await (const text of stripThinkTags(groqStream)) {
+        for await (const text of normaliseUnits(stripThinkTags(groqStream))) {
           fullText += text;
           controller.enqueue(encoder.encode(text));
         }

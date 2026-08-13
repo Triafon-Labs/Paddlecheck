@@ -19,6 +19,7 @@ import {
 } from "@mui/icons-material";
 import { Status } from "@/types";
 import { formatRiverLevel } from "./units";
+import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
 
 // ============================================================================
 // CONFIGURATION
@@ -282,14 +283,26 @@ export const TIME_PERIODS = {
 };
 
 // --- Data Freshness ---
-// Data older than this is flagged as stale regardless of why - a momentary
-// blip that still leaves recent data on screen isn't worth alarming users
-// over, but the underlying sources (server-side, cached for 15 minutes) have
-// genuinely gone quiet for a while by this point. Also the threshold at which
-// the client forces a live re-fetch (see /api/conditions/live) rather than
-// waiting for someone else's request to eventually land after the cache's
-// background revalidation finishes.
-export const DATA_STALE_THRESHOLD_MS = 30 * 60 * 1000;
+// /api/conditions is cached for CONDITIONS_REVALIDATE_SECONDS, and once that
+// window is up the cache hands the *expired* entry to whoever arrives first
+// and regenerates behind them (stale-while-revalidate). So a payload older
+// than the window is proof the cache turned over on this very request: the
+// data on screen is last cycle's, and the fresh copy only lands for whoever
+// asks next. That threshold therefore has to sit just above the window - a
+// value set to some multiple of it (this was 30 minutes against a 15-minute
+// window) leaves a band where data is stale by the server's own contract yet
+// the client accepts it as fresh, so the live re-fetch never fires and the
+// "whoever asks next" that finally gets the regenerated data is the user
+// tapping refresh by hand.
+//
+// The grace on top absorbs regeneration latency and device clock skew, since
+// fetchedAt is stamped by the server clock and compared against the phone's.
+const STALE_GRACE_MS = 2 * 60 * 1000;
+// Data older than this forces a live re-fetch (see /api/conditions/live)
+// rather than waiting on background revalidation, and - if that re-fetch
+// can't get through either - is flagged as stale in the UI.
+export const DATA_STALE_THRESHOLD_MS =
+  CONDITIONS_REVALIDATE_SECONDS * 1000 + STALE_GRACE_MS;
 
 // --- AI Summary ---
 export const DEFAULT_AI_MODEL = "openai/gpt-oss-120b";

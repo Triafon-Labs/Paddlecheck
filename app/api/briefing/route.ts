@@ -1,7 +1,11 @@
 import Groq from "groq-sdk";
 import { KayakConditions } from "@/types";
-import { formatMetTime, degreesToCompass } from "@/lib/weather";
-import { londonNow, isWarningActiveNow } from "@/lib/warnings";
+import { degreesToCompass } from "@/lib/weather";
+import {
+  londonNow,
+  isWarningActiveNow,
+  formatWarningTime,
+} from "@/lib/warnings";
 import {
   THRESHOLDS,
   VISIBILITY_DESCRIPTIONS,
@@ -90,7 +94,7 @@ function buildConditionsParts(req: SummaryRequest): string {
           const status = isWarningActiveNow(w, now)
             ? "currently active"
             : "upcoming - not yet in force";
-          return `- ${w.severity} ${w.type} (${status}): ${w.headline}. Valid: ${formatMetTime(w.validFrom)} to ${formatMetTime(w.validTo)}`;
+          return `- ${w.severity} ${w.type} (${status}): ${w.headline}. Valid: ${formatWarningTime(w.validFromISO, w.validFrom)} to ${formatWarningTime(w.validToISO, w.validTo)}`;
         })
         .join("\n")}${
         // Every warning here has already been filtered to the day being

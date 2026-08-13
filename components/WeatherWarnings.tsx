@@ -3,9 +3,12 @@ import { Stack, Typography, Link, Box, Divider } from "@mui/material";
 import WarningIcon from "@mui/icons-material/Warning";
 import { WeatherWarning, WarningSeverity } from "@/types";
 import InfoPanel from "./InfoPanel";
-import { formatMetTime } from "@/lib/weather";
 import { WARNING_COLORS } from "@/lib/config";
-import { londonNow, isWarningActiveNow } from "@/lib/warnings";
+import {
+  londonNow,
+  isWarningActiveNow,
+  formatWarningTime,
+} from "@/lib/warnings";
 
 interface Props {
   warnings?: WeatherWarning[];
@@ -96,8 +99,15 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
                         }}
                       >
                         <Typography variant="caption" color="text.secondary">
-                          {formatMetTime(warning.validFrom)}–
-                          {formatMetTime(warning.validTo)}
+                          {formatWarningTime(
+                            warning.validFromISO,
+                            warning.validFrom
+                          )}
+                          –
+                          {formatWarningTime(
+                            warning.validToISO,
+                            warning.validTo
+                          )}
                         </Typography>
                         <Link
                           href={warning.link}

@@ -39,8 +39,7 @@ import WarningIcon from "@mui/icons-material/Warning";
 import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
-import { formatMetTime } from "@/lib/weather";
-import { isWarningOnDay } from "@/lib/warnings";
+import { isWarningOnDay, formatWarningTime } from "@/lib/warnings";
 import { m3Easing } from "@/lib/m3-palette";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 
@@ -504,8 +503,8 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                               variant="caption"
                               color="text.secondary"
                             >
-                              {formatMetTime(w.validFrom)}–
-                              {formatMetTime(w.validTo)}
+                              {formatWarningTime(w.validFromISO, w.validFrom)}–
+                              {formatWarningTime(w.validToISO, w.validTo)}
                             </Typography>
                             <Link
                               href={w.link}

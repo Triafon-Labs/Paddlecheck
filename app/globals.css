@@ -4,12 +4,11 @@ body {
   overflow-x: hidden;
 }
 
-body {
-  /* No font-family here: it's set from the theme's type scale via
-     CssBaseline, so hardcoding one would silently outrank Roboto Flex. */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* No body font rules here. The family comes from the theme's type scale via
+   CssBaseline, so hardcoding one would silently outrank Roboto Flex, and
+   smoothing is left at the browser default: -webkit-font-smoothing:
+   antialiased disables subpixel rendering on macOS and thins every stroke,
+   which fights the weights the type scale asks for. */
 
 * {
   box-sizing: border-box;

@@ -76,15 +76,21 @@ const surfacesFor = (m3: M3Palette): M3Surfaces => ({
   onInverse: m3.inverseOnSurface,
 });
 
-// M3 type scale mapped to MUI variants, exploiting Roboto Flex variable axes:
-//   wght (weight 100–900), wdth (width 25–151), opsz (optical size 8–144)
+// M3 type scale mapped to MUI variants, using Roboto Flex's opsz (optical
+// size) axis to pick letterforms drawn for each step's size.
 //
-// Note the wght axis is deliberately *not* listed in fontVariationSettings:
-// it's driven by each variant's `fontWeight` instead. Setting it here would
-// pin the axis, and since font-variation-settings outranks font-weight, every
-// `sx={{ fontWeight: … }}` at a call site would silently do nothing - which
-// takes M3's emphasised type styles off the table. The wdth and opsz axes
-// have no equivalent CSS property worth overriding, so they stay explicit.
+// Two axes are deliberately absent:
+//
+// wght is driven by each variant's `fontWeight` instead of being pinned here.
+// font-variation-settings outranks font-weight, so listing the axis made every
+// `sx={{ fontWeight: … }}` at a call site silently do nothing - which takes
+// M3's emphasised type styles off the table.
+//
+// wdth stays at the font's designed default. The scale previously widened the
+// headings to 105–112, but M3's type scale doesn't vary width at all (its
+// emphasised styles vary weight), and widened letterforms read as subtly
+// wrong. This was invisible while the family name was broken and everything
+// rendered in Arial, which has no width axis to stretch.
 const m3Typography: ThemeOptions["typography"] = {
   // next/font renames the family it registers, so naming "Roboto Flex" here
   // matched nothing and every MUI component quietly fell through to Helvetica
@@ -99,7 +105,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.127,
     letterSpacing: "-0.015625em",
-    fontVariationSettings: '"wdth" 112, "opsz" 57',
+    fontVariationSettings: '"opsz" 57',
   },
   // Display Medium
   h2: {
@@ -107,7 +113,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.156,
     letterSpacing: "0em",
-    fontVariationSettings: '"wdth" 110, "opsz" 45',
+    fontVariationSettings: '"opsz" 45',
   },
   // Display Small
   h3: {
@@ -115,7 +121,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.222,
     letterSpacing: "0em",
-    fontVariationSettings: '"wdth" 108, "opsz" 36',
+    fontVariationSettings: '"opsz" 36',
   },
   // Headline Large
   h4: {
@@ -123,7 +129,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.25,
     letterSpacing: "0em",
-    fontVariationSettings: '"wdth" 106, "opsz" 32',
+    fontVariationSettings: '"opsz" 32',
   },
   // Headline Small – used for card titles ("Paddling Status", "Detailed Stats")
   h5: {
@@ -131,7 +137,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 600,
     lineHeight: 1.333,
     letterSpacing: "0em",
-    fontVariationSettings: '"wdth" 110, "opsz" 24',
+    fontVariationSettings: '"opsz" 24',
   },
   // Title Large – used for settings section headings
   h6: {
@@ -139,7 +145,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 500,
     lineHeight: 1.273,
     letterSpacing: "0em",
-    fontVariationSettings: '"wdth" 105, "opsz" 22',
+    fontVariationSettings: '"opsz" 22',
   },
   // Title Medium
   subtitle1: {
@@ -147,7 +153,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 500,
     lineHeight: 1.5,
     letterSpacing: "0.009375em",
-    fontVariationSettings: '"wdth" 100, "opsz" 16',
+    fontVariationSettings: '"opsz" 16',
   },
   // Title Small
   subtitle2: {
@@ -155,7 +161,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 500,
     lineHeight: 1.429,
     letterSpacing: "0.00714em",
-    fontVariationSettings: '"wdth" 100, "opsz" 14',
+    fontVariationSettings: '"opsz" 14',
   },
   // Body Large
   body1: {
@@ -163,7 +169,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.5,
     letterSpacing: "0.03125em",
-    fontVariationSettings: '"wdth" 100, "opsz" 16',
+    fontVariationSettings: '"opsz" 16',
   },
   // Body Medium
   body2: {
@@ -171,7 +177,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.429,
     letterSpacing: "0.015625em",
-    fontVariationSettings: '"wdth" 100, "opsz" 14',
+    fontVariationSettings: '"opsz" 14',
   },
   // Body Small
   caption: {
@@ -179,7 +185,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.333,
     letterSpacing: "0.025em",
-    fontVariationSettings: '"wdth" 100, "opsz" 12',
+    fontVariationSettings: '"opsz" 12',
   },
   // Label Small
   overline: {
@@ -188,7 +194,7 @@ const m3Typography: ThemeOptions["typography"] = {
     lineHeight: 1.455,
     letterSpacing: "0.0454em",
     textTransform: "uppercase",
-    fontVariationSettings: '"wdth" 90, "opsz" 11',
+    fontVariationSettings: '"opsz" 11',
   },
   // Label Large – button text
   button: {
@@ -197,7 +203,7 @@ const m3Typography: ThemeOptions["typography"] = {
     lineHeight: 1.429,
     letterSpacing: "0.00625em",
     textTransform: "none",
-    fontVariationSettings: '"wdth" 100, "opsz" 14',
+    fontVariationSettings: '"opsz" 14',
   },
 };
 
@@ -273,6 +279,15 @@ const perScheme = (
 const components: ThemeOptions["components"] = {
   MuiCssBaseline: {
     styleOverrides: {
+      // CssBaseline sets -webkit-font-smoothing: antialiased of its own
+      // accord, so dropping it from globals.css alone changed nothing. It
+      // disables subpixel rendering on macOS and thins every stroke, which
+      // works against the weights the type scale asks for; `auto` is the
+      // property's initial value, i.e. whatever the platform does normally.
+      body: {
+        WebkitFontSmoothing: "auto",
+        MozOsxFontSmoothing: "auto",
+      },
       // Everything M3 Expressive adds - the springs, the pop-ins, the
       // spinning refresh affordance - is motion a vestibular-sensitive
       // viewer has asked not to see. M3's accessibility guidance is to

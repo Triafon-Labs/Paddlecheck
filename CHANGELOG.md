@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.3...paddlecheck-v1.30.4) (2026-08-13)
+
+
+### Bug Fixes
+
+* **theme:** correct the M3 switch colours in dark mode ([62f85ec](https://github.com/dylanr97/Paddlecheck/commit/62f85ecd663018636d585a8bba59aba741be5dc0))
+* **theme:** let the headings keep Roboto Flex's designed proportions ([de95c82](https://github.com/dylanr97/Paddlecheck/commit/de95c82ee98a721619c47fc30058a19932c8fad7))
+* **theme:** restore vivid status colours, drawn from the RAG palette ([da80415](https://github.com/dylanr97/Paddlecheck/commit/da804150aba8c35ac1fd37a27da2d17659cf355e)), closes [#008000](https://github.com/dylanr97/Paddlecheck/issues/008000) [#FF8F00](https://github.com/dylanr97/Paddlecheck/issues/FF8F00) [#B71C1](https://github.com/dylanr97/Paddlecheck/issues/B71C1) [#4CBB17](https://github.com/dylanr97/Paddlecheck/issues/4CBB17) [#FFB300](https://github.com/dylanr97/Paddlecheck/issues/FFB300) [#FF5449](https://github.com/dylanr97/Paddlecheck/issues/FF5449)
+* **ui:** close remaining gaps against Material 3 Expressive ([d8cd9b1](https://github.com/dylanr97/Paddlecheck/commit/d8cd9b103dcaade9ad94ac6d10a27f7a9866e3fa))
+
 ## [1.30.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.2...paddlecheck-v1.30.3) (2026-08-13)
 
 

@@ -8,8 +8,11 @@ const MET_OFFICE_RSS_URL =
   "https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm";
 
 /**
- * Parses Met Office time string "HHmm Day DD Mon" into ISO string
- * e.g. "0800 Wed 24 Jun" -> "2026-06-24T08:00:00+01:00" (assuming current year, BST)
+ * Parses Met Office time string "HHmm Day DD Mon" into ISO string.
+ * The feed quotes its validity times in UTC year-round, so they are an hour
+ * behind local time through BST and must be read as UTC rather than as London
+ * wall-clock times.
+ * e.g. "0800 Wed 24 Jun" -> "2026-06-24T08:00:00Z" (09:00 local, assuming current year)
  */
 const parseMetTimeToISO = (timeStr: string, baseDate: Date) => {
   if (!timeStr) return "";
@@ -17,14 +20,13 @@ const parseMetTimeToISO = (timeStr: string, baseDate: Date) => {
     // Format is "HHmm EEE d MMM"
     // We need to append the year because the Met Office RSS doesn't include it
     const year = baseDate.getFullYear();
-    let parsed = parse(
-      `${timeStr} ${year}`,
-      "HHmm EEE d MMM yyyy",
-      new Date(),
-      {
-        in: tz("Europe/London"),
-      }
-    );
+    // The reference date only fills in the units the format string doesn't
+    // parse, so use the epoch to zero the seconds rather than picking up
+    // whatever the current clock happens to read.
+    const reference = new Date(0);
+    let parsed = parse(`${timeStr} ${year}`, "HHmm EEE d MMM yyyy", reference, {
+      in: tz("UTC"),
+    });
     // Year rollover: a warning published in late December can be valid into
     // early January. Naively stamping it with the publication year would date
     // it ~a year in the past, so anything far behind the publication date
@@ -34,8 +36,8 @@ const parseMetTimeToISO = (timeStr: string, baseDate: Date) => {
       parsed = parse(
         `${timeStr} ${year + 1}`,
         "HHmm EEE d MMM yyyy",
-        new Date(),
-        { in: tz("Europe/London") }
+        reference,
+        { in: tz("UTC") }
       );
     }
     return formatISO(parsed);

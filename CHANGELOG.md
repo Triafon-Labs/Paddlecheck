@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.1...paddlecheck-v1.30.2) (2026-08-13)
+
+
+### Bug Fixes
+
+* **warnings:** show Met Office warning times in UK local time ([b8cab59](https://github.com/dylanr97/Paddlecheck/commit/b8cab59d7f65efc080d348449fdfbfc1a60e4ff0))
+
 ## [1.30.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.0...paddlecheck-v1.30.1) (2026-08-13)
 
 

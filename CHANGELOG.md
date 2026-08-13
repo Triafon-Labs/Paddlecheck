@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.0...paddlecheck-v1.30.1) (2026-08-13)
+
+
+### Bug Fixes
+
+* keep AI overview figures exact and degrees unspaced ([dce5dda](https://github.com/dylanr97/Paddlecheck/commit/dce5dda168d65de54a4e1050ecdda13b419ba4c6))
+* make AI overview state which day it is describing ([a1fd03c](https://github.com/dylanr97/Paddlecheck/commit/a1fd03c8c05ed8f87eb325429b4fcf190cfec2d8))
+
 ## [1.30.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.29.0...paddlecheck-v1.30.0) (2026-08-13)
 
 

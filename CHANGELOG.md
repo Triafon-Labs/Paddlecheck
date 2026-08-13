@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.29.0...paddlecheck-v1.30.0) (2026-08-13)
+
+
+### Features
+
+* **warnings:** outline weather warning panels in their severity colour ([6c295d4](https://github.com/dylanr97/Paddlecheck/commit/6c295d4b416d2c0b165127c9eeb7fa0779e1d17d))
+
 ## [1.29.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.28.0...paddlecheck-v1.29.0) (2026-08-12)
 
 

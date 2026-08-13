@@ -393,25 +393,13 @@ const components: ThemeOptions["components"] = {
     styleOverrides: {
       root: ({ theme }) => [
         { borderRadius: 8 },
-        // The semantic chips in the conditions key annotate a rule ("raises
-        // the rating"); the RAG chips beside them name the status itself and
-        // set their colour inline. Giving the annotations the tonal container
-        // pair keeps that hierarchy legible - filling both sets with a
-        // saturated accent, as MUI does by default, put two competing ambers
-        // side by side and gave equal weight to the quieter of the two.
+        // The success/warning/error chips deliberately keep MUI's saturated
+        // filled treatment, drawing on the RAG accents in lib/m3-palette.ts.
+        // Demoting them to the tonal container pair was more orthodox M3 and
+        // made a cleaner emphasis hierarchy, but it washed the status colours
+        // out - and on a safety dashboard the colour needs to carry at a
+        // glance, so legibility wins over hierarchy here.
         ...perScheme(theme, (m3) => ({
-          "&.MuiChip-filled.MuiChip-colorSuccess": {
-            backgroundColor: m3.successContainer,
-            color: m3.onSuccessContainer,
-          },
-          "&.MuiChip-filled.MuiChip-colorWarning": {
-            backgroundColor: m3.warningContainer,
-            color: m3.onWarningContainer,
-          },
-          "&.MuiChip-filled.MuiChip-colorError": {
-            backgroundColor: m3.errorContainer,
-            color: m3.onErrorContainer,
-          },
           // Read through custom properties rather than set outright: the RAG
           // chips carry their own exact status colour, and `applyStyles`
           // emits the dark rule under a `.dark` ancestor selector, which

@@ -105,11 +105,12 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
         <Grow in appear {...springTransition()}>
           <Box>
             {isNoPaddling && NoPaddlingIcon ? (
-              // The RAG palette's `backgroundColor` values are all light-mode
-              // tints, so this panel used to paint a pale grey slab across a
-              // navy card in dark mode. The M3 error container pair is both
-              // the scheme-aware fix and the role the spec asks for on a
-              // hard prohibition like this one.
+              // Keeps the original look - a neutral panel carrying vivid red
+              // text, icon and border - but takes the panel colour from the
+              // tonal surface role instead of the RAG palette's hardcoded
+              // light-mode tint, which painted a pale grey slab across a navy
+              // card in dark mode. In the light scheme the two are all but
+              // identical, so only dark mode changes.
               <Box
                 sx={{
                   display: "flex",
@@ -120,8 +121,8 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                   mb: 2,
                   p: 2,
                   borderRadius: 1,
-                  backgroundColor: "error.container",
-                  color: "error.onContainer",
+                  backgroundColor: "surfaces.containerHighest",
+                  color: "error.main",
                   border: "1px solid",
                   borderColor: "error.main",
                 }}

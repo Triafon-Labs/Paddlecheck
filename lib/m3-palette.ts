@@ -19,19 +19,27 @@ export const m3Light = {
   surfaceContainerHighest: "#E1E2EC",
   outline: "#74777F",
   outlineVariant: "#C4C6D0",
-  error: "#BA1A1A",
+  error: "#B71C1C", // WARNING_COLORS.Red - the RAG palette's red
   onError: "#FFFFFF",
   errorContainer: "#FFDAD6",
   onErrorContainer: "#410002",
-  // Extended (custom) colour roles. M3 has no built-in success/warning, so
-  // these are tonal ramps built the same way as the roles above and hue-
-  // harmonised towards the blue seed, rather than MUI's stock M2 green/orange.
-  success: "#146C2E",
+  // Extended (custom) colour roles. M3 has no built-in success/warning, and
+  // MUI's stock M2 green/orange don't belong to this app's colour language
+  // either - so the accents are taken straight from the RAG palette in
+  // lib/config.ts (Dark Green, Amber, Red). A "raises the rating" chip then
+  // reads in the same amber as the Amber status chip beside it, instead of
+  // introducing a third, unrelated orange. The container tones stay on the
+  // M3 tonal ramp, since they back low-emphasis surfaces rather than
+  // signalling status.
+  //
+  // `warning` is only ever used as a fill (chips, the status strip); at 2:1
+  // against the app's surfaces it must not be used for text or icons.
+  success: "#008000",
   onSuccess: "#FFFFFF",
   successContainer: "#A2F5AC",
   onSuccessContainer: "#00210A",
-  warning: "#7D5700",
-  onWarning: "#FFFFFF",
+  warning: "#FF8F00",
+  onWarning: "#271900",
   warningContainer: "#FFDEA6",
   onWarningContainer: "#271900",
   inverseSurface: "#2F3038",
@@ -59,16 +67,20 @@ export const m3Dark = {
   surfaceContainerHighest: "#363840",
   outline: "#8E9099",
   outlineVariant: "#44474F",
-  error: "#FFB4AB",
-  onError: "#690005",
+  // Lifted versions of the same RAG accents. The light-scheme values are too
+  // dark to read as icons against the navy surfaces, so each is raised to the
+  // next step up the same hue - success lands on the RAG palette's own Light
+  // Green - while staying recognisably the same colour language.
+  error: "#FF5449",
+  onError: "#410002",
   errorContainer: "#93000A",
   onErrorContainer: "#FFDAD6",
-  success: "#87D892",
-  onSuccess: "#003914",
+  success: "#4CBB17", // RAG "Light Green"
+  onSuccess: "#00210A",
   successContainer: "#00531F",
   onSuccessContainer: "#A2F5AC",
-  warning: "#F5BF48",
-  onWarning: "#422C00",
+  warning: "#FFB300",
+  onWarning: "#271900",
   warningContainer: "#5F4100",
   onWarningContainer: "#FFDEA6",
   inverseSurface: "#E3E2E9",

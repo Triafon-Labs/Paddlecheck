@@ -32,20 +32,18 @@ import {
 } from "@/lib/forecast";
 import { getRelativeTimeString, getLondonHHMM } from "@/lib/time";
 
-// M3 renders a persistent inline status strip on the tonal container pair,
-// not on the saturated accent - `warning.main` filled edge to edge is a
-// Material 2 recipe, and it reads as an alarm for what is usually just
-// "showing you slightly older numbers". The container roles keep it legible
-// in both schemes while letting the app bar below it stay the loudest thing
-// on screen.
+// Filled with the saturated accent rather than the tonal container pair.
+// The container roles would be the more orthodox M3 reading of a persistent
+// inline strip, but they left the banner too quiet to notice - and the whole
+// point of this strip is that the numbers below it may be stale.
 const StatusBanner: React.FC<{
   severity: "warning" | "error";
   children: React.ReactNode;
 }> = ({ severity, children }) => (
   <Box
     sx={{
-      bgcolor: `${severity}.container`,
-      color: `${severity}.onContainer`,
+      bgcolor: `${severity}.main`,
+      color: `${severity}.contrastText`,
       py: 0.5,
       px: 2,
       textAlign: "center",

@@ -145,12 +145,15 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({
     </Box>
     {chipLabel &&
       (ragColor ? (
+        // --chip-bg/--chip-fg rather than backgroundColor/color: see the
+        // MuiChip override in lib/themes.ts for why the direct properties
+        // lose to the theme in dark mode.
         <Chip
           label={chipLabel}
           size="small"
           sx={{
-            backgroundColor: ragColor,
-            color: contrastText(ragColor),
+            "--chip-bg": ragColor,
+            "--chip-fg": contrastText(ragColor),
             fontWeight: 500,
           }}
         />
@@ -372,13 +375,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  sx={{
-                    pl: 0,
-                    color: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "common.white"
-                        : "primary.main",
-                  }}
+                  // `primary` is the M3 role for a link, and the dark scheme's
+                  // primary is already a light blue that clears contrast on
+                  // the drawer surface - so the previous common.white branch
+                  // for dark mode was both off-token and unnecessary.
+                  sx={{ pl: 0, color: "primary.main" }}
                 >
                   <Typography sx={{ flexGrow: 1 }}>{link.name}</Typography>
                   <OpenInNewIcon fontSize="small" />

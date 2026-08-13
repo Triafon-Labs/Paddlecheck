@@ -73,14 +73,10 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
               <Stack spacing={1} sx={{ flex: 1 }}>
                 {Object.entries(group).map(([headline, warnings], idx) => (
                   <Box key={headline}>
-                    {idx > 0 && (
-                      <Divider
-                        sx={{
-                          my: 1,
-                          opacity: 0.3,
-                        }}
-                      />
-                    )}
+                    {/* outlineVariant is already the low-emphasis divider
+                        role, so thinning it further with opacity put it under
+                        the 3:1 contrast M3 asks of non-text lines. */}
+                    {idx > 0 && <Divider sx={{ my: 1 }} />}
                     <Typography
                       variant="body2"
                       sx={{ fontWeight: 600, lineHeight: 1.2, mb: 0.5 }}

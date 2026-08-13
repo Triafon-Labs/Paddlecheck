@@ -2,7 +2,7 @@
 
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { Box, ToggleButtonGroup, ToggleButtonGroupProps } from "@mui/material";
-import { m3Duration, m3Easing } from "@/lib/m3-palette";
+import { m3Spring, spring } from "@/lib/m3-palette";
 
 // Matches the MuiToggleButtonGroup theme override in lib/themes.ts (padding: 4).
 const GROUP_PADDING = 4;
@@ -89,7 +89,11 @@ const SlidingToggleButtonGroup = React.forwardRef<
             // still set directly (not transitioned): every current usage
             // has equal-width segments, so it's only ever set once and
             // never actually animates - only position needs to slide.
-            transition: `transform ${m3Duration.short4}ms ${m3Easing.standard}`,
+            //
+            // The pill is the most-touched moving part in the app, so it
+            // gets M3 Expressive's fast spatial spring: it arrives with a
+            // small overshoot and settles, rather than easing to a dead stop.
+            transition: spring("transform", m3Spring.spatialFast),
             willChange: "transform",
             pointerEvents: "none",
             zIndex: 0,

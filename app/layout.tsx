@@ -11,10 +11,17 @@ import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
+// Exposed as a CSS variable rather than a class, because the theme's type
+// scale has to name the family (MUI writes font-family onto every Typography
+// root, so it can't be inherited from <html>). next/font mangles the family
+// name at build time - it is not "Roboto Flex" - so the theme has to reach it
+// through this variable rather than by spelling the name out. See the
+// fontFamily entry in lib/themes.ts.
 const robotoFlex = localFont({
   src: "../node_modules/@fontsource-variable/roboto-flex/files/roboto-flex-latin-full-normal.woff2",
   weight: "100 900",
   style: "normal",
+  variable: "--font-roboto-flex",
 });
 
 import { Viewport } from "next";
@@ -45,7 +52,7 @@ export default function RootLayout({
   return (
     // The init script below sets a colour-scheme class on <html> before React
     // hydrates, which would otherwise be reported as a hydration mismatch.
-    <html lang="en" className={robotoFlex.className} suppressHydrationWarning>
+    <html lang="en" className={robotoFlex.variable} suppressHydrationWarning>
       <head>
         {/* Applies the saved colour scheme to <html> before the body is even
             parsed, so there's no window in which a flash of the wrong theme
@@ -60,7 +67,7 @@ export default function RootLayout({
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
-      <body style={{ fontFamily: "inherit" }}>
+      <body>
         <ServiceWorkerRegistration />
         <ThemeRegistry>
           <KayakDataProvider>

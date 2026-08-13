@@ -32,6 +32,10 @@ import {
 } from "@/lib/forecast";
 import { getRelativeTimeString, getLondonHHMM } from "@/lib/time";
 
+// Filled with the saturated accent rather than the tonal container pair.
+// The container roles would be the more orthodox M3 reading of a persistent
+// inline strip, but they left the banner too quiet to notice - and the whole
+// point of this strip is that the numbers below it may be stale.
 const StatusBanner: React.FC<{
   severity: "warning" | "error";
   children: React.ReactNode;
@@ -46,7 +50,8 @@ const StatusBanner: React.FC<{
       fontSize: "0.75rem",
       fontWeight: 600,
       letterSpacing: "0.02em",
-      borderBottom: "1px solid rgba(0,0,0,0.08)",
+      borderBottom: "1px solid",
+      borderColor: "divider",
     }}
   >
     {children}

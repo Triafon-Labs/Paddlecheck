@@ -4,7 +4,7 @@ import React from "react";
 import { Box, Typography, useTheme, Stack } from "@mui/material";
 import { Status } from "@/types";
 import { ragStatus } from "@/lib/rag";
-import { springEasing } from "@/lib/m3-palette";
+import { m3Spring, spring } from "@/lib/m3-palette";
 
 interface TrafficLightProps {
   status: Status;
@@ -49,8 +49,17 @@ const TrafficLight: React.FC<TrafficLightProps> = ({ status }) => {
                     : ragStatus[s].backgroundColor
                   : "transparent",
                 border: `1px solid ${isActive ? color : theme.palette.divider}`,
-                // M3 Expressive spring motion – slight overshoot on size change
-                transition: `width 0.4s ${springEasing}, height 0.4s ${springEasing}, background-color 0.4s ${springEasing}, border-color 0.4s ${springEasing}, opacity 0.4s ${springEasing}`,
+                // M3 Expressive springs: the lamp's size gets the spatial
+                // spring, so the active one overshoots slightly as it grows,
+                // while the colour and opacity use the critically-damped
+                // effects spring - a colour that overshoots reads as a flicker.
+                transition: [
+                  spring("width, height", m3Spring.spatialDefault),
+                  spring(
+                    "background-color, border-color, opacity",
+                    m3Spring.effectsDefault
+                  ),
+                ].join(", "),
                 opacity: isActive ? 1 : 0.45,
               }}
             >

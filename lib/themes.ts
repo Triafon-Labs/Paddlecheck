@@ -10,7 +10,29 @@ import {
   type M3Palette,
   m3Easing,
   m3Duration,
+  m3Spring,
+  spring,
 } from "./m3-palette";
+
+// The tonal surface roles, exposed on the palette so components can reach
+// them through `sx` (e.g. `bgcolor: "surfaces.containerHigh"`) instead of
+// importing the raw token maps and re-implementing the light/dark split.
+// M3 draws a firm line between these and the `action.*` state-layer colours:
+// state layers are translucent overlays that express interaction, so using
+// one as a component's resting background (as several cards used to) reads
+// as a permanently-hovered surface and drifts with any state-layer change.
+interface M3Surfaces {
+  containerLowest: string;
+  containerLow: string;
+  container: string;
+  containerHigh: string;
+  containerHighest: string;
+  variant: string;
+  onVariant: string;
+  outline: string;
+  inverse: string;
+  onInverse: string;
+}
 
 // Opts the MUI types into their CSS-theme-variables branch, which is what
 // makes `theme.vars` and the provider's `forceThemeRerender` prop visible to
@@ -20,19 +42,70 @@ declare module "@mui/material/styles" {
   interface CssThemeVariables {
     enabled: true;
   }
+  interface Palette {
+    surfaces: M3Surfaces;
+  }
+  interface PaletteOptions {
+    surfaces?: M3Surfaces;
+  }
+  // M3 pairs every accent role with a lower-emphasis container role. MUI's
+  // PaletteColor only models main/light/dark/contrastText, so the container
+  // pair is added here rather than hard-coding tonal values at call sites.
+  interface PaletteColor {
+    container: string;
+    onContainer: string;
+  }
+  interface SimplePaletteColorOptions {
+    container?: string;
+    onContainer?: string;
+  }
 }
 
-// M3 type scale mapped to MUI variants, exploiting Roboto Flex variable axes:
-//   wght (weight 100–900), wdth (width 25–151), opsz (optical size 8–144)
+// Both schemes' surface sets, derived from the same token maps that drive
+// the component overrides below.
+const surfacesFor = (m3: M3Palette): M3Surfaces => ({
+  containerLowest: m3.surfaceContainerLowest,
+  containerLow: m3.surfaceContainerLow,
+  container: m3.surfaceContainer,
+  containerHigh: m3.surfaceContainerHigh,
+  containerHighest: m3.surfaceContainerHighest,
+  variant: m3.surfaceVariant,
+  onVariant: m3.onSurfaceVariant,
+  outline: m3.outline,
+  inverse: m3.inverseSurface,
+  onInverse: m3.inverseOnSurface,
+});
+
+// M3 type scale mapped to MUI variants, using Roboto Flex's opsz (optical
+// size) axis to pick letterforms drawn for each step's size.
+//
+// Two axes are deliberately absent:
+//
+// wght is driven by each variant's `fontWeight` instead of being pinned here.
+// font-variation-settings outranks font-weight, so listing the axis made every
+// `sx={{ fontWeight: … }}` at a call site silently do nothing - which takes
+// M3's emphasised type styles off the table.
+//
+// wdth stays at the font's designed default. The scale previously widened the
+// headings to 105–112, but M3's type scale doesn't vary width at all (its
+// emphasised styles vary weight), and widened letterforms read as subtly
+// wrong. This was invisible while the family name was broken and everything
+// rendered in Arial, which has no width axis to stretch.
 const m3Typography: ThemeOptions["typography"] = {
-  fontFamily: '"Roboto Flex", "Roboto", "Helvetica", "Arial", sans-serif',
+  // next/font renames the family it registers, so naming "Roboto Flex" here
+  // matched nothing and every MUI component quietly fell through to Helvetica
+  // - taking the variable axes below with it, since a static fallback has no
+  // wdth or opsz to set. The variable is declared by the localFont() call in
+  // app/layout.tsx and already expands to the family plus its metric-matched
+  // fallback, so only the generic families follow it.
+  fontFamily: "var(--font-roboto-flex), Helvetica, Arial, sans-serif",
   // Display Large – rarely used in app, included for completeness
   h1: {
     fontSize: "3.5625rem",
     fontWeight: 400,
     lineHeight: 1.127,
     letterSpacing: "-0.015625em",
-    fontVariationSettings: '"wght" 400, "wdth" 112, "opsz" 57',
+    fontVariationSettings: '"opsz" 57',
   },
   // Display Medium
   h2: {
@@ -40,7 +113,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.156,
     letterSpacing: "0em",
-    fontVariationSettings: '"wght" 400, "wdth" 110, "opsz" 45',
+    fontVariationSettings: '"opsz" 45',
   },
   // Display Small
   h3: {
@@ -48,7 +121,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.222,
     letterSpacing: "0em",
-    fontVariationSettings: '"wght" 400, "wdth" 108, "opsz" 36',
+    fontVariationSettings: '"opsz" 36',
   },
   // Headline Large
   h4: {
@@ -56,7 +129,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.25,
     letterSpacing: "0em",
-    fontVariationSettings: '"wght" 400, "wdth" 106, "opsz" 32',
+    fontVariationSettings: '"opsz" 32',
   },
   // Headline Small – used for card titles ("Paddling Status", "Detailed Stats")
   h5: {
@@ -64,7 +137,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 600,
     lineHeight: 1.333,
     letterSpacing: "0em",
-    fontVariationSettings: '"wght" 600, "wdth" 110, "opsz" 24',
+    fontVariationSettings: '"opsz" 24',
   },
   // Title Large – used for settings section headings
   h6: {
@@ -72,7 +145,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 500,
     lineHeight: 1.273,
     letterSpacing: "0em",
-    fontVariationSettings: '"wght" 500, "wdth" 105, "opsz" 22',
+    fontVariationSettings: '"opsz" 22',
   },
   // Title Medium
   subtitle1: {
@@ -80,7 +153,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 500,
     lineHeight: 1.5,
     letterSpacing: "0.009375em",
-    fontVariationSettings: '"wght" 500, "wdth" 100, "opsz" 16',
+    fontVariationSettings: '"opsz" 16',
   },
   // Title Small
   subtitle2: {
@@ -88,7 +161,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 500,
     lineHeight: 1.429,
     letterSpacing: "0.00714em",
-    fontVariationSettings: '"wght" 500, "wdth" 100, "opsz" 14',
+    fontVariationSettings: '"opsz" 14',
   },
   // Body Large
   body1: {
@@ -96,7 +169,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.5,
     letterSpacing: "0.03125em",
-    fontVariationSettings: '"wght" 400, "wdth" 100, "opsz" 16',
+    fontVariationSettings: '"opsz" 16',
   },
   // Body Medium
   body2: {
@@ -104,7 +177,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.429,
     letterSpacing: "0.015625em",
-    fontVariationSettings: '"wght" 400, "wdth" 100, "opsz" 14',
+    fontVariationSettings: '"opsz" 14',
   },
   // Body Small
   caption: {
@@ -112,7 +185,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.333,
     letterSpacing: "0.025em",
-    fontVariationSettings: '"wght" 400, "wdth" 100, "opsz" 12',
+    fontVariationSettings: '"opsz" 12',
   },
   // Label Small
   overline: {
@@ -121,7 +194,7 @@ const m3Typography: ThemeOptions["typography"] = {
     lineHeight: 1.455,
     letterSpacing: "0.0454em",
     textTransform: "uppercase",
-    fontVariationSettings: '"wght" 500, "wdth" 90, "opsz" 11',
+    fontVariationSettings: '"opsz" 11',
   },
   // Label Large – button text
   button: {
@@ -130,7 +203,7 @@ const m3Typography: ThemeOptions["typography"] = {
     lineHeight: 1.429,
     letterSpacing: "0.00625em",
     textTransform: "none",
-    fontVariationSettings: '"wght" 500, "wdth" 100, "opsz" 14',
+    fontVariationSettings: '"opsz" 14',
   },
 };
 
@@ -145,9 +218,50 @@ const m3DarkNavy: M3Palette = {
   surfaceContainer: "#193A5E", // card background – one step lighter
   surfaceContainerHigh: "#1E4168",
   surfaceContainerHighest: "#254B75",
+  surfaceVariant: "#20405F",
+  outline: "#8A9BAD",
   outlineVariant: "#2A4F73",
   onSurfaceVariant: "#9EAAB8",
 };
+
+// One palette shape, filled from whichever token map a scheme uses, so a
+// role can't end up defined for light and forgotten for dark.
+const paletteFor = (m3: M3Palette) => ({
+  primary: {
+    main: m3.primary,
+    contrastText: m3.onPrimary,
+    container: m3.primaryContainer,
+    onContainer: m3.onPrimaryContainer,
+  },
+  secondary: {
+    main: m3.secondary,
+    contrastText: m3.onSecondary,
+    container: m3.secondaryContainer,
+    onContainer: m3.onSecondaryContainer,
+  },
+  error: {
+    main: m3.error,
+    contrastText: m3.onError,
+    container: m3.errorContainer,
+    onContainer: m3.onErrorContainer,
+  },
+  success: {
+    main: m3.success,
+    contrastText: m3.onSuccess,
+    container: m3.successContainer,
+    onContainer: m3.onSuccessContainer,
+  },
+  warning: {
+    main: m3.warning,
+    contrastText: m3.onWarning,
+    container: m3.warningContainer,
+    onContainer: m3.onWarningContainer,
+  },
+  background: { default: m3.surface, paper: m3.surfaceContainerLow },
+  text: { primary: m3.onSurface, secondary: m3.onSurfaceVariant },
+  divider: m3.outlineVariant,
+  surfaces: surfacesFor(m3),
+});
 
 // Emits one declaration per colour scheme from a single token-keyed rule:
 // the light values apply at the base selector, the dark ones inside the
@@ -163,6 +277,58 @@ const perScheme = (
 // the outlined border from Cards while leaving other Paper components (e.g.
 // chart tooltips) untouched.
 const components: ThemeOptions["components"] = {
+  MuiCssBaseline: {
+    styleOverrides: {
+      // CssBaseline sets -webkit-font-smoothing: antialiased of its own
+      // accord, so dropping it from globals.css alone changed nothing. It
+      // disables subpixel rendering on macOS and thins every stroke, which
+      // works against the weights the type scale asks for; `auto` is the
+      // property's initial value, i.e. whatever the platform does normally.
+      body: {
+        WebkitFontSmoothing: "auto",
+        MozOsxFontSmoothing: "auto",
+      },
+      // Everything M3 Expressive adds - the springs, the pop-ins, the
+      // spinning refresh affordance - is motion a vestibular-sensitive
+      // viewer has asked not to see. M3's accessibility guidance is to
+      // honour the request globally rather than component by component, so
+      // transitions collapse to a single frame and looping animations stop
+      // at their first keyframe. `!important` is needed because most of the
+      // durations it's overriding are themselves inline emotion styles.
+      "@media (prefers-reduced-motion: reduce)": {
+        "*, *::before, *::after": {
+          animationDuration: "0.01ms !important",
+          animationIterationCount: "1 !important",
+          transitionDuration: "0.01ms !important",
+          scrollBehavior: "auto !important",
+        },
+      },
+    },
+  },
+  // MUI still paints Material 2's dark-mode "elevation overlay" - a white
+  // linear-gradient laid over the paper colour - on every elevated Paper.
+  // M3 replaced that idea outright with the tonal surfaceContainer ramp, so
+  // the gradient is stripped here and elevated papers (chart tooltips, menus,
+  // popovers) sit on a genuine tonal surface instead.
+  MuiPaper: {
+    styleOverrides: {
+      root: ({ theme }) => [
+        { backgroundImage: "none" },
+        // Deliberately limited to the low elevations, which is what a bare
+        // <Paper> in this app uses (chart tooltips). The components that ride
+        // on higher elevations - Drawer at 16, Menu at 8, SnackbarContent at
+        // 6 - each pick their own tonal surface further down. Matching every
+        // non-zero elevation here would out-specify those rules, because
+        // `applyStyles` compiles this one to a longer selector than theirs.
+        ...perScheme(theme, (m3) => ({
+          "&.MuiPaper-elevation1, &.MuiPaper-elevation2, &.MuiPaper-elevation3, &.MuiPaper-elevation4":
+            {
+              backgroundColor: m3.surfaceContainerHigh,
+            },
+        })),
+      ],
+    },
+  },
   MuiCard: {
     styleOverrides: {
       root: ({ theme }) => [
@@ -225,7 +391,28 @@ const components: ThemeOptions["components"] = {
   },
   MuiChip: {
     styleOverrides: {
-      root: { borderRadius: 8 },
+      root: ({ theme }) => [
+        { borderRadius: 8 },
+        // The success/warning/error chips deliberately keep MUI's saturated
+        // filled treatment, drawing on the RAG accents in lib/m3-palette.ts.
+        // Demoting them to the tonal container pair was more orthodox M3 and
+        // made a cleaner emphasis hierarchy, but it washed the status colours
+        // out - and on a safety dashboard the colour needs to carry at a
+        // glance, so legibility wins over hierarchy here.
+        ...perScheme(theme, (m3) => ({
+          // Read through custom properties rather than set outright: the RAG
+          // chips carry their own exact status colour, and `applyStyles`
+          // emits the dark rule under a `.dark` ancestor selector, which
+          // outranks the single class an `sx` background compiles to. The
+          // chips would have gone flat grey in dark mode only. Setting
+          // --chip-bg/--chip-fg at the call site wins regardless of
+          // specificity, since there is nothing to out-specify.
+          "&.MuiChip-filled.MuiChip-colorDefault": {
+            backgroundColor: `var(--chip-bg, ${m3.surfaceContainerHighest})`,
+            color: `var(--chip-fg, ${m3.onSurfaceVariant})`,
+          },
+        })),
+      ],
     },
   },
   // Segmented pill control – container + individual pill buttons
@@ -258,10 +445,17 @@ const components: ThemeOptions["components"] = {
           border: "none",
           textTransform: "none",
           // Lets label/icon colour recolour in step with SlidingToggleButtonGroup's
-          // pill sliding underneath, rather than flipping instantly.
-          transition: `color ${m3Duration.short4}ms ${m3Easing.standard}`,
+          // pill sliding underneath, rather than flipping instantly. Colour is
+          // an "effects" change in M3's motion system, so it gets the
+          // critically-damped spring - overshooting a colour just looks wrong.
+          transition: spring("color", m3Spring.effectsDefault),
         },
         ...perScheme(theme, (m3) => ({
+          "&.Mui-focusVisible": {
+            outline: `3px solid ${m3.primary}`,
+            outlineOffset: -1,
+            zIndex: 1,
+          },
           "&.Mui-selected": {
             backgroundColor: m3.primary,
             color: m3.onPrimary,
@@ -357,7 +551,209 @@ const components: ThemeOptions["components"] = {
   },
   MuiAlert: {
     styleOverrides: {
-      root: { borderRadius: 12 },
+      root: ({ theme }) => [
+        { borderRadius: 12 },
+        // M3 uses the tonal container pair for inline status surfaces, where
+        // MUI's default reaches for a tinted background plus a saturated
+        // `main` text colour - a Material 2 recipe that leaves dark mode with
+        // a near-black panel.
+        ...perScheme(theme, (m3) => ({
+          "&.MuiAlert-standardError": {
+            backgroundColor: m3.errorContainer,
+            color: m3.onErrorContainer,
+            "& .MuiAlert-icon": { color: m3.onErrorContainer },
+          },
+          "&.MuiAlert-standardWarning": {
+            backgroundColor: m3.warningContainer,
+            color: m3.onWarningContainer,
+            "& .MuiAlert-icon": { color: m3.onWarningContainer },
+          },
+          "&.MuiAlert-standardSuccess": {
+            backgroundColor: m3.successContainer,
+            color: m3.onSuccessContainer,
+            "& .MuiAlert-icon": { color: m3.onSuccessContainer },
+          },
+        })),
+      ],
+    },
+  },
+  // M3's switch is a different component from Material 2's, not a restyle:
+  // a 52×32 track with an outline when off, a thumb that grows from 16dp to
+  // 24dp as it travels, and a state layer that only appears on interaction.
+  // MUI still ships the M2 shape, so the whole thing is rebuilt here.
+  MuiSwitch: {
+    defaultProps: { disableRipple: true },
+    styleOverrides: {
+      root: {
+        width: 52,
+        height: 32,
+        padding: 0,
+        overflow: "visible",
+        marginRight: 8,
+      },
+      switchBase: ({ theme }) => [
+        {
+          // 8px of padding around the 16px thumb keeps the hit target at
+          // 32×32 even though the thumb itself is small.
+          padding: 8,
+          transition: spring("transform", m3Spring.spatialFast),
+          "&:hover, &.Mui-focusVisible": { backgroundColor: "transparent" },
+          "&.Mui-checked": { transform: "translateX(20px)" },
+        },
+        ...perScheme(theme, (m3) => ({
+          color: m3.outline,
+          "&.Mui-checked": { color: m3.onPrimary },
+          // The selected track is coloured from here rather than from the
+          // `track` slot below. A sibling selector written there would have to
+          // start `.Mui-checked + &`, and `applyStyles` wraps its rule as
+          // `.dark &` - so the nested `&` expands to `.dark <track>` and the
+          // whole thing becomes `.Mui-checked + .dark <track>`, which matches
+          // nothing. Anchoring on `&` keeps the scheme class where it belongs.
+          "&.Mui-checked + .MuiSwitch-track": {
+            backgroundColor: m3.primary,
+            borderColor: m3.primary,
+            opacity: 1,
+          },
+          // The state layer is a 40dp halo around the thumb rather than a
+          // fill, so it lives on a pseudo-element instead of the usual MUI
+          // hover background.
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: -4,
+            borderRadius: "50%",
+            backgroundColor: m3.onSurface,
+            opacity: 0,
+            transition: `opacity ${m3Duration.short2}ms ${m3Easing.standard}`,
+            pointerEvents: "none",
+          },
+          "&:hover::before": { opacity: 0.08 },
+          "&.Mui-focusVisible::before": { opacity: 0.12 },
+          "&.Mui-checked::before": { backgroundColor: m3.primary },
+          "&.Mui-disabled": { color: `${m3.onSurface}61` },
+        })),
+      ],
+      thumb: {
+        width: 16,
+        height: 16,
+        boxShadow: "none",
+        transition: spring("width, height, margin", m3Spring.spatialFast),
+        ".Mui-checked &": { width: 24, height: 24, margin: -4 },
+      },
+      track: ({ theme }) => [
+        {
+          borderRadius: 16,
+          opacity: 1,
+          border: "2px solid",
+          transition: `background-color ${m3Duration.short4}ms ${m3Easing.standard}, border-color ${m3Duration.short4}ms ${m3Easing.standard}`,
+        },
+        // Unselected track is surfaceContainerHighest per spec. (In the light
+        // scheme that token happens to equal surfaceVariant, so only dark mode
+        // changes visibly.) The selected state lives on switchBase above.
+        ...perScheme(theme, (m3) => ({
+          backgroundColor: m3.surfaceContainerHighest,
+          borderColor: m3.outline,
+        })),
+      ],
+    },
+  },
+  // MUI hangs control labels 11px into the left margin to cancel out the
+  // padding on its own Material 2 switch. The M3 switch above carries no such
+  // padding, so that compensation would pull the row out of alignment with
+  // every heading beside it.
+  MuiFormControlLabel: {
+    styleOverrides: {
+      root: { marginLeft: 0 },
+    },
+  },
+  // M3 primary tabs: label-large text, and an indicator that's a 3dp bar with
+  // rounded top corners inset to the label, not MUI's full-width 2dp square rule.
+  MuiTabs: {
+    styleOverrides: {
+      root: { minHeight: 48 },
+      indicator: {
+        height: 3,
+        borderRadius: "3px 3px 0 0",
+      },
+    },
+  },
+  MuiTab: {
+    styleOverrides: {
+      root: ({ theme }) => [
+        {
+          textTransform: "none",
+          minHeight: 48,
+          fontWeight: 500,
+          transition: `color ${m3Duration.short4}ms ${m3Easing.standard}`,
+        },
+        ...perScheme(theme, (m3) => ({
+          color: m3.onSurfaceVariant,
+          "&.Mui-selected": { color: m3.primary },
+          "&.Mui-focusVisible": {
+            outline: `3px solid ${m3.primary}`,
+            outlineOffset: -3,
+            borderRadius: 8,
+          },
+        })),
+      ],
+    },
+  },
+  // M3 plain tooltip - inverse surface, body-small text, 4dp corners. MUI's
+  // default is Material 2's translucent grey.
+  MuiTooltip: {
+    styleOverrides: {
+      tooltip: ({ theme }) => [
+        {
+          borderRadius: 4,
+          fontSize: "0.75rem",
+          lineHeight: 1.333,
+          letterSpacing: "0.025em",
+          fontWeight: 400,
+          padding: "4px 8px",
+        },
+        ...perScheme(theme, (m3) => ({
+          backgroundColor: m3.inverseSurface,
+          color: m3.inverseOnSurface,
+        })),
+      ],
+      arrow: ({ theme }) =>
+        perScheme(theme, (m3) => ({ color: m3.inverseSurface })),
+    },
+  },
+  // Same inverse-surface pairing for snackbars, which MUI otherwise renders
+  // in a fixed Material 2 grey that ignores the colour scheme entirely.
+  MuiSnackbarContent: {
+    styleOverrides: {
+      root: ({ theme }) => [
+        { borderRadius: 4, boxShadow: "none" },
+        ...perScheme(theme, (m3) => ({
+          backgroundColor: m3.inverseSurface,
+          color: m3.inverseOnSurface,
+        })),
+      ],
+    },
+  },
+  MuiMenu: {
+    styleOverrides: {
+      paper: ({ theme }) => [
+        { borderRadius: 12, boxShadow: "none" },
+        ...perScheme(theme, (m3) => ({
+          backgroundColor: m3.surfaceContainer,
+          border: `1px solid ${m3.outlineVariant}`,
+        })),
+      ],
+    },
+  },
+  MuiMenuItem: {
+    styleOverrides: {
+      root: ({ theme }) =>
+        perScheme(theme, (m3) => ({
+          "&.Mui-selected": {
+            backgroundColor: m3.secondaryContainer,
+            color: m3.onSecondaryContainer,
+            "&:hover": { backgroundColor: m3.secondaryContainer },
+          },
+        })),
     },
   },
 };
@@ -391,41 +787,8 @@ const m3Transitions: ThemeOptions["transitions"] = {
 export const theme = createTheme({
   cssVariables: { colorSchemeSelector: "class" },
   colorSchemes: {
-    light: {
-      palette: {
-        primary: { main: m3Light.primary, contrastText: m3Light.onPrimary },
-        secondary: {
-          main: m3Light.secondary,
-          contrastText: m3Light.onSecondary,
-        },
-        error: { main: m3Light.error, contrastText: m3Light.onError },
-        background: {
-          default: m3Light.surface,
-          paper: m3Light.surfaceContainerLow,
-        },
-        text: {
-          primary: m3Light.onSurface,
-          secondary: m3Light.onSurfaceVariant,
-        },
-        divider: m3Light.outlineVariant,
-      },
-    },
-    dark: {
-      palette: {
-        primary: { main: m3Dark.primary, contrastText: m3Dark.onPrimary },
-        secondary: { main: m3Dark.secondary, contrastText: m3Dark.onSecondary },
-        error: { main: m3Light.error, contrastText: m3Light.onError },
-        background: {
-          default: m3DarkNavy.surface,
-          paper: m3DarkNavy.surfaceContainerLow,
-        },
-        text: {
-          primary: "#FFFFFF",
-          secondary: "#BDBDBD",
-        },
-        divider: m3DarkNavy.outlineVariant,
-      },
-    },
+    light: { palette: paletteFor(m3Light) },
+    dark: { palette: paletteFor(m3DarkNavy) },
   },
   shape: { borderRadius: 12 },
   typography: m3Typography,

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.2...paddlecheck-v1.30.3) (2026-08-13)
+
+
+### Bug Fixes
+
+* self-heal stale data at the server's cache window, not double it ([915fd71](https://github.com/dylanr97/Paddlecheck/commit/915fd7169a180457f0fa8fc1ffb1b77c9b125911))
+
 ## [1.30.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.1...paddlecheck-v1.30.2) (2026-08-13)
 
 

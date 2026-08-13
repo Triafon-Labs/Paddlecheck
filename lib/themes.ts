@@ -600,6 +600,17 @@ const components: ThemeOptions["components"] = {
         ...perScheme(theme, (m3) => ({
           color: m3.outline,
           "&.Mui-checked": { color: m3.onPrimary },
+          // The selected track is coloured from here rather than from the
+          // `track` slot below. A sibling selector written there would have to
+          // start `.Mui-checked + &`, and `applyStyles` wraps its rule as
+          // `.dark &` - so the nested `&` expands to `.dark <track>` and the
+          // whole thing becomes `.Mui-checked + .dark <track>`, which matches
+          // nothing. Anchoring on `&` keeps the scheme class where it belongs.
+          "&.Mui-checked + .MuiSwitch-track": {
+            backgroundColor: m3.primary,
+            borderColor: m3.primary,
+            opacity: 1,
+          },
           // The state layer is a 40dp halo around the thumb rather than a
           // fill, so it lives on a pseudo-element instead of the usual MUI
           // hover background.
@@ -633,14 +644,12 @@ const components: ThemeOptions["components"] = {
           border: "2px solid",
           transition: `background-color ${m3Duration.short4}ms ${m3Easing.standard}, border-color ${m3Duration.short4}ms ${m3Easing.standard}`,
         },
+        // Unselected track is surfaceContainerHighest per spec. (In the light
+        // scheme that token happens to equal surfaceVariant, so only dark mode
+        // changes visibly.) The selected state lives on switchBase above.
         ...perScheme(theme, (m3) => ({
-          backgroundColor: m3.surfaceVariant,
+          backgroundColor: m3.surfaceContainerHighest,
           borderColor: m3.outline,
-          ".Mui-checked + &": {
-            backgroundColor: `${m3.primary} !important`,
-            borderColor: m3.primary,
-            opacity: "1 !important",
-          },
         })),
       ],
     },

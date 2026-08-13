@@ -12,6 +12,11 @@ interface InfoPanelProps {
 // Shared wrapper for the "icon + text on a muted background" panels used
 // across StatusCard, ConditionsBriefing and WeatherWarnings, so the same
 // padding/spacing/background doesn't get hand-duplicated at each call site.
+//
+// The background is the tonal surfaceContainerHigh role, one step up from the
+// card these sit inside. It used to be `action.hover`, which is a state layer
+// - an overlay M3 reserves for expressing interaction - so a resting panel
+// was painted in the colour that means "you are hovering this".
 const InfoPanel: React.FC<InfoPanelProps> = ({
   children,
   align = "center",
@@ -24,7 +29,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({
       display: "flex",
       alignItems: align,
       gap: 1,
-      backgroundColor: "action.hover",
+      backgroundColor: "surfaces.containerHigh",
       ...sx,
     }}
   >

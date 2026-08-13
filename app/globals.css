@@ -5,7 +5,8 @@ body {
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  /* No font-family here: it's set from the theme's type scale via
+     CssBaseline, so hardcoding one would silently outrank Roboto Flex. */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

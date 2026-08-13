@@ -25,7 +25,7 @@ import {
 import { ragStatus } from "@/lib/rag";
 import { THRESHOLDS } from "@/lib/config";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
-import { m3Easing } from "@/lib/m3-palette";
+import { m3Spring, spring, springTransition } from "@/lib/m3-palette";
 
 export const PADDLER_LEVEL_CHANGED_EVENT = "paddlecheck:paddler-level-changed";
 
@@ -292,7 +292,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                 <Box
                   key={paddler}
                   sx={{
-                    backgroundColor: "action.hover",
+                    backgroundColor: "surfaces.containerHigh",
                     borderRadius: 1.5,
                     overflow: "hidden",
                   }}
@@ -349,7 +349,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
             })}
           </Box>
         ) : (
-          <Grow in appear easing={{ enter: m3Easing.decelerate }}>
+          <Grow in appear {...springTransition()}>
             <Box
               sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}
             >
@@ -365,7 +365,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                   <Box
                     key={paddler}
                     sx={{
-                      backgroundColor: "action.hover",
+                      backgroundColor: "surfaces.containerHigh",
                       borderRadius: 1.5,
                       overflow: "hidden",
                       border: "1.5px solid",
@@ -390,6 +390,29 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                         px: 1.5,
                         py: 1.25,
                         cursor: "pointer",
+                        position: "relative",
+                        // These rows are real buttons (click, Enter/Space,
+                        // aria-expanded) but were the only interactive surface
+                        // in the app with no M3 state layer and no focus
+                        // indicator - a keyboard user had no way to tell which
+                        // row they were on. The overlay is the standard M3
+                        // onSurface state layer at 8%/10%.
+                        "&::after": {
+                          content: '""',
+                          position: "absolute",
+                          inset: 0,
+                          backgroundColor: "text.primary",
+                          opacity: 0,
+                          transition: spring("opacity", m3Spring.effectsFast),
+                          pointerEvents: "none",
+                        },
+                        "&:hover::after": { opacity: 0.08 },
+                        "&:active::after": { opacity: 0.1 },
+                        "&:focus-visible": {
+                          outline: "3px solid",
+                          outlineColor: "primary.main",
+                          outlineOffset: -3,
+                        },
                       }}
                     >
                       <Box
@@ -407,8 +430,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                         sx={{
                           color: "text.secondary",
                           transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                          transition:
-                            "transform 200ms cubic-bezier(0.2, 0, 0, 1)",
+                          transition: spring("transform", m3Spring.spatialFast),
                         }}
                       />
                     </Box>

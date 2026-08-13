@@ -19,7 +19,7 @@ import TrafficLight from "./TrafficLight";
 import InfoPanel from "./InfoPanel";
 import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
 import { formatWindGust } from "@/lib/units";
-import { m3Easing } from "@/lib/m3-palette";
+import { springTransition } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
 import WeatherWarnings from "./WeatherWarnings";
 
@@ -102,9 +102,14 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
       const NoPaddlingIcon = noPaddlingStatusInfo?.icon;
 
       return (
-        <Grow in appear easing={{ enter: m3Easing.decelerate }}>
+        <Grow in appear {...springTransition()}>
           <Box>
             {isNoPaddling && NoPaddlingIcon ? (
+              // The RAG palette's `backgroundColor` values are all light-mode
+              // tints, so this panel used to paint a pale grey slab across a
+              // navy card in dark mode. The M3 error container pair is both
+              // the scheme-aware fix and the role the spec asks for on a
+              // hard prohibition like this one.
               <Box
                 sx={{
                   display: "flex",
@@ -115,21 +120,14 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                   mb: 2,
                   p: 2,
                   borderRadius: 1,
-                  backgroundColor: noPaddlingStatusInfo.backgroundColor,
-                  border: `1px solid ${noPaddlingStatusInfo.color}`,
+                  backgroundColor: "error.container",
+                  color: "error.onContainer",
+                  border: "1px solid",
+                  borderColor: "error.main",
                 }}
               >
-                <NoPaddlingIcon
-                  sx={{
-                    fontSize: 40,
-                    color: noPaddlingStatusInfo.color,
-                    mb: 1,
-                  }}
-                />
-                <Typography
-                  variant="h6"
-                  sx={{ color: noPaddlingStatusInfo.color, mb: 1 }}
-                >
+                <NoPaddlingIcon sx={{ fontSize: 40, mb: 1 }} />
+                <Typography variant="h6" sx={{ mb: 1 }}>
                   No Paddling
                 </Typography>
               </Box>

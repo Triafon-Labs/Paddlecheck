@@ -27,7 +27,7 @@ import {
   formatWindSpeed,
 } from "@/lib/units";
 import { useNowTicking, formatDataAge } from "@/lib/time";
-import { m3Easing } from "@/lib/m3-palette";
+import { springTransition } from "@/lib/m3-palette";
 
 interface StatsCardProps {
   conditions: KayakConditions | null;
@@ -189,7 +189,7 @@ const RiverLevelSection: React.FC<{
               py: 1,
               px: 1.5,
               ...(row.current && {
-                backgroundColor: "action.hover",
+                backgroundColor: "surfaces.containerHigh",
                 borderRadius: 1,
               }),
             }}
@@ -405,7 +405,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
         <Typography variant="h5" component="div" gutterBottom>
           Detailed Stats
         </Typography>
-        <Grow in appear easing={{ enter: m3Easing.decelerate }}>
+        <Grow in appear {...springTransition()}>
           <Box sx={{ mt: 1 }}>
             <RiverLevelSection
               conditions={conditions}

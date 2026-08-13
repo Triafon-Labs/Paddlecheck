@@ -43,7 +43,7 @@ import { useNowTicking, formatDataAge } from "@/lib/time";
 import { TIME_PERIODS } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
-import { m3Easing } from "@/lib/m3-palette";
+import { springTransition } from "@/lib/m3-palette";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 
 interface RiverLevelGraphProps {
@@ -79,7 +79,7 @@ const ChangeIndicator: React.FC<{
         justifyContent: "center",
         flexDirection: "column",
         height: "100%",
-        backgroundColor: "action.hover",
+        backgroundColor: "surfaces.containerHigh",
       }}
     >
       <Box
@@ -522,7 +522,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
       );
     }
     return (
-      <Grow in appear easing={{ enter: m3Easing.decelerate }}>
+      <Grow in appear {...springTransition()}>
         <Box>{renderChartBody()}</Box>
       </Grow>
     );
@@ -552,12 +552,10 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               <Typography
                 variant="caption"
                 color="text.disabled"
-                sx={{
-                  display: "block",
-                  textAlign: "right",
-                  fontSize: "0.7rem",
-                  mt: 1,
-                }}
+                // No fontSize override: 0.7rem sat between M3's Body Small and
+                // Label Small, so the label was the one piece of text on the
+                // card that belonged to no step of the type scale.
+                sx={{ display: "block", textAlign: "right", mt: 1 }}
               >
                 As of {dataAgeLabel}
               </Typography>

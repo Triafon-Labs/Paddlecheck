@@ -40,7 +40,7 @@ import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { isWarningOnDay, formatWarningTime } from "@/lib/warnings";
-import { m3Easing } from "@/lib/m3-palette";
+import { springTransition } from "@/lib/m3-palette";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 
 interface ForecastRagGraphProps {
@@ -409,7 +409,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
       );
     }
     return (
-      <Grow in appear easing={{ enter: m3Easing.decelerate }}>
+      <Grow in appear {...springTransition()}>
         <Box>{renderChartBody()}</Box>
       </Grow>
     );
@@ -510,7 +510,8 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                               href={w.link}
                               target="_blank"
                               rel="noopener"
-                              sx={{ fontSize: "0.7rem", fontWeight: "bold" }}
+                              variant="caption"
+                              sx={{ fontWeight: 700 }}
                             >
                               UK Met Office
                             </Link>

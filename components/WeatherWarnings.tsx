@@ -51,17 +51,21 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
           const isRed = severity === "Red";
           const isAmber = severity === "Amber";
 
-          const iconColor = isRed
+          const severityColor = isRed
             ? WARNING_COLORS.Red
             : isAmber
               ? WARNING_COLORS.Amber
               : WARNING_COLORS.Yellow;
 
           return (
-            <InfoPanel key={severity} align="flex-start">
+            <InfoPanel
+              key={severity}
+              align="flex-start"
+              sx={{ border: "1.5px solid", borderColor: severityColor }}
+            >
               <WarningIcon
                 fontSize="small"
-                sx={{ color: iconColor, mt: "2px" }}
+                sx={{ color: severityColor, mt: "2px" }}
               />
               <Stack spacing={1} sx={{ flex: 1 }}>
                 {Object.entries(group).map(([headline, warnings], idx) => (

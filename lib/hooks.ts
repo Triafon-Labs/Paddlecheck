@@ -214,7 +214,13 @@ export const useKayakData = () => {
         Date.now() - new Date(apiResponse.fetchedAt).getTime() >
           DATA_STALE_THRESHOLD_MS;
       if (isStale) {
-        const liveResponse = await fetch("/api/conditions/live")
+        // no-store because this route exists purely to sidestep caches: it
+        // sets no cache-control of its own, and a browser that heuristically
+        // held on to the previous response would hand back the very staleness
+        // this call is here to break out of.
+        const liveResponse = await fetch("/api/conditions/live", {
+          cache: "no-store",
+        })
           .then((res) =>
             res.ok ? (res.json() as Promise<ConditionsApiResponse>) : null
           )
@@ -566,11 +572,21 @@ export const useKayakData = () => {
         Date.now() - lastFetchedAtRef.current > DATA_STALE_THRESHOLD_MS;
       if (isStale) fetchData();
     };
+    // A page restored from the back/forward cache never remounts, so the
+    // fetch-on-mount above doesn't run - and a restore that was already
+    // visible when it was frozen (a back navigation, rather than the app
+    // being switched away from) fires no visibilitychange either. pageshow
+    // is the one event both paths share.
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) refetchIfStale();
+    };
     document.addEventListener("visibilitychange", refetchIfStale);
     window.addEventListener("online", refetchIfStale);
+    window.addEventListener("pageshow", handlePageShow);
     return () => {
       document.removeEventListener("visibilitychange", refetchIfStale);
       window.removeEventListener("online", refetchIfStale);
+      window.removeEventListener("pageshow", handlePageShow);
     };
   }, [fetchData]);
 

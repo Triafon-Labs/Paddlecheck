@@ -245,7 +245,7 @@ rejecting commits whose first line isn't a valid Conventional Commit
 
 ## CI Pipeline
 
-- **ci.yml** – runs `lint` then `build` on every push/PR to `main` (Node 20)
+- **ci.yml** – runs `lint` then `build` on every push/PR to `main` (Node 22)
 - **auto-tag.yml** – on every push to `main` (i.e. right after a PR merges), runs
   `commit-and-tag-version` to bump `package.json`'s version, update `CHANGELOG.md`,
   commit both directly to `main`, and push a `paddlecheck-vX.Y.Z` tag. No release PR,
@@ -257,6 +257,18 @@ rejecting commits whose first line isn't a valid Conventional Commit
 
 Both workflows install through `.github/actions/npm-install` rather than calling
 `npm ci` directly. See below for why.
+
+The Node version is pinned to 22 in both workflows and declared as
+`engines.node` in `package.json`, which is also what Vercel reads when picking a
+build image. Node 20 reached end of life in April 2026, and parts of the release
+toolchain (`@conventional-changelog/template`, `@simple-libs/*`, `argue-cli`)
+already require `node >=22` — on Node 20 they only emitted `EBADENGINE` warnings,
+but nothing guaranteed they would keep working. Keep the two workflows, the
+`engines` field, and the README in step with each other.
+
+`ci.yml` cancels superseded runs on the same ref. `auto-tag.yml` deliberately
+does **not** cancel: releases are queued one at a time so two quick merges cannot
+bump from the same base and race each other's tag push.
 
 ### Dependabot and the lockfile
 
@@ -281,6 +293,12 @@ Two things keep this from recurring:
    failing, but only for Dependabot's own runs (and always in `auto-tag.yml`).
    For anyone else a lockfile that does not match the manifest is still a hard
    error, because there it means the lockfile was not committed.
+
+Related: the `postcss` entry under `overrides` is bounded to `^8.5.10` rather
+than `>=8.5.10`. An override replaces the range **every** package in the tree
+asked for, so an open-ended `>=` would pull in a future postcss 9 the day it
+ships and hand it to Next's build with nothing to catch it. Keep overrides
+bounded to a major.
 
 ---
 

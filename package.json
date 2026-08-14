@@ -2,6 +2,9 @@
   "name": "paddlecheck",
   "version": "1.30.5",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/dylanr97/Paddlecheck.git"
@@ -33,7 +36,7 @@
     "xml2js": "^0.6.2"
   },
   "overrides": {
-    "postcss": ">=8.5.10"
+    "postcss": "^8.5.10"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.1",

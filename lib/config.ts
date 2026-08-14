@@ -154,12 +154,21 @@ export const RAG_STATUS_UI: Record<
 
 // --- RAG Calculation Criteria ---
 // Adjust these thresholds based on your local safety guidelines
+// Each row is the club's conditions table: temperature band, then weather,
+// then one rating per river-level column.
+//
+// `low.rainy` is the one entry with no row in the printed table, which lists
+// only calm and windy at 5°C and below. It used to copy `low.calm`, so rain
+// raised the rating at 8°C and did nothing at 3°C - backwards, since cold rain
+// is worse than cool rain. It now matches `low.windy`, the same pairing the
+// 5-12°C band already makes between wind and rain. That is deliberately
+// stricter than the printed rules; the Conditions Key says so.
 export const CRITERIA_TABLE: {
   [key: string]: { [key: string]: number[] };
 } = {
   high: { calm: [0, 1, 2, 3], windy: [1, 2, 2, 3] },
   moderate: { calm: [1, 2, 2, 3], windy: [2, 2, 2, 3], rainy: [2, 2, 2, 3] },
-  low: { calm: [2, 2, 3, 3], windy: [2, 3, 3, 3], rainy: [2, 2, 3, 3] },
+  low: { calm: [2, 2, 3, 3], windy: [2, 3, 3, 3], rainy: [2, 3, 3, 3] },
 };
 
 export const THRESHOLDS = {

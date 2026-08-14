@@ -487,14 +487,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 />
                 <ThresholdRow
                   icon={<Thermostat fontSize="small" />}
-                  label={`${THRESHOLDS.TEMP_MODERATE}–${THRESHOLDS.TEMP_HIGH}°C`}
+                  label={`Over ${THRESHOLDS.TEMP_MODERATE}°C, below ${THRESHOLDS.TEMP_HIGH}°C`}
                   description="Cool. Raises the base risk rating. Rain also becomes a factor."
                   chipLabel="Raises Rating"
                   chipColor="warning"
                 />
                 <ThresholdRow
                   icon={<AcUnit fontSize="small" />}
-                  label={`Below ${THRESHOLDS.TEMP_MODERATE}°C`}
+                  label={`${THRESHOLDS.TEMP_MODERATE}°C and below`}
                   description="Cold air, and likely cold water too - capsizing is far more dangerous with nowhere warm to recover. Significant increase in risk rating."
                   chipLabel="Cold"
                   chipColor="error"
@@ -597,10 +597,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 </Typography>
                 <ThresholdRow
                   icon={<WaterDrop fontSize="small" />}
-                  label="Rain"
-                  description="Rain at cool temperatures (5–12°C) raises the risk rating."
+                  label={`Rain below ${THRESHOLDS.TEMP_HIGH}°C`}
+                  description="Rain raises the risk rating whenever it isn't warm, by the same step as windy conditions."
                   chipLabel="Raises Rating"
                   chipColor="warning"
+                />
+                <ThresholdRow
+                  icon={<WaterDrop fontSize="small" />}
+                  label={`Rain at ${THRESHOLDS.TEMP_MODERATE}°C and below`}
+                  description={`The club's printed table sets out rain only for the cool band, listing just calm and windy at ${THRESHOLDS.TEMP_MODERATE}°C and below. Paddlecheck treats cold rain like cold wind rather than ignoring it, so it is stricter than the printed rules here.`}
+                  chipLabel="Stricter Than Rules"
+                  chipColor="default"
                 />
                 <ThresholdRow
                   icon={<WaterDrop fontSize="small" />}

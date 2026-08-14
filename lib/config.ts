@@ -104,8 +104,7 @@ export const RAG_HEIGHT_MAP: Record<Status, number> = {
 
 // `color` is the status hue itself, `onColor` the label colour to put on top
 // of it - see ON_STATUS_COLORS in lib/statusColors.ts for why the pairing
-// isn't simply white throughout. `backgroundColor` is the old pale Material 2
-// tint, kept only for the traffic-light lamps.
+// isn't simply white throughout.
 export const RAG_STATUS_UI: Record<
   Status,
   {
@@ -113,7 +112,6 @@ export const RAG_STATUS_UI: Record<
     onColor: string;
     emoji: string;
     icon: React.ElementType;
-    backgroundColor: string;
   }
 > = {
   Unknown: {
@@ -121,42 +119,36 @@ export const RAG_STATUS_UI: Record<
     onColor: ON_STATUS_COLORS.grey,
     emoji: "🤷",
     icon: HelpOutlined,
-    backgroundColor: "#F5F5F5",
   },
   "Light Green": {
     color: STATUS_COLORS.lightGreen,
     onColor: ON_STATUS_COLORS.lightGreen,
     emoji: "✅",
     icon: Check,
-    backgroundColor: "#E8F5E9",
   },
   "Dark Green": {
     color: STATUS_COLORS.darkGreen,
     onColor: ON_STATUS_COLORS.darkGreen,
     emoji: "📈",
     icon: TrendingUpOutlined,
-    backgroundColor: "#C8E6C9",
   },
   Amber: {
     color: WARNING_COLORS.Amber,
     onColor: ON_STATUS_COLORS.amber,
     emoji: "⚠️",
     icon: WarningAmberOutlined,
-    backgroundColor: "#FFF3E0",
   },
   Red: {
     color: WARNING_COLORS.Red,
     onColor: ON_STATUS_COLORS.red,
     emoji: "🚨",
     icon: CrisisAlert,
-    backgroundColor: "#FFEBEE",
   },
   "No Paddling": {
     color: STATUS_COLORS.maroon,
     onColor: ON_STATUS_COLORS.maroon,
     emoji: "⛔",
     icon: DoNotDisturbOutlined,
-    backgroundColor: "#E0E0E0",
   },
 };
 

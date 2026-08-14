@@ -190,7 +190,7 @@ export function buildBestPaddlingTimes(
         const [endH, endM] = end.split(":").map(Number);
         const remaining = endH * 60 + endM - (nowH * 60 + nowM);
         if (remaining > 0 && remaining < 60) {
-          note = ` – only ~${remaining} mins remaining`;
+          note = ` – only ~${remaining} min remaining`;
         }
       }
       return `${start}–${end}${note}`;

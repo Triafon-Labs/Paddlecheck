@@ -11,6 +11,10 @@ export const useNowTicking = (intervalMs: number = 60 * 1000): Date => {
   return now;
 };
 
+// Minutes on their own are always "min" - "45 min ago". The bare "m" below
+// only ever appears welded to an hour ("2h 15m ago"), where it reads as part
+// of a compact duration rather than as a unit in its own right; standalone it
+// would be one character away from the metres this app quotes river levels in.
 export const formatDataAge = (latestTs: number, now: Date): string => {
   const ageMinutes = Math.round((now.getTime() - latestTs) / (60 * 1000));
   if (ageMinutes < 1) return "just now";
@@ -37,8 +41,10 @@ export const getRelativeTimeString = (
   const diffMins = Math.floor(diffMs / 60000);
 
   if (diffMins < 1) return "just now";
-  if (diffMins === 1) return "1 minute ago";
-  if (diffMins < 60) return `${diffMins} minutes ago`;
+  // "min", never "mins" or "minutes" - the same unit this file's
+  // formatDataAge and the forecast summary use, so the freshness caption in
+  // the app bar reads the same as the one under the graphs.
+  if (diffMins < 60) return `${diffMins} min ago`;
 
   const diffHours = Math.floor(diffMins / 60);
   if (diffHours < 24)

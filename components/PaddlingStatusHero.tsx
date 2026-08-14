@@ -29,14 +29,14 @@ const SCALE: Status[] = [
 // Material 2 tint, and the scale survives as the strip underneath, so "which
 // of the five are we on" is still legible without it outweighing "which one".
 //
-// M3 Expressive shows up in three places: the fill/on-fill pairing (the same
-// treatment the status chips and the No Paddling panel already use), the
-// shape - a 28dp hero that morphs down to 12dp for the stop state, since a
-// shape change reads as a category change in a way a colour change alone
-// doesn't - and the spatial spring on the scale segments.
+// All six statuses get the identical panel - same shape, same icon
+// treatment, same type. No Paddling shares the RAG red with the Red status
+// and is told apart by its icon and its label, which is the one pairing in
+// the app where the hue alone doesn't carry the difference. Every darker red
+// that would has to sit on the dark scheme's navy card, where it drops to
+// 1.0-1.2:1 against it and the panel stops reading as a shape at all.
 const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
   const { icon: Icon, color, onColor } = ragStatus[status];
-  const isStop = status === "No Paddling";
 
   return (
     <Box>
@@ -46,17 +46,10 @@ const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
           alignItems: "center",
           gap: { xs: 1.75, sm: 2.5 },
           p: { xs: 2, sm: 3 },
-          // The stop state is the one place the shape breaks from the rest of
-          // the app. Everything else here is a soft 28dp hero; No Paddling
-          // squares off, so it reads as a different kind of thing at a glance
-          // rather than as "red, but more so".
-          borderRadius: isStop ? "12px" : "28px",
+          borderRadius: "28px",
           backgroundColor: color,
           color: onColor,
-          transition: [
-            spring("border-radius", m3Spring.spatialDefault),
-            spring("background-color", m3Spring.effectsDefault),
-          ].join(", "),
+          transition: spring("background-color", m3Spring.effectsDefault),
         }}
       >
         <Icon sx={{ fontSize: { xs: 44, sm: 64 }, flexShrink: 0 }} />
@@ -98,10 +91,7 @@ const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
               sx={{
                 flex: isActive ? 2.2 : 1,
                 height: isActive ? 10 : 6,
-                // The stop segment squares off for the same reason the panel
-                // does - Red and No Paddling share a hue, so shape is what
-                // separates them on a strip this small.
-                borderRadius: s === "No Paddling" ? "3px" : 9999,
+                borderRadius: 9999,
                 backgroundColor: ragStatus[s].color,
                 opacity: isActive ? 1 : 0.32,
                 // Size is spatial, so it gets the overshooting spring; the

@@ -104,7 +104,8 @@ const getPaddlingMatrix = (
       beginner.details = ["Coach supervision required.", "PFD required."];
       improver.status = "Yes";
       improver.details = [
-        "Group can paddle without a coach.",
+        "No coach needed.",
+        "Paddle with at least one other improver or intermediate, preferably more.",
         "Group carries a mobile phone.",
         "Familiar boat only.",
         sabrinaSlip,
@@ -129,6 +130,7 @@ const getPaddlingMatrix = (
       intermediate.status = "Yes";
       intermediate.details = [
         "Pair up with another intermediate, no coach needed.",
+        "Solo K2 crews must be able to self-rescue.",
         "Carry a mobile phone.",
         "Familiar boat only.",
         sabrinaSlip,
@@ -216,14 +218,21 @@ const getPaddlingMatrix = (
     addHighWaterPfdWarning(intermediate);
   }
 
-  // Everyone below Independent needs to be easy to spot from the bank and
-  // from other boats, whatever the conditions. This isn't PPE-grade hi-vis -
-  // a fluorescent top, or a bib pulled over your kit, is enough. Applied
-  // after the PFD rules above so it lands last in the list and doesn't
+  // From the club email introducing bibs: "All coaching groups of Adult and
+  // Junior Beginners and Intermediate paddlers will wear luminous bibs." It
+  // postdates the printed rules, which don't mention hi-vis at all.
+  //
+  // Improvers are not named in that sentence and are carried here anyway, and
+  // the email scopes the rule to coaching groups where this applies to any
+  // paddling level - both deliberately wider than the source, since a bib
+  // costs nothing and being seen from the bank is the point. Narrow both if
+  // the club wants the app to state the rule exactly.
+  //
+  // Applied after the PFD rules above so it lands last in the list and doesn't
   // disturb their "PFD required." lookups.
   for (const paddler of [beginner, improver, intermediate]) {
     if (paddler.status !== "No") {
-      paddler.details.push("Wear a fluorescent top or bib.");
+      paddler.details.push("Wear a luminous bib.");
     }
   }
 

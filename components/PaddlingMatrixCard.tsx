@@ -7,6 +7,7 @@ import {
   Collapse,
   Skeleton,
   Grow,
+  Stack,
 } from "@mui/material";
 import {
   CheckCircleOutlined,
@@ -37,19 +38,51 @@ interface PaddlingMatrixCardProps {
 
 // Colours each paddler's status icon using the same RAG colour tokens as
 // the rest of the app.
+//
+// `headline` and `short` exist because Discretion and Warning are different
+// verdicts that draw the same amber warning triangle - "only at a coach's
+// discretion" and "yes, but the river is high" were indistinguishable when
+// the icon was the whole signal. Saying them in words is what separates them.
 const STATUS_UI: Record<
   PaddlingStatusValue,
-  { color: string; icon: React.ElementType }
+  {
+    color: string;
+    icon: React.ElementType;
+    headline: string;
+    short: string;
+  }
 > = {
-  Yes: { color: ragStatus["Light Green"].color, icon: CheckCircleOutlined },
-  No: { color: ragStatus["Red"].color, icon: CancelOutlined },
-  Discretion: { color: ragStatus["Amber"].color, icon: WarningAmberOutlined },
-  Warning: { color: ragStatus["Amber"].color, icon: WarningAmberOutlined },
+  Yes: {
+    color: ragStatus["Light Green"].color,
+    icon: CheckCircleOutlined,
+    headline: "You can paddle",
+    short: "Can paddle",
+  },
+  Warning: {
+    color: ragStatus["Amber"].color,
+    icon: WarningAmberOutlined,
+    headline: "You can paddle, with care",
+    short: "With care",
+  },
+  Discretion: {
+    color: ragStatus["Amber"].color,
+    icon: WarningAmberOutlined,
+    headline: "Coach's discretion",
+    short: "Coach's discretion",
+  },
+  No: {
+    color: ragStatus["Red"].color,
+    icon: CancelOutlined,
+    headline: "You can't paddle today",
+    short: "Cannot paddle",
+  },
 };
 
 const UNKNOWN_UI = {
   color: ragStatus["Unknown"].color,
   icon: HelpOutlined,
+  headline: "Conditions unavailable",
+  short: "Unknown",
 };
 
 const getPaddlingMatrix = (
@@ -266,6 +299,175 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
     setOpen((prevOpen) => ({ ...prevOpen, [paddler]: !prevOpen[paddler] }));
   };
 
+  // The verdict for the reader's own level, lifted out of the accordion: it
+  // is the question this card exists to answer, and it used to be a 22px icon
+  // on a row weighted the same as the three levels that don't apply. The
+  // others stay, one compact line each, still expandable.
+  const renderCompactRow = (paddler: PaddlerType) => {
+    const statusInfo = paddlingMatrix[paddler];
+    const ui = statusInfo ? STATUS_UI[statusInfo.status] : UNKNOWN_UI;
+    const StatusIcon = ui.icon;
+    const isOpen = open[paddler];
+    return (
+      <Box
+        key={paddler}
+        sx={{
+          backgroundColor: "surfaces.containerHigh",
+          borderRadius: 1.5,
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          onClick={() => handleToggle(paddler)}
+          role="button"
+          tabIndex={0}
+          aria-expanded={isOpen}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleToggle(paddler);
+            }
+          }}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            px: 1.5,
+            py: 1,
+            cursor: "pointer",
+            position: "relative",
+            // These rows are real buttons (click, Enter/Space, aria-expanded)
+            // and carry the M3 onSurface state layer at 8%/10% plus a focus
+            // indicator, so a keyboard user can tell which row they are on.
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              inset: 0,
+              backgroundColor: "text.primary",
+              opacity: 0,
+              transition: spring("opacity", m3Spring.effectsFast),
+              pointerEvents: "none",
+            },
+            "&:hover::after": { opacity: 0.08 },
+            "&:active::after": { opacity: 0.1 },
+            "&:focus-visible": {
+              outline: "3px solid",
+              outlineColor: "primary.main",
+              outlineOffset: -3,
+            },
+          }}
+        >
+          <StatusIcon sx={{ color: ui.color, fontSize: 20, flexShrink: 0 }} />
+          <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
+            {paddler}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {ui.short}
+          </Typography>
+          <ExpandMore
+            sx={{
+              fontSize: 20,
+              color: "text.secondary",
+              transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+              transition: spring("transform", m3Spring.spatialFast),
+            }}
+          />
+        </Box>
+        <Collapse in={isOpen} timeout="auto" unmountOnExit>
+          {statusInfo && statusInfo.details.length > 0 && (
+            <Box
+              component="ul"
+              sx={{
+                m: 0,
+                pl: 4.5,
+                pr: 1.5,
+                pt: 0.5,
+                pb: 1.5,
+                "& li:not(:last-of-type)": { mb: 0.75 },
+              }}
+            >
+              {statusInfo.details.map((line, index) => (
+                <Typography key={index} component="li" variant="body2">
+                  {line}
+                </Typography>
+              ))}
+            </Box>
+          )}
+        </Collapse>
+      </Box>
+    );
+  };
+
+  const selectedInfo = selectedLevel
+    ? paddlingMatrix[selectedLevel]
+    : undefined;
+  const otherLevels = selectedLevel
+    ? paddlerTypes.filter((paddler) => paddler !== selectedLevel)
+    : paddlerTypes;
+
+  const renderVerdict = () => {
+    if (!selectedLevel || !selectedInfo) return null;
+    const ui = STATUS_UI[selectedInfo.status];
+    const StatusIcon = ui.icon;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          borderRadius: "16px",
+          overflow: "hidden",
+          backgroundColor: "surfaces.containerHighest",
+        }}
+      >
+        {/* The status colour arrives as an accent rather than as a fill. A
+            filled panel would repeat the status card's treatment directly
+            above it, leaving the page with two full-width colour slabs
+            competing to be the headline. */}
+        <Box
+          sx={{ width: 6, backgroundColor: ui.color, flexShrink: 0 }}
+          aria-hidden
+        />
+        <Box sx={{ p: 2, flex: 1, minWidth: 0 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <StatusIcon sx={{ fontSize: 40, color: ui.color, flexShrink: 0 }} />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                sx={{ display: "block", lineHeight: 1.2 }}
+              >
+                You - {selectedLevel}
+              </Typography>
+              <Typography
+                variant="h5"
+                component="p"
+                sx={{ fontWeight: 500, lineHeight: 1.15 }}
+              >
+                {ui.headline}
+              </Typography>
+            </Box>
+          </Box>
+          {selectedInfo.details.length > 0 && (
+            <Box
+              component="ul"
+              sx={{ m: 0, mt: 1.5, pl: 2.5, "& li": { mb: 0.25 } }}
+            >
+              {selectedInfo.details.map((line, index) => (
+                <Typography key={index} component="li" variant="body2">
+                  {line}
+                </Typography>
+              ))}
+            </Box>
+          )}
+        </Box>
+      </Box>
+    );
+  };
+
+  const savedLevelForSkeleton =
+    typeof window !== "undefined"
+      ? (localStorage.getItem(STORAGE_KEYS.PADDLER_LEVEL) as PaddlerType | null)
+      : null;
+
   return (
     <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
       <CardContent>
@@ -273,195 +475,59 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
           Who Can Paddle
         </Typography>
         {loading ? (
-          <Box
-            sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}
-          >
-            {paddlerTypes.map((paddler) => {
-              // Mirrors the open-state resolution below (read directly,
-              // rather than from `open` state, since that's only populated
-              // once the effect below runs) so a row that's about to expand
-              // by default reserves the space for its detail lines too.
-              const savedLevel =
-                typeof window !== "undefined"
-                  ? (localStorage.getItem(
-                      STORAGE_KEYS.PADDLER_LEVEL
-                    ) as PaddlerType | null)
-                  : null;
-              const isOpen = savedLevel ? paddler === savedLevel : true;
-              return (
-                <Box
-                  key={paddler}
-                  sx={{
-                    backgroundColor: "surfaces.containerHigh",
-                    borderRadius: 1.5,
-                    overflow: "hidden",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      px: 1.5,
-                      py: 1.25,
-                    }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Skeleton
-                        variant="circular"
-                        width={22}
-                        height={22}
-                        animation="wave"
-                      />
-                      <Skeleton
-                        variant="text"
-                        width={100}
-                        height={28}
-                        animation="wave"
-                      />
-                    </Box>
-                    <Skeleton
-                      variant="circular"
-                      width={20}
-                      height={20}
-                      animation="wave"
-                    />
-                  </Box>
-                  {isOpen && (
-                    <Box sx={{ pl: 4.5, pr: 1.5, pt: 0.5, pb: 1.5 }}>
-                      <Skeleton
-                        variant="text"
-                        width="90%"
-                        height={20}
-                        animation="wave"
-                        sx={{ mb: 0.75 }}
-                      />
-                      <Skeleton
-                        variant="text"
-                        width="70%"
-                        height={20}
-                        animation="wave"
-                      />
-                    </Box>
-                  )}
-                </Box>
-              );
-            })}
+          <Box sx={{ mt: 1 }}>
+            {/* Mirrors the layout below, reading the saved level directly
+                rather than from state (which is only populated once the effect
+                runs) so the skeleton reserves the shape the card will take. */}
+            {savedLevelForSkeleton && (
+              <Skeleton
+                variant="rounded"
+                height={150}
+                animation="wave"
+                sx={{ borderRadius: "16px", mb: 2 }}
+              />
+            )}
+            <Skeleton
+              variant="text"
+              width={100}
+              height={20}
+              animation="wave"
+              sx={{ mb: 1 }}
+            />
+            <Stack spacing={0.75}>
+              {Array.from({
+                length: savedLevelForSkeleton
+                  ? paddlerTypes.length - 1
+                  : paddlerTypes.length,
+              }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  variant="rounded"
+                  height={savedLevelForSkeleton ? 40 : 96}
+                  animation="wave"
+                  sx={{ borderRadius: 1.5 }}
+                />
+              ))}
+            </Stack>
           </Box>
         ) : (
           <Grow in appear {...springTransition()}>
-            <Box
-              sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}
-            >
-              {paddlerTypes.map((paddler) => {
-                const statusInfo = paddlingMatrix[paddler];
-                const ui = statusInfo
-                  ? STATUS_UI[statusInfo.status]
-                  : UNKNOWN_UI;
-                const StatusIcon = ui.icon;
-                const isOpen = open[paddler];
-                const isSelected = paddler === selectedLevel;
-                return (
-                  <Box
-                    key={paddler}
-                    sx={{
-                      backgroundColor: "surfaces.containerHigh",
-                      borderRadius: 1.5,
-                      overflow: "hidden",
-                      border: "1.5px solid",
-                      borderColor: isSelected ? ui.color : "transparent",
-                    }}
-                  >
-                    <Box
-                      onClick={() => handleToggle(paddler)}
-                      role="button"
-                      tabIndex={0}
-                      aria-expanded={isOpen}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          handleToggle(paddler);
-                        }
-                      }}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        px: 1.5,
-                        py: 1.25,
-                        cursor: "pointer",
-                        position: "relative",
-                        // These rows are real buttons (click, Enter/Space,
-                        // aria-expanded) but were the only interactive surface
-                        // in the app with no M3 state layer and no focus
-                        // indicator - a keyboard user had no way to tell which
-                        // row they were on. The overlay is the standard M3
-                        // onSurface state layer at 8%/10%.
-                        "&::after": {
-                          content: '""',
-                          position: "absolute",
-                          inset: 0,
-                          backgroundColor: "text.primary",
-                          opacity: 0,
-                          transition: spring("opacity", m3Spring.effectsFast),
-                          pointerEvents: "none",
-                        },
-                        "&:hover::after": { opacity: 0.08 },
-                        "&:active::after": { opacity: 0.1 },
-                        "&:focus-visible": {
-                          outline: "3px solid",
-                          outlineColor: "primary.main",
-                          outlineOffset: -3,
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <StatusIcon sx={{ color: ui.color, fontSize: 22 }} />
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ fontWeight: 600 }}
-                        >
-                          {paddler}
-                        </Typography>
-                      </Box>
-                      <ExpandMore
-                        sx={{
-                          color: "text.secondary",
-                          transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                          transition: spring("transform", m3Spring.spatialFast),
-                        }}
-                      />
-                    </Box>
-                    <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                      {statusInfo && statusInfo.details.length > 0 && (
-                        <Box
-                          component="ul"
-                          sx={{
-                            m: 0,
-                            pl: 4.5,
-                            pr: 1.5,
-                            pt: 0.5,
-                            pb: 1.5,
-                            "& li:not(:last-of-type)": { mb: 0.75 },
-                          }}
-                        >
-                          {statusInfo.details.map((line, index) => (
-                            <Typography
-                              key={index}
-                              component="li"
-                              variant="body2"
-                            >
-                              {line}
-                            </Typography>
-                          ))}
-                        </Box>
-                      )}
-                    </Collapse>
-                  </Box>
-                );
-              })}
+            <Box sx={{ mt: 1 }}>
+              {selectedLevel && selectedInfo ? (
+                renderVerdict()
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  Set your level in Settings to see what applies to you first.
+                </Typography>
+              )}
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                sx={{ mt: 2, mb: 1 }}
+              >
+                {selectedLevel && selectedInfo ? "Other levels" : "All levels"}
+              </Typography>
+              <Stack spacing={0.75}>{otherLevels.map(renderCompactRow)}</Stack>
             </Box>
           </Grow>
         )}

@@ -200,19 +200,6 @@ export const isRainy = (weatherCode: number): boolean =>
 // These appear in the Settings drawer "Conditions Key" section.
 // Update them to describe your own venue's landmarks and club guidelines.
 
-// One short line per status, read straight off the status panel at the top of
-// the page. RAG_DESCRIPTIONS below is the full rule set for the settings
-// drawer; this is the version that has to land in a glance from the car park,
-// so keep each to a handful of words.
-export const RAG_SUMMARIES: Record<Status, string> = {
-  "Light Green": "Ideal conditions",
-  "Dark Green": "Good conditions",
-  Amber: "Coach's discretion required",
-  Red: "Experienced paddlers only",
-  "No Paddling": "Do not go on the water",
-  Unknown: "Conditions unavailable",
-};
-
 export const RAG_DESCRIPTIONS: Record<Status, string> = {
   "Light Green":
     "Ideal conditions. Beginners need coach supervision. Improvers may paddle as a group without a coach. Intermediates may paddle solo.",

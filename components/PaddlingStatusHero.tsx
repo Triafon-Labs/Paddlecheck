@@ -4,7 +4,7 @@ import React from "react";
 import { Box, Typography } from "@mui/material";
 import { Status } from "@/types";
 import { ragStatus } from "@/lib/rag";
-import { RAG_STATUS_MAP, RAG_SUMMARIES } from "@/lib/config";
+import { RAG_STATUS_MAP } from "@/lib/config";
 import { m3Spring, spring } from "@/lib/m3-palette";
 
 interface PaddlingStatusHeroProps {
@@ -59,51 +59,27 @@ const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
           ].join(", "),
         }}
       >
-        {isStop ? (
-          // Inverted badge: the icon sits in a solid disc of the label colour
-          // with the red inside it. One more step of emphasis than the bare
-          // glyph the other four get, without introducing a sixth colour.
-          <Box
-            sx={{
-              flexShrink: 0,
-              width: { xs: 48, sm: 72 },
-              height: { xs: 48, sm: 72 },
-              borderRadius: "50%",
-              backgroundColor: onColor,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon sx={{ fontSize: { xs: 30, sm: 44 }, color }} />
-          </Box>
-        ) : (
-          <Icon sx={{ fontSize: { xs: 44, sm: 64 }, flexShrink: 0 }} />
-        )}
+        <Icon sx={{ fontSize: { xs: 44, sm: 64 }, flexShrink: 0 }} />
 
-        <Box sx={{ minWidth: 0 }}>
-          <Typography
-            variant="h3"
-            component="p"
-            sx={{
-              // The label is the only text on the page that has to survive
-              // being read at arm's length in the rain, so it takes M3's
-              // emphasised weight rather than the scale's default 400.
-              fontWeight: 500,
-              lineHeight: 1.1,
-              // Display Small on a phone would break "No Paddling" - the
-              // longest label - onto two lines inside a 360px card, so the
-              // step down to Headline Large below the sm breakpoint is what
-              // keeps every status on one line.
-              fontSize: { xs: "1.75rem", sm: "2.25rem" },
-            }}
-          >
-            {status}
-          </Typography>
-          <Typography variant="body1" sx={{ mt: 0.5, opacity: 0.9 }}>
-            {RAG_SUMMARIES[status]}
-          </Typography>
-        </Box>
+        <Typography
+          variant="h3"
+          component="p"
+          sx={{
+            minWidth: 0,
+            // The label is the only text on the page that has to survive being
+            // read at arm's length in the rain, so it takes M3's emphasised
+            // weight rather than the scale's default 400.
+            fontWeight: 500,
+            lineHeight: 1.1,
+            // Display Small on a phone would break "No Paddling" - the longest
+            // label - onto two lines inside a 360px card, so the step down to
+            // Headline Large below the sm breakpoint is what keeps every
+            // status on one line.
+            fontSize: { xs: "1.75rem", sm: "2.25rem" },
+          }}
+        >
+          {status}
+        </Typography>
       </Box>
 
       <Box

@@ -20,7 +20,14 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-      - run: npm ci
+      # Heal unconditionally here: releasing must not stall on a lockfile that a
+      # merged Dependabot PR left incomplete. commit-and-tag-version commits
+      # package-lock.json as part of the release commit, so the repair lands on
+      # main and the drift is gone for good.
+      - name: Install dependencies
+        uses: ./.github/actions/npm-install
+        with:
+          heal: always
       - name: Configure git identity
         run: |
           git config user.name "github-actions[bot]"

@@ -255,6 +255,33 @@ rejecting commits whose first line isn't a valid Conventional Commit
   major. The job skips itself when the triggering commit is its own
   `chore(release): ...` commit, to avoid a loop.
 
+Both workflows install through `.github/actions/npm-install` rather than calling
+`npm ci` directly. See below for why.
+
+### Dependabot and the lockfile
+
+Dependabot regenerates `package-lock.json` with its own resolver, and that
+resolver does not write **nested optional peer dependencies** that npm itself
+installs ([dependabot-core#6317](https://github.com/dependabot/dependabot-core/issues/6317)).
+`npm ci` then rejects the lockfile as out of sync and the PR fails on a build
+error that has nothing to do with the package being bumped.
+
+Two things keep this from recurring:
+
+1. **`conventional-commits-filter` and `conventional-commits-parser` are direct
+   `devDependencies`.** Nothing in this repo imports them. They are declared so
+   that npm resolves them at the top level instead of nesting them under
+   `@commitlint/read` to satisfy the optional peer dependencies of
+   `@conventional-changelog/git-client`. A nested optional peer is the exact
+   shape Dependabot drops; a direct dependency is one it must keep. Removing
+   these two entries as "unused" reintroduces the failure — `commit-and-tag-version`
+   pulls in the older v3/v4 line of the same packages, which is what forces the
+   nesting.
+2. **`.github/actions/npm-install` heals an out-of-sync lockfile** rather than
+   failing, but only for Dependabot's own runs (and always in `auto-tag.yml`).
+   For anyone else a lockfile that does not match the manifest is still a hard
+   error, because there it means the lockfile was not committed.
+
 ---
 
 ## Troubleshooting Husky Hooks

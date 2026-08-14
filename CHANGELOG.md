@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.5](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.4...paddlecheck-v1.30.5) (2026-08-14)
+
+
+### Bug Fixes
+
+* **theme:** stop the optical-size axis shrinking the type ([f2e367f](https://github.com/dylanr97/Paddlecheck/commit/f2e367f8c905d1256afca5e72daebd8e97f2ac7f))
+
 ## [1.30.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.3...paddlecheck-v1.30.4) (2026-08-13)
 
 

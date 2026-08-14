@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.31.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.8...paddlecheck-v1.31.0) (2026-08-14)
+
+
+### Features
+
+* **matrix:** lead Who Can Paddle with the reader's own level ([64a1928](https://github.com/dylanr97/Paddlecheck/commit/64a1928bf19b7323499c0cd256e606e86477494f))
+* **status:** lead the card with the paddling status itself ([b9eeb83](https://github.com/dylanr97/Paddlecheck/commit/b9eeb834ac6adbb5552a308616d6946c165f97a1)), closes [#E8F5E9](https://github.com/dylanr97/Paddlecheck/issues/E8F5E9) [#FFF3E0](https://github.com/dylanr97/Paddlecheck/issues/FFF3E0)
+* **theme:** give No Paddling its own red ([7019f48](https://github.com/dylanr97/Paddlecheck/commit/7019f48d8f546374bdd0b3bca4f8a8229b239f57)), closes [#800000](https://github.com/dylanr97/Paddlecheck/issues/800000)
+
+
+### Bug Fixes
+
+* **matrix:** stop calling a flooding river "not recommended" ([5c4b2fe](https://github.com/dylanr97/Paddlecheck/commit/5c4b2fe638622ccb5f0ef64df5bd589bd9404e2e))
+* **rag:** treat cold rain like cold wind, and say so in the key ([0f89e3e](https://github.com/dylanr97/Paddlecheck/commit/0f89e3eeb5ebee6f9a2003016bf82085bb021123))
+* **rules:** reconcile the matrix and the temperature bands with the club rules ([86dc5f2](https://github.com/dylanr97/Paddlecheck/commit/86dc5f270670f27813dd9756f36f7f4420b590ab))
+
+
+### Code Refactoring
+
+* **status:** drop the status subtitle and the stop-state badge ([2c1668b](https://github.com/dylanr97/Paddlecheck/commit/2c1668b4608212043f95294d05aacd0b387cec9a))
+* **status:** remove the traffic light ([97aaf68](https://github.com/dylanr97/Paddlecheck/commit/97aaf685fc2060c9707e6630821272237f922ab1)), closes [#E8F5E9](https://github.com/dylanr97/Paddlecheck/issues/E8F5E9) [#FFF3E0](https://github.com/dylanr97/Paddlecheck/issues/FFF3E0)
+
 ## [1.30.8](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.7...paddlecheck-v1.30.8) (2026-08-14)
 
 

@@ -6,6 +6,14 @@ on:
     - cron: "*/5 * * * *"
   workflow_dispatch:
 
+# Only curls the public site; needs no access to the repo at all.
+permissions: {}
+
+# A ping that outlives its 5-minute slot should not stack up behind the next one.
+concurrency:
+  group: keep-alive
+  cancel-in-progress: true
+
 jobs:
   ping:
     runs-on: ubuntu-latest

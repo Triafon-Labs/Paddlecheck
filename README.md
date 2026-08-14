@@ -34,7 +34,7 @@ River level, temperature, wind speed, visibility, weather codes, and time of day
 
 ### Prerequisites
 
-- Node.js v18 or later
+- Node.js v22 or later (matches CI and `engines.node` in `package.json`)
 - npm
 
 ### Installation

@@ -241,16 +241,30 @@ const TopNavBar = () => {
       </Collapse>
       <AppBar position="static" color="inherit" elevation={0}>
         <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          {/* minWidth: 0 lets this half shrink past its content on a narrow
+              phone. Without it the title sets a floor on the flex item's
+              width and the action buttons get pushed off the right edge
+              instead - which globals.css's overflow-x: hidden then quietly
+              clips. */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              minWidth: 0,
+            }}
+          >
             <Image
               src="/favicon.svg"
               alt="Paddlecheck Logo"
               width={40}
               height={40}
+              style={{ flexShrink: 0 }}
             />
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
               <Typography
                 variant="h6"
+                noWrap
                 sx={{ fontWeight: 600, lineHeight: 1.2 }}
                 color="text.primary"
               >
@@ -260,6 +274,7 @@ const TopNavBar = () => {
                 <Typography
                   variant="caption"
                   color="text.secondary"
+                  noWrap
                   sx={{ lineHeight: 1.2, mt: -0.2 }}
                 >
                   {isRefreshing ? "Updating…" : `Updated ${freshnessText}`}
@@ -267,7 +282,7 @@ const TopNavBar = () => {
               )}
             </Box>
           </Box>
-          <Box sx={{ display: "flex" }}>
+          <Box sx={{ display: "flex", flexShrink: 0 }}>
             <IconButton onClick={handleShare} aria-label="share">
               <ShareIcon />
             </IconButton>

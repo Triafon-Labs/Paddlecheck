@@ -96,81 +96,81 @@ const getPaddlingMatrix = (
   const intermediate: PaddlingStatus = { status: "No", details: [] };
   const independent: PaddlingStatus = { status: "No", details: [] };
 
-  const sabrinaSlip = "Stay between Sabrina Bridge and the Slip.";
+  const sabrinaSlip = "Stay between Sabrina Bridge and the Slip";
 
   switch (overallStatus) {
     case "Light Green":
       beginner.status = "Yes";
-      beginner.details = ["Coach supervision required.", "PFD required."];
+      beginner.details = ["Coach supervision and PFD required"];
       improver.status = "Yes";
       improver.details = [
-        "No coach needed.",
-        "Paddle with at least one other improver or intermediate, preferably more.",
-        "Group carries a mobile phone.",
-        "Familiar boat only.",
+        "No coach needed, but paddle with at least one other improver or intermediate (preferably more)",
+        "Someone in the group carries a mobile phone",
+        "Familiar boat only",
         sabrinaSlip,
-        "PFD required.",
+        "PFD required",
       ];
       intermediate.status = "Yes";
       intermediate.details = [
-        "Can paddle solo.",
-        "Carry a mobile phone.",
-        "Familiar boat only.",
+        "Can paddle solo",
+        "Carry a mobile phone",
+        "Familiar boat only",
         sabrinaSlip,
-        "PFD required.",
+        "PFD required",
       ];
       independent.status = "Yes";
-      independent.details = ["No restrictions."];
+      independent.details = ["No restrictions"];
       break;
     case "Dark Green":
       beginner.status = "Yes";
-      beginner.details = ["Coach supervision required.", "PFD required."];
+      beginner.details = ["Coach supervision and PFD required"];
       improver.status = "Yes";
-      improver.details = ["Coach supervision required.", "PFD required."];
+      improver.details = ["Coach supervision and PFD required"];
       intermediate.status = "Yes";
       intermediate.details = [
-        "Pair up with another intermediate, no coach needed.",
-        "Solo K2 crews must be able to self-rescue.",
-        "Carry a mobile phone.",
-        "Familiar boat only.",
+        "Pair up with another intermediate, no coach needed",
+        "Solo K2 crews must be able to self-rescue",
+        "Carry a mobile phone",
+        "Familiar boat only",
         sabrinaSlip,
-        "PFD required.",
+        "PFD required",
       ];
       independent.status = "Yes";
-      independent.details = ["No restrictions."];
+      independent.details = ["No restrictions"];
       break;
     case "Amber":
       beginner.status = "Discretion";
-      beginner.details = ["Coach's discretion only.", "PFD required."];
+      beginner.details = ["Coach's discretion only, PFD required"];
       improver.status = "Discretion";
-      improver.details = ["Coach's discretion only.", "PFD required."];
+      improver.details = ["Coach's discretion only, PFD required"];
       intermediate.status = "Yes";
+      // The PFD line stays a bullet of its own here rather than merging into
+      // the one above: addHighWaterPfdWarning below rewrites it in place when
+      // the river is up, and it can only find it if it stands alone.
       intermediate.details = [
-        "Supervised by an independent paddler or coach.",
-        "PFD required.",
+        "Supervised by an independent paddler or coach",
+        "PFD required",
       ];
       independent.status = "Yes";
       independent.details = [
-        "Can paddle, may supervise intermediates.",
-        "PFD required above the concrete step.",
+        "Can paddle, may supervise intermediates",
+        "PFD required above the concrete step",
       ];
       break;
     case "Red":
       beginner.status = "No";
-      beginner.details = ["No paddling."];
+      beginner.details = ["No paddling"];
       improver.status = "No";
-      improver.details = ["No paddling."];
+      improver.details = ["No paddling"];
       if (riverLevel && riverLevel >= THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3) {
         intermediate.status = "No";
-        intermediate.details = [
-          "No paddling above 10 steps from the car park.",
-        ];
+        intermediate.details = ["No paddling above 10 steps from the car park"];
       } else {
         intermediate.status = "Discretion";
-        intermediate.details = ["Coach's discretion only.", "PFD required."];
+        intermediate.details = ["Coach's discretion only, PFD required"];
       }
       independent.status = "Warning";
-      independent.details = ["Avoid paddling alone.", "PFD required."];
+      independent.details = ["Avoid paddling alone, PFD required"];
       break;
     // Split from Unknown below, which it used to share a branch with. The two
     // mean opposite things - one is "the river is dangerous", the other is
@@ -180,8 +180,8 @@ const getPaddlingMatrix = (
     case "No Paddling":
       for (const paddler of [beginner, improver, intermediate, independent]) {
         paddler.details = [
-          "Do not go on the water.",
-          "Applies to every level, independents included.",
+          "Do not go on the water",
+          "Applies to every level, independents included",
         ];
       }
       break;
@@ -189,8 +189,8 @@ const getPaddlingMatrix = (
     default:
       for (const paddler of [beginner, improver, intermediate, independent]) {
         paddler.details = [
-          "Conditions could not be checked.",
-          "Ask a coach before paddling.",
+          "Conditions could not be checked",
+          "Ask a coach before paddling",
         ];
       }
       break;
@@ -201,11 +201,11 @@ const getPaddlingMatrix = (
     if (paddler.status === "No") return;
     if (paddler.status === "Yes") paddler.status = "Warning";
     const last = paddler.details[paddler.details.length - 1];
-    if (last === "PFD required.") {
+    if (last === "PFD required") {
       paddler.details[paddler.details.length - 1] =
-        "PFD required – river is high.";
+        "PFD required – river is high";
     } else {
-      paddler.details.push("PFD required – river is high.");
+      paddler.details.push("PFD required – river is high");
     }
   };
 
@@ -229,10 +229,10 @@ const getPaddlingMatrix = (
   // the club wants the app to state the rule exactly.
   //
   // Applied after the PFD rules above so it lands last in the list and doesn't
-  // disturb their "PFD required." lookups.
+  // disturb the "PFD required" lookup above.
   for (const paddler of [beginner, improver, intermediate]) {
     if (paddler.status !== "No") {
-      paddler.details.push("Wear a luminous bib.");
+      paddler.details.push("Wear a luminous bib");
     }
   }
 

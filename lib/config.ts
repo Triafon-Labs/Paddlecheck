@@ -18,7 +18,7 @@ import {
   Foggy,
 } from "@mui/icons-material";
 import { Status } from "@/types";
-import { STATUS_COLORS } from "./statusColors";
+import { STATUS_COLORS, ON_STATUS_COLORS } from "./statusColors";
 import { formatRiverLevel } from "./units";
 import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
 
@@ -102,10 +102,15 @@ export const RAG_HEIGHT_MAP: Record<Status, number> = {
   Unknown: 0.1,
 };
 
+// `color` is the status hue itself, `onColor` the label colour to put on top
+// of it - see ON_STATUS_COLORS in lib/statusColors.ts for why the pairing
+// isn't simply white throughout. `backgroundColor` is the old pale Material 2
+// tint, kept only for the traffic-light lamps.
 export const RAG_STATUS_UI: Record<
   Status,
   {
     color: string;
+    onColor: string;
     emoji: string;
     icon: React.ElementType;
     backgroundColor: string;
@@ -113,36 +118,42 @@ export const RAG_STATUS_UI: Record<
 > = {
   Unknown: {
     color: STATUS_COLORS.grey,
+    onColor: ON_STATUS_COLORS.grey,
     emoji: "🤷",
     icon: HelpOutlined,
     backgroundColor: "#F5F5F5",
   },
   "Light Green": {
     color: STATUS_COLORS.lightGreen,
+    onColor: ON_STATUS_COLORS.lightGreen,
     emoji: "✅",
     icon: Check,
     backgroundColor: "#E8F5E9",
   },
   "Dark Green": {
     color: STATUS_COLORS.darkGreen,
+    onColor: ON_STATUS_COLORS.darkGreen,
     emoji: "📈",
     icon: TrendingUpOutlined,
     backgroundColor: "#C8E6C9",
   },
   Amber: {
     color: WARNING_COLORS.Amber,
+    onColor: ON_STATUS_COLORS.amber,
     emoji: "⚠️",
     icon: WarningAmberOutlined,
     backgroundColor: "#FFF3E0",
   },
   Red: {
     color: WARNING_COLORS.Red,
+    onColor: ON_STATUS_COLORS.red,
     emoji: "🚨",
     icon: CrisisAlert,
     backgroundColor: "#FFEBEE",
   },
   "No Paddling": {
     color: WARNING_COLORS.Red,
+    onColor: ON_STATUS_COLORS.red,
     emoji: "⛔",
     icon: DoNotDisturbOutlined,
     backgroundColor: "#E0E0E0",
@@ -188,6 +199,19 @@ export const isRainy = (weatherCode: number): boolean =>
 // --- Conditions Key Descriptions ---
 // These appear in the Settings drawer "Conditions Key" section.
 // Update them to describe your own venue's landmarks and club guidelines.
+
+// One short line per status, read straight off the status panel at the top of
+// the page. RAG_DESCRIPTIONS below is the full rule set for the settings
+// drawer; this is the version that has to land in a glance from the car park,
+// so keep each to a handful of words.
+export const RAG_SUMMARIES: Record<Status, string> = {
+  "Light Green": "Ideal conditions",
+  "Dark Green": "Good conditions",
+  Amber: "Coach's discretion required",
+  Red: "Experienced paddlers only",
+  "No Paddling": "Do not go on the water",
+  Unknown: "Conditions unavailable",
+};
 
 export const RAG_DESCRIPTIONS: Record<Status, string> = {
   "Light Green":

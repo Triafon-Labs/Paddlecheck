@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
   Card,
   CardContent,
@@ -54,15 +54,49 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
+// Gap left between the tooltip and the edges of the viewport when it has to
+// be pulled back into view.
+const TOOLTIP_VIEWPORT_MARGIN = 8;
+
+interface CustomTooltipProps extends TooltipContentProps<ValueType, NameType> {
+  // Reports the rendered height back to the graph, which needs it to work out
+  // how far the tooltip has to be shifted to stay on screen.
+  onMeasure: (height: number) => void;
+}
+
 const CustomTooltip = ({
   active,
   payload,
   label,
-}: TooltipContentProps<ValueType, NameType>) => {
-  if (active && payload && payload.length) {
+  onMeasure,
+}: CustomTooltipProps) => {
+  const paperRef = useRef<HTMLDivElement>(null);
+  const visible = !!(active && payload && payload.length);
+
+  // Deliberately unkeyed: the height changes with the hovered hour, not just
+  // with visibility, so it has to be re-read after every render. onMeasure
+  // rounds and bails out on an unchanged value, so this settles immediately
+  // rather than looping.
+  useLayoutEffect(() => {
+    if (visible && paperRef.current) {
+      onMeasure(paperRef.current.offsetHeight);
+    }
+  });
+
+  if (visible && payload) {
     const data = payload[0].payload as ForecastGraphDataPoint;
     return (
-      <Paper sx={{ p: 2 }}>
+      <Paper
+        ref={paperRef}
+        sx={{
+          p: 2,
+          // The chart is only 200px tall and this content can run to twice
+          // that, so cap it at the viewport as a floor under the positioning
+          // below - there is nowhere to put a tooltip taller than the screen.
+          maxHeight: `calc(100vh - ${TOOLTIP_VIEWPORT_MARGIN * 2}px)`,
+          overflowY: "auto",
+        }}
+      >
         <Typography variant="body1">{`${label}`}</Typography>
         <Typography variant="body2">{`${data.status}`}</Typography>
         <Typography variant="body2" color="text.secondary">
@@ -269,6 +303,27 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   const theme = useTheme();
   const lineColor = theme.palette.text.secondary;
   const [selectedDay, setSelectedDay] = useState(0);
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [tooltipY, setTooltipY] = useState(0);
+
+  // Recharts places the tooltip at the cursor and clamps it to the chart's own
+  // box, which doesn't work here: the tooltip is routinely taller than the
+  // 200px chart, so it spilled past the card and got cut off by the card's
+  // overflow. Pin it to the top of the chart instead, then pull it up or down
+  // by however much it takes to sit inside the viewport. Recharts honours a
+  // numeric `position.y` verbatim, so this fully replaces its own clamping;
+  // x is left alone and still tracks the cursor.
+  const measureTooltip = useCallback((height: number) => {
+    const chart = chartRef.current;
+    if (!chart || !height) return;
+    const { top } = chart.getBoundingClientRect();
+    const lowestTop = TOOLTIP_VIEWPORT_MARGIN - top;
+    const highestTop =
+      window.innerHeight - TOOLTIP_VIEWPORT_MARGIN - height - top;
+    // Anchored at 0 (the top of the chart) whenever that already fits.
+    const next = Math.round(Math.max(lowestTop, Math.min(0, highestTop)));
+    setTooltipY((prev) => (prev === next ? prev : next));
+  }, []);
 
   const currentDay = forecastDays?.[selectedDay] ?? null;
   const data = currentDay?.graphData ?? null;
@@ -322,7 +377,16 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               tick={{ fontSize: 12 }}
             />
             <YAxis hide domain={[0, 1.2]} />
-            <Tooltip content={CustomTooltip} cursor={{ fill: "transparent" }} />
+            <Tooltip
+              content={(props: TooltipContentProps<ValueType, NameType>) => (
+                <CustomTooltip {...props} onMeasure={measureTooltip} />
+              )}
+              cursor={{ fill: "transparent" }}
+              position={{ y: tooltipY }}
+              // The pinned y is measured against the viewport, not the chart,
+              // so recharts must not second-guess it.
+              allowEscapeViewBox={{ x: false, y: true }}
+            />
             {sunriseHour && sunrise && (
               <ReferenceLine
                 x={`${sunriseHour}:00`}
@@ -410,13 +474,16 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
     }
     return (
       <Grow in appear {...springTransition()}>
-        <Box>{renderChartBody()}</Box>
+        <Box ref={chartRef}>{renderChartBody()}</Box>
       </Grow>
     );
   };
 
   return (
-    <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
+    // overflow is visible so the tooltip can hang outside the card - Card
+    // clips to its rounded corners by default, which is what was cutting the
+    // bottom off it. Nothing else in here paints outside the card's bounds.
+    <Card variant="outlined" sx={{ width: "100%", p: 2, overflow: "visible" }}>
       <CardContent>
         <Typography variant="h5" component="div">
           Paddling Forecast

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.7](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.6...paddlecheck-v1.30.7) (2026-08-14)
+
+
+### Bug Fixes
+
+* **forecast:** keep the graph tooltip inside the viewport ([8333b47](https://github.com/dylanr97/Paddlecheck/commit/8333b47f9c9cfa30a3e76335ccbbb2a9b6af412a))
+* **layout:** inset the portalled surfaces and switch to dvh ([e18b5db](https://github.com/dylanr97/Paddlecheck/commit/e18b5db036c8121c9c850b56b21dd506a0f1f138))
+* **layout:** keep content clear of the iOS safe areas ([edcad27](https://github.com/dylanr97/Paddlecheck/commit/edcad27b5e385862ec7375a65246d4eaf6c97056))
+
+
+### Documentation
+
+* **claude:** open pull requests by default ([3571742](https://github.com/dylanr97/Paddlecheck/commit/3571742585bd917caff08937eea4ce43564f9096))
+
 ## [1.30.6](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.5...paddlecheck-v1.30.6) (2026-08-14)
 
 

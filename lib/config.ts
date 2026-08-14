@@ -18,6 +18,7 @@ import {
   Foggy,
 } from "@mui/icons-material";
 import { Status } from "@/types";
+import { STATUS_COLORS } from "./statusColors";
 import { formatRiverLevel } from "./units";
 import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
 
@@ -79,9 +80,9 @@ export const API_ENDPOINTS = {
 
 // --- Weather Warning Colors ---
 export const WARNING_COLORS = {
-  Red: "#B71C1C",
-  Amber: "#FF8F00",
-  Yellow: "#FBC02D",
+  Red: STATUS_COLORS.red,
+  Amber: STATUS_COLORS.amber,
+  Yellow: STATUS_COLORS.yellow,
 };
 
 // --- RAG Status Definitions ---
@@ -111,19 +112,19 @@ export const RAG_STATUS_UI: Record<
   }
 > = {
   Unknown: {
-    color: "#9E9E9E",
+    color: STATUS_COLORS.grey,
     emoji: "🤷",
     icon: HelpOutlined,
     backgroundColor: "#F5F5F5",
   },
   "Light Green": {
-    color: "#4CBB17",
+    color: STATUS_COLORS.lightGreen,
     emoji: "✅",
     icon: Check,
     backgroundColor: "#E8F5E9",
   },
   "Dark Green": {
-    color: "#008000",
+    color: STATUS_COLORS.darkGreen,
     emoji: "📈",
     icon: TrendingUpOutlined,
     backgroundColor: "#C8E6C9",

@@ -223,7 +223,6 @@ const popIn = {
 
 const BarLabel = (props: BarLabelProps) => {
   const { x, y, width, index, data } = props;
-  const theme = useTheme();
 
   if (
     x === undefined ||
@@ -241,7 +240,10 @@ const BarLabel = (props: BarLabelProps) => {
   let clearAbove = 0;
 
   if (entry.status === "No Paddling") {
-    const Icon = ragStatus[entry.status]?.icon;
+    // Straight from the RAG palette rather than the theme's error role: this
+    // icon captions a bar the <Bar> below fills from that same palette, so
+    // the two have to be the one red no matter what the theme does.
+    const { icon: Icon, color } = ragStatus[entry.status];
     if (Icon) {
       elements.push(
         <foreignObject
@@ -251,9 +253,7 @@ const BarLabel = (props: BarLabelProps) => {
           width={24}
           height={24}
         >
-          <Icon
-            sx={{ color: theme.palette.error.main, fontSize: 24, ...popIn }}
-          />
+          <Icon sx={{ color, fontSize: 24, ...popIn }} />
         </foreignObject>
       );
       clearAbove = 28;
@@ -426,7 +426,9 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={ragStatus[entry.status]?.color || "#9E9E9E"}
+                  fill={
+                    ragStatus[entry.status]?.color ?? ragStatus.Unknown.color
+                  }
                 />
               ))}
               <LabelList

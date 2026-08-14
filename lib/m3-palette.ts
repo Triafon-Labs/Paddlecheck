@@ -1,3 +1,5 @@
+import { STATUS_COLORS } from "./statusColors";
+
 // M3 tonal color tokens derived from seed #005AC1 (primary blue)
 export const m3Light = {
   primary: "#005AC1",
@@ -19,26 +21,29 @@ export const m3Light = {
   surfaceContainerHighest: "#E1E2EC",
   outline: "#74777F",
   outlineVariant: "#C4C6D0",
-  error: "#B71C1C", // WARNING_COLORS.Red - the RAG palette's red
+  error: STATUS_COLORS.red,
   onError: "#FFFFFF",
   errorContainer: "#FFDAD6",
   onErrorContainer: "#410002",
   // Extended (custom) colour roles. M3 has no built-in success/warning, and
   // MUI's stock M2 green/orange don't belong to this app's colour language
-  // either - so the accents are taken straight from the RAG palette in
-  // lib/config.ts (Dark Green, Amber, Red). A "raises the rating" chip then
+  // either - so the accents are taken straight from the status palette in
+  // lib/statusColors.ts (Dark Green, Amber, Red), the same source the RAG
+  // statuses in lib/config.ts draw from. A "raises the rating" chip then
   // reads in the same amber as the Amber status chip beside it, instead of
   // introducing a third, unrelated orange. The container tones stay on the
   // M3 tonal ramp, since they back low-emphasis surfaces rather than
   // signalling status.
   //
-  // `warning` is only ever used as a fill (chips, the status strip); at 2:1
-  // against the app's surfaces it must not be used for text or icons.
-  success: "#008000",
+  // All three are saturated mid-tones that carry as fills - chips, the status
+  // strip, the No Paddling panel - and only weakly as bare glyphs on a
+  // surface, `warning` worst at around 2:1. Prefer a filled treatment over
+  // colouring text or a lone icon with them, and never use them for body copy.
+  success: STATUS_COLORS.darkGreen,
   onSuccess: "#FFFFFF",
   successContainer: "#A2F5AC",
   onSuccessContainer: "#00210A",
-  warning: "#FF8F00",
+  warning: STATUS_COLORS.amber,
   onWarning: "#271900",
   warningContainer: "#FFDEA6",
   onWarningContainer: "#271900",
@@ -67,19 +72,23 @@ export const m3Dark = {
   surfaceContainerHighest: "#363840",
   outline: "#8E9099",
   outlineVariant: "#44474F",
-  // Lifted versions of the same RAG accents. The light-scheme values are too
-  // dark to read as icons against the navy surfaces, so each is raised to the
-  // next step up the same hue - success lands on the RAG palette's own Light
-  // Green - while staying recognisably the same colour language.
-  error: "#FF5449",
-  onError: "#410002",
+  // The same status accents as the light scheme, not lifted versions of them.
+  // These roles sit alongside the RAG palette - an `error` chip next to a
+  // "Red" status chip in the Conditions Key, an `error` icon over red bars on
+  // the forecast graph - and the RAG palette is scheme-independent, so any
+  // lift here reads as a second red (or amber, or green) rather than as the
+  // same colour adapted. The container tones below stay on the dark tonal
+  // ramp: they back surfaces rather than signalling status, so they have to
+  // follow the scheme.
+  error: STATUS_COLORS.red,
+  onError: "#FFFFFF",
   errorContainer: "#93000A",
   onErrorContainer: "#FFDAD6",
-  success: "#4CBB17", // RAG "Light Green"
-  onSuccess: "#00210A",
+  success: STATUS_COLORS.darkGreen,
+  onSuccess: "#FFFFFF",
   successContainer: "#00531F",
   onSuccessContainer: "#A2F5AC",
-  warning: "#FFB300",
+  warning: STATUS_COLORS.amber,
   onWarning: "#271900",
   warningContainer: "#5F4100",
   onWarningContainer: "#FFDEA6",

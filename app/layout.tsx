@@ -89,14 +89,7 @@ export default function RootLayout({
                   alignItems: "center",
                   justifyContent: "flex-start",
                   pt: 4,
-                  // Extra breathing room so the last card doesn't end flush
-                  // with the bottom of the scroll, plus the home-indicator
-                  // inset - viewportFit: "cover" lets content run underneath
-                  // it on iOS, where the inset is 0 everywhere else. Spelled
-                  // out rather than taken from theme.spacing because this is
-                  // a server component, which can't pass an sx callback to
-                  // the client-side Box.
-                  pb: "calc(48px + env(safe-area-inset-bottom))",
+                  pb: 4,
                 }}
               >
                 {children}

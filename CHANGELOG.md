@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.8](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.7...paddlecheck-v1.30.8) (2026-08-14)
+
+
+### Bug Fixes
+
+* **copy:** settle the Conditions Key chips and the minute unit ([c5a52a8](https://github.com/dylanr97/Paddlecheck/commit/c5a52a884c1e4e7b59b48c1617efbe8902a98b73))
+* **theme:** draw every status colour from one palette ([5ba2fec](https://github.com/dylanr97/Paddlecheck/commit/5ba2fec2d4adeea16cad5c1ea13bf3a6e2cbfc02)), closes [#B71C1](https://github.com/dylanr97/Paddlecheck/issues/B71C1) [#FF5449](https://github.com/dylanr97/Paddlecheck/issues/FF5449) [#FF8F00](https://github.com/dylanr97/Paddlecheck/issues/FF8F00) [#FFB300](https://github.com/dylanr97/Paddlecheck/issues/FFB300) [#008000](https://github.com/dylanr97/Paddlecheck/issues/008000) [#4CBB17](https://github.com/dylanr97/Paddlecheck/issues/4CBB17)
+
 ## [1.30.7](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.6...paddlecheck-v1.30.7) (2026-08-14)
 
 

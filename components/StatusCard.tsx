@@ -15,7 +15,7 @@ import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { KayakConditions } from "@/types";
-import TrafficLight from "./TrafficLight";
+import PaddlingStatusHero from "./PaddlingStatusHero";
 import InfoPanel from "./InfoPanel";
 import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
 import { formatWindGust } from "@/lib/units";
@@ -28,37 +28,35 @@ interface StatusCardProps {
   loading?: boolean;
 }
 
-// Mirrors the filtering in TrafficLight.tsx so the skeleton renders the same
-// number of placeholder circles as the real traffic light.
-const TRAFFIC_LIGHT_COUNT = (
+// Mirrors the scale in PaddlingStatusHero so the skeleton lays out the same
+// number of placeholder segments as the real strip.
+const SCALE_SEGMENT_COUNT = (
   Object.keys(ragStatus) as (keyof typeof ragStatus)[]
-).filter((s) => s !== "Unknown" && s !== "No Paddling").length;
+).filter((s) => s !== "Unknown").length;
 
 const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
   const renderContent = () => {
     if (loading) {
       return (
         <>
-          <Box
-            sx={{
-              mt: 2,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-              {Array.from({ length: TRAFFIC_LIGHT_COUNT }).map((_, i) => (
+          <Box sx={{ mt: 2 }}>
+            <Skeleton
+              variant="rounded"
+              height={120}
+              animation="wave"
+              sx={{ borderRadius: "28px" }}
+            />
+            <Box sx={{ display: "flex", gap: 0.75, mt: 1.5 }}>
+              {Array.from({ length: SCALE_SEGMENT_COUNT }).map((_, i) => (
                 <Skeleton
                   key={i}
-                  variant="circular"
-                  width={50}
-                  height={50}
+                  variant="rounded"
+                  height={6}
                   animation="wave"
+                  sx={{ flex: 1, borderRadius: 9999 }}
                 />
               ))}
             </Box>
-            <Skeleton variant="text" width={100} height={32} animation="wave" />
           </Box>
 
           <Box sx={{ mt: 2 }}>
@@ -95,47 +93,15 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
       );
     }
     if (conditions) {
-      const isNoPaddling = conditions.overallStatus === "No Paddling";
-      const noPaddlingStatusInfo = isNoPaddling
-        ? ragStatus["No Paddling"]
-        : null;
-      const NoPaddlingIcon = noPaddlingStatusInfo?.icon;
-
       return (
         <Grow in appear {...springTransition()}>
           <Box>
-            {isNoPaddling && NoPaddlingIcon ? (
-              // The RAG red is one colour in both schemes, and on the navy
-              // surfaces it only carries as a fill - as text on the tonal
-              // panel this used to use, it sat at 1.4:1 against the dark
-              // scheme's containerHighest. So the red moves to the panel
-              // itself and the label rides on top of it, which is how every
-              // other red surface in the app is built (the status chips, the
-              // traffic-light lamps): saturated fill, white glyph.
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  textAlign: "center",
-                  mb: 2,
-                  p: 2,
-                  borderRadius: 1,
-                  backgroundColor: "error.main",
-                  color: "error.contrastText",
-                }}
-              >
-                <NoPaddlingIcon sx={{ fontSize: 40, mb: 1 }} />
-                <Typography variant="h6" sx={{ mb: 1 }}>
-                  No Paddling
-                </Typography>
-              </Box>
-            ) : (
-              <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
-                <TrafficLight status={conditions.overallStatus} />
-              </Box>
-            )}
+            {/* One panel for all six statuses, including No Paddling, which
+                used to render as an entirely separate widget - so the top of
+                the card changed shape depending on the reading. */}
+            <Box sx={{ mt: 2 }}>
+              <PaddlingStatusHero status={conditions.overallStatus} />
+            </Box>
 
             <Collapse
               in={!!conditions.reasons && conditions.reasons.length > 0}

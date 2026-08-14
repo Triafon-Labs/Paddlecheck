@@ -18,7 +18,7 @@ import {
   Foggy,
 } from "@mui/icons-material";
 import { Status } from "@/types";
-import { STATUS_COLORS } from "./statusColors";
+import { STATUS_COLORS, ON_STATUS_COLORS } from "./statusColors";
 import { formatRiverLevel } from "./units";
 import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
 
@@ -102,61 +102,73 @@ export const RAG_HEIGHT_MAP: Record<Status, number> = {
   Unknown: 0.1,
 };
 
+// `color` is the status hue itself, `onColor` the label colour to put on top
+// of it - see ON_STATUS_COLORS in lib/statusColors.ts for why the pairing
+// isn't simply white throughout.
 export const RAG_STATUS_UI: Record<
   Status,
   {
     color: string;
+    onColor: string;
     emoji: string;
     icon: React.ElementType;
-    backgroundColor: string;
   }
 > = {
   Unknown: {
     color: STATUS_COLORS.grey,
+    onColor: ON_STATUS_COLORS.grey,
     emoji: "🤷",
     icon: HelpOutlined,
-    backgroundColor: "#F5F5F5",
   },
   "Light Green": {
     color: STATUS_COLORS.lightGreen,
+    onColor: ON_STATUS_COLORS.lightGreen,
     emoji: "✅",
     icon: Check,
-    backgroundColor: "#E8F5E9",
   },
   "Dark Green": {
     color: STATUS_COLORS.darkGreen,
+    onColor: ON_STATUS_COLORS.darkGreen,
     emoji: "📈",
     icon: TrendingUpOutlined,
-    backgroundColor: "#C8E6C9",
   },
   Amber: {
     color: WARNING_COLORS.Amber,
+    onColor: ON_STATUS_COLORS.amber,
     emoji: "⚠️",
     icon: WarningAmberOutlined,
-    backgroundColor: "#FFF3E0",
   },
   Red: {
     color: WARNING_COLORS.Red,
+    onColor: ON_STATUS_COLORS.red,
     emoji: "🚨",
     icon: CrisisAlert,
-    backgroundColor: "#FFEBEE",
   },
   "No Paddling": {
-    color: WARNING_COLORS.Red,
+    color: STATUS_COLORS.maroon,
+    onColor: ON_STATUS_COLORS.maroon,
     emoji: "⛔",
     icon: DoNotDisturbOutlined,
-    backgroundColor: "#E0E0E0",
   },
 };
 
 // --- RAG Calculation Criteria ---
 // Adjust these thresholds based on your local safety guidelines
+// Each row is the club's conditions table: temperature band, then weather,
+// then one rating per river-level column.
+//
+// `low.rainy` is the one entry with no row in the printed table, which lists
+// only calm and windy at 5°C and below. It used to copy `low.calm`, so rain
+// raised the rating at 8°C and did nothing at 3°C - backwards, since cold rain
+// is worse than cool rain. It now matches `low.windy`, the same pairing the
+// 5-12°C band already makes between wind and rain. That is deliberately
+// stricter than the printed rules; the Conditions Key says so.
 export const CRITERIA_TABLE: {
   [key: string]: { [key: string]: number[] };
 } = {
   high: { calm: [0, 1, 2, 3], windy: [1, 2, 2, 3] },
   moderate: { calm: [1, 2, 2, 3], windy: [2, 2, 2, 3], rainy: [2, 2, 2, 3] },
-  low: { calm: [2, 2, 3, 3], windy: [2, 3, 3, 3], rainy: [2, 2, 3, 3] },
+  low: { calm: [2, 2, 3, 3], windy: [2, 3, 3, 3], rainy: [2, 3, 3, 3] },
 };
 
 export const THRESHOLDS = {

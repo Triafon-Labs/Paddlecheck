@@ -52,7 +52,10 @@ const getTemperatureConditions = (
   temp: number
 ): { tempCondition: string; reason?: string } => {
   if (temp >= THRESHOLDS.TEMP_HIGH) return { tempCondition: "high" };
-  if (temp >= THRESHOLDS.TEMP_MODERATE)
+  // Strictly greater than, not >=. The club table's bands read "5-12" and
+  // "5 or less", which overlap at exactly 5; the club reads the middle band as
+  // 5.1-12, so 5.0 falls to "low" and takes the stricter row.
+  if (temp > THRESHOLDS.TEMP_MODERATE)
     return {
       tempCondition: "moderate",
       reason: "Moderately low temperature",

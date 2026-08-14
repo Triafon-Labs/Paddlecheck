@@ -482,14 +482,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   icon={<Thermostat fontSize="small" />}
                   label={`${THRESHOLDS.TEMP_HIGH}°C and above`}
                   description="Warm. No temperature penalty applied."
-                  chipLabel="No penalty"
+                  chipLabel="No Penalty"
                   chipColor="success"
                 />
                 <ThresholdRow
                   icon={<Thermostat fontSize="small" />}
                   label={`${THRESHOLDS.TEMP_MODERATE}–${THRESHOLDS.TEMP_HIGH}°C`}
                   description="Cool. Raises the base risk rating. Rain also becomes a factor."
-                  chipLabel="Raises rating"
+                  chipLabel="Raises Rating"
                   chipColor="warning"
                 />
                 <ThresholdRow
@@ -519,7 +519,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   icon={<Air fontSize="small" />}
                   label={`${THRESHOLDS.WIND_HIGH} mph and above`}
                   description="Windy. Raises the risk rating at all temperatures."
-                  chipLabel="Raises rating"
+                  chipLabel="Raises Rating"
                   chipColor="error"
                 />
                 <ThresholdRow
@@ -599,7 +599,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   icon={<WaterDrop fontSize="small" />}
                   label="Rain"
                   description="Rain at cool temperatures (5–12°C) raises the risk rating."
-                  chipLabel="Raises rating"
+                  chipLabel="Raises Rating"
                   chipColor="warning"
                 />
                 <ThresholdRow
@@ -613,14 +613,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   icon={<NightsStay fontSize="small" />}
                   label="Dark (streetlights on)"
                   description="Raises Green to Amber, and Amber to Red."
-                  chipLabel="Raises rating"
+                  chipLabel="Raises Rating"
                   chipColor="warning"
                 />
                 <ThresholdRow
                   icon={<Foggy fontSize="small" />}
                   label="Fog"
                   description="Raises Green to Amber, and Amber to Red."
-                  chipLabel="Raises rating"
+                  chipLabel="Raises Rating"
                   chipColor="warning"
                 />
                 <ThresholdRow

@@ -105,12 +105,13 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
         <Grow in appear {...springTransition()}>
           <Box>
             {isNoPaddling && NoPaddlingIcon ? (
-              // Keeps the original look - a neutral panel carrying vivid red
-              // text, icon and border - but takes the panel colour from the
-              // tonal surface role instead of the RAG palette's hardcoded
-              // light-mode tint, which painted a pale grey slab across a navy
-              // card in dark mode. In the light scheme the two are all but
-              // identical, so only dark mode changes.
+              // The RAG red is one colour in both schemes, and on the navy
+              // surfaces it only carries as a fill - as text on the tonal
+              // panel this used to use, it sat at 1.4:1 against the dark
+              // scheme's containerHighest. So the red moves to the panel
+              // itself and the label rides on top of it, which is how every
+              // other red surface in the app is built (the status chips, the
+              // traffic-light lamps): saturated fill, white glyph.
               <Box
                 sx={{
                   display: "flex",
@@ -121,10 +122,8 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                   mb: 2,
                   p: 2,
                   borderRadius: 1,
-                  backgroundColor: "surfaces.containerHighest",
-                  color: "error.main",
-                  border: "1px solid",
-                  borderColor: "error.main",
+                  backgroundColor: "error.main",
+                  color: "error.contrastText",
                 }}
               >
                 <NoPaddlingIcon sx={{ fontSize: 40, mb: 1 }} />

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.30.6](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.5...paddlecheck-v1.30.6) (2026-08-14)
+
+
+### Bug Fixes
+
+* **ci:** move to Node 22, harden workflows, and fold in pending bumps ([2eabcff](https://github.com/dylanr97/Paddlecheck/commit/2eabcffb43d22b66c255b2ba6a267cc146576402))
+* **ci:** stop Dependabot PRs failing on an out-of-sync lockfile ([819160d](https://github.com/dylanr97/Paddlecheck/commit/819160d3d5fa300d3592c11af47241deb7a548ba)), closes [dependabot-core#6317](https://github.com/dylanr97/dependabot-core/issues/6317)
+
 ## [1.30.5](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.4...paddlecheck-v1.30.5) (2026-08-14)
 
 

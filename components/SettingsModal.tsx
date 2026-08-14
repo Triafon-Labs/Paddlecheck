@@ -221,11 +221,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         paper: {
           sx: {
             borderRadius: "16px 16px 0 0",
-            maxHeight: "90vh",
+            // dvh, not vh: in a browser tab vh is the viewport with the URL
+            // bar retracted, so 90vh can be taller than what's on screen.
+            maxHeight: "90dvh",
             bgcolor: "background.paper",
             backgroundImage: "none",
             display: "flex",
             flexDirection: "column",
+            // The drawer is portalled to <body>, so it sits outside the
+            // safe-area frame in app/layout.tsx and has to inset itself. It
+            // is anchored to the bottom of the screen, which on an installed
+            // iOS app is behind the home indicator.
+            pb: "env(safe-area-inset-bottom)",
           },
         },
       }}

@@ -87,7 +87,10 @@ export default function RootLayout({
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                minHeight: "100vh",
+                // dvh rather than vh: in a mobile browser tab vh measures the
+                // viewport with the URL bar retracted, so 100vh leaves the
+                // page permanently taller than what is actually on screen.
+                minHeight: "100dvh",
                 bgcolor: "background.default",
                 pt: "env(safe-area-inset-top)",
                 pb: "env(safe-area-inset-bottom)",

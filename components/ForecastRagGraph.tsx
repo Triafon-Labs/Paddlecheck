@@ -93,7 +93,10 @@ const CustomTooltip = ({
           // The chart is only 200px tall and this content can run to twice
           // that, so cap it at the viewport as a floor under the positioning
           // below - there is nowhere to put a tooltip taller than the screen.
-          maxHeight: `calc(100vh - ${TOOLTIP_VIEWPORT_MARGIN * 2}px)`,
+          // dvh to match the window.innerHeight the positioning above works
+          // in - vh would let the cap exceed the visible viewport in a
+          // browser tab, putting the tooltip back out of reach.
+          maxHeight: `calc(100dvh - ${TOOLTIP_VIEWPORT_MARGIN * 2}px)`,
           overflowY: "auto",
         }}
       >

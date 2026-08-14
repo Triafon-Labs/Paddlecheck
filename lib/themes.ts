@@ -76,8 +76,24 @@ const surfacesFor = (m3: M3Palette): M3Surfaces => ({
   onInverse: m3.inverseOnSurface,
 });
 
-// M3 type scale mapped to MUI variants, using Roboto Flex's opsz (optical
-// size) axis to pick letterforms drawn for each step's size.
+// M3 type scale mapped to MUI variants.
+//
+// opsz (optical size) is clamped at the font's designed default of 14 rather
+// than tracking each step's pixel size. Roboto Flex's opsz axis runs 8–144,
+// and above 14 it steadily narrows the letterforms and thins the strokes for
+// print-scale display type: measured against opsz 14, a line set at opsz 24
+// is 4.7% narrower, at 32 8.4%, at 57 14.4%, with the x-height dropping in
+// step. Pinning opsz to the size therefore made every heading render lighter
+// and shorter-looking than its nominal size - the type looked subtly wrong
+// and undersized, worst on the card titles. It also wasn't buying anything
+// the browser wasn't already doing: `font-optical-sizing` defaults to `auto`,
+// which is exactly "opsz = font-size".
+//
+// M3's type scale is drawn for Roboto, which is Roboto Flex frozen at opsz
+// 14, so 14 is the value that gives the scale the proportions it was designed
+// with. Below 14 the ramp works in our favour - it opens the spacing out and
+// thickens the strokes - so the two smallest steps keep an opsz matched to
+// their size.
 //
 // Two axes are deliberately absent:
 //
@@ -91,6 +107,7 @@ const surfacesFor = (m3: M3Palette): M3Surfaces => ({
 // emphasised styles vary weight), and widened letterforms read as subtly
 // wrong. This was invisible while the family name was broken and everything
 // rendered in Arial, which has no width axis to stretch.
+const OPSZ_DEFAULT = '"opsz" 14';
 const m3Typography: ThemeOptions["typography"] = {
   // next/font renames the family it registers, so naming "Roboto Flex" here
   // matched nothing and every MUI component quietly fell through to Helvetica
@@ -104,8 +121,11 @@ const m3Typography: ThemeOptions["typography"] = {
     fontSize: "3.5625rem",
     fontWeight: 400,
     lineHeight: 1.127,
-    letterSpacing: "-0.015625em",
-    fontVariationSettings: '"opsz" 57',
+    // M3 Display Large tracks -0.25px at 57px. The -0.015625em here was
+    // Material 2's h1 tracking, i.e. -0.89px - three and a half times tighter
+    // than the scale asks for.
+    letterSpacing: "-0.004386em",
+    fontVariationSettings: OPSZ_DEFAULT,
   },
   // Display Medium
   h2: {
@@ -113,7 +133,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.156,
     letterSpacing: "0em",
-    fontVariationSettings: '"opsz" 45',
+    fontVariationSettings: OPSZ_DEFAULT,
   },
   // Display Small
   h3: {
@@ -121,7 +141,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.222,
     letterSpacing: "0em",
-    fontVariationSettings: '"opsz" 36',
+    fontVariationSettings: OPSZ_DEFAULT,
   },
   // Headline Large
   h4: {
@@ -129,7 +149,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.25,
     letterSpacing: "0em",
-    fontVariationSettings: '"opsz" 32',
+    fontVariationSettings: OPSZ_DEFAULT,
   },
   // Headline Small – used for card titles ("Paddling Status", "Detailed Stats")
   h5: {
@@ -137,7 +157,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 600,
     lineHeight: 1.333,
     letterSpacing: "0em",
-    fontVariationSettings: '"opsz" 24',
+    fontVariationSettings: OPSZ_DEFAULT,
   },
   // Title Large – used for settings section headings
   h6: {
@@ -145,7 +165,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 500,
     lineHeight: 1.273,
     letterSpacing: "0em",
-    fontVariationSettings: '"opsz" 22',
+    fontVariationSettings: OPSZ_DEFAULT,
   },
   // Title Medium
   subtitle1: {
@@ -153,7 +173,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 500,
     lineHeight: 1.5,
     letterSpacing: "0.009375em",
-    fontVariationSettings: '"opsz" 16',
+    fontVariationSettings: OPSZ_DEFAULT,
   },
   // Title Small
   subtitle2: {
@@ -161,7 +181,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 500,
     lineHeight: 1.429,
     letterSpacing: "0.00714em",
-    fontVariationSettings: '"opsz" 14',
+    fontVariationSettings: OPSZ_DEFAULT,
   },
   // Body Large
   body1: {
@@ -169,7 +189,7 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.5,
     letterSpacing: "0.03125em",
-    fontVariationSettings: '"opsz" 16',
+    fontVariationSettings: OPSZ_DEFAULT,
   },
   // Body Medium
   body2: {
@@ -177,14 +197,15 @@ const m3Typography: ThemeOptions["typography"] = {
     fontWeight: 400,
     lineHeight: 1.429,
     letterSpacing: "0.015625em",
-    fontVariationSettings: '"opsz" 14',
+    fontVariationSettings: OPSZ_DEFAULT,
   },
   // Body Small
   caption: {
     fontSize: "0.75rem",
     fontWeight: 400,
     lineHeight: 1.333,
-    letterSpacing: "0.025em",
+    // 0.4px at 12px, per M3 Body Small.
+    letterSpacing: "0.033333em",
     fontVariationSettings: '"opsz" 12',
   },
   // Label Small
@@ -201,9 +222,11 @@ const m3Typography: ThemeOptions["typography"] = {
     fontSize: "0.875rem",
     fontWeight: 500,
     lineHeight: 1.429,
-    letterSpacing: "0.00625em",
+    // 0.1px at 14px, per M3 Label Large - matching subtitle2, which is the
+    // same 14px step of the scale.
+    letterSpacing: "0.00714em",
     textTransform: "none",
-    fontVariationSettings: '"opsz" 14',
+    fontVariationSettings: OPSZ_DEFAULT,
   },
 };
 
@@ -279,6 +302,18 @@ const perScheme = (
 const components: ThemeOptions["components"] = {
   MuiCssBaseline: {
     styleOverrides: {
+      // The type scale is written in rem, so this is the one knob that moves
+      // all of it at once. M3's scale is specified for phone-sized reading
+      // distances and comes out small on a dashboard read at arm's length, so
+      // every step is scaled up by a sixteenth. A percentage keeps it relative
+      // to whatever base size the reader has set in their browser, which a
+      // hardcoded `17px` would throw away. Nothing else needs adjusting:
+      // MUI's own pxToRem values ride the same base, while the px-based
+      // spacing scale deliberately doesn't, so text grows inside the existing
+      // paddings rather than pushing every card taller with it.
+      html: {
+        fontSize: "106.25%",
+      },
       // CssBaseline sets -webkit-font-smoothing: antialiased of its own
       // accord, so dropping it from globals.css alone changed nothing. It
       // disables subpixel rendering on macOS and thins every stroke, which
@@ -287,6 +322,18 @@ const components: ThemeOptions["components"] = {
       body: {
         WebkitFontSmoothing: "auto",
         MozOsxFontSmoothing: "auto",
+        // The type scale pins opsz per variant (see m3Typography), but text
+        // that isn't a Typography variant - Chip labels, table cells, chart
+        // labels, anything sized straight from `sx` - would otherwise be left
+        // on the browser default of `auto`, which ramps opsz with the font
+        // size and reintroduces the thinning the scale exists to avoid.
+        fontOpticalSizing: "none",
+      },
+      // Form controls don't inherit typography from their ancestors - the UA
+      // stylesheet gives them the system font outright - so the body rule
+      // above never reaches them.
+      "button, input, optgroup, select, textarea": {
+        fontOpticalSizing: "none",
       },
       // Everything M3 Expressive adds - the springs, the pop-ins, the
       // spinning refresh affordance - is motion a vestibular-sensitive
@@ -444,6 +491,22 @@ const components: ThemeOptions["components"] = {
           borderRadius: 9999,
           border: "none",
           textTransform: "none",
+          // Every group in the app lays its pills out with flex, so the side
+          // padding only ever sets each pill's *minimum* width - at normal
+          // widths they're sized by their flex share and this is invisible.
+          // It matters on a 320px phone, where the river-level control has to
+          // fit five pills ("5d" through "Forecast") into a 216px row: at
+          // MUI's default 11px the labels alone overran it. The vertical
+          // padding is what carries the touch target, and 8px + the 20px
+          // label line keeps it at M3's 36dp minimum for a small pill.
+          padding: "8px 6px",
+          // The selected pill sets `overflow: hidden` for its state layer
+          // (below), and an overflow other than `visible` switches a flex
+          // item's automatic minimum size off - so under a fullWidth group's
+          // `flex: 1 1 0%`, the selected pill alone was free to shrink to its
+          // padding and clip its own label. Restoring the floor explicitly
+          // keeps every pill at least as wide as its text, selected or not.
+          minWidth: "fit-content",
           // Lets label/icon colour recolour in step with SlidingToggleButtonGroup's
           // pill sliding underneath, rather than flipping instantly. Colour is
           // an "effects" change in M3's motion system, so it gets the

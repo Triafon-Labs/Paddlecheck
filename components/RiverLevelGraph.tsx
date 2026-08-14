@@ -79,6 +79,11 @@ const ChangeIndicator: React.FC<{
         justifyContent: "center",
         flexDirection: "column",
         height: "100%",
+        // Grid items default to `min-width: auto`, so on a narrow phone the
+        // "24h Change" label held the column wider than its 1fr share and
+        // the pair overflowed the card. Zero lets the track win and the
+        // label wrap instead.
+        minWidth: 0,
         backgroundColor: "surfaces.containerHigh",
       }}
     >

@@ -14,6 +14,14 @@
 // icons - has to agree on it.
 export const STATUS_COLORS = {
   red: "#B71C1C",
+  // No Paddling's own red, one step past the RAG red rather than the same
+  // hex. The two used to share `red`, which left the most severe reading in
+  // the app looking identical to the second most severe - the difference
+  // rested entirely on reading the label. At dE 18 from `red` they are
+  // clearly different where they meet (the status panel's scale strip, the
+  // Conditions Key), while still unmistakably red, so the stop state doesn't
+  // lose the danger association that makes red the right colour for it.
+  maroon: "#800000",
   amber: "#FF8F00",
   yellow: "#FBC02D",
   darkGreen: "#008000",
@@ -30,6 +38,7 @@ export const STATUS_COLORS = {
 // same hue instead. Ratios below are measured against the fill each pairs with.
 export const ON_STATUS_COLORS = {
   red: "#FFFFFF", // 6.57:1
+  maroon: "#FFFFFF", // 10.95:1
   amber: "#2B1700", // 7.49:1
   yellow: "#241A00", // 10.37:1
   darkGreen: "#FFFFFF", // 5.14:1

@@ -628,7 +628,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   label="Thunderstorm"
                   description="No paddling when thunder is near – overrides all other conditions."
                   chipLabel="No Paddling"
-                  chipColor="error"
+                  ragColor={RAG_STATUS_UI["No Paddling"].color}
                 />
               </AccordionDetails>
             </Accordion>

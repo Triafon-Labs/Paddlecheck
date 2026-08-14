@@ -152,8 +152,8 @@ export const RAG_STATUS_UI: Record<
     backgroundColor: "#FFEBEE",
   },
   "No Paddling": {
-    color: WARNING_COLORS.Red,
-    onColor: ON_STATUS_COLORS.red,
+    color: STATUS_COLORS.maroon,
+    onColor: ON_STATUS_COLORS.maroon,
     emoji: "⛔",
     icon: DoNotDisturbOutlined,
     backgroundColor: "#E0E0E0",

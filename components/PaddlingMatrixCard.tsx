@@ -170,13 +170,27 @@ const getPaddlingMatrix = (
       independent.status = "Warning";
       independent.details = ["Avoid paddling alone.", "PFD required."];
       break;
+    // Split from Unknown below, which it used to share a branch with. The two
+    // mean opposite things - one is "the river is dangerous", the other is
+    // "we could not find out" - and the single line they shared, "Not
+    // recommended.", was far too mild for a gauge reading above the no-paddling
+    // threshold or a thunderstorm overhead.
     case "No Paddling":
+      for (const paddler of [beginner, improver, intermediate, independent]) {
+        paddler.details = [
+          "Do not go on the water.",
+          "Applies to every level, independents included.",
+        ];
+      }
+      break;
     case "Unknown":
     default:
-      beginner.details = ["Not recommended."];
-      improver.details = ["Not recommended."];
-      intermediate.details = ["Not recommended."];
-      independent.details = ["Not recommended."];
+      for (const paddler of [beginner, improver, intermediate, independent]) {
+        paddler.details = [
+          "Conditions could not be checked.",
+          "Ask a coach before paddling.",
+        ];
+      }
       break;
   }
 

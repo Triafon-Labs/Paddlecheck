@@ -71,12 +71,31 @@ export default function RootLayout({
         <ServiceWorkerRegistration />
         <ThemeRegistry>
           <KayakDataProvider>
+            {/* viewportFit: "cover" above, plus the black-translucent status
+                bar and display: standalone in the manifest, hand the installed
+                iOS app the whole screen - including the strips behind the
+                status bar, the home indicator and (in landscape) the rounded
+                corners. Inset the frame by those strips so the nav bar and the
+                cards don't sit underneath them. Every inset resolves to 0 off
+                a notched device, so this is inert everywhere else. It sits on
+                the frame rather than on the bar or the content because either
+                one can be topmost: the offline/stale banners render above the
+                AppBar. The exposed strips take this Box's background, which is
+                both what the AppBar inherits and what themeColor declares, so
+                they read as part of the page. */}
             <Box
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                minHeight: "100vh",
+                // dvh rather than vh: in a mobile browser tab vh measures the
+                // viewport with the URL bar retracted, so 100vh leaves the
+                // page permanently taller than what is actually on screen.
+                minHeight: "100dvh",
                 bgcolor: "background.default",
+                pt: "env(safe-area-inset-top)",
+                pb: "env(safe-area-inset-bottom)",
+                pl: "env(safe-area-inset-left)",
+                pr: "env(safe-area-inset-right)",
               }}
             >
               <TopNavBar />

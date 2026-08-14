@@ -315,6 +315,16 @@ const TopNavBar = () => {
         autoHideDuration={2500}
         onClose={() => setSnackbarOpen(false)}
         message="Copied to clipboard"
+        // Portalled to <body>, so it misses the safe-area frame in
+        // app/layout.tsx. MUI rests it 8px off the bottom of the screen (24px
+        // from sm up), which on an installed iOS app is inside the home
+        // indicator - so re-declare both offsets with the inset added.
+        sx={{
+          bottom: {
+            xs: "calc(8px + env(safe-area-inset-bottom))",
+            sm: "calc(24px + env(safe-area-inset-bottom))",
+          },
+        }}
       />
     </>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Drawer,
   Typography,
@@ -57,7 +57,7 @@ import {
 } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
-import { m3Duration, m3Easing } from "@/lib/m3-palette";
+import { m3Duration, m3Easing, m3Spring, spring } from "@/lib/m3-palette";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 
 interface SettingsModalProps {
@@ -163,6 +163,13 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({
   </Box>
 );
 
+// How far down the sheet has to be dragged to dismiss on release, as a share
+// of its own height, and the flick speed that dismisses regardless of
+// distance. A short, fast swipe reads as "get rid of this" even when it
+// covered barely any ground, which is why velocity gets its own threshold.
+const DISMISS_DISTANCE_RATIO = 0.3;
+const DISMISS_VELOCITY_PX_PER_MS = 0.5;
+
 const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const [activeTab, setActiveTab] = useState<"settings" | "info">("settings");
   // Both tab panels stay mounted (see the grid below), so the Conditions Key
@@ -212,6 +219,78 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     "Independent",
   ];
 
+  // --- Drag to dismiss ---
+  //
+  // The sheet grew a drag handle, and a handle that doesn't drag is a label
+  // for a gesture that isn't there. The transform is written straight to the
+  // node rather than held in state: this runs on every pointermove, and a
+  // React render per frame is how a drag ends up trailing the finger.
+  //
+  // Only the header drags. The panels below it scroll, and a sheet that
+  // dismisses when you try to scroll its contents is worse than one that
+  // doesn't drag at all.
+  const paperRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<{
+    startY: number;
+    startedAt: number;
+    dy: number;
+  } | null>(null);
+
+  const setSheetOffset = useCallback((y: number, animate: boolean) => {
+    const paper = paperRef.current;
+    if (!paper) return;
+    paper.style.transition = animate
+      ? spring("transform", m3Spring.spatialDefault)
+      : "none";
+    paper.style.transform = y > 0 ? `translateY(${y}px)` : "";
+  }, []);
+
+  // Clear any leftover offset when the sheet reopens, so a sheet flung shut
+  // doesn't come back part-way down the screen. MUI's Slide writes its own
+  // transform during the open and close transitions and overwrites whatever
+  // is here, which is what makes a dismissing drag hand off to the exit
+  // animation from wherever the finger left it.
+  useEffect(() => {
+    if (open) setSheetOffset(0, false);
+  }, [open, setSheetOffset]);
+
+  const handleDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    dragRef.current = {
+      startY: e.clientY,
+      startedAt: performance.now(),
+      dy: 0,
+    };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handleDragMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    // Downward only. Dragging up would lift the sheet off the bottom of the
+    // screen and expose the page behind it.
+    drag.dy = Math.max(0, e.clientY - drag.startY);
+    setSheetOffset(drag.dy, false);
+  };
+
+  const handleDragEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    dragRef.current = null;
+    e.currentTarget.releasePointerCapture?.(e.pointerId);
+
+    const height = paperRef.current?.offsetHeight ?? 0;
+    const velocity = drag.dy / Math.max(1, performance.now() - drag.startedAt);
+    if (
+      drag.dy > height * DISMISS_DISTANCE_RATIO ||
+      velocity > DISMISS_VELOCITY_PX_PER_MS
+    ) {
+      onClose();
+    } else {
+      setSheetOffset(0, true);
+    }
+  };
+
   return (
     <Drawer
       anchor="bottom"
@@ -219,6 +298,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       onClose={onClose}
       slotProps={{
         paper: {
+          ref: paperRef,
           sx: {
             borderRadius: "16px 16px 0 0",
             // dvh, not vh: in a browser tab vh is the viewport with the URL
@@ -238,20 +318,60 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       }}
     >
       <Box
+        onPointerDown={handleDragStart}
+        onPointerMove={handleDragMove}
+        onPointerUp={handleDragEnd}
+        onPointerCancel={handleDragEnd}
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          px: 2,
-          pt: 2,
-          pb: 1,
           flexShrink: 0,
+          // Without this the browser claims vertical drags for scrolling
+          // before the pointermove handler ever sees them.
+          touchAction: "none",
+          cursor: "grab",
+          "&:active": { cursor: "grabbing" },
         }}
       >
-        <Typography variant="h5">Settings</Typography>
-        <IconButton onClick={onClose} edge="end" aria-label="close">
-          <CloseIcon />
-        </IconButton>
+        {/* M3's 32x4dp drag handle. Decorative rather than a control: the
+            close button beside it and Escape both already dismiss the sheet,
+            so announcing a third way to a screen reader adds noise, not a
+            route. */}
+        <Box
+          aria-hidden
+          sx={{
+            width: 32,
+            height: 4,
+            mx: "auto",
+            mt: 1.5,
+            mb: 0.5,
+            borderRadius: 9999,
+            backgroundColor: "surfaces.onVariant",
+            opacity: 0.4,
+          }}
+        />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: 2,
+            pt: 1,
+            pb: 1,
+          }}
+        >
+          <Typography variant="h5">Settings</Typography>
+          <IconButton
+            onClick={onClose}
+            edge="end"
+            aria-label="close"
+            // The button sits inside the drag region, so its own presses have
+            // to stay out of the drag: without this, pressing close starts a
+            // zero-distance drag that captures the pointer and swallows the
+            // click.
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </Box>
 
       <Tabs

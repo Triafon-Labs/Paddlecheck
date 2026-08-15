@@ -377,6 +377,19 @@ const components: ThemeOptions["components"] = {
     },
   },
   MuiCard: {
+    // Cards render at elevation 0 so they stay out of the elevation1-4 bucket
+    // the MuiPaper override above claims for surfaceContainerHigh. That rule
+    // compiles to a longer selector than this one (see the note there), so a
+    // card left at MUI's default elevation of 1 is painted a tone lighter than
+    // `surfaceContainer` below - which is the tone the panels *inside* it use,
+    // so the nesting flattens and the panels disappear into the card.
+    //
+    // Every call site used to hold this off by passing `variant="outlined"`,
+    // which looked decorative because the override below strips the border it
+    // asks for. What it was really doing was keeping the card off the
+    // elevation classes. Setting the elevation here does that on purpose, and
+    // in one place.
+    defaultProps: { elevation: 0 },
     styleOverrides: {
       root: ({ theme }) => [
         {

@@ -26,7 +26,12 @@ import {
 import { ragStatus } from "@/lib/rag";
 import { THRESHOLDS } from "@/lib/config";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
-import { m3Spring, spring, springTransition } from "@/lib/m3-palette";
+import {
+  collapseMotion,
+  m3Spring,
+  spring,
+  springTransition,
+} from "@/lib/m3-palette";
 
 export const PADDLER_LEVEL_CHANGED_EVENT = "paddlecheck:paddler-level-changed";
 
@@ -396,7 +401,12 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
             }}
           />
         </Box>
-        <Collapse in={isOpen} timeout="auto" unmountOnExit>
+        <Collapse
+          in={isOpen}
+          timeout="auto"
+          unmountOnExit
+          easing={collapseMotion.easing}
+        >
           {statusInfo && statusInfo.details.length > 0 && (
             <Box
               component="ul"
@@ -495,7 +505,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
       : null;
 
   return (
-    <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
+    <Card sx={{ width: "100%" }}>
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
           Who Can Paddle

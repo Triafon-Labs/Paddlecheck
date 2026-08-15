@@ -19,7 +19,7 @@ import PaddlingStatusHero from "./PaddlingStatusHero";
 import InfoPanel from "./InfoPanel";
 import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
 import { formatWindGust } from "@/lib/units";
-import { springTransition } from "@/lib/m3-palette";
+import { collapseMotion, springTransition } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
 import WeatherWarnings from "./WeatherWarnings";
 
@@ -106,6 +106,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
             <Collapse
               in={!!conditions.reasons && conditions.reasons.length > 0}
               unmountOnExit
+              {...collapseMotion}
             >
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle2" color="text.secondary">
@@ -141,6 +142,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
             <Collapse
               in={!!(conditions.gustStatus || conditions.rainWhileWarm)}
               unmountOnExit
+              {...collapseMotion}
             >
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle2" color="text.secondary">
@@ -206,11 +208,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
   };
 
   return (
-    <Card
-      data-testid="status-card"
-      variant="outlined"
-      sx={{ width: "100%", p: 2 }}
-    >
+    <Card data-testid="status-card" sx={{ width: "100%" }}>
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
           Paddling Status

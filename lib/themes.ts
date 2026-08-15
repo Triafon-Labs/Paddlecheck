@@ -391,6 +391,11 @@ const components: ThemeOptions["components"] = {
       ],
     },
   },
+  // 16dp on all four sides, which is the inset M3 specifies for a card and
+  // the only one the cards now carry. Each of them used to set `p: 2` on the
+  // Card as well, on top of the padding CardContent brings of its own, so
+  // every card was inset 32px - a whole 16px column of a 360px phone spent
+  // twice over.
   MuiCardContent: {
     styleOverrides: {
       root: {

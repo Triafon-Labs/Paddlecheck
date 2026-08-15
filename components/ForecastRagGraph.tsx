@@ -488,7 +488,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
     // overflow is visible so the tooltip can hang outside the card - Card
     // clips to its rounded corners by default, which is what was cutting the
     // bottom off it. Nothing else in here paints outside the card's bounds.
-    <Card variant="outlined" sx={{ width: "100%", p: 2, overflow: "visible" }}>
+    <Card sx={{ width: "100%", overflow: "visible" }}>
       <CardContent>
         <Typography variant="h5" component="div">
           Paddling Forecast

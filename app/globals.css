@@ -1,7 +1,11 @@
 html,
 body {
   max-width: 100vw;
-  overflow-x: hidden;
+  /* clip, not hidden. `overflow-x: hidden` computes overflow-y to auto, which
+     makes body a scroll container - and a sticky child sticks to a container
+     that never scrolls, so the sticky top app bar simply scrolled away with
+     the page. `clip` clips the same overflow without creating one. */
+  overflow-x: clip;
 }
 
 /* No body font rules here. The family comes from the theme's type scale via

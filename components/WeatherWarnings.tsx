@@ -89,7 +89,7 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
               <Box sx={{ p: 2, flex: 1, minWidth: 0 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                   <WarningAmberOutlined
-                    sx={{ fontSize: 40, color: severityColor, flexShrink: 0 }}
+                    sx={{ fontSize: 32, color: severityColor, flexShrink: 0 }}
                   />
                   <Box sx={{ minWidth: 0 }}>
                     <Typography
@@ -100,9 +100,12 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
                       {severity} warning
                     </Typography>
                     <Typography
-                      variant="h5"
                       component="p"
-                      sx={{ fontWeight: 500, lineHeight: 1.15 }}
+                      sx={{
+                        fontSize: "1.25rem",
+                        fontWeight: 500,
+                        lineHeight: 1.2,
+                      }}
                     >
                       {describeWarning(groupWarnings[0])}
                     </Typography>

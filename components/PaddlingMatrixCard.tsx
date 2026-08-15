@@ -451,7 +451,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
         />
         <Box sx={{ p: 2, flex: 1, minWidth: 0 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <StatusIcon sx={{ fontSize: 40, color: ui.color, flexShrink: 0 }} />
+            <StatusIcon sx={{ fontSize: 32, color: ui.color, flexShrink: 0 }} />
             <Box sx={{ minWidth: 0 }}>
               <Typography
                 variant="overline"
@@ -460,10 +460,13 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
               >
                 You - {selectedLevel}
               </Typography>
+              {/* A step below the h5 card title rather than level with it.
+                  At h5 the verdict matched "Who Can Paddle" above it exactly,
+                  so the card read as two headlines of equal rank instead of a
+                  title and its answer. */}
               <Typography
-                variant="h5"
                 component="p"
-                sx={{ fontWeight: 500, lineHeight: 1.15 }}
+                sx={{ fontSize: "1.25rem", fontWeight: 500, lineHeight: 1.2 }}
               >
                 {ui.headline}
               </Typography>

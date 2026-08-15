@@ -52,7 +52,7 @@ const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
           transition: spring("background-color", m3Spring.effectsDefault),
         }}
       >
-        <Icon sx={{ fontSize: { xs: 44, sm: 64 }, flexShrink: 0 }} />
+        <Icon sx={{ fontSize: { xs: 40, sm: 56 }, flexShrink: 0 }} />
 
         <Typography
           variant="h3"
@@ -65,10 +65,14 @@ const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
             fontWeight: 500,
             lineHeight: 1.1,
             // Display Small on a phone would break "No Paddling" - the longest
-            // label - onto two lines inside a 360px card, so the step down to
-            // Headline Large below the sm breakpoint is what keeps every
-            // status on one line.
-            fontSize: { xs: "1.75rem", sm: "2.25rem" },
+            // label - onto two lines inside a 360px card, so the step down
+            // below the sm breakpoint is what keeps every status on one line.
+            //
+            // Both steps sit a size above the h5 card title, which is the
+            // floor here: the traffic light this replaced set the status
+            // *below* its own card title, and that inversion is the thing the
+            // panel exists to correct.
+            fontSize: { xs: "1.625rem", sm: "2rem" },
           }}
         >
           {status}

@@ -6,7 +6,6 @@ import {
   CardContent,
   Typography,
   Box,
-  Tooltip,
   Skeleton,
   Grow,
 } from "@mui/material";
@@ -53,39 +52,41 @@ const TICK_DOT_CENTER = 11;
 // merge it into that landmark's row instead of giving it its own row.
 const NEAR_THRESHOLD_M = 0.1;
 
+// No tooltip. Every tile wrapped one, defaulted to `tooltip || label` with no
+// call site ever passing `tooltip` - so each tile popped a bubble repeating
+// the label already printed underneath it. It hung off a plain Box too, which
+// no keyboard or screen reader could reach, so the only people it spoke to
+// were the ones who could already read it.
 const StatItem: React.FC<{
   icon: React.ReactNode;
   label: string;
   value: React.ReactNode;
-  tooltip?: string;
   isInfluencing?: boolean;
-}> = ({ icon, label, value, tooltip, isInfluencing }) => (
-  <Tooltip title={tooltip || label} placement="top">
-    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-      <Box sx={{ mr: 1.5, color: "primary.main" }}>{icon}</Box>
-      <Box>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ display: "flex", alignItems: "center" }}
-        >
-          {label}
-          {isInfluencing && (
-            <Box
-              component="span"
-              sx={{ display: "inline-flex", alignItems: "center", ml: 0.5 }}
-            >
-              🚦
-              <ArrowUpward sx={{ fontSize: "inherit", color: "error.main" }} />
-            </Box>
-          )}
-        </Typography>
-        <Typography variant="body1" component="div">
-          {value}
-        </Typography>
-      </Box>
+}> = ({ icon, label, value, isInfluencing }) => (
+  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+    <Box sx={{ mr: 1.5, color: "primary.main" }}>{icon}</Box>
+    <Box>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ display: "flex", alignItems: "center" }}
+      >
+        {label}
+        {isInfluencing && (
+          <Box
+            component="span"
+            sx={{ display: "inline-flex", alignItems: "center", ml: 0.5 }}
+          >
+            🚦
+            <ArrowUpward sx={{ fontSize: "inherit", color: "error.main" }} />
+          </Box>
+        )}
+      </Typography>
+      <Typography variant="body1" component="div">
+        {value}
+      </Typography>
     </Box>
-  </Tooltip>
+  </Box>
 );
 
 const RiverLevelSection: React.FC<{
@@ -316,7 +317,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
 
   if (loading) {
     return (
-      <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
+      <Card sx={{ width: "100%" }}>
         <CardContent>
           <Typography variant="h5" component="div" gutterBottom>
             Detailed Stats
@@ -400,7 +401,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
   }
 
   return (
-    <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
+    <Card sx={{ width: "100%" }}>
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
           Detailed Stats

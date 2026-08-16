@@ -19,7 +19,7 @@ import { OFFLINE_NO_CACHE_ERROR } from "@/lib/hooks";
 // Placeholder shown only while a chart's JS chunk downloads - the components
 // render their own richer skeletons once mounted and `loading` is true.
 const ChartCardFallback = ({ height }: { height: number }) => (
-  <Card variant="outlined" sx={{ width: "100%", p: 2 }}>
+  <Card sx={{ width: "100%" }}>
     <CardContent>
       <Skeleton variant="text" width={140} height={32} animation="wave" />
       <Skeleton
@@ -63,14 +63,20 @@ export default function HomePage() {
 
   return (
     <Container maxWidth="md">
-      <Stack spacing={4}>
+      {/* 16px, the same value as the page gutter, the card inset and the
+          section rhythm inside each card - one spacing step for the whole
+          page. It was 32px, which was even with the cards' old 32px inset;
+          once that halved, the space between two cards was twice the space
+          inside them. */}
+      <Stack spacing={2}>
         <Collapse
           in={!!error && error !== OFFLINE_NO_CACHE_ERROR}
           unmountOnExit
         >
-          <Alert severity="error" sx={{ borderRadius: 1 }}>
-            {error}
-          </Alert>
+          {/* Radius left to the MuiAlert override, which sets the M3 12px.
+              Overriding it to 8 here made this the one status surface on the
+              page with a shape of its own. */}
+          <Alert severity="error">{error}</Alert>
         </Collapse>
         <StatusCard conditions={conditions} loading={loading} />
         <PaddlingMatrixCard

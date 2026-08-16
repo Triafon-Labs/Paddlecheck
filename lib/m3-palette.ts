@@ -195,3 +195,16 @@ export const springTransition = (
   easing: { enter: token.easing, exit: m3Easing.accelerate },
   timeout: { enter: token.duration, exit: m3Duration.short4 },
 });
+
+// Motion for <Collapse>, which the springs above are the wrong tool for: a
+// spatial spring overshoots by design, and a section whose height overshoots
+// doesn't bounce - it clips its own last line and then lets it back in.
+// Collapses take M3's decelerate/accelerate pair instead, entering slower
+// than they leave, the way a panel that unfurls into place should.
+//
+// Spread it whole where the height is known, or pass `.easing` alone next to
+// `timeout="auto"` to keep MUI's content-aware duration.
+export const collapseMotion = {
+  easing: { enter: m3Easing.decelerate, exit: m3Easing.accelerate },
+  timeout: { enter: m3Duration.medium2, exit: m3Duration.short4 },
+} as const;

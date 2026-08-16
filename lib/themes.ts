@@ -377,6 +377,19 @@ const components: ThemeOptions["components"] = {
     },
   },
   MuiCard: {
+    // Cards render at elevation 0 so they stay out of the elevation1-4 bucket
+    // the MuiPaper override above claims for surfaceContainerHigh. That rule
+    // compiles to a longer selector than this one (see the note there), so a
+    // card left at MUI's default elevation of 1 is painted a tone lighter than
+    // `surfaceContainer` below - which is the tone the panels *inside* it use,
+    // so the nesting flattens and the panels disappear into the card.
+    //
+    // Every call site used to hold this off by passing `variant="outlined"`,
+    // which looked decorative because the override below strips the border it
+    // asks for. What it was really doing was keeping the card off the
+    // elevation classes. Setting the elevation here does that on purpose, and
+    // in one place.
+    defaultProps: { elevation: 0 },
     styleOverrides: {
       root: ({ theme }) => [
         {
@@ -391,21 +404,53 @@ const components: ThemeOptions["components"] = {
       ],
     },
   },
+  // 24dp on all four sides, and the only inset the cards carry. Each of them
+  // used to set `p: 2` on the Card as well, on top of the padding CardContent
+  // brings of its own, so every card was inset 32px - a 16px column of a 360px
+  // phone spent twice over.
+  //
+  // 24 rather than the 16 M3 gives as a card's padding: at 16 the content sat
+  // hard against the card edge, with the same gap inside the card as between
+  // one card and the next, so nothing marked where a card began. M3 pairs a
+  // 16dp inset with an 8dp gap between cards for exactly that reason - the
+  // inset is meant to be the larger of the two. This keeps that relationship
+  // with the 16px gap the page settled on.
   MuiCardContent: {
     styleOverrides: {
       root: {
-        "&:last-child": { paddingBottom: 16 },
+        padding: 24,
+        "&:last-child": { paddingBottom: 24 },
       },
     },
   },
+  // No bottom border. `outlineVariant` is darker than the bar in the light
+  // scheme and lighter than it in the dark one, so the same rule drew a shadow
+  // line under the bar in one scheme and an edge-lit seam in the other. M3
+  // doesn't give the top app bar a divider at all - separation comes from the
+  // tonal step the bar takes when content scrolls under it (see TopNavBar),
+  // and that ramp moves away from the background in whichever direction the
+  // scheme runs, so it reads the same way in both.
+  // Both scroll states live here rather than in an sx at the call site,
+  // because perScheme's dark half goes through applyStyles and compiles to a
+  // selector with an ancestor in it. That outranks a single sx class, so an sx
+  // colour on the AppBar took effect in the light scheme and was silently
+  // dropped in the dark one - the same trap as the Card elevation above.
+  //
+  // The scrolled tone is containerHighest, not the container M3 names for it,
+  // because container is exactly what the cards are painted: a card sliding
+  // under the bar would meet a boundary between two identical fills. Highest
+  // clears the cards by a step in both schemes, in the direction each scheme's
+  // ramp already runs.
   MuiAppBar: {
     styleOverrides: {
       root: ({ theme }) => [
-        { boxShadow: "none" },
+        { boxShadow: "none", transition: spring("background-color") },
         ...perScheme(theme, (m3) => ({
           backgroundColor: m3.surfaceContainerLow,
           color: m3.onSurface,
-          borderBottom: `1px solid ${m3.outlineVariant}`,
+          '&[data-scrolled="true"]': {
+            backgroundColor: m3.surfaceContainerHighest,
+          },
         })),
       ],
     },

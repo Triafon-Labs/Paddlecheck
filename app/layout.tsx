@@ -107,8 +107,12 @@ export default function RootLayout({
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "flex-start",
-                  pt: 4,
-                  pb: 4,
+                  // Matches the gap between the cards below, so the first one
+                  // sits the same distance from the app bar as the next does
+                  // from it - 32px here would have been the last odd value in
+                  // an otherwise single-step page.
+                  pt: 2,
+                  pb: 2,
                 }}
               >
                 {children}

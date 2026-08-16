@@ -2,10 +2,17 @@
 
 import React from "react";
 import { Paper, SxProps, Theme } from "@mui/material";
+import { m3Spring, spring } from "@/lib/m3-palette";
 
 interface InfoPanelProps {
   children: React.ReactNode;
   align?: "center" | "flex-start";
+  // Renders the panel as a button carrying the M3 state layer and focus
+  // indicator. The layer is drawn on a pseudo-element rather than by swapping
+  // the background, so it composites over whatever fill the panel has instead
+  // of replacing it.
+  onClick?: () => void;
+  ariaLabel?: string;
   sx?: SxProps<Theme>;
 }
 
@@ -20,16 +27,52 @@ interface InfoPanelProps {
 const InfoPanel: React.FC<InfoPanelProps> = ({
   children,
   align = "center",
+  onClick,
+  ariaLabel,
   sx,
 }) => (
   <Paper
     elevation={0}
+    {...(onClick && {
+      component: "button" as const,
+      type: "button" as const,
+      onClick,
+      "aria-label": ariaLabel,
+    })}
     sx={{
       p: 1.5,
       display: "flex",
       alignItems: align,
       gap: 1,
       backgroundColor: "surfaces.containerHigh",
+      ...(onClick && {
+        width: "100%",
+        border: "none",
+        textAlign: "left",
+        font: "inherit",
+        color: "inherit",
+        cursor: "pointer",
+        position: "relative",
+        // M3 state layer at 8% hover / 10% pressed, plus a focus indicator so
+        // a keyboard user can see which panel they are on.
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          borderRadius: "inherit",
+          backgroundColor: "text.primary",
+          opacity: 0,
+          transition: spring("opacity", m3Spring.effectsFast),
+          pointerEvents: "none",
+        },
+        "&:hover::after": { opacity: 0.08 },
+        "&:active::after": { opacity: 0.1 },
+        "&:focus-visible": {
+          outline: "3px solid",
+          outlineColor: "primary.main",
+          outlineOffset: -3,
+        },
+      }),
       ...sx,
     }}
   >

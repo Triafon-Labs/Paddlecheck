@@ -63,7 +63,12 @@ export default function HomePage() {
 
   return (
     <Container maxWidth="md">
-      <Stack spacing={4}>
+      {/* 16px, the same value as the page gutter, the card inset and the
+          section rhythm inside each card - one spacing step for the whole
+          page. It was 32px, which was even with the cards' old 32px inset;
+          once that halved, the space between two cards was twice the space
+          inside them. */}
+      <Stack spacing={2}>
         <Collapse
           in={!!error && error !== OFFLINE_NO_CACHE_ERROR}
           unmountOnExit

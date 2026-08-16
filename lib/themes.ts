@@ -335,22 +335,25 @@ const components: ThemeOptions["components"] = {
       "button, input, optgroup, select, textarea": {
         fontOpticalSizing: "none",
       },
-      // Recharts gives every chart's <svg> tabIndex=0 for its accessibility
-      // layer (arrow keys walk the series), and Chromium paints its focus
-      // ring on a focused SVG whether or not `:focus-visible` matches - so
-      // simply tapping the graph drew a hard rectangle around the plot. Drop
-      // the ring for pointer focus and put the app's own M3 indicator back on
-      // `:focus-visible`, which still fires for Tab, so keyboard users keep
-      // seeing where they are. The colour comes from the palette's CSS
-      // variable rather than `perScheme` because CssBaseline's overrides are
-      // a plain global-style object with no theme in scope.
-      ".recharts-surface": {
+      // Recharts hands out tabindex freely: the chart's <svg> gets 0 for its
+      // accessibility layer (arrow keys walk the series), and each z-index
+      // layer <g>, portal and tooltip box gets -1. Chromium paints its focus
+      // ring on a focused SVG element whether or not `:focus-visible`
+      // matches, and a press lands focus on whichever of those the finger hit
+      // - so tapping the graph drew a hard rectangle, sized to a different
+      // layer's bounding box depending on where it was tapped. Kill the ring
+      // across the whole chart, then put the app's M3 indicator back on the
+      // one element a reader can actually reach with Tab, which is the
+      // surface. The colour comes from the palette's CSS variable rather than
+      // `perScheme` because CssBaseline's overrides are a plain global-style
+      // object with no theme in scope.
+      ".recharts-wrapper": {
         WebkitTapHighlightColor: "transparent",
       },
-      ".recharts-surface:focus": {
+      ".recharts-wrapper :focus": {
         outline: "none",
       },
-      ".recharts-surface:focus-visible": {
+      ".recharts-wrapper .recharts-surface:focus-visible": {
         outline: "3px solid var(--mui-palette-primary-main)",
         outlineOffset: 2,
       },

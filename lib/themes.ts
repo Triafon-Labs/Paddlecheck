@@ -423,14 +423,34 @@ const components: ThemeOptions["components"] = {
       },
     },
   },
+  // No bottom border. `outlineVariant` is darker than the bar in the light
+  // scheme and lighter than it in the dark one, so the same rule drew a shadow
+  // line under the bar in one scheme and an edge-lit seam in the other. M3
+  // doesn't give the top app bar a divider at all - separation comes from the
+  // tonal step the bar takes when content scrolls under it (see TopNavBar),
+  // and that ramp moves away from the background in whichever direction the
+  // scheme runs, so it reads the same way in both.
+  // Both scroll states live here rather than in an sx at the call site,
+  // because perScheme's dark half goes through applyStyles and compiles to a
+  // selector with an ancestor in it. That outranks a single sx class, so an sx
+  // colour on the AppBar took effect in the light scheme and was silently
+  // dropped in the dark one - the same trap as the Card elevation above.
+  //
+  // The scrolled tone is containerHighest, not the container M3 names for it,
+  // because container is exactly what the cards are painted: a card sliding
+  // under the bar would meet a boundary between two identical fills. Highest
+  // clears the cards by a step in both schemes, in the direction each scheme's
+  // ramp already runs.
   MuiAppBar: {
     styleOverrides: {
       root: ({ theme }) => [
-        { boxShadow: "none" },
+        { boxShadow: "none", transition: spring("background-color") },
         ...perScheme(theme, (m3) => ({
           backgroundColor: m3.surfaceContainerLow,
           color: m3.onSurface,
-          borderBottom: `1px solid ${m3.outlineVariant}`,
+          '&[data-scrolled="true"]': {
+            backgroundColor: m3.surfaceContainerHighest,
+          },
         })),
       ],
     },

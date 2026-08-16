@@ -32,7 +32,7 @@ import {
   hasDaylightRemaining,
 } from "@/lib/forecast";
 import { getRelativeTimeString, getLondonHHMM } from "@/lib/time";
-import { collapseMotion, spring } from "@/lib/m3-palette";
+import { collapseMotion } from "@/lib/m3-palette";
 
 // Filled with the saturated accent rather than the tonal container pair.
 // The container roles would be the more orthodox M3 reading of a persistent
@@ -243,23 +243,21 @@ const TopNavBar = () => {
       <Collapse in={isOfflineError} unmountOnExit {...collapseMotion}>
         <StatusBanner severity="error">{OFFLINE_NO_CACHE_ERROR}</StatusBanner>
       </Collapse>
-      {/* M3's small top app bar carries no separator at rest and lifts onto
-          surfaceContainer once content scrolls under it - the change *is* the
-          signal that there's more above. This one wore a permanent border
-          instead, which says the same thing whether or not anything is behind
-          it. useScrollTrigger fires past 8px, before the first card reaches
-          the bar. */}
+      {/* M3's small top app bar carries no separator at rest and lifts a tonal
+          step once content scrolls under it - the change *is* the signal that
+          there's more above. This one wore a permanent border instead, which
+          says the same thing whether or not anything is behind it.
+          useScrollTrigger fires past 8px, before the first card reaches the
+          bar.
+
+          The two states are painted by the MuiAppBar override, which this only
+          selects between - an sx colour here would be outranked in the dark
+          scheme. See the note there. */}
       <AppBar
         position="sticky"
         color="inherit"
         elevation={0}
-        sx={{
-          backgroundColor: scrolled
-            ? "surfaces.container"
-            : "surfaces.containerLow",
-          borderBottomColor: scrolled ? "divider" : "transparent",
-          transition: spring("background-color, border-bottom-color"),
-        }}
+        data-scrolled={scrolled}
       >
         <Toolbar sx={{ justifyContent: "space-between" }}>
           {/* minWidth: 0 lets this half shrink past its content on a narrow

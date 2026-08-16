@@ -8,7 +8,7 @@ import {
   CalendarToday,
   Update,
 } from "@mui/icons-material";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -44,6 +44,7 @@ import { TIME_PERIODS } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { springTransition } from "@/lib/m3-palette";
+import { useTooltipDismiss } from "@/lib/useTooltipDismiss";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 
 interface RiverLevelGraphProps {
@@ -197,6 +198,8 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   change5d,
 }) => {
   const theme = useTheme();
+  const chartRef = useRef<HTMLDivElement>(null);
+  const { tooltipActive, chartMoveProps } = useTooltipDismiss(chartRef);
   const [timeRange, setTimeRange] = useState(
     () =>
       (typeof window !== "undefined"
@@ -395,6 +398,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             // place a tick on the very last point, and half of that centred
             // label would otherwise be clipped by the chart edge.
             margin={{ top: 5, right: 32, left: 5, bottom: 5 }}
+            {...chartMoveProps}
           >
             <defs>
               <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
@@ -428,7 +432,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               stroke={theme.palette.text.secondary}
               domain={[0, forecastYDomainMax]}
             />
-            <Tooltip content={CustomTooltip} />
+            <Tooltip content={CustomTooltip} active={tooltipActive} />
             <ReferenceLine
               x={nowTs}
               stroke={theme.palette.text.disabled}
@@ -463,6 +467,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           <ComposedChart
             data={filteredDataWithTs ?? undefined}
             margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
+            {...chartMoveProps}
           >
             <defs>
               <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
@@ -496,7 +501,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               stroke={theme.palette.text.secondary}
               domain={[0, yDomainMax]}
             />
-            <Tooltip content={CustomTooltip} />
+            <Tooltip content={CustomTooltip} active={tooltipActive} />
             <Area
               type="monotone"
               dataKey="level"
@@ -528,7 +533,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     }
     return (
       <Grow in appear {...springTransition()}>
-        <Box>{renderChartBody()}</Box>
+        <Box ref={chartRef}>{renderChartBody()}</Box>
       </Grow>
     );
   };

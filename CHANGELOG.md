@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.32.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.32.0...paddlecheck-v1.32.1) (2026-08-16)
+
+
+### Bug Fixes
+
+* **charts:** clear the focus ring off the inner chart layers too ([3ebf5e5](https://github.com/dylanr97/Paddlecheck/commit/3ebf5e5ea40beecb18265b0ee8beccc8bc14de79))
+* **charts:** stop the focus box and leave the tooltip dismissable ([96e542d](https://github.com/dylanr97/Paddlecheck/commit/96e542d48963192b95d3e7f91fb2e443023996c6))
+
 ## [1.32.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.31.0...paddlecheck-v1.32.0) (2026-08-16)
 
 

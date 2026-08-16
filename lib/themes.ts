@@ -404,15 +404,22 @@ const components: ThemeOptions["components"] = {
       ],
     },
   },
-  // 16dp on all four sides, which is the inset M3 specifies for a card and
-  // the only one the cards now carry. Each of them used to set `p: 2` on the
-  // Card as well, on top of the padding CardContent brings of its own, so
-  // every card was inset 32px - a whole 16px column of a 360px phone spent
-  // twice over.
+  // 24dp on all four sides, and the only inset the cards carry. Each of them
+  // used to set `p: 2` on the Card as well, on top of the padding CardContent
+  // brings of its own, so every card was inset 32px - a 16px column of a 360px
+  // phone spent twice over.
+  //
+  // 24 rather than the 16 M3 gives as a card's padding: at 16 the content sat
+  // hard against the card edge, with the same gap inside the card as between
+  // one card and the next, so nothing marked where a card began. M3 pairs a
+  // 16dp inset with an 8dp gap between cards for exactly that reason - the
+  // inset is meant to be the larger of the two. This keeps that relationship
+  // with the 16px gap the page settled on.
   MuiCardContent: {
     styleOverrides: {
       root: {
-        "&:last-child": { paddingBottom: 16 },
+        padding: 24,
+        "&:last-child": { paddingBottom: 24 },
       },
     },
   },

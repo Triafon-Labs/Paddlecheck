@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.32.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.31.0...paddlecheck-v1.32.0) (2026-08-16)
+
+
+### Features
+
+* **nav:** pin the top app bar and lift it on scroll ([1be0bc1](https://github.com/dylanr97/Paddlecheck/commit/1be0bc13f8499c8025ec0de64122522d8908f02e))
+* **settings:** give the sheet a drag handle that drags ([8b40215](https://github.com/dylanr97/Paddlecheck/commit/8b402156c1780fee386c101447deafd90d7e78b3))
+
+
+### Bug Fixes
+
+* **a11y:** make the tappable things tappable, and drop the tooltips ([103eab0](https://github.com/dylanr97/Paddlecheck/commit/103eab072d02ad518eab42405d0fc0680d2ee8d9))
+* **cards:** keep cards a tone below the panels inside them ([3a3923a](https://github.com/dylanr97/Paddlecheck/commit/3a3923a6a3feb04de0b0baeb7148c5ce7db04e52)), closes [#E7E8F1](https://github.com/dylanr97/Paddlecheck/issues/E7E8F1) [#EDEEF7](https://github.com/dylanr97/Paddlecheck/issues/EDEEF7) [#E7E8F1](https://github.com/dylanr97/Paddlecheck/issues/E7E8F1) [#EDEEF7](https://github.com/dylanr97/Paddlecheck/issues/EDEEF7) [#E7E8F1](https://github.com/dylanr97/Paddlecheck/issues/E7E8F1)
+* **nav:** drop the app bar border, and paint both states in the theme ([a72818f](https://github.com/dylanr97/Paddlecheck/commit/a72818f8034eba463fb7ea2d1d6bb5f8abc58be4))
+
 ## [1.31.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.30.8...paddlecheck-v1.31.0) (2026-08-14)
 
 

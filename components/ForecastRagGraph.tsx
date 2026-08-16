@@ -41,6 +41,7 @@ import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { isWarningOnDay, formatWarningTime } from "@/lib/warnings";
 import { springTransition } from "@/lib/m3-palette";
+import { useTooltipDismiss } from "@/lib/useTooltipDismiss";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 
 interface ForecastRagGraphProps {
@@ -307,6 +308,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   const lineColor = theme.palette.text.secondary;
   const [selectedDay, setSelectedDay] = useState(0);
   const chartRef = useRef<HTMLDivElement>(null);
+  const { tooltipActive, chartMoveProps } = useTooltipDismiss(chartRef);
   const [tooltipY, setTooltipY] = useState(0);
 
   // Recharts places the tooltip at the cursor and clamps it to the chart's own
@@ -372,6 +374,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
           <ComposedChart
             data={chartData}
             margin={{ top: 40, right: 15, left: 15, bottom: 5 }}
+            {...chartMoveProps}
           >
             <XAxis
               dataKey="time"
@@ -385,6 +388,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                 <CustomTooltip {...props} onMeasure={measureTooltip} />
               )}
               cursor={{ fill: "transparent" }}
+              active={tooltipActive}
               position={{ y: tooltipY }}
               // The pinned y is measured against the viewport, not the chart,
               // so recharts must not second-guess it.

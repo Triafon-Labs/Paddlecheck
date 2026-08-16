@@ -335,6 +335,28 @@ const components: ThemeOptions["components"] = {
       "button, input, optgroup, select, textarea": {
         fontOpticalSizing: "none",
       },
+      // Recharts hands out tabindex freely: the chart's <svg> gets 0 for its
+      // accessibility layer (arrow keys walk the series), and each z-index
+      // layer <g>, portal and tooltip box gets -1. Chromium paints its focus
+      // ring on a focused SVG element whether or not `:focus-visible`
+      // matches, and a press lands focus on whichever of those the finger hit
+      // - so tapping the graph drew a hard rectangle, sized to a different
+      // layer's bounding box depending on where it was tapped. Kill the ring
+      // across the whole chart, then put the app's M3 indicator back on the
+      // one element a reader can actually reach with Tab, which is the
+      // surface. The colour comes from the palette's CSS variable rather than
+      // `perScheme` because CssBaseline's overrides are a plain global-style
+      // object with no theme in scope.
+      ".recharts-wrapper": {
+        WebkitTapHighlightColor: "transparent",
+      },
+      ".recharts-wrapper :focus": {
+        outline: "none",
+      },
+      ".recharts-wrapper .recharts-surface:focus-visible": {
+        outline: "3px solid var(--mui-palette-primary-main)",
+        outlineOffset: 2,
+      },
       // Everything M3 Expressive adds - the springs, the pop-ins, the
       // spinning refresh affordance - is motion a vestibular-sensitive
       // viewer has asked not to see. M3's accessibility guidance is to

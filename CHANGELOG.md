@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.33.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.32.2...paddlecheck-v1.33.0) (2026-08-25)
+
+
+### Features
+
+* display paddling status in chip in forecast graph tooltip ([e5a7374](https://github.com/dylanr97/Paddlecheck/commit/e5a7374637ccc63b90be47e92f17bf8d2ac31882))
+
 ## [1.32.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.32.1...paddlecheck-v1.32.2) (2026-08-25)
 
 

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.32.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.32.1...paddlecheck-v1.32.2) (2026-08-25)
+
+
+### Bug Fixes
+
+* treat thunderstorms separately from rain and group forecast icons ([57a35ce](https://github.com/dylanr97/Paddlecheck/commit/57a35ce322157c68886be0c4414db4d339a8ce8f))
+* treat thunderstorms separately from rain and update reason label ([bb0e652](https://github.com/dylanr97/Paddlecheck/commit/bb0e652fe7a6f3d6ffbe844768ad18dabf4ddcc8))
+* treat thunderstorms separately from rain and update reason label ([37aa78b](https://github.com/dylanr97/Paddlecheck/commit/37aa78b6b55a0b8940a0fbd55dcb1be00e2eeb11))
+* treat thunderstorms separately from rain and update reason label ([7ebc57a](https://github.com/dylanr97/Paddlecheck/commit/7ebc57af0ad306fa1b2c154c95f8b1f5f6bfec6d))
+
 ## [1.32.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.32.0...paddlecheck-v1.32.1) (2026-08-16)
 
 

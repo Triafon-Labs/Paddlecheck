@@ -241,37 +241,24 @@ const BarLabel = (props: BarLabelProps) => {
   let clearAbove = 0;
 
   if (entry.status === "No Paddling") {
-    // Group contiguous "No Paddling" bars so a single icon is centered
-    // over the run rather than rendering overlapping icons on every bar.
-    let start = index;
-    while (start > 0 && data[start - 1]?.status === "No Paddling") {
-      start--;
+    // Straight from the RAG palette rather than the theme's error role: this
+    // icon captions a bar the <Bar> below fills from that same palette, so
+    // the two have to be the one red no matter what the theme does.
+    const { icon: Icon, color } = ragStatus[entry.status];
+    if (Icon) {
+      elements.push(
+        <foreignObject
+          key="no-paddling"
+          x={x + width / 2 - 12}
+          y={y - 28}
+          width={24}
+          height={24}
+        >
+          <Icon sx={{ color, fontSize: 24, ...popIn }} />
+        </foreignObject>
+      );
+      clearAbove = 28;
     }
-    let end = index;
-    while (end < data.length - 1 && data[end + 1]?.status === "No Paddling") {
-      end++;
-    }
-    const count = end - start + 1;
-    const midIndex = Math.floor((start + end) / 2);
-
-    if (index === midIndex) {
-      const { icon: Icon, color } = ragStatus[entry.status];
-      if (Icon) {
-        const xShift = count % 2 === 0 ? width / 2 : 0;
-        elements.push(
-          <foreignObject
-            key="no-paddling"
-            x={x + width / 2 - 12 + xShift}
-            y={y - 28}
-            width={24}
-            height={24}
-          >
-            <Icon sx={{ color, fontSize: 24, ...popIn }} />
-          </foreignObject>
-        );
-      }
-    }
-    clearAbove = 28;
   }
 
   // Heads-up dot for a notable gust - coloured by the status that gust would

@@ -143,7 +143,7 @@ export const calculateFinalRagStatus = (
     };
   }
   if (THRESHOLDS.THUNDERSTORM_CODES.includes(weatherCode!)) {
-    return { status: "No Paddling", reasons: ["Risk of thunderstorms"] };
+    return { status: "No Paddling", reasons: ["Thunderstorms"] };
   }
 
   const initialRag = calculateInitialRagStatus(riverLevel!);

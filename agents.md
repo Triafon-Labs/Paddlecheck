@@ -139,7 +139,7 @@ The RAG status is calculated from river level first, then modifiers are applied:
 3. **Rain** – only a factor when temp is 5–13°C (moderate)
 4. **Darkness** – raises Green → Amber, Amber → Red
 5. **Poor visibility** – below 1 000 m raises Green → Amber, Amber → Red
-6. **Thunderstorm** – overrides everything → No Paddling
+6. **Thunderstorms** – overrides everything → No Paddling
 
 The word "raises" means incrementing one step up the severity scale.
 

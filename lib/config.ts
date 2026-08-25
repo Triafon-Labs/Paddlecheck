@@ -192,8 +192,13 @@ export const THRESHOLDS = {
 
 // WMO weather interpretation codes 50–99 cover drizzle, rain, snow, showers
 // and thunderstorms. Used as the single source of truth for "is it raining?"
-// across both live conditions and the hourly forecast.
-const RAIN_CODES = new Set(Array.from({ length: 50 }, (_, i) => i + 50));
+// across both live conditions and the hourly forecast. Thunderstorms (95–99)
+// are excluded as they are treated separately from rain.
+const RAIN_CODES = new Set(
+  Array.from({ length: 50 }, (_, i) => i + 50).filter(
+    (code) => !THRESHOLDS.THUNDERSTORM_CODES.includes(code)
+  )
+);
 export const isRainy = (weatherCode: number): boolean =>
   RAIN_CODES.has(weatherCode);
 
@@ -210,7 +215,7 @@ export const RAG_DESCRIPTIONS: Record<Status, string> = {
     "Coach's discretion required. Beginners and improvers may only paddle at coach's discretion. Intermediates need supervision by an independent paddler or coach.",
   Red: "Risky conditions. No paddling for beginners or improvers. Intermediates at coach's discretion only (not above 10 steps from car park). PFDs must be worn by all.",
   "No Paddling":
-    "Do not paddle. Triggered by thunderstorm risk or dangerously high river level.",
+    "Do not paddle. Triggered by thunderstorms or dangerously high river level.",
   Unknown: "Data unavailable.",
 };
 
@@ -241,7 +246,7 @@ export const REASON_ICONS: Record<string, React.ElementType> = {
   Dark: NightsStay,
   Foggy: Foggy,
   "River level is dangerously high": Flood,
-  "Risk of thunderstorms": Thunderstorm,
+  Thunderstorms: Thunderstorm,
   "Missing data": HelpOutlined,
   "Could not determine conditions": HelpOutlined,
 };

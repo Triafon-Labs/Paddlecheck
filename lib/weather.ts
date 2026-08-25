@@ -72,6 +72,8 @@ const WMO_WEATHER_CODES: Record<number, string> = {
   86: "Heavy snow showers",
   95: "Thunderstorm",
   96: "Thunderstorm with slight hail",
+  97: "Heavy thunderstorm",
+  98: "Thunderstorm with duststorm",
   99: "Thunderstorm with heavy hail",
 };
 

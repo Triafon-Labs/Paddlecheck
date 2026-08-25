@@ -8,6 +8,7 @@ import {
   Box,
   Skeleton,
   Paper,
+  Chip,
   useTheme,
   ToggleButton,
   Divider,
@@ -86,6 +87,7 @@ const CustomTooltip = ({
 
   if (visible && payload) {
     const data = payload[0].payload as ForecastGraphDataPoint;
+    const statusConfig = ragStatus[data.status] ?? ragStatus.Unknown;
     return (
       <Paper
         ref={paperRef}
@@ -102,7 +104,17 @@ const CustomTooltip = ({
         }}
       >
         <Typography variant="body1">{`${label}`}</Typography>
-        <Typography variant="body2">{`${data.status}`}</Typography>
+        <Box sx={{ my: 0.5 }}>
+          <Chip
+            label={data.status}
+            size="small"
+            sx={{
+              "--chip-bg": statusConfig.color,
+              "--chip-fg": statusConfig.onColor,
+              fontWeight: 600,
+            }}
+          />
+        </Box>
         <Typography variant="body2" color="text.secondary">
           Forecast Level: {formatRiverLevel(data.forecastLevel)}
         </Typography>

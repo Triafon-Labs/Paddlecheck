@@ -178,7 +178,7 @@ const CustomTooltip = ({
       .toString()
       .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
     return (
-      <Paper sx={{ p: 2 }}>
+      <Paper sx={{ p: 2, pointerEvents: "none" }}>
         <Typography variant="body1">{formattedDate}</Typography>
         <Typography variant="body2">{formatRiverLevel(value)}</Typography>
       </Paper>
@@ -432,7 +432,11 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               stroke={theme.palette.text.secondary}
               domain={[0, forecastYDomainMax]}
             />
-            <Tooltip content={CustomTooltip} active={tooltipActive} />
+            <Tooltip
+              content={CustomTooltip}
+              active={tooltipActive}
+              wrapperStyle={{ pointerEvents: "none" }}
+            />
             <ReferenceLine
               x={nowTs}
               stroke={theme.palette.text.disabled}
@@ -501,7 +505,11 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               stroke={theme.palette.text.secondary}
               domain={[0, yDomainMax]}
             />
-            <Tooltip content={CustomTooltip} active={tooltipActive} />
+            <Tooltip
+              content={CustomTooltip}
+              active={tooltipActive}
+              wrapperStyle={{ pointerEvents: "none" }}
+            />
             <Area
               type="monotone"
               dataKey="level"

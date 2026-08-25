@@ -101,6 +101,7 @@ const CustomTooltip = ({
           // browser tab, putting the tooltip back out of reach.
           maxHeight: `calc(100dvh - ${TOOLTIP_VIEWPORT_MARGIN * 2}px)`,
           overflowY: "auto",
+          pointerEvents: "none",
         }}
       >
         <Typography variant="body1">{`${label}`}</Typography>
@@ -405,6 +406,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               // The pinned y is measured against the viewport, not the chart,
               // so recharts must not second-guess it.
               allowEscapeViewBox={{ x: false, y: true }}
+              wrapperStyle={{ pointerEvents: "none" }}
             />
             {sunriseHour && sunrise && (
               <ReferenceLine

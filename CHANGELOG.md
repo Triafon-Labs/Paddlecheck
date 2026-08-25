@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.33.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.0...paddlecheck-v1.33.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **charts:** disable pointer events on graph tooltips to allow smooth sliding ([056d3f5](https://github.com/dylanr97/Paddlecheck/commit/056d3f51415cb46070d87779edfd9b0e96bf6817))
+
 ## [1.33.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.32.2...paddlecheck-v1.33.0) (2026-08-25)
 
 

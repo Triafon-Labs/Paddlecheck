@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.33.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.1...paddlecheck-v1.33.2) (2026-08-29)
+
+
+### Bug Fixes
+
+* **forecast:** make paddling forecast river level line Y-axis adaptive ([a9cd26d](https://github.com/dylanr97/Paddlecheck/commit/a9cd26d036b65ba6610cd5c7bfea2ef05b5cd9d2))
+
 ## [1.33.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.0...paddlecheck-v1.33.1) (2026-08-25)
 
 

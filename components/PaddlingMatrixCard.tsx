@@ -10,6 +10,7 @@ import {
   Stack,
 } from "@mui/material";
 import {
+  SentimentVerySatisfiedOutlined,
   SentimentSatisfiedOutlined,
   SentimentNeutralOutlined,
   SentimentDissatisfiedOutlined,
@@ -59,13 +60,13 @@ const STATUS_UI: Record<
 > = {
   Yes: {
     color: ragStatus["Light Green"].color,
-    icon: SentimentSatisfiedOutlined,
+    icon: SentimentVerySatisfiedOutlined,
     headline: "You can paddle",
     short: "Can paddle",
   },
   Warning: {
     color: ragStatus["Amber"].color,
-    icon: SentimentNeutralOutlined,
+    icon: SentimentSatisfiedOutlined,
     headline: "You can paddle, with caveats",
     short: "With caveats",
   },

@@ -105,9 +105,9 @@ const getPaddlingMatrix = (
 
   switch (overallStatus) {
     case "Light Green":
-      beginner.status = "Yes";
+      beginner.status = "Warning";
       beginner.details = ["Coach supervision and PFD required"];
-      improver.status = "Yes";
+      improver.status = "Warning";
       improver.details = [
         "No coach needed, but paddle with at least one other improver or intermediate (preferably more)",
         "Someone in the group carries a mobile phone",
@@ -127,11 +127,11 @@ const getPaddlingMatrix = (
       independent.details = ["No restrictions"];
       break;
     case "Dark Green":
-      beginner.status = "Yes";
+      beginner.status = "Warning";
       beginner.details = ["Coach supervision and PFD required"];
-      improver.status = "Yes";
+      improver.status = "Warning";
       improver.details = ["Coach supervision and PFD required"];
-      intermediate.status = "Yes";
+      intermediate.status = "Warning";
       intermediate.details = [
         "Pair up with another intermediate, no coach needed",
         "Solo K2 crews must be able to self-rescue",
@@ -148,7 +148,7 @@ const getPaddlingMatrix = (
       beginner.details = ["Coach's discretion only, PFD required"];
       improver.status = "Discretion";
       improver.details = ["Coach's discretion only, PFD required"];
-      intermediate.status = "Yes";
+      intermediate.status = "Discretion";
       // The PFD line stays a bullet of its own here rather than merging into
       // the one above: addHighWaterPfdWarning below rewrites it in place when
       // the river is up, and it can only find it if it stands alone.

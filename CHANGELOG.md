@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.33.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.2...paddlecheck-v1.33.3) (2026-08-29)
+
+
+### Code Refactoring
+
+* **matrix:** align paddler level statuses with individual actionability ([4d9e0a1](https://github.com/dylanr97/Paddlecheck/commit/4d9e0a179706d03194d34b0fd82dd3951ddcf440))
+* **matrix:** align paddler level statuses with individual actionability and sentiment faces ([4b73302](https://github.com/dylanr97/Paddlecheck/commit/4b7330226f3ce8cf95bdb1d33d1806a4b02835aa))
+* **matrix:** align paddler level statuses with individual actionability and sentiment faces ([9c59a87](https://github.com/dylanr97/Paddlecheck/commit/9c59a87763e0bff516c42af1fd8a807e5c83477d))
+
 ## [1.33.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.1...paddlecheck-v1.33.2) (2026-08-29)
 
 

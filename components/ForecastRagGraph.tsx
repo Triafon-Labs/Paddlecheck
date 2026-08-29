@@ -363,8 +363,11 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         ? parseInt(sunset.split("T")[1].split(":")[0], 10)
         : null;
 
+      const maxForecastLevel = Math.max(...data.map((d) => d.forecastLevel));
+      const dayMaxLevel = Math.max(Math.ceil(maxForecastLevel), 1);
+
       const chartData = data.map((d, i) => {
-        const scaled = d.forecastLevel / 6.0;
+        const scaled = d.forecastLevel / dayMaxLevel;
         const isBewdley = d.forecastSource === "bewdley";
         const prevSource = i > 0 ? data[i - 1].forecastSource : null;
         const nextSource =

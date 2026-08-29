@@ -10,9 +10,9 @@ import {
   Stack,
 } from "@mui/material";
 import {
-  CheckCircleOutlined,
-  CancelOutlined,
-  WarningAmberOutlined,
+  SentimentSatisfiedOutlined,
+  SentimentNeutralOutlined,
+  SentimentDissatisfiedOutlined,
   HelpOutlined,
   ExpandMore,
 } from "@mui/icons-material";
@@ -59,25 +59,25 @@ const STATUS_UI: Record<
 > = {
   Yes: {
     color: ragStatus["Light Green"].color,
-    icon: CheckCircleOutlined,
+    icon: SentimentSatisfiedOutlined,
     headline: "You can paddle",
     short: "Can paddle",
   },
   Warning: {
     color: ragStatus["Amber"].color,
-    icon: WarningAmberOutlined,
-    headline: "You can paddle, with care",
-    short: "With care",
+    icon: SentimentNeutralOutlined,
+    headline: "You can paddle, with caveats",
+    short: "With caveats",
   },
   Discretion: {
     color: ragStatus["Amber"].color,
-    icon: WarningAmberOutlined,
+    icon: SentimentNeutralOutlined,
     headline: "Coach's discretion",
     short: "Coach's discretion",
   },
   No: {
     color: ragStatus["Red"].color,
-    icon: CancelOutlined,
+    icon: SentimentDissatisfiedOutlined,
     headline: "You can't paddle today",
     short: "Cannot paddle",
   },

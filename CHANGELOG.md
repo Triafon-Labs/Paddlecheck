@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.33.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.3...paddlecheck-v1.33.4) (2026-08-31)
+
+
+### Code Refactoring
+
+* **briefing:** refine prompt for sentence flow and wind phrasing ([7fd9a97](https://github.com/dylanr97/Paddlecheck/commit/7fd9a97f07e3d137c7b190cb53b27f9bf6f44701))
+
 ## [1.33.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.2...paddlecheck-v1.33.3) (2026-08-29)
 
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.33.5](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.4...paddlecheck-v1.33.5) (2026-08-31)
+
+
+### Bug Fixes
+
+* AGENTS.md ([a66cfa7](https://github.com/dylanr97/Paddlecheck/commit/a66cfa7ffc9fa9b089fea9814968ea53afb1c770))
+
 ## [1.33.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.3...paddlecheck-v1.33.4) (2026-08-31)
 
 

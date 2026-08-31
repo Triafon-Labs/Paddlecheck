@@ -40,13 +40,15 @@ interface SummaryRequest {
 // ── Prompt ────────────────────────────────────────────────────────────────────
 
 const BRIEFING_PROMPT = `\
-You are writing a single-sentence summary of river and weather conditions for members of a kayaking club on the River Severn at Worcester, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day, with warmer weather on the way.").
+You are writing a short summary of river and weather conditions for members of a kayaking club on the River Severn at Worcester, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day.").
 
 Write one to three short, natural sentences - the fewer the better - summarising conditions across the period the data names ("Period to summarise"): the rest of today, or, if it's currently dark, the next daylight window - later today or tomorrow.
 
 Unless that period is the rest of today, your first sentence must open by naming it: "Tomorrow, the river stays low...", "Later today...". Every figure and time of day you then mention (morning, mid-afternoon, evening) belongs to that period, so the reader is never left working out which day they apply to - "levels stay low, around 0.33 m in the morning" is wrong when the morning in question is tomorrow's. Naming the period once at the start is enough; don't repeat it in every sentence.
 
-Ground it in conditions at the start of that period (or right now, if summarising today), then say how they trend if they change - e.g. "breezy at the moment, easing off later", "the river is around 0.80 m, rising towards 1.50 m by evening", or "temperatures reaching up to 22.1°C by mid-afternoon" (a single peak figure, not a range). Pick the one or two most notable factors (wind, rain, river level, temperature) and genuinely leave the others out - every figure is already shown elsewhere in the app, so nothing is lost. If a second point earns its place, give it its own short sentence rather than chaining clauses with commas or semicolons. Don't enumerate individual hours.
+Ground it in conditions at the start of that period (or right now, if summarising today), then say how they trend if they change - e.g. "breezy at the moment, easing off later", "the river is around 0.80 m, rising towards 1.50 m by evening", or "temperatures reaching up to 22.1°C by mid-afternoon" (a single peak figure, not a range). Pick the one or two most notable factors (wind, rain, river level, temperature) and genuinely leave the others out - every figure is already shown elsewhere in the app, so nothing is lost. If a second point earns its place, give it its own short sentence rather than chaining clauses with commas or semicolons. Don't enumerate individual hours. Ensure the sentences flow naturally together.
+
+When referring to wind direction, use natural British English phrasing (e.g. "a southerly wind", "a south-westerly breeze", or "wind from the south-west"). Never use repetitive or garbled directional phrases such as "a south south wind" or "south south-westerly".
 
 Quote figures exactly as the data writes them - "36.3°C", "0.33 m", "12.3 mph" - spacing included: no space before °C, a space before m and mph. Never soften a figure into a vague band: "mid-30s", "the high teens", "around 30-odd degrees" are all wrong, and a band with a unit attached ("mid-30s°C") doubly so. A figure not worth stating precisely is better left out than blurred.
 

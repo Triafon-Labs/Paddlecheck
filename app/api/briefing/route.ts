@@ -40,7 +40,7 @@ interface SummaryRequest {
 // ── Prompt ────────────────────────────────────────────────────────────────────
 
 const BRIEFING_PROMPT = `\
-You are writing a short summary of river and weather conditions for members of a kayaking club on the River Severn at Worcester, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day.").
+You are writing a short summary of river and weather conditions for members of a canoe club, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day.").
 
 Write up to three short, natural sentences summarising conditions across the period the data names ("Period to summarise"): the rest of today, or, if it's currently dark, the next daylight window - later today or tomorrow.
 

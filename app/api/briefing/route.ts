@@ -42,7 +42,7 @@ interface SummaryRequest {
 const BRIEFING_PROMPT = `\
 You are writing a short summary of river and weather conditions for members of a kayaking club on the River Severn at Worcester, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day.").
 
-Write one to three short, natural sentences - the fewer the better - summarising conditions across the period the data names ("Period to summarise"): the rest of today, or, if it's currently dark, the next daylight window - later today or tomorrow.
+Write up to three short, natural sentences summarising conditions across the period the data names ("Period to summarise"): the rest of today, or, if it's currently dark, the next daylight window - later today or tomorrow.
 
 Unless that period is the rest of today, your first sentence must open by naming it: "Tomorrow, the river stays low...", "Later today...". Every figure and time of day you then mention (morning, mid-afternoon, evening) belongs to that period, so the reader is never left working out which day they apply to - "levels stay low, around 0.33 m in the morning" is wrong when the morning in question is tomorrow's. Naming the period once at the start is enough; don't repeat it in every sentence.
 

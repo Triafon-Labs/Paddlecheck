@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.33.6](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.5...paddlecheck-v1.33.6) (2026-08-31)
+
+
+### Bug Fixes
+
+* clarify summary prompt for kayaking conditions ([c63b2a9](https://github.com/dylanr97/Paddlecheck/commit/c63b2a9512310b36c79f60373d52b72cac024f1a))
+
 ## [1.33.5](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.4...paddlecheck-v1.33.5) (2026-08-31)
 
 

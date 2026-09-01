@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.33.9](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.8...paddlecheck-v1.33.9) (2026-09-01)
+
+
+### Bug Fixes
+
+* **build:** align @mui/icons-material version and fix MUI v9 prop error ([bf3d7e3](https://github.com/dylanr97/Paddlecheck/commit/bf3d7e3e4613a1a8a661ee60cf5192dfe014c53c))
+
 ## [1.33.8](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.7...paddlecheck-v1.33.8) (2026-09-01)
 
 ## [1.33.7](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.6...paddlecheck-v1.33.7) (2026-08-31)

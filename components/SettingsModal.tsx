@@ -466,8 +466,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             <Typography
               variant="caption"
               color="text.secondary"
-              display="block"
-              sx={{ mt: 0.5 }}
+              sx={{ display: "block", mt: 0.5 }}
             >
               When off, tap &ldquo;Generate AI Summary&rdquo; inside the status
               card to generate one on demand.

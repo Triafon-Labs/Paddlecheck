@@ -124,7 +124,7 @@ const ChangeIndicator: React.FC<{
         {loading ? (
           <Skeleton variant="text" width={50} height={32} animation="wave" />
         ) : (
-          <Typography variant="h6" component="span">
+          <>
             {rounded !== null ? (
               isFlat ? (
                 <TrendingFlat sx={{ color: "text.secondary", mr: 0.5 }} />
@@ -134,8 +134,10 @@ const ChangeIndicator: React.FC<{
                 <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
               )
             ) : null}
-            {changeStr !== null ? changeStr : "N/A"}
-          </Typography>
+            <Typography variant="h6" component="span">
+              {changeStr !== null ? changeStr : "N/A"}
+            </Typography>
+          </>
         )}
       </Box>
     </Paper>

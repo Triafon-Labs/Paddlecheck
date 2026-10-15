@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.35.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.35.2...paddlecheck-v1.35.3) (2026-10-15)
+
+
+### Bug Fixes
+
+* keep the river level graph's forecast to 24 hours ([dc00844](https://github.com/dylanr97/Paddlecheck/commit/dc008440635ac05c93dc84246f4cb2d9d4b61bf0))
+
 ## [1.35.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.35.1...paddlecheck-v1.35.2) (2026-10-15)
 
 

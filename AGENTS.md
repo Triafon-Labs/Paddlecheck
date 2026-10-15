@@ -14,7 +14,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that provides real-time kayaking conditions on the River Severn. It presents a RAG (Red-Amber-Green) traffic light safety status, detailed weather and river statistics, a skill-level paddling matrix, and a 5-day hourly forecast. There is no database. The browser only talks to the app's own Next.js API routes: `/api/conditions` fetches every upstream source server-side and caches the combined payload for 15 minutes, and `/api/briefing` generates the AI summary.
 
-**Current version:** see `package.json` – it is bumped automatically on every merge to `main` (see CI Pipeline), so it isn't repeated here, where it went stale.
 **Deployed on:** Vercel  
 **Location hardcoded to:** Worcester, UK (lat 52.2, lon -2.2)
 

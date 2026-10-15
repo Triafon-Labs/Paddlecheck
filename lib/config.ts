@@ -82,6 +82,11 @@ export const BEWDLEY_FORECAST_HOURS = 30;
 // line carried on for days invents floods and droughts the river never sees.
 export const LINEAR_FORECAST_HOURS = 18;
 
+// How far ahead the river level graph's forecast view is drawn. Shorter than
+// BEWDLEY_FORECAST_HOURS on purpose: a round day keeps the view tidy, and the
+// paddling forecast still uses the full Bewdley window.
+export const RIVER_GRAPH_FORECAST_HOURS = 24;
+
 export const API_ENDPOINTS = {
   RIVER: `https://environment.data.gov.uk/flood-monitoring/id/stations`,
   WEATHER: `https://api.open-meteo.com/v1/forecast`,

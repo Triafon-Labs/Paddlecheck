@@ -30,7 +30,12 @@ import {
   ReferenceLine,
   LabelList,
 } from "recharts";
-import { DayForecast, ForecastGraphDataPoint, WeatherWarning } from "@/types";
+import {
+  DayForecast,
+  ForecastGraphDataPoint,
+  ForecastSource,
+  WeatherWarning,
+} from "@/types";
 import { ragStatus, describeReason } from "@/lib/rag";
 import { REASON_ICONS, WARNING_COLORS } from "@/lib/config";
 import { formatRiverLevel, formatWindGust } from "@/lib/units";
@@ -55,6 +60,12 @@ import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
+
+const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
+  bewdley: "Source: Bewdley upstream forecast",
+  linear: "Source: Local trend (linear)",
+  held: "Source: None – level held",
+};
 
 // Gap left between the tooltip and the edges of the viewport when it has to
 // be pulled back into view.
@@ -117,12 +128,11 @@ const CustomTooltip = ({
           />
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Forecast Level: {formatRiverLevel(data.forecastLevel)}
+          {data.forecastSource === "held" ? "Assumed" : "Forecast"} Level:{" "}
+          {formatRiverLevel(data.forecastLevel)}
         </Typography>
         <Typography variant="caption" color="text.disabled">
-          {data.forecastSource === "bewdley"
-            ? "Source: Bewdley upstream forecast"
-            : "Source: Local trend (linear)"}
+          {FORECAST_SOURCE_LABELS[data.forecastSource]}
         </Typography>
         {data.reasons && data.reasons.length > 0 && (
           <Box sx={{ mt: 1 }}>
@@ -374,7 +384,10 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         const nextSource =
           i < data.length - 1 ? data[i + 1].forecastSource : null;
         const inBewdleyLine = isBewdley || prevSource === "bewdley";
-        const inLinearLine = !isBewdley || nextSource === "linear";
+        // Held hours get no line at all: they aren't a forecast, and a flat
+        // line would read as one that says the river will stay steady.
+        const inLinearLine =
+          d.forecastSource === "linear" || nextSource === "linear";
         return {
           ...d,
           bewdleyLevel: inBewdleyLine ? scaled : null,

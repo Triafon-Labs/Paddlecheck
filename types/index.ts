@@ -121,13 +121,17 @@ export interface ConditionsApiResponse {
   fetchedAt: string;
 }
 
+// "held" means no forecast covers the hour: the level is the last linear
+// estimate carried forward unchanged.
+export type ForecastSource = "bewdley" | "linear" | "held";
+
 export interface ForecastGraphDataPoint {
   time: string;
   status: Status;
   reasons: string[];
   value: number;
   forecastLevel: number;
-  forecastSource: "bewdley" | "linear";
+  forecastSource: ForecastSource;
   temperature?: number;
   windSpeed?: number;
   windGust?: number;

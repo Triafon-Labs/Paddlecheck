@@ -136,7 +136,7 @@ public/                  Static assets – icons, favicon, sw.js (offline shell)
 | Data                             | API                                                                          | Notes                                        |
 | -------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------- |
 | River level readings             | Environment Agency Flood-Monitoring API – station `2642` (Diglis, Worcester) | Historical readings                          |
-| Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)               | Used for 0–24 h forecast with 6 h travel lag |
+| Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)               | Used for 0–30 h forecast with 6 h travel lag |
 | Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                  | No API key required                          |
 | Weather warnings                 | Met Office warnings RSS, West Midlands region                                | Parsed in `lib/metOfficeWarnings.ts`         |
 
@@ -177,8 +177,9 @@ The word "raises" means incrementing one step up the severity scale.
 
 Two sources are combined transparently:
 
-- **Bewdley delta transfer** (primary, 0–24 h forecast): Upstream Bewdley readings are shifted 6 h forward and applied as a delta to the current Diglis level. Displayed as solid lines in graphs.
-- **Linear regression** (fallback, beyond Bewdley horizon): Uses the last 8 h of Diglis readings to extrapolate a trend. Displayed as dashed lines.
+- **Bewdley delta transfer** (primary, 0–30 h forecast, `BEWDLEY_FORECAST_HOURS`): Upstream Bewdley readings are shifted 6 h forward and applied as a delta to the current Diglis level. Displayed as solid lines in graphs.
+- **Linear regression** (fallback, beyond Bewdley horizon): Uses the last 8 h of Diglis readings to extrapolate a trend, for at most `LINEAR_FORECAST_HOURS` (18 h) after the Bewdley data ends. Displayed as dashed lines.
+- **Held** (everything after that): The level is held flat at the last linear estimate, so the RAG status for those hours is driven by the weather. No line is drawn for these hours, and the tooltip reads "Assumed Level" / "Source: None – level held".
 
 Bewdley data failure is non-fatal – the app falls back to linear regression silently.
 
@@ -260,16 +261,16 @@ prefixed `paddlecheck_` and omitted here.
 
 ## TypeScript Types (`types/index.ts`)
 
-| Type                     | Description                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------------- |
-| `Status`                 | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"`   |
-| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps          |
-| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                               |
-| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"bewdley"` \| `"linear"`) |
-| `RiverReading`           | `{ dateTime: string; value: number }`                                               |
-| `WeatherData`            | Current weather snapshot                                                            |
-| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                        |
-| `PaddlingMatrix`         | Skill level → status mapping with guidance text                                     |
+| Type                     | Description                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `Status`                 | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"`               |
+| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps                      |
+| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                           |
+| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"bewdley"` \| `"linear"` \| `"held"`) |
+| `RiverReading`           | `{ dateTime: string; value: number }`                                                           |
+| `WeatherData`            | Current weather snapshot                                                                        |
+| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                                    |
+| `PaddlingMatrix`         | Skill level → status mapping with guidance text                                                 |
 
 ---
 
@@ -370,14 +371,16 @@ If Git hooks are not firing:
 
 ## Key Configuration Constants (`lib/config.ts`)
 
-| Constant               | Value                  | Meaning                                |
-| ---------------------- | ---------------------- | -------------------------------------- |
-| `DIGLIS_STATION_ID`    | `2642`                 | EA API station for current river level |
-| `BEWDLEY_STATION_ID`   | `2001`                 | Upstream station for forecast          |
-| `BEWDLEY_LAG_HOURS`    | `6`                    | Travel time Bewdley → Worcester        |
-| `RAG_THRESHOLDS`       | `[1.0, 1.4, 2.2, 5.0]` | River level breakpoints (metres)       |
-| `TEMP_HIGH`            | `13°C`                 | Above this: no temperature penalty     |
-| `TEMP_LOW`             | `5°C`                  | Below this: cold water shock risk      |
-| `WIND_THRESHOLD`       | `15` mph               | Above this: wind penalty applied       |
-| `VISIBILITY_THRESHOLD` | `1000` m               | Below this: fog penalty applied        |
-| Coordinates            | `52.2, -2.2`           | Open-Meteo weather location            |
+| Constant                 | Value                  | Meaning                                      |
+| ------------------------ | ---------------------- | -------------------------------------------- |
+| `DIGLIS_STATION_ID`      | `2642`                 | EA API station for current river level       |
+| `BEWDLEY_STATION_ID`     | `2001`                 | Upstream station for forecast                |
+| `BEWDLEY_LAG_HOURS`      | `6`                    | Travel time Bewdley → Worcester              |
+| `BEWDLEY_FORECAST_HOURS` | `30`                   | How far ahead the Bewdley forecast is used   |
+| `LINEAR_FORECAST_HOURS`  | `18`                   | Linear trend after Bewdley; level held after |
+| `RAG_THRESHOLDS`         | `[1.0, 1.4, 2.2, 5.0]` | River level breakpoints (metres)             |
+| `TEMP_HIGH`              | `13°C`                 | Above this: no temperature penalty           |
+| `TEMP_LOW`               | `5°C`                  | Below this: cold water shock risk            |
+| `WIND_THRESHOLD`         | `15` mph               | Above this: wind penalty applied             |
+| `VISIBILITY_THRESHOLD`   | `1000` m               | Below this: fog penalty applied              |
+| Coordinates              | `52.2, -2.2`           | Open-Meteo weather location                  |

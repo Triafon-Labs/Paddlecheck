@@ -73,6 +73,15 @@ export const BEWDLEY_CSV_URL =
   "https://check-for-flooding.service.gov.uk/station-csv/2001";
 export const BEWDLEY_TRAVEL_HOURS = 6;
 
+// How far ahead (at Worcester) the Bewdley-based forecast is used: its ~24h
+// published forecast plus the travel time.
+export const BEWDLEY_FORECAST_HOURS = 30;
+
+// How long the local linear trend is extrapolated once the Bewdley forecast
+// runs out. Past this the level is held flat at the last estimate – a straight
+// line carried on for days invents floods and droughts the river never sees.
+export const LINEAR_FORECAST_HOURS = 18;
+
 export const API_ENDPOINTS = {
   RIVER: `https://environment.data.gov.uk/flood-monitoring/id/stations`,
   WEATHER: `https://api.open-meteo.com/v1/forecast`,

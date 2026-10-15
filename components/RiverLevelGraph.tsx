@@ -346,7 +346,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return Math.max(Math.ceil(Math.max(...allLevels)), 1);
   }, [combinedForecastData]);
 
-  // Every 8 hours across the forecast view's ~38h span, which keeps roughly
+  // Every 8 hours across the forecast view's ~32h span, which keeps roughly
   // the same label density as the 24h historical view. (At the previous 12h
   // spacing the shorter span would only fit two or three labels.)
   const forecastTicks = useMemo(() => {

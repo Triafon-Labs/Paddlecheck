@@ -26,6 +26,7 @@ import {
   DATA_STALE_THRESHOLD_MS,
   BEWDLEY_FORECAST_HOURS,
   LINEAR_FORECAST_HOURS,
+  RIVER_GRAPH_FORECAST_HOURS,
 } from "@/lib/config";
 import { getLondonHHMM, getLondonHour, hhmmOfISO } from "@/lib/time";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
@@ -482,7 +483,10 @@ export const useKayakData = () => {
           });
 
           // Only include Bewdley-backed points in the river level graph forecast
-          if (forecastSource === "bewdley") {
+          if (
+            forecastSource === "bewdley" &&
+            hoursAhead <= RIVER_GRAPH_FORECAST_HOURS
+          ) {
             forecastPoints.push({
               dateTime: futureWeatherData.hourly.time[index],
               level: forecastRiverLevel,

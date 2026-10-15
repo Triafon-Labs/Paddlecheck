@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.35.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.35.0...paddlecheck-v1.35.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* hide forecast gust dot when it matches the bar's status ([2bcbc5b](https://github.com/dylanr97/Paddlecheck/commit/2bcbc5b2438b7974ff7c8cc25d3312d72e085151))
+
 ## [1.35.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.34.0...paddlecheck-v1.35.0) (2026-10-15)
 
 

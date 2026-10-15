@@ -73,6 +73,11 @@ export const BEWDLEY_CSV_URL =
   "https://check-for-flooding.service.gov.uk/station-csv/2001";
 export const BEWDLEY_TRAVEL_HOURS = 6;
 
+// How long the local linear trend is extrapolated once the Bewdley forecast
+// runs out. Past this the level is held flat at the last estimate – a straight
+// line carried on for days invents floods and droughts the river never sees.
+export const LINEAR_FORECAST_HOURS = 24;
+
 export const API_ENDPOINTS = {
   RIVER: `https://environment.data.gov.uk/flood-monitoring/id/stations`,
   WEATHER: `https://api.open-meteo.com/v1/forecast`,

@@ -178,7 +178,8 @@ The word "raises" means incrementing one step up the severity scale.
 Two sources are combined transparently:
 
 - **Bewdley delta transfer** (primary, 0–24 h forecast): Upstream Bewdley readings are shifted 6 h forward and applied as a delta to the current Diglis level. Displayed as solid lines in graphs.
-- **Linear regression** (fallback, beyond Bewdley horizon): Uses the last 8 h of Diglis readings to extrapolate a trend. Displayed as dashed lines.
+- **Linear regression** (fallback, beyond Bewdley horizon): Uses the last 8 h of Diglis readings to extrapolate a trend, for at most `LINEAR_FORECAST_HOURS` (24 h) after the Bewdley data ends. Displayed as dashed lines.
+- **Held** (everything after that): The level is held flat at the last linear estimate, so the RAG status for those hours is driven by the weather. No line is drawn for these hours, and the tooltip reads "Assumed Level" / "Source: None – level held".
 
 Bewdley data failure is non-fatal – the app falls back to linear regression silently.
 
@@ -260,16 +261,16 @@ prefixed `paddlecheck_` and omitted here.
 
 ## TypeScript Types (`types/index.ts`)
 
-| Type                     | Description                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------------- |
-| `Status`                 | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"`   |
-| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps          |
-| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                               |
-| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"bewdley"` \| `"linear"`) |
-| `RiverReading`           | `{ dateTime: string; value: number }`                                               |
-| `WeatherData`            | Current weather snapshot                                                            |
-| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                        |
-| `PaddlingMatrix`         | Skill level → status mapping with guidance text                                     |
+| Type                     | Description                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `Status`                 | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"`               |
+| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps                      |
+| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                           |
+| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"bewdley"` \| `"linear"` \| `"held"`) |
+| `RiverReading`           | `{ dateTime: string; value: number }`                                                           |
+| `WeatherData`            | Current weather snapshot                                                                        |
+| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                                    |
+| `PaddlingMatrix`         | Skill level → status mapping with guidance text                                                 |
 
 ---
 

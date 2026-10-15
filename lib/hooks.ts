@@ -7,6 +7,7 @@ import {
   FutureWeatherData,
   RiverDataResult,
   ConditionsApiResponse,
+  ForecastSource,
 } from "@/types";
 import {
   calculateFinalRagStatus,
@@ -19,7 +20,12 @@ import {
 } from "@/lib/rag";
 import { forecastRiverLevel, getBewdleyBasedWorcesterLevel } from "@/lib/river";
 import { getVisibilityDescription, getWeatherDescription } from "@/lib/weather";
-import { isRainy, TIME_PERIODS, DATA_STALE_THRESHOLD_MS } from "@/lib/config";
+import {
+  isRainy,
+  TIME_PERIODS,
+  DATA_STALE_THRESHOLD_MS,
+  LINEAR_FORECAST_HOURS,
+} from "@/lib/config";
 import { getLondonHHMM, getLondonHour, hhmmOfISO } from "@/lib/time";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 
@@ -403,23 +409,32 @@ export const useKayakData = () => {
                 )
               : null;
 
-          const forecastSource: "bewdley" | "linear" =
-            bewdleyLevel !== null ? "bewdley" : "linear";
-
+          let forecastSource: ForecastSource;
           let forecastRiverLevel: number;
           if (bewdleyLevel !== null) {
+            forecastSource = "bewdley";
             forecastRiverLevel = bewdleyLevel;
             lastBewdleyForecast = bewdleyLevel;
             transitionHoursAhead = hoursAhead;
           } else {
             // Anchor linear regression to the last Bewdley-forecasted level so
-            // there's no jump at the transition point.
+            // there's no jump at the transition point. The trend only runs for
+            // LINEAR_FORECAST_HOURS; after that the level is held where the
+            // trend left it rather than extrapolated for days.
             const baseLevel =
               lastBewdleyForecast ?? (riverData.latestLevel || 0);
             const baseHours = transitionHoursAhead ?? 0;
+            const linearHours = Math.min(
+              hoursAhead - baseHours,
+              LINEAR_FORECAST_HOURS
+            );
+            forecastSource =
+              hoursAhead - baseHours > LINEAR_FORECAST_HOURS
+                ? "held"
+                : "linear";
             forecastRiverLevel = Math.max(
               0,
-              baseLevel + worcesterSlopePerHour * (hoursAhead - baseHours)
+              baseLevel + worcesterSlopePerHour * linearHours
             );
           }
 

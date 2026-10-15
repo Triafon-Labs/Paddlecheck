@@ -12,9 +12,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project Overview
 
-Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that provides real-time kayaking conditions on the River Severn. It presents a RAG (Red-Amber-Green) traffic light safety status, detailed weather and river statistics, a skill-level paddling matrix, and a 5-day hourly forecast. There is no backend – all data is fetched client-side from public APIs, with some proxying through Next.js API routes.
+Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that provides real-time kayaking conditions on the River Severn. It presents a RAG (Red-Amber-Green) traffic light safety status, detailed weather and river statistics, a skill-level paddling matrix, and a 5-day hourly forecast. There is no database. The browser only talks to the app's own Next.js API routes: `/api/conditions` fetches every upstream source server-side and caches the combined payload for 15 minutes, and `/api/briefing` generates the AI summary.
 
-**Current version:** 1.16.7
+**Current version:** see `package.json` – it is bumped automatically on every merge to `main` (see CI Pipeline), so it isn't repeated here, where it went stale.
 **Deployed on:** Vercel  
 **Location hardcoded to:** Worcester, UK (lat 52.2, lon -2.2)
 
@@ -65,37 +65,51 @@ plugin or build step generates it.
 ```
 app/
   api/
-    briefing/           AI briefing generation endpoint
-    river/              EA API proxy
-    weather/            Open-Meteo API proxy
-  layout.tsx            Root layout – ThemeRegistry, Analytics
+    conditions/         All upstream data in one payload, cached 15 min (lib/conditions.ts)
+      live/             Same payload with no cache – called when the cached one is stale
+    briefing/           AI briefing generation endpoint (Groq)
+    weather/warnings/   Met Office warnings on their own – nothing in the app calls it
+  layout.tsx            Root layout – Roboto Flex, ThemeRegistry, data provider, Analytics, safe-area frame
   page.tsx              Home page (client component, renders all cards)
-  globals.css           Global resets and Roboto Flex font
+  globals.css           Global resets only; type and colour come from the theme
   manifest.ts           PWA web manifest
 
 components/
-  StatusCard.tsx         Current RAG status + reasons + traffic light
+  StatusCard.tsx         Current RAG status, contributing factors, warnings, AI overview
+  PaddlingStatusHero.tsx The status panel and five-step scale strip at the top of StatusCard
   PaddlingMatrixCard.tsx Skill-level guidance table (Beginner/Improver/Intermediate/Independent)
   StatsCard.tsx          Numeric stats – river level, temp, wind, visibility, launch notes
-  RiverLevelGraph.tsx    Historical + forecasted river levels (Recharts)
+  RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart)
-  TopNavBar.tsx          Header – share, settings, refresh buttons
+  TopNavBar.tsx          Header – share, settings, refresh, freshness line, status banners
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
-  TrafficLight.tsx       4-circle RAG visual indicator with animation
-  ThemeRegistry.tsx      Emotion cache + AppThemeProvider for SSR
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners
+  InfoPanel.tsx          Shared tonal "icon + text" panel, optionally a button
+  SlidingToggleButtonGroup.tsx  Segmented control with a sliding pill
+  ThemeRegistry.tsx      Emotion cache + AppThemeProvider for SSR
   ServiceWorkerRegistration.tsx  Registers public/sw.js in production
 
 lib/
   config.ts              All thresholds, station IDs, descriptions, coordinates
+  conditions.ts          Builds the /api/conditions payload – every source in parallel
+  fetchCache.ts          The shared 15-minute upstream cache window
   rag.ts                 RAG status calculation logic
   river.ts               Environment Agency API calls + Bewdley forecast logic
   weather.ts             Open-Meteo API calls + utilities
+  metOfficeWarnings.ts   Met Office warnings RSS fetch and parsing
+  warnings.ts            Warning display and per-day helpers
+  forecast.ts            Best-paddling-time windows and forecast summaries
   hooks.ts               useKayakData hook – orchestrates all fetching and state
   KayakDataContext.tsx   React Context wrapping the hook for component tree access
+  useBriefing.ts         AI briefing request and state
+  units.ts               How each metric is formatted for display
+  time.ts                Europe/London time helpers and data-age formatting
+  storageKeys.ts         Canonical localStorage key names
+  useTooltipDismiss.ts   Closes a recharts tooltip on an outside press
+  statusColors.ts        The status colour vocabulary
   ThemeContext.tsx       Wraps MUI's colour-scheme provider/hook (light/dark/system)
-  m3-palette.ts          Material Design 3 colour palettes
+  m3-palette.ts          Material Design 3 colour palettes + motion tokens
   themes.ts              One MUI theme carrying both schemes as CSS variables
 
 types/
@@ -125,8 +139,13 @@ public/                  Static assets – icons, favicon, sw.js (offline shell)
 | River level readings             | Environment Agency Flood-Monitoring API – station `2642` (Diglis, Worcester) | Historical readings                          |
 | Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)               | Used for 0–24 h forecast with 6 h travel lag |
 | Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                  | No API key required                          |
+| Weather warnings                 | Met Office warnings RSS, West Midlands region                                | Parsed in `lib/metOfficeWarnings.ts`         |
 
-There are no environment variables required for local development.
+All of these are fetched server-side by `lib/conditions.ts` for `/api/conditions`; the
+browser never calls them directly.
+
+No environment variables are required for local development, except `GROQ_API_KEY` for
+the AI briefing, which is the one feature that won't work without it.
 
 ---
 

@@ -5,6 +5,7 @@ import {
   TIME_PERIODS,
   BEWDLEY_CSV_URL,
   BEWDLEY_TRAVEL_HOURS,
+  BEWDLEY_FORECAST_HOURS,
 } from "@/lib/config";
 import { FetchLiveness, fetchCacheOptions } from "@/lib/fetchCache";
 
@@ -15,7 +16,8 @@ export interface BewdleyForecastPoint {
 
 /**
  * Fetches the upstream Bewdley river level forecast and observations.
- * The forecast is limited to 24 hours ahead from the current time.
+ * Forecast points are kept only as far ahead as they can reach Worcester
+ * within BEWDLEY_FORECAST_HOURS, after the travel time.
  */
 export const fetchBewdleyForecast = async (
   liveness: FetchLiveness = {}
@@ -34,8 +36,9 @@ export const fetchBewdleyForecast = async (
   const observations: BewdleyForecastPoint[] = [];
 
   const now = new Date();
-  const twentyFourHoursAhead = new Date(
-    now.getTime() + TIME_PERIODS.TWENTY_FOUR_HOURS
+  const forecastCutoff = new Date(
+    now.getTime() +
+      (BEWDLEY_FORECAST_HOURS - BEWDLEY_TRAVEL_HOURS) * TIME_PERIODS.ONE_HOUR
   );
 
   // Skip header row (index 0)
@@ -55,8 +58,7 @@ export const fetchBewdleyForecast = async (
     if (isNaN(level) || isNaN(timestamp.getTime())) continue;
 
     if (type === "forecast") {
-      // Only retrieve up to 24 hours ahead
-      if (timestamp <= twentyFourHoursAhead) {
+      if (timestamp <= forecastCutoff) {
         forecasts.push({ timestamp, level });
       }
     } else if (type === "observed") {

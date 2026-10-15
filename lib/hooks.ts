@@ -24,6 +24,7 @@ import {
   isRainy,
   TIME_PERIODS,
   DATA_STALE_THRESHOLD_MS,
+  BEWDLEY_FORECAST_HOURS,
   LINEAR_FORECAST_HOURS,
 } from "@/lib/config";
 import { getLondonHHMM, getLondonHour, hhmmOfISO } from "@/lib/time";
@@ -399,7 +400,8 @@ export const useKayakData = () => {
           );
 
           const bewdleyLevel =
-            bewdleyData.currentLevel !== null && hoursAhead <= 24
+            bewdleyData.currentLevel !== null &&
+            hoursAhead <= BEWDLEY_FORECAST_HOURS
               ? getBewdleyBasedWorcesterLevel(
                   riverData.latestLevel ?? 0,
                   bewdleyData.forecasts,

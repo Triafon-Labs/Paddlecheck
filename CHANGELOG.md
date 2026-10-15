@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.35.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.35.1...paddlecheck-v1.35.2) (2026-10-15)
+
+
+### Bug Fixes
+
+* hold forecast river level flat after 24h of linear trend ([384abf4](https://github.com/dylanr97/Paddlecheck/commit/384abf4d98d22e6d8244f9cb37723ecdab660140))
+* use 30h of Bewdley forecast, then 18h of linear trend ([fe953c7](https://github.com/dylanr97/Paddlecheck/commit/fe953c7abf6a9a423d7ada6fb3097cbb955bd004))
+
 ## [1.35.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.35.0...paddlecheck-v1.35.1) (2026-10-15)
 
 

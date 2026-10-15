@@ -74,7 +74,7 @@ app/
   manifest.ts           PWA web manifest
 
 components/
-  StatusCard.tsx         Current RAG status, contributing factors, warnings, AI overview
+  StatusCard.tsx         Current RAG status, contributing factors, warnings, conditions report
   PaddlingStatusHero.tsx The status panel and five-step scale strip at the top of StatusCard
   PaddlingMatrixCard.tsx Skill-level guidance table (Beginner/Improver/Intermediate/Independent)
   StatsCard.tsx          Numeric stats – river level, temp, wind, visibility, launch notes

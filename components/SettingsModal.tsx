@@ -452,7 +452,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             <Divider sx={{ my: 2 }} />
 
             <Typography variant="h6" gutterBottom>
-              AI Summary
+              Conditions Report
             </Typography>
             <FormControlLabel
               control={
@@ -461,15 +461,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   onChange={handleAutoSummariseChange}
                 />
               }
-              label="Auto-summarise conditions on load"
+              label="Show the conditions report on load"
             />
             <Typography
               variant="caption"
               color="text.secondary"
               sx={{ display: "block", mt: 0.5 }}
             >
-              When off, tap &ldquo;Generate AI Summary&rdquo; inside the status
-              card to generate one on demand.
+              When off, tap &ldquo;Show Conditions Report&rdquo; inside the
+              status card to get one on demand.
             </Typography>
           </Box>
         </Box>

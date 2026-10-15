@@ -67,6 +67,13 @@ export const useKayakData = () => {
   // True for the full duration of any fetch attempt - initial, background,
   // or manual refresh - mirrored by loading/forecastLoading below.
   const [isRefreshing, setIsRefreshing] = useState(false);
+  // Whether the data on screen was already past DATA_STALE_THRESHOLD_MS when
+  // the last fetch finished - i.e. a refresh was tried and couldn't get
+  // anything newer, through the conditions API, the forced live fetch or the
+  // caches. Data that only goes stale later, because nothing has fetched
+  // since (there is no background poll), leaves this false. The nav bar
+  // needs the difference: only the first is a failed update.
+  const [lastFetchStale, setLastFetchStale] = useState(false);
   const isOfflineRef = useRef(false);
   // Tracks whether conditions/forecast data has ever been populated, so that
   // *while offline* a fetch attempt (which can't succeed anyway) doesn't
@@ -551,6 +558,10 @@ export const useKayakData = () => {
       );
     } finally {
       fetchInFlightRef.current = false;
+      setLastFetchStale(
+        lastFetchedAtRef.current > 0 &&
+          Date.now() - lastFetchedAtRef.current > DATA_STALE_THRESHOLD_MS
+      );
       setLoading(false);
       setForecastLoading(false);
       setIsRefreshing(false);
@@ -604,6 +615,7 @@ export const useKayakData = () => {
     error,
     isOffline,
     isRefreshing,
+    lastFetchStale,
     refetch: fetchData,
   };
 };

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.35.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.34.0...paddlecheck-v1.35.0) (2026-10-15)
+
+
+### Features
+
+* show a skeleton while the conditions report loads ([89fd179](https://github.com/dylanr97/Paddlecheck/commit/89fd179486f25ed43e77e50fb66ab6815f2a3aaa))
+
 ## [1.34.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.13...paddlecheck-v1.34.0) (2026-10-15)
 
 

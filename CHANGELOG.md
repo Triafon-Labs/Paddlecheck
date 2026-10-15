@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.34.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.13...paddlecheck-v1.34.0) (2026-10-15)
+
+
+### Features
+
+* rename AI Overview to Briefing and drop AI wording from the UI ([1c530f7](https://github.com/dylanr97/Paddlecheck/commit/1c530f742907c156054bc0c9a52984c425ce5acf))
+* rename Briefing to Conditions Report ([cb54c3b](https://github.com/dylanr97/Paddlecheck/commit/cb54c3b3a5afbd4ddd325add1c1d27683f30395f))
+
+
+### Bug Fixes
+
+* stop calling aged data a failed update ([2816ed1](https://github.com/dylanr97/Paddlecheck/commit/2816ed1e2050fdddf7e2218d79d14cab395e8f7c))
+
+
+### Performance Improvements
+
+* stop downloading the 1.25MB favicon.svg three times per visit ([9c82fdc](https://github.com/dylanr97/Paddlecheck/commit/9c82fdcefffa45b3e5ec325c7c7cc276b11dc166))
+
+
+### Documentation
+
+* bring AGENTS.md's overview, directory map and sources up to date ([a17de5b](https://github.com/dylanr97/Paddlecheck/commit/a17de5ba842376d7e8e36d678d4fa4dfbf9cceb5))
+* describe how useKayakData actually fetches ([09326bd](https://github.com/dylanr97/Paddlecheck/commit/09326bdca8b0198f7f9c1e48eca5c529014d442d))
+* drop the version line from AGENTS.md ([25a4e4d](https://github.com/dylanr97/Paddlecheck/commit/25a4e4db711a95e2b3340b19eb3a30d46706f311))
+
 ## [1.33.13](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.12...paddlecheck-v1.33.13) (2026-09-16)
 
 ## [1.33.12](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.33.11...paddlecheck-v1.33.12) (2026-09-05)

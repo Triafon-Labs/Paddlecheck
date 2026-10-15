@@ -190,11 +190,23 @@ Bewdley data failure is non-fatal – the app falls back to linear regression si
 }
 ```
 
-River, weather and future-weather are fetched independently (`Promise.all` with each
-promise wrapped in its own `.then/.catch`), each falling back to its own last-known
-cached value (`paddlecheck_riverDataRaw` / `paddlecheck_weatherDataRaw` /
-`paddlecheck_futureWeatherDataRaw` in `localStorage`) on failure. This means a single
-source blipping doesn't discard data that arrived fine from the others.
+The hook makes one request, `GET /api/conditions`, retried up to twice with backoff.
+That route builds its payload server-side in `lib/conditions.ts`: river, weather,
+future-weather, the Bewdley forecast and Met Office warnings are fetched in parallel
+(`Promise.all`, each promise wrapped in its own `.catch`), and the whole response is
+cached for 15 minutes (`revalidate = 900`) with `fetchedAt` stamped when it was built.
+If the request fails, or its `fetchedAt` is older than `DATA_STALE_THRESHOLD_MS`, the
+hook makes one forced call to `/api/conditions/live`, which runs the same fetch with no
+cache.
+
+A source that failed server-side comes back `null` (Bewdley as an empty forecast,
+warnings as `[]`), and the hook falls back to its own last-known copy of just that
+source (`paddlecheck_riverDataRaw` / `paddlecheck_weatherDataRaw` /
+`paddlecheck_futureWeatherDataRaw` in `localStorage`); if the whole request fails, all
+three fall back. So a single source blipping doesn't discard data that arrived fine
+from the others. Bewdley and warnings have no client cache. `lastUpdated` is the
+response's `fetchedAt`, or the previous cached conditions' timestamp when no response
+arrived at all.
 
 `loading` / `forecastLoading` intentionally show a spinner for _every_ online fetch –
 initial load, background refetch, manual refresh alike – so the spinner disappearing is

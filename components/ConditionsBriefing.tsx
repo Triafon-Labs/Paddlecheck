@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Typography, Fade } from "@mui/material";
+import { Box, Typography, Fade, Skeleton } from "@mui/material";
 import NotesIcon from "@mui/icons-material/Notes";
 import { KayakConditions } from "@/types";
 import InfoPanel from "./InfoPanel";
@@ -61,8 +61,9 @@ export default function ConditionsBriefing({
 
   // A failed summary is a retry control, so it takes the same whole-panel
   // button as the untriggered state rather than hanging a "Try again?" link
-  // off the end of a sentence.
-  if (failed) {
+  // off the end of a sentence. A stream that finished empty is a failure
+  // too, or the skeleton below would hold forever.
+  if (failed || (!loading && !text.trim())) {
     return (
       <InfoPanel onClick={trigger} ariaLabel="Retry conditions report">
         <NotesIcon fontSize="small" sx={{ color: "primary.main" }} />
@@ -73,35 +74,32 @@ export default function ConditionsBriefing({
     );
   }
 
+  // The reply streams in, but it is held back until it is complete and then
+  // faded in whole: a "Thinking…" label and words typing themselves out behind
+  // a cursor read as a chatbot, where a skeleton reads as any other content
+  // loading. The skeleton matches the two or three lines the report runs to.
   return (
     <InfoPanel align="flex-start">
       <NotesIcon fontSize="small" sx={{ color: "primary.main", mt: "2px" }} />
-      <Fade in appear {...springTransition(m3Spring.effectsDefault)}>
-        <Typography variant="body2" sx={{ lineHeight: 1.65 }}>
-          {loading && !text.trim() ? (
-            <Box
-              component="span"
-              sx={{
-                fontStyle: "italic",
-                animation: "thinking 2s ease-in-out infinite",
-                "@keyframes thinking": {
-                  "0%, 100%": { opacity: 0.15 },
-                  "50%": { opacity: 0.65 },
-                },
-              }}
-            >
-              Thinking…
-            </Box>
-          ) : (
-            text
-          )}
-          {loading && text.trim() && (
-            <Box component="span" sx={{ opacity: 0.35 }}>
-              ▋
-            </Box>
-          )}
-        </Typography>
-      </Fade>
+      {!loading ? (
+        <Fade in appear {...springTransition(m3Spring.effectsDefault)}>
+          <Typography variant="body2" sx={{ lineHeight: 1.65 }}>
+            {text}
+          </Typography>
+        </Fade>
+      ) : (
+        <Box
+          role="status"
+          aria-label="Loading conditions report"
+          sx={{ flex: 1, minWidth: 0 }}
+        >
+          {["100%", "100%", "60%"].map((width, i) => (
+            <Typography key={i} variant="body2" sx={{ lineHeight: 1.65 }}>
+              <Skeleton variant="text" width={width} animation="wave" />
+            </Typography>
+          ))}
+        </Box>
+      )}
     </InfoPanel>
   );
 }

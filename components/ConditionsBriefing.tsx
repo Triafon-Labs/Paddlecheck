@@ -50,10 +50,10 @@ export default function ConditionsBriefing({
   // wasn't the control.
   if (!triggered) {
     return (
-      <InfoPanel onClick={trigger} ariaLabel="Show briefing">
+      <InfoPanel onClick={trigger} ariaLabel="Show conditions report">
         <NotesIcon fontSize="small" sx={{ color: "primary.main" }} />
         <Typography variant="body2" color="text.secondary">
-          Show Briefing
+          Show Conditions Report
         </Typography>
       </InfoPanel>
     );
@@ -64,10 +64,10 @@ export default function ConditionsBriefing({
   // off the end of a sentence.
   if (failed) {
     return (
-      <InfoPanel onClick={trigger} ariaLabel="Retry briefing">
+      <InfoPanel onClick={trigger} ariaLabel="Retry conditions report">
         <NotesIcon fontSize="small" sx={{ color: "primary.main" }} />
         <Typography variant="body2" color="text.secondary">
-          Briefing unavailable. Try again?
+          Conditions report unavailable. Try again?
         </Typography>
       </InfoPanel>
     );

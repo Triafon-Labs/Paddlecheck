@@ -184,7 +184,7 @@ Bewdley data failure is non-fatal – the app falls back to linear regression si
   forecastLoading: boolean  // same, for the forecast section specifically
   error: string | null      // set only when there's truly nothing to show (no cache fallback)
   isOffline: boolean
-  usingCachedData: boolean  // true when the latest fetch fell back to cache for any source
+  lastFetchStale: boolean   // the data was already stale when the last fetch finished
   isRefreshing: boolean     // mirrors loading; true for the full duration of any online fetch
   refetch: () => void
 }
@@ -203,6 +203,12 @@ cache. The one exception is being fully offline with a cache already loaded: the
 fetch that can succeed to wait on, so the cache displays immediately and the "Offline –
 showing cached data" banner (`TopNavBar`) communicates that it isn't live, instead of
 spinning forever.
+
+There is no background poll. Past `DATA_STALE_THRESHOLD_MS`, the banner above the app
+bar distinguishes a failed update from data that has simply aged: "Live update failed"
+only when `lastFetchStale` says the last fetch itself couldn't get anything newer, and
+"Showing data from … – refresh for the latest" when the page has just been left open
+since a successful fetch.
 
 `KayakDataContext.tsx` wraps this hook in React Context so all components can access it without prop drilling.
 

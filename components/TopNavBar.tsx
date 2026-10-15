@@ -155,8 +155,15 @@ const TopNavBar = () => {
   const scrolled = useScrollTrigger({ disableHysteresis: true, threshold: 8 });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const { refetch, conditions, forecastDays, isOffline, error, isRefreshing } =
-    useKayakContext();
+  const {
+    refetch,
+    conditions,
+    forecastDays,
+    isOffline,
+    error,
+    isRefreshing,
+    lastFetchStale,
+  } = useKayakContext();
 
   const isOfflineError = error === OFFLINE_NO_CACHE_ERROR;
 
@@ -228,16 +235,21 @@ const TopNavBar = () => {
       </Collapse>
       {/* A stale cache is normally self-healed by a live re-fetch on load (see
           useKayakData), so this only fires once that attempt has actually
-          finished and genuinely couldn't get fresh data - not while one may
-          still be in flight. */}
+          finished - not while one may still be in flight. Stale data means
+          one of two things, worded differently: the last fetch couldn't get
+          anything newer (a failed update), or nothing has fetched since the
+          data aged past the threshold - there is no background poll, so a
+          page left open on screen gets here without anything failing, and
+          "Live update failed" would claim a failure that never happened. */}
       <Collapse
         in={!isOffline && !isOfflineError && !isRefreshing && isStale}
         unmountOnExit
         {...collapseMotion}
       >
         <StatusBanner severity="warning">
-          Live update failed
-          {freshnessText ? ` – showing data from ${freshnessText}` : ""}
+          {lastFetchStale
+            ? `Live update failed${freshnessText ? ` – showing data from ${freshnessText}` : ""}`
+            : `Showing data from ${freshnessText} – refresh for the latest`}
         </StatusBanner>
       </Collapse>
       <Collapse in={isOfflineError} unmountOnExit {...collapseMotion}>

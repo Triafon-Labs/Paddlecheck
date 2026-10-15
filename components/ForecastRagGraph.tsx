@@ -276,8 +276,9 @@ const BarLabel = (props: BarLabelProps) => {
 
   // Heads-up dot for a notable gust - coloured by the status that gust would
   // imply if it were sustained wind. Sits above any No Paddling icon so the
-  // two never overlap.
-  if (entry.gustStatus) {
+  // two never overlap. Skipped when the gust wouldn't change the status: a
+  // dot the same colour as the bar beneath it says nothing.
+  if (entry.gustStatus && entry.gustStatus !== entry.status) {
     elements.push(
       <foreignObject
         key="gust-dot"

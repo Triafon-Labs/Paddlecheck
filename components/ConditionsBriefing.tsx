@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Box, Typography, Fade } from "@mui/material";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import NotesIcon from "@mui/icons-material/Notes";
 import { KayakConditions } from "@/types";
 import InfoPanel from "./InfoPanel";
 import { useKayakContext } from "@/lib/KayakDataContext";
@@ -50,10 +50,10 @@ export default function ConditionsBriefing({
   // wasn't the control.
   if (!triggered) {
     return (
-      <InfoPanel onClick={trigger} ariaLabel="Generate AI summary">
-        <AutoAwesomeIcon fontSize="small" sx={{ color: "primary.main" }} />
+      <InfoPanel onClick={trigger} ariaLabel="Show briefing">
+        <NotesIcon fontSize="small" sx={{ color: "primary.main" }} />
         <Typography variant="body2" color="text.secondary">
-          Generate AI Summary
+          Show Briefing
         </Typography>
       </InfoPanel>
     );
@@ -64,10 +64,10 @@ export default function ConditionsBriefing({
   // off the end of a sentence.
   if (failed) {
     return (
-      <InfoPanel onClick={trigger} ariaLabel="Retry AI summary">
-        <AutoAwesomeIcon fontSize="small" sx={{ color: "primary.main" }} />
+      <InfoPanel onClick={trigger} ariaLabel="Retry briefing">
+        <NotesIcon fontSize="small" sx={{ color: "primary.main" }} />
         <Typography variant="body2" color="text.secondary">
-          Summary unavailable. Try again?
+          Briefing unavailable. Try again?
         </Typography>
       </InfoPanel>
     );
@@ -75,10 +75,7 @@ export default function ConditionsBriefing({
 
   return (
     <InfoPanel align="flex-start">
-      <AutoAwesomeIcon
-        fontSize="small"
-        sx={{ color: "primary.main", mt: "2px" }}
-      />
+      <NotesIcon fontSize="small" sx={{ color: "primary.main", mt: "2px" }} />
       <Fade in appear {...springTransition(m3Spring.effectsDefault)}>
         <Typography variant="body2" sx={{ lineHeight: 1.65 }}>
           {loading && !text.trim() ? (

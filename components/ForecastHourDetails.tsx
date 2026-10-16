@@ -4,16 +4,18 @@ import React, { useRef } from "react";
 import { Box, Chip, IconButton, Skeleton, Typography } from "@mui/material";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
-import Air from "@mui/icons-material/Air";
-import WaterDrop from "@mui/icons-material/WaterDrop";
-import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import WbSunny from "@mui/icons-material/WbSunny";
 import NightsStay from "@mui/icons-material/NightsStay";
 import { ForecastGraphDataPoint, ForecastSource } from "@/types";
-import { ragStatus, describeReason } from "@/lib/rag";
-import { REASON_ICONS } from "@/lib/config";
-import { formatRiverLevel, formatWindGust } from "@/lib/units";
+import { ragStatus } from "@/lib/rag";
+import { formatRiverLevel } from "@/lib/units";
 import { hhmmOfISO, isDarkHour, minutesOfISO } from "@/lib/time";
+import {
+  ContributingFactors,
+  BeAware,
+  BeAwareItem,
+  beAwareItemsFor,
+} from "./ConditionFactors";
 
 const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
   bewdley: "Bewdley upstream forecast",
@@ -24,10 +26,6 @@ const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
 // A horizontal drag this far across the panel steps one hour. Anything
 // shorter, or more vertical than horizontal, is left as a tap or a scroll.
 const SWIPE_THRESHOLD_PX = 40;
-
-// One row of small chips, so the panel keeps its height while scrubbing
-// between an hour with no factors and one with a single row of them.
-const CHIP_ROW_MIN_HEIGHT = 24;
 
 // How far ahead of sunset the panel starts counting down to it - about a
 // club session's length, so it's there when choosing when to start without
@@ -98,18 +96,23 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
     hour > 0 &&
     !isDarkHour(hour, sunrise, sunset) &&
     isDarkHour(hour - 1, sunrise, sunset);
-  const sunEvent =
+  const sunEvent: BeAwareItem | null =
     sunrise && isFirstLightHour
-      ? { label: `Sunrise at ${hhmmOfISO(sunrise)}`, Icon: WbSunny }
+      ? { key: "sun", Icon: WbSunny, text: `Sunrise at ${hhmmOfISO(sunrise)}` }
       : sunset &&
           minutesToSunset !== null &&
           minutesToSunset > 0 &&
           minutesToSunset <= SUNSET_COUNTDOWN_MINUTES
         ? {
-            label: `Sunset at ${hhmmOfISO(sunset)} (${formatDuration(minutesToSunset)} away)`,
+            key: "sun",
             Icon: NightsStay,
+            text: `Sunset at ${hhmmOfISO(sunset)} (${formatDuration(minutesToSunset)} away)`,
           }
         : null;
+  const beAwareItems = [
+    ...beAwareItemsFor(point),
+    ...(sunEvent ? [sunEvent] : []),
+  ];
   const timeLabel = `${dayLabel} ${padHour(point.time)}`;
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -204,80 +207,14 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
         </Typography>
       </Typography>
 
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: 0.75,
-          mt: 1,
-          minHeight: CHIP_ROW_MIN_HEIGHT,
-        }}
-      >
-        {point.reasons.map((reason) => {
-          const Icon = REASON_ICONS[reason];
-          return (
-            <Chip
-              key={reason}
-              size="small"
-              icon={Icon ? <Icon fontSize="small" /> : undefined}
-              label={describeReason(reason, {
-                temperature: point.temperature,
-                windSpeed: point.windSpeed,
-              })}
-            />
-          );
-        })}
-        {/* "Be aware" items aren't part of the status, so they're outlined
-            to read as a side note rather than another contributing factor. */}
-        {point.gustStatus && (
-          <Chip
-            size="small"
-            variant="outlined"
-            icon={<Air fontSize="small" />}
-            label={
-              <Box
-                component="span"
-                sx={{ display: "flex", alignItems: "center" }}
-              >
-                Gusts up to {formatWindGust(point.windGust!)}
-                <FiberManualRecord
-                  titleAccess={`Would be ${point.gustStatus} if sustained`}
-                  sx={{
-                    fontSize: 8,
-                    color: ragStatus[point.gustStatus].color,
-                    ml: 0.75,
-                  }}
-                />
-              </Box>
-            }
-          />
-        )}
-        {point.rainWhileWarm && (
-          <Chip
-            size="small"
-            variant="outlined"
-            icon={<WaterDrop fontSize="small" />}
-            label={point.weatherDescription || "Rain"}
-          />
-        )}
-        {sunEvent && (
-          <Chip
-            size="small"
-            variant="outlined"
-            icon={<sunEvent.Icon fontSize="small" />}
-            label={sunEvent.label}
-          />
-        )}
-        {point.reasons.length === 0 &&
-          !point.gustStatus &&
-          !point.rainWhileWarm &&
-          !sunEvent && (
-            <Typography variant="caption" color="text.secondary">
-              No contributing factors
-            </Typography>
-          )}
-      </Box>
+      {point.reasons.length > 0 && (
+        <ContributingFactors
+          reasons={point.reasons}
+          temperature={point.temperature}
+          windSpeed={point.windSpeed}
+        />
+      )}
+      {beAwareItems.length > 0 && <BeAware items={beAwareItems} />}
     </Box>
   );
 };

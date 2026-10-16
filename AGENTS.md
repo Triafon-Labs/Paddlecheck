@@ -86,6 +86,7 @@ components/
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners
   InfoPanel.tsx          Shared tonal "icon + text" panel, optionally a button
+  ConditionFactors.tsx   "Contributing Factors" / "Be Aware" sections, shared by StatusCard and the forecast panel
   SlidingToggleButtonGroup.tsx  Segmented control with a sliding pill
   ThemeRegistry.tsx      Emotion cache + AppThemeProvider for SSR
   ServiceWorkerRegistration.tsx  Registers public/sw.js in production

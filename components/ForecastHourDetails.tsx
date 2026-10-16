@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Card,
@@ -17,6 +17,7 @@ import { ForecastGraphDataPoint, ForecastSource } from "@/types";
 import { ragStatus } from "@/lib/rag";
 import { formatRiverLevel } from "@/lib/units";
 import { hhmmOfISO, minutesOfISO } from "@/lib/time";
+import { m3Duration, m3Easing } from "@/lib/m3-palette";
 import {
   ContributingFactors,
   BeAware,
@@ -250,13 +251,16 @@ interface ForecastHourBodiesProps extends StepProps {
 // The picked hour's details, as a card that continues the forecast card above
 // it - flush, same surface, square top corners - so the two read as one.
 //
-// Every other shown hour of the forecast is laid out in the same grid cell as
-// an invisible copy. The cell is therefore always as tall as the busiest hour,
-// so the page never changes height - shifting the chart and the step buttons
-// under the reader's thumb - as they step through hours or days. Each copy is
-// top-aligned at its own height, so the visible card hugs the picked hour and
-// the space the others reserve shows as page background below it. Picked by
-// identity: the same "H:00" recurs on every day.
+// Every shown hour of the forecast is also laid out, invisibly, in the same
+// grid cell. The cell is therefore always as tall as the busiest hour, so the
+// page never changes height - shifting the chart and the step buttons under
+// the reader's thumb - as they step through hours or days, and the space the
+// quieter hours leave shows as page background below the card.
+//
+// The visible card sits on top, sized to the picked hour's invisible copy and
+// easing to each new hour's height. It clips its content while it does, so a
+// taller hour's text never spills out past a card still growing to fit it.
+// Copies are picked by identity: the same "H:00" recurs on every day.
 export const ForecastHourBodies: React.FC<ForecastHourBodiesProps> = ({
   point,
   hours,
@@ -267,6 +271,22 @@ export const ForecastHourBodies: React.FC<ForecastHourBodiesProps> = ({
   const rows = hours.some((h) => h.point === point)
     ? hours
     : [{ point, sunset }];
+  const pickedIndex = rows.findIndex((h) => h.point === point);
+  const picked = rows[pickedIndex];
+
+  const copyRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [height, setHeight] = useState<number | null>(null);
+
+  // Follows the picked copy's height, including when it reflows (a rotated
+  // phone, a refetch). The first measurement lands on a card already at its
+  // natural height, so nothing animates on load.
+  useEffect(() => {
+    const copy = copyRefs.current[pickedIndex];
+    if (!copy) return;
+    const observer = new ResizeObserver(() => setHeight(copy.offsetHeight));
+    observer.observe(copy);
+    return () => observer.disconnect();
+  }, [pickedIndex, rows.length]);
 
   return (
     <Box
@@ -275,26 +295,34 @@ export const ForecastHourBodies: React.FC<ForecastHourBodiesProps> = ({
       // fractional device pixel ratios.
       sx={{ ...swipeSx, display: "grid", mt: "-1px" }}
     >
-      {rows.map((h, index) => {
-        const picked = h.point === point;
-        return (
-          <Card
-            key={index}
-            aria-hidden={!picked}
-            sx={{
-              gridArea: "1 / 1",
-              alignSelf: "start",
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: 0,
-              visibility: picked ? "visible" : "hidden",
-            }}
-          >
-            <CardContent sx={{ pt: 0 }}>
-              <HourBody point={h.point} sunset={h.sunset} />
-            </CardContent>
-          </Card>
-        );
-      })}
+      {rows.map((h, index) => (
+        <Box
+          key={index}
+          ref={(el: HTMLDivElement | null) => {
+            copyRefs.current[index] = el;
+          }}
+          aria-hidden
+          sx={{ gridArea: "1 / 1", alignSelf: "start", visibility: "hidden" }}
+        >
+          <CardContent sx={{ pt: 0 }}>
+            <HourBody point={h.point} sunset={h.sunset} />
+          </CardContent>
+        </Box>
+      ))}
+      <Card
+        sx={{
+          gridArea: "1 / 1",
+          alignSelf: "start",
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
+          height: height ?? "auto",
+          transition: `height ${m3Duration.medium1}ms ${m3Easing.standard}`,
+        }}
+      >
+        <CardContent sx={{ pt: 0 }}>
+          <HourBody point={picked.point} sunset={picked.sunset} />
+        </CardContent>
+      </Card>
     </Box>
   );
 };

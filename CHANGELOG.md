@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.36.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.36.0...paddlecheck-v1.36.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* drop the stray dot on the forecast chart's river level line ([50ca778](https://github.com/dylanr97/Paddlecheck/commit/50ca77817cc6897ce04b08f7e6721f170215f29c))
+
 ## [1.36.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.35.3...paddlecheck-v1.36.0) (2026-10-16)
 
 

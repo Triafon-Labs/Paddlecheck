@@ -44,8 +44,9 @@ const padHour = (time: string) => time.padStart(5, "0");
 
 interface ForecastHourDetailsProps {
   point: ForecastGraphDataPoint | null;
-  // The picked day's shown hours, which set the panel's height.
-  hours: ForecastGraphDataPoint[];
+  // Every shown hour across the forecast, each with its own day's sunset,
+  // which together set the panel's height.
+  hours: { point: ForecastGraphDataPoint; sunset: string | null }[];
   dayLabel: string;
   // The day's sunset, counted down to over the hours before it.
   sunset: string | null;
@@ -220,23 +221,27 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
         </IconButton>
       </Box>
 
-      {/* Every hour of the day is laid out in the same grid cell, with only
-          the picked one visible, so the panel is always as tall as the
-          day's busiest hour and doesn't change height - shifting the page
-          under the reader's thumb - while they step through it. */}
+      {/* Every shown hour of the forecast is laid out in the same grid cell,
+          with only the picked one visible, so the panel is always as tall
+          as the busiest hour and never changes height - shifting the page
+          under the reader's thumb - as they step through hours or days.
+          Picked by identity: the same "H:00" recurs on every day. */}
       <Box sx={{ display: "grid" }}>
-        {(hours.includes(point) ? hours : [point]).map((h) => {
-          const picked = h.time === point.time;
+        {(hours.some((h) => h.point === point)
+          ? hours
+          : [{ point, sunset }]
+        ).map((h, index) => {
+          const picked = h.point === point;
           return (
             <Box
-              key={h.time}
+              key={index}
               aria-hidden={!picked}
               sx={{
                 gridArea: "1 / 1",
                 visibility: picked ? "visible" : "hidden",
               }}
             >
-              <HourBody point={h} sunset={sunset} />
+              <HourBody point={h.point} sunset={h.sunset} />
             </Box>
           );
         })}

@@ -224,6 +224,11 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
 
   const currentDay = forecastDays?.[selectedDay] ?? null;
   const data = currentDay ? visibleHours(currentDay) : null;
+  // Every shown hour of all five days, which the details panel sizes itself
+  // to so it keeps one height whichever hour or day is picked.
+  const allShownHours = (forecastDays ?? []).flatMap((day) =>
+    visibleHours(day).map((point) => ({ point, sunset: day.sunset }))
+  );
   // What the chart draws: the shown hours, plus the hidden sunrise/sunset
   // hours as empty slots for their markers to sit in.
   const chartRows: ChartRow[] | null = currentDay
@@ -625,7 +630,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         {(loading || selectedPoint) && (
           <ForecastHourDetails
             point={selectedPoint}
-            hours={data ?? []}
+            hours={allShownHours}
             dayLabel={currentDay?.label ?? ""}
             sunset={currentDay?.sunset ?? null}
             loading={loading}

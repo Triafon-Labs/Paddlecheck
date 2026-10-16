@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Box, Chip, IconButton, Skeleton, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  IconButton,
+  Skeleton,
+  Typography,
+} from "@mui/material";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import NightsStay from "@mui/icons-material/NightsStay";
@@ -41,21 +49,6 @@ const formatDuration = (minutes: number) => {
 
 // "9:00" -> "09:00", to match every other time the app shows.
 const padHour = (time: string) => time.padStart(5, "0");
-
-interface ForecastHourDetailsProps {
-  point: ForecastGraphDataPoint | null;
-  // Every shown hour across the forecast, each with its own day's sunset,
-  // which together set the panel's height.
-  hours: { point: ForecastGraphDataPoint; sunset: string | null }[];
-  dayLabel: string;
-  // The day's sunset, counted down to over the hours before it.
-  sunset: string | null;
-  loading?: boolean;
-  onPrev: () => void;
-  onNext: () => void;
-  canPrev: boolean;
-  canNext: boolean;
-}
 
 // Sunset is counted down over the hours leading up to it, measured from the
 // start of the hour, for planning when to get off the water. Sunrise gets
@@ -117,21 +110,65 @@ const HourBody: React.FC<{
   );
 };
 
-// The always-visible read-out under the forecast chart, for the hour picked
-// on it. It replaces a floating tooltip, which on a phone sat under the
-// finger doing the picking and vanished as soon as the finger lifted.
-const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
-  point,
-  hours,
-  dayLabel,
-  sunset,
-  loading,
-  onPrev,
-  onNext,
-  canPrev,
-  canNext,
-}) => {
+interface StepProps {
+  onPrev: () => void;
+  onNext: () => void;
+  canPrev: boolean;
+  canNext: boolean;
+}
+
+// A horizontal swipe across the header or the details steps one hour.
+const useSwipeStep = ({ onPrev, onNext, canPrev, canNext }: StepProps) => {
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  return {
+    onPointerDown: (e: React.PointerEvent) => {
+      // A drag that starts on the hour buttons isn't a swipe: the button's
+      // own click would fire as well and step a second hour.
+      if ((e.target as HTMLElement).closest("button")) {
+        swipeStart.current = null;
+        return;
+      }
+      swipeStart.current = { x: e.clientX, y: e.clientY };
+    },
+    onPointerUp: (e: React.PointerEvent) => {
+      const start = swipeStart.current;
+      swipeStart.current = null;
+      if (!start) return;
+      const dx = e.clientX - start.x;
+      const dy = e.clientY - start.y;
+      if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) < Math.abs(dy)) {
+        return;
+      }
+      // Swiping left brings the later hour in, as with any carousel.
+      if (dx < 0 && canNext) onNext();
+      if (dx > 0 && canPrev) onPrev();
+    },
+    onPointerCancel: () => {
+      swipeStart.current = null;
+    },
+  };
+};
+
+// Vertical drags still scroll the page; horizontal ones are the swipe.
+const swipeSx = { touchAction: "pan-y" } as const;
+
+interface ForecastHourHeaderProps extends StepProps {
+  point: ForecastGraphDataPoint | null;
+  dayLabel: string;
+  loading?: boolean;
+}
+
+// The picked hour's "‹ Sat 14:00 [status] ›" row, under the forecast chart.
+// The hour's details follow in ForecastHourBodies. Together they replace a
+// floating tooltip, which on a phone sat under the finger doing the picking
+// and vanished as soon as the finger lifted.
+export const ForecastHourHeader: React.FC<ForecastHourHeaderProps> = ({
+  point,
+  dayLabel,
+  loading,
+  ...step
+}) => {
+  const swipe = useSwipeStep(step);
 
   if (loading || !point) {
     return (
@@ -146,108 +183,118 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   const statusConfig = ragStatus[point.status] ?? ragStatus.Unknown;
   const timeLabel = `${dayLabel} ${padHour(point.time)}`;
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    // A drag that starts on the hour buttons isn't a swipe: the button's own
-    // click would fire as well and step a second hour.
-    if ((e.target as HTMLElement).closest("button")) {
-      swipeStart.current = null;
-      return;
-    }
-    swipeStart.current = { x: e.clientX, y: e.clientY };
-  };
-  const handlePointerUp = (e: React.PointerEvent) => {
-    const start = swipeStart.current;
-    swipeStart.current = null;
-    if (!start) return;
-    const dx = e.clientX - start.x;
-    const dy = e.clientY - start.y;
-    if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) < Math.abs(dy)) {
-      return;
-    }
-    // Swiping left brings the later hour in, as with any carousel.
-    if (dx < 0 && canNext) onNext();
-    if (dx > 0 && canPrev) onPrev();
-  };
-
   return (
     <Box
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={() => (swipeStart.current = null)}
-      // Vertical drags still scroll the page; horizontal ones are the swipe.
-      sx={{ mt: 2, touchAction: "pan-y" }}
+      {...swipe}
+      sx={{
+        ...swipeSx,
+        mt: 2,
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+      }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <IconButton
-          onClick={onPrev}
-          disabled={!canPrev}
-          aria-label="Previous hour"
-          edge="start"
-        >
-          <ChevronLeft />
-        </IconButton>
-        <Box
-          aria-live="polite"
+      <IconButton
+        onClick={step.onPrev}
+        disabled={!step.canPrev}
+        aria-label="Previous hour"
+        edge="start"
+      >
+        <ChevronLeft />
+      </IconButton>
+      <Box
+        aria-live="polite"
+        sx={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 1,
+          flexWrap: "wrap",
+          minWidth: 0,
+        }}
+      >
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          {timeLabel}
+        </Typography>
+        <Chip
+          label={point.status}
+          size="small"
           sx={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 1,
-            flexWrap: "wrap",
-            minWidth: 0,
+            "--chip-bg": statusConfig.color,
+            "--chip-fg": statusConfig.onColor,
+            fontWeight: 600,
           }}
-        >
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            {timeLabel}
-          </Typography>
-          <Chip
-            label={point.status}
-            size="small"
-            sx={{
-              "--chip-bg": statusConfig.color,
-              "--chip-fg": statusConfig.onColor,
-              fontWeight: 600,
-            }}
-          />
-        </Box>
-        <IconButton
-          onClick={onNext}
-          disabled={!canNext}
-          aria-label="Next hour"
-          edge="end"
-        >
-          <ChevronRight />
-        </IconButton>
+        />
       </Box>
-
-      {/* Every shown hour of the forecast is laid out in the same grid cell,
-          with only the picked one visible, so the panel is always as tall
-          as the busiest hour and never changes height - shifting the page
-          under the reader's thumb - as they step through hours or days.
-          Picked by identity: the same "H:00" recurs on every day. */}
-      <Box sx={{ display: "grid" }}>
-        {(hours.some((h) => h.point === point)
-          ? hours
-          : [{ point, sunset }]
-        ).map((h, index) => {
-          const picked = h.point === point;
-          return (
-            <Box
-              key={index}
-              aria-hidden={!picked}
-              sx={{
-                gridArea: "1 / 1",
-                visibility: picked ? "visible" : "hidden",
-              }}
-            >
-              <HourBody point={h.point} sunset={h.sunset} />
-            </Box>
-          );
-        })}
-      </Box>
+      <IconButton
+        onClick={step.onNext}
+        disabled={!step.canNext}
+        aria-label="Next hour"
+        edge="end"
+      >
+        <ChevronRight />
+      </IconButton>
     </Box>
   );
 };
 
-export default ForecastHourDetails;
+interface ForecastHourBodiesProps extends StepProps {
+  point: ForecastGraphDataPoint;
+  // Every shown hour across the forecast, each with its own day's sunset.
+  hours: { point: ForecastGraphDataPoint; sunset: string | null }[];
+  // The picked hour's own day's sunset, for when it isn't among `hours`.
+  sunset: string | null;
+}
+
+// The picked hour's details, as a card that continues the forecast card above
+// it - flush, same surface, square top corners - so the two read as one.
+//
+// Every other shown hour of the forecast is laid out in the same grid cell as
+// an invisible copy. The cell is therefore always as tall as the busiest hour,
+// so the page never changes height - shifting the chart and the step buttons
+// under the reader's thumb - as they step through hours or days. Each copy is
+// top-aligned at its own height, so the visible card hugs the picked hour and
+// the space the others reserve shows as page background below it. Picked by
+// identity: the same "H:00" recurs on every day.
+export const ForecastHourBodies: React.FC<ForecastHourBodiesProps> = ({
+  point,
+  hours,
+  sunset,
+  ...step
+}) => {
+  const swipe = useSwipeStep(step);
+  const rows = hours.some((h) => h.point === point)
+    ? hours
+    : [{ point, sunset }];
+
+  return (
+    <Box
+      {...swipe}
+      // Overlaps the card above by a pixel so no seam shows between them at
+      // fractional device pixel ratios.
+      sx={{ ...swipeSx, display: "grid", mt: "-1px" }}
+    >
+      {rows.map((h, index) => {
+        const picked = h.point === point;
+        return (
+          <Card
+            key={index}
+            aria-hidden={!picked}
+            sx={{
+              gridArea: "1 / 1",
+              alignSelf: "start",
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+              visibility: picked ? "visible" : "hidden",
+            }}
+          >
+            <CardContent sx={{ pt: 0 }}>
+              <HourBody point={h.point} sunset={h.sunset} />
+            </CardContent>
+          </Card>
+        );
+      })}
+    </Box>
+  );
+};

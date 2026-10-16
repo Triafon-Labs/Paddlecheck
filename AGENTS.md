@@ -80,7 +80,7 @@ components/
   StatsCard.tsx          Numeric stats – river level, temp, wind, visibility, launch notes
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
-  ForecastHourDetails.tsx The picked forecast hour's details, with prev/next hour stepping
+  ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below
   TopNavBar.tsx          Header – share, settings, refresh, freshness line, status banners
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)

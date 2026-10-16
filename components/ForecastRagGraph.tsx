@@ -39,7 +39,7 @@ import { springTransition } from "@/lib/m3-palette";
 import { hourOfISO, isDarkHour } from "@/lib/time";
 import { useShowNightHours } from "@/lib/useShowNightHours";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
-import ForecastHourDetails from "./ForecastHourDetails";
+import { ForecastHourHeader, ForecastHourBodies } from "./ForecastHourDetails";
 
 interface ForecastRagGraphProps {
   forecastDays: DayForecast[] | null;
@@ -312,6 +312,14 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
     if (time !== selectedPoint?.time) setSelectedTime(time);
   };
 
+  const stepProps = {
+    onPrev: () => step(prevStep),
+    onNext: () => step(nextStep),
+    canPrev: prevStep !== null,
+    canNext: nextStep !== null,
+  };
+  const showDetails = !loading && selectedPoint !== null;
+
   const handleChartKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") step(prevStep);
     else if (e.key === "ArrowRight") step(nextStep);
@@ -515,133 +523,153 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   };
 
   return (
-    <Card sx={{ width: "100%" }}>
-      <CardContent>
-        <Typography variant="h5" component="div">
-          Paddling Forecast
-        </Typography>
-        {loading ? (
-          <Box sx={{ pt: 2, pb: 2, display: "flex", gap: 1 }}>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton
-                key={i}
-                variant="rounded"
-                height={40.5}
-                animation="wave"
-                sx={{ flex: 1 }}
-              />
-            ))}
-          </Box>
-        ) : (
-          forecastDays &&
-          forecastDays.length > 0 && (
-            <Box sx={{ pt: 2, pb: 2 }}>
-              <SlidingToggleButtonGroup
-                value={selectedDay}
-                exclusive
-                onChange={(_, val) => {
-                  if (val !== null) selectDay(val);
-                }}
-                fullWidth
-                size="small"
-              >
-                {forecastDays.map((day, i) => (
-                  <ToggleButton key={i} value={i}>
-                    {day.label}
-                  </ToggleButton>
-                ))}
-              </SlidingToggleButtonGroup>
+    // With an hour picked, the card's bottom edge is handed to the details
+    // card that continues it (ForecastHourBodies), so this one squares off
+    // its bottom corners and drops its bottom padding to meet it flush.
+    <Box sx={{ width: "100%" }}>
+      <Card
+        sx={
+          showDetails
+            ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }
+            : undefined
+        }
+      >
+        <CardContent
+          sx={showDetails ? { pb: 0, "&:last-child": { pb: 0 } } : undefined}
+        >
+          <Typography variant="h5" component="div">
+            Paddling Forecast
+          </Typography>
+          {loading ? (
+            <Box sx={{ pt: 2, pb: 2, display: "flex", gap: 1 }}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  variant="rounded"
+                  height={40.5}
+                  animation="wave"
+                  sx={{ flex: 1 }}
+                />
+              ))}
             </Box>
-          )
-        )}
+          ) : (
+            forecastDays &&
+            forecastDays.length > 0 && (
+              <Box sx={{ pt: 2, pb: 2 }}>
+                <SlidingToggleButtonGroup
+                  value={selectedDay}
+                  exclusive
+                  onChange={(_, val) => {
+                    if (val !== null) selectDay(val);
+                  }}
+                  fullWidth
+                  size="small"
+                >
+                  {forecastDays.map((day, i) => (
+                    <ToggleButton key={i} value={i}>
+                      {day.label}
+                    </ToggleButton>
+                  ))}
+                </SlidingToggleButtonGroup>
+              </Box>
+            )
+          )}
 
-        {/* Daily warnings display – moved above chart */}
-        <Collapse in={dailyWarnings.length > 0} unmountOnExit>
-          <Box sx={{ mb: 2 }}>
-            <Stack spacing={1}>
-              {Object.entries(
-                dailyWarnings.reduce(
-                  (acc, w) => {
-                    if (!acc[w.headline]) acc[w.headline] = [];
-                    acc[w.headline].push(w);
-                    return acc;
-                  },
-                  {} as Record<string, WeatherWarning[]>
-                )
-              ).map(([headline, warnings], i) => {
-                const firstWarning = warnings[0];
-                const color =
-                  firstWarning.severity === "Red"
-                    ? WARNING_COLORS.Red
-                    : firstWarning.severity === "Amber"
-                      ? WARNING_COLORS.Amber
-                      : WARNING_COLORS.Yellow;
-                return (
-                  <Box key={i}>
-                    <Box
-                      sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}
-                    >
-                      <WarningIcon sx={{ color, fontSize: 16, mt: 0.2 }} />
-                      <Box sx={{ flex: 1 }}>
-                        <Typography
-                          variant="caption"
-                          sx={{ fontWeight: "bold", display: "block" }}
-                        >
-                          {headline}
-                        </Typography>
-                        {warnings.map((w, wIdx) => (
-                          <Box
-                            key={wIdx}
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
+          {/* Daily warnings display – moved above chart */}
+          <Collapse in={dailyWarnings.length > 0} unmountOnExit>
+            <Box sx={{ mb: 2 }}>
+              <Stack spacing={1}>
+                {Object.entries(
+                  dailyWarnings.reduce(
+                    (acc, w) => {
+                      if (!acc[w.headline]) acc[w.headline] = [];
+                      acc[w.headline].push(w);
+                      return acc;
+                    },
+                    {} as Record<string, WeatherWarning[]>
+                  )
+                ).map(([headline, warnings], i) => {
+                  const firstWarning = warnings[0];
+                  const color =
+                    firstWarning.severity === "Red"
+                      ? WARNING_COLORS.Red
+                      : firstWarning.severity === "Amber"
+                        ? WARNING_COLORS.Amber
+                        : WARNING_COLORS.Yellow;
+                  return (
+                    <Box key={i}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 1,
+                        }}
+                      >
+                        <WarningIcon sx={{ color, fontSize: 16, mt: 0.2 }} />
+                        <Box sx={{ flex: 1 }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ fontWeight: "bold", display: "block" }}
                           >
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
+                            {headline}
+                          </Typography>
+                          {warnings.map((w, wIdx) => (
+                            <Box
+                              key={wIdx}
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
                             >
-                              {formatWarningTime(w.validFromISO, w.validFrom)}–
-                              {formatWarningTime(w.validToISO, w.validTo)}
-                            </Typography>
-                            <Link
-                              href={w.link}
-                              target="_blank"
-                              rel="noopener"
-                              variant="caption"
-                              sx={{ fontWeight: 700 }}
-                            >
-                              UK Met Office
-                            </Link>
-                          </Box>
-                        ))}
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {formatWarningTime(w.validFromISO, w.validFrom)}
+                                –{formatWarningTime(w.validToISO, w.validTo)}
+                              </Typography>
+                              <Link
+                                href={w.link}
+                                target="_blank"
+                                rel="noopener"
+                                variant="caption"
+                                sx={{ fontWeight: 700 }}
+                              >
+                                UK Met Office
+                              </Link>
+                            </Box>
+                          ))}
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                );
-              })}
-            </Stack>
-            <Divider sx={{ mt: 1.5 }} />
-          </Box>
-        </Collapse>
+                  );
+                })}
+              </Stack>
+              <Divider sx={{ mt: 1.5 }} />
+            </Box>
+          </Collapse>
 
-        {renderChart()}
-        {(loading || selectedPoint) && (
-          <ForecastHourDetails
-            point={selectedPoint}
-            hours={allShownHours}
-            dayLabel={currentDay?.label ?? ""}
-            sunset={currentDay?.sunset ?? null}
-            loading={loading}
-            onPrev={() => step(prevStep)}
-            onNext={() => step(nextStep)}
-            canPrev={prevStep !== null}
-            canNext={nextStep !== null}
-          />
-        )}
-      </CardContent>
-    </Card>
+          {renderChart()}
+          {(loading || selectedPoint) && (
+            <ForecastHourHeader
+              point={selectedPoint}
+              dayLabel={currentDay?.label ?? ""}
+              loading={loading}
+              {...stepProps}
+            />
+          )}
+        </CardContent>
+      </Card>
+      {showDetails && selectedPoint && (
+        <ForecastHourBodies
+          point={selectedPoint}
+          hours={allShownHours}
+          sunset={currentDay?.sunset ?? null}
+          {...stepProps}
+        />
+      )}
+    </Box>
   );
 };
 

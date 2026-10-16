@@ -257,6 +257,7 @@ prefixed `paddlecheck_` and omitted here.
 | `paddlerLevel`        | `"Beginner"` \| `"Improver"` \| `"Intermediate"` \| `"Independent"` |
 | `riverGraphTimeRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`               |
 | `autoSummarise`       | `"true"` \| `"false"` – auto-generate the AI summary on load        |
+| `forecastShowNight`   | `"true"` \| `"false"` – show night hours in the forecast chart      |
 
 ---
 

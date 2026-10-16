@@ -3,6 +3,7 @@ export const STORAGE_KEYS = {
   AUTO_SUMMARISE: "autoSummarise",
   PADDLER_LEVEL: "paddlerLevel",
   RIVER_GRAPH_TIME_RANGE: "riverGraphTimeRange",
+  FORECAST_SHOW_NIGHT: "forecastShowNight",
   CONDITIONS: "paddlecheck_conditions",
   FORECAST_DAYS: "paddlecheck_forecastDays",
   FORECAST_DATA: "paddlecheck_forecastData",

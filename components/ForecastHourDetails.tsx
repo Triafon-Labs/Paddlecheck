@@ -32,7 +32,7 @@ const CHIP_ROW_MIN_HEIGHT = 24;
 // How far ahead of sunset the panel starts counting down to it - about a
 // club session's length, so it's there when choosing when to start without
 // turning up on most of the afternoon.
-const SUNSET_COUNTDOWN_MINUTES = 3 * 60;
+const SUNSET_COUNTDOWN_MINUTES = 2 * 60;
 
 // 70 -> "1 h 10 min", 60 -> "1 h", 10 -> "10 min".
 const formatDuration = (minutes: number) => {

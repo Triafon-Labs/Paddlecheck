@@ -13,11 +13,13 @@ import {
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import NightsStay from "@mui/icons-material/NightsStay";
+import Water from "@mui/icons-material/Water";
 import { ForecastGraphDataPoint, ForecastSource } from "@/types";
 import { ragStatus } from "@/lib/rag";
 import { formatRiverLevel } from "@/lib/units";
 import { hhmmOfISO, minutesOfISO } from "@/lib/time";
 import { m3Duration, m3Easing } from "@/lib/m3-palette";
+import InfoPanel from "./InfoPanel";
 import {
   ContributingFactors,
   BeAware,
@@ -83,22 +85,26 @@ const HourBody: React.FC<{
   ];
   return (
     <>
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ textAlign: "center" }}
-      >
-        {point.forecastSource === "held" ? "Assumed" : "Forecast"} level{" "}
-        {formatRiverLevel(point.forecastLevel)}
-        <Typography
-          component="span"
-          variant="caption"
-          color="text.disabled"
-          sx={{ ml: 1 }}
-        >
-          {FORECAST_SOURCE_LABELS[point.forecastSource]}
+      {/* Laid out like the factor sections below it - heading, then an
+          InfoPanel - with where the level comes from trailing on the right. */}
+      <Box sx={{ mt: 2 }}>
+        <Typography variant="subtitle2" color="text.secondary">
+          River Level
         </Typography>
-      </Typography>
+        <InfoPanel sx={{ mt: 1 }}>
+          <Water fontSize="small" sx={{ color: "primary.main" }} />
+          <Typography variant="body2">
+            {formatRiverLevel(point.forecastLevel)}
+          </Typography>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ ml: "auto", textAlign: "right" }}
+          >
+            {FORECAST_SOURCE_LABELS[point.forecastSource]}
+          </Typography>
+        </InfoPanel>
+      </Box>
       {point.reasons.length > 0 && (
         <ContributingFactors
           reasons={point.reasons}

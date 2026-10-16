@@ -13,7 +13,7 @@ import { ForecastGraphDataPoint, ForecastSource } from "@/types";
 import { ragStatus, describeReason } from "@/lib/rag";
 import { REASON_ICONS } from "@/lib/config";
 import { formatRiverLevel, formatWindGust } from "@/lib/units";
-import { hhmmOfISO, hourOfISO } from "@/lib/time";
+import { hhmmOfISO, hourOfISO, minutesOfISO } from "@/lib/time";
 
 const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
   bewdley: "Bewdley upstream forecast",
@@ -28,6 +28,19 @@ const SWIPE_THRESHOLD_PX = 40;
 // One row of small chips, so the panel keeps its height while scrubbing
 // between an hour with no factors and one with a single row of them.
 const CHIP_ROW_MIN_HEIGHT = 24;
+
+// How far ahead of sunset the panel starts counting down to it - about a
+// club session's length, so it's there when choosing when to start without
+// turning up on most of the afternoon.
+const SUNSET_COUNTDOWN_MINUTES = 3 * 60;
+
+// 70 -> "1 h 10 min", 60 -> "1 h", 10 -> "10 min".
+const formatDuration = (minutes: number) => {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m} min`;
+  return m === 0 ? `${h} h` : `${h} h ${m} min`;
+};
 
 // "9:00" -> "09:00", to match every other time the app shows.
 const padHour = (time: string) => time.padStart(5, "0");
@@ -75,12 +88,23 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   // The hours the sun rises or sets in count as daylight in the status (see
   // isDarkHour), so the exact time is called out here instead and the
   // paddler can judge how much of the hour they'd have light for.
+  // Sunset is also counted down over the hours leading up to it, measured
+  // from the start of the picked hour, for planning when to get on the water.
   const hour = parseInt(point.time, 10);
+  const sunsetMinutes = minutesOfISO(sunset);
+  const minutesToSunset =
+    sunsetMinutes !== null ? sunsetMinutes - hour * 60 : null;
   const sunEvent =
     sunrise && hourOfISO(sunrise) === hour
       ? { label: `Sunrise at ${hhmmOfISO(sunrise)}`, Icon: WbSunny }
-      : sunset && hourOfISO(sunset) === hour
-        ? { label: `Sunset at ${hhmmOfISO(sunset)}`, Icon: NightsStay }
+      : sunset &&
+          minutesToSunset !== null &&
+          minutesToSunset > 0 &&
+          minutesToSunset <= SUNSET_COUNTDOWN_MINUTES
+        ? {
+            label: `Sunset at ${hhmmOfISO(sunset)} (${formatDuration(minutesToSunset)} away)`,
+            Icon: NightsStay,
+          }
         : null;
   const timeLabel = `${dayLabel} ${padHour(point.time)}`;
 

@@ -78,6 +78,14 @@ export const getLondonHour = (date: Date = new Date()): number =>
 export const hhmmOfISO = (iso: string): string | null =>
   iso.split("T")[1]?.slice(0, 5) ?? null;
 
+// Minutes past midnight of an ISO "YYYY-MM-DDTHH:MM" time.
+export const minutesOfISO = (iso: string | null): number | null => {
+  const hhmm = iso ? hhmmOfISO(iso) : null;
+  if (!hhmm) return null;
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+};
+
 export const hourOfISO = (iso: string | null): number | null => {
   const hhmm = iso ? hhmmOfISO(iso) : null;
   return hhmm ? parseInt(hhmm.slice(0, 2), 10) : null;

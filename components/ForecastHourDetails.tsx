@@ -30,10 +30,11 @@ import {
   beAwareItemsFor,
 } from "./ConditionFactors";
 
+// Where the hour's level comes from, shown in brackets after "River Level".
 const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
-  bewdley: "Bewdley upstream forecast",
-  linear: "Local trend (linear)",
-  held: "No forecast – level held",
+  bewdley: "upstream forecast",
+  linear: "local trend",
+  held: "held – no forecast",
 };
 
 // A horizontal drag this far across the panel steps one hour. Anything
@@ -94,15 +95,14 @@ const HourBody: React.FC<{
       {/* Laid out like the factor sections below it - heading, then an
           InfoPanel - with where the level comes from trailing on the right. */}
       <Box sx={compactSize.sectionSx}>
-        <FactorHeading compact>River Level</FactorHeading>
+        <FactorHeading compact>
+          River Level ({FORECAST_SOURCE_LABELS[point.forecastSource]})
+        </FactorHeading>
         <FactorChipRow>
           <FactorChip
             Icon={Water}
             label={formatRiverLevel(point.forecastLevel)}
           />
-          <Typography variant="caption" color="text.secondary">
-            {FORECAST_SOURCE_LABELS[point.forecastSource]}
-          </Typography>
         </FactorChipRow>
       </Box>
       {point.reasons.length > 0 && (

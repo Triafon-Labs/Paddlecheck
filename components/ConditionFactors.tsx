@@ -43,6 +43,12 @@ export const FactorChip: React.FC<{
     size="small"
     icon={<Icon sx={{ fontSize: 16, "&&": { color: "primary.main" } }} />}
     label={label}
+    // The theme's default chip text is the muted onSurfaceVariant; these
+    // carry the same content as the full-size panels, so they take the same
+    // text colour. Set through --chip-fg, which the theme's chip rule reads.
+    sx={(theme) => ({
+      "--chip-fg": (theme.vars ?? theme).palette.text.primary,
+    })}
   />
 );
 

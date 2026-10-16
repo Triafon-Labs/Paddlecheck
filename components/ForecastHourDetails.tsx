@@ -44,6 +44,8 @@ const padHour = (time: string) => time.padStart(5, "0");
 
 interface ForecastHourDetailsProps {
   point: ForecastGraphDataPoint | null;
+  // The picked day's shown hours, which set the panel's height.
+  hours: ForecastGraphDataPoint[];
   dayLabel: string;
   // The day's sunset, counted down to over the hours before it.
   sunset: string | null;
@@ -54,11 +56,72 @@ interface ForecastHourDetailsProps {
   canNext: boolean;
 }
 
+// Sunset is counted down over the hours leading up to it, measured from the
+// start of the hour, for planning when to get off the water. Sunrise gets
+// nothing: by the first light hour it only gets lighter.
+const sunsetItemFor = (
+  point: ForecastGraphDataPoint,
+  sunset: string | null
+): BeAwareItem | null => {
+  const sunsetMinutes = minutesOfISO(sunset);
+  if (!sunset || sunsetMinutes === null) return null;
+  const minutesToSunset = sunsetMinutes - parseInt(point.time, 10) * 60;
+  if (minutesToSunset <= 0 || minutesToSunset > SUNSET_COUNTDOWN_MINUTES) {
+    return null;
+  }
+  return {
+    key: "sunset",
+    Icon: NightsStay,
+    text: `Sunset at ${hhmmOfISO(sunset)} (${formatDuration(minutesToSunset)} away)`,
+  };
+};
+
+// Everything under the hour's header: its river level and factor sections.
+const HourBody: React.FC<{
+  point: ForecastGraphDataPoint;
+  sunset: string | null;
+}> = ({ point, sunset }) => {
+  const sunsetItem = sunsetItemFor(point, sunset);
+  const beAwareItems = [
+    ...beAwareItemsFor(point),
+    ...(sunsetItem ? [sunsetItem] : []),
+  ];
+  return (
+    <>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ textAlign: "center" }}
+      >
+        {point.forecastSource === "held" ? "Assumed" : "Forecast"} level{" "}
+        {formatRiverLevel(point.forecastLevel)}
+        <Typography
+          component="span"
+          variant="caption"
+          color="text.disabled"
+          sx={{ ml: 1 }}
+        >
+          {FORECAST_SOURCE_LABELS[point.forecastSource]}
+        </Typography>
+      </Typography>
+      {point.reasons.length > 0 && (
+        <ContributingFactors
+          reasons={point.reasons}
+          temperature={point.temperature}
+          windSpeed={point.windSpeed}
+        />
+      )}
+      {beAwareItems.length > 0 && <BeAware items={beAwareItems} />}
+    </>
+  );
+};
+
 // The always-visible read-out under the forecast chart, for the hour picked
 // on it. It replaces a floating tooltip, which on a phone sat under the
 // finger doing the picking and vanished as soon as the finger lifted.
 const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   point,
+  hours,
   dayLabel,
   sunset,
   loading,
@@ -80,28 +143,6 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   }
 
   const statusConfig = ragStatus[point.status] ?? ragStatus.Unknown;
-  // Sunset is counted down over the hours leading up to it, measured from the
-  // start of the picked hour, for planning when to get off the water. Sunrise
-  // gets nothing: by the first light hour it only gets lighter.
-  const hour = parseInt(point.time, 10);
-  const sunsetMinutes = minutesOfISO(sunset);
-  const minutesToSunset =
-    sunsetMinutes !== null ? sunsetMinutes - hour * 60 : null;
-  const sunsetItem: BeAwareItem | null =
-    sunset &&
-    minutesToSunset !== null &&
-    minutesToSunset > 0 &&
-    minutesToSunset <= SUNSET_COUNTDOWN_MINUTES
-      ? {
-          key: "sunset",
-          Icon: NightsStay,
-          text: `Sunset at ${hhmmOfISO(sunset)} (${formatDuration(minutesToSunset)} away)`,
-        }
-      : null;
-  const beAwareItems = [
-    ...beAwareItemsFor(point),
-    ...(sunsetItem ? [sunsetItem] : []),
-  ];
   const timeLabel = `${dayLabel} ${padHour(point.time)}`;
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -179,31 +220,27 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
         </IconButton>
       </Box>
 
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ textAlign: "center" }}
-      >
-        {point.forecastSource === "held" ? "Assumed" : "Forecast"} level{" "}
-        {formatRiverLevel(point.forecastLevel)}
-        <Typography
-          component="span"
-          variant="caption"
-          color="text.disabled"
-          sx={{ ml: 1 }}
-        >
-          {FORECAST_SOURCE_LABELS[point.forecastSource]}
-        </Typography>
-      </Typography>
-
-      {point.reasons.length > 0 && (
-        <ContributingFactors
-          reasons={point.reasons}
-          temperature={point.temperature}
-          windSpeed={point.windSpeed}
-        />
-      )}
-      {beAwareItems.length > 0 && <BeAware items={beAwareItems} />}
+      {/* Every hour of the day is laid out in the same grid cell, with only
+          the picked one visible, so the panel is always as tall as the
+          day's busiest hour and doesn't change height - shifting the page
+          under the reader's thumb - while they step through it. */}
+      <Box sx={{ display: "grid" }}>
+        {(hours.includes(point) ? hours : [point]).map((h) => {
+          const picked = h.time === point.time;
+          return (
+            <Box
+              key={h.time}
+              aria-hidden={!picked}
+              sx={{
+                gridArea: "1 / 1",
+                visibility: picked ? "visible" : "hidden",
+              }}
+            >
+              <HourBody point={h} sunset={sunset} />
+            </Box>
+          );
+        })}
+      </Box>
     </Box>
   );
 };

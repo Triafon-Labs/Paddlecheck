@@ -625,6 +625,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         {(loading || selectedPoint) && (
           <ForecastHourDetails
             point={selectedPoint}
+            hours={data ?? []}
             dayLabel={currentDay?.label ?? ""}
             sunset={currentDay?.sunset ?? null}
             loading={loading}

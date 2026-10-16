@@ -51,8 +51,6 @@ import { format } from "date-fns";
 
 const CHART_MARGIN = { top: 40, right: 15, left: 15, bottom: 5 };
 
-const UNSELECTED_OPACITY = 0.5;
-
 // The same rule as the "Dark" factor in lib/hooks.ts, worked out again from
 // the times rather than read from an hour's reasons, which skip "Dark" when
 // something overrides it - a thunderstorm at 2am would otherwise count as
@@ -408,12 +406,8 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                   fill={
                     ragStatus[entry.status]?.color ?? ragStatus.Unknown.color
                   }
-                  // The picked hour keeps full colour and gains an outline;
-                  // the rest fade back enough to show which one it is
-                  // without losing the shape of the day.
-                  fillOpacity={
-                    entry.time === selectedPoint?.time ? 1 : UNSELECTED_OPACITY
-                  }
+                  // The picked hour is outlined; every bar keeps its full
+                  // colour so the day still reads at a glance.
                   stroke={
                     entry.time === selectedPoint?.time
                       ? theme.palette.text.primary

@@ -202,6 +202,11 @@ export const THRESHOLDS = {
   // Above this, the river is above the 10th step from the car park - no paddling for intermediates.
   RIVER_LEVEL_INITIAL_RAG_3: 2.75,
   RIVER_LEVEL_TREND_THRESHOLD: 0.1,
+  // A forecast hour counts as dark - and takes the "Dark" step - when more
+  // than this fraction of it falls before sunrise or after sunset. A quarter,
+  // so an hour only counts as light when at least three quarters of it is:
+  // more than 15 minutes of dark in an hour makes it a dark hour.
+  DARK_HOUR_FRACTION: 0.25,
 };
 
 // WMO weather interpretation codes 50–99 cover drizzle, rain, snow, showers

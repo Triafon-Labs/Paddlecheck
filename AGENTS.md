@@ -1,6 +1,6 @@
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
@@ -79,12 +79,14 @@ components/
   PaddlingMatrixCard.tsx Skill-level guidance table (Beginner/Improver/Intermediate/Independent)
   StatsCard.tsx          Numeric stats – river level, temp, wind, visibility, launch notes
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
-  ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart)
+  ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
+  ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below
   TopNavBar.tsx          Header – share, settings, refresh, freshness line, status banners
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners
   InfoPanel.tsx          Shared tonal "icon + text" panel, optionally a button
+  ConditionFactors.tsx   "Contributing Factors" / "Be Aware" sections, shared by StatusCard and the forecast panel
   SlidingToggleButtonGroup.tsx  Segmented control with a sliding pill
   ThemeRegistry.tsx      Emotion cache + AppThemeProvider for SSR
   ServiceWorkerRegistration.tsx  Registers public/sw.js in production
@@ -102,6 +104,7 @@ lib/
   hooks.ts               useKayakData hook – orchestrates all fetching and state
   KayakDataContext.tsx   React Context wrapping the hook for component tree access
   useBriefing.ts         AI briefing request and state
+  useShowNightHours.ts   The "Show night hours" setting, shared by Settings and the forecast chart
   units.ts               How each metric is formatted for display
   time.ts                Europe/London time helpers and data-age formatting
   storageKeys.ts         Canonical localStorage key names
@@ -165,7 +168,7 @@ The RAG status is calculated from river level first, then modifiers are applied:
 1. **Temperature** – below 5°C raises status significantly (cold water shock); 5–13°C raises status moderately and enables rain as a factor
 2. **Wind** – above 15 mph raises status at any temperature
 3. **Rain** – only a factor when temp is 5–13°C (moderate)
-4. **Darkness** – raises Green → Amber, Amber → Red
+4. **Darkness** – raises Green → Amber, Amber → Red. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the forecast panel counts down to sunset over the last two hours before it
 5. **Poor visibility** – below 1 000 m raises Green → Amber, Amber → Red
 6. **Thunderstorms** – overrides everything → No Paddling
 
@@ -250,12 +253,13 @@ since a successful fetch.
 Canonical names live in `lib/storageKeys.ts`; cached payload keys are all
 prefixed `paddlecheck_` and omitted here.
 
-| Key                   | Value                                                               |
-| --------------------- | ------------------------------------------------------------------- |
-| `themeMode`           | `"light"` \| `"dark"` \| `"system"` (read/written by MUI)           |
-| `paddlerLevel`        | `"Beginner"` \| `"Improver"` \| `"Intermediate"` \| `"Independent"` |
-| `riverGraphTimeRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`               |
-| `autoSummarise`       | `"true"` \| `"false"` – auto-generate the AI summary on load        |
+| Key                   | Value                                                                     |
+| --------------------- | ------------------------------------------------------------------------- |
+| `themeMode`           | `"light"` \| `"dark"` \| `"system"` (read/written by MUI)                 |
+| `paddlerLevel`        | `"Beginner"` \| `"Improver"` \| `"Intermediate"` \| `"Independent"`       |
+| `riverGraphTimeRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`                     |
+| `autoSummarise`       | `"true"` \| `"false"` – auto-generate the AI summary on load              |
+| `forecastShowNight`   | `"true"` \| `"false"` – show night hours in the forecast chart (Settings) |
 
 ---
 

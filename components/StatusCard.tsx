@@ -10,15 +10,14 @@ import {
   Grow,
   Collapse,
 } from "@mui/material";
-import HelpOutlined from "@mui/icons-material/HelpOutlined";
-import Air from "@mui/icons-material/Air";
-import WaterDrop from "@mui/icons-material/WaterDrop";
-import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { KayakConditions } from "@/types";
 import PaddlingStatusHero from "./PaddlingStatusHero";
-import InfoPanel from "./InfoPanel";
-import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
-import { formatWindGust } from "@/lib/units";
+import { ragStatus } from "@/lib/rag";
+import {
+  ContributingFactors,
+  BeAware,
+  beAwareItemsFor,
+} from "./ConditionFactors";
 import { collapseMotion, springTransition } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
 import WeatherWarnings from "./WeatherWarnings";
@@ -93,6 +92,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
       );
     }
     if (conditions) {
+      const beAwareItems = beAwareItemsFor(conditions);
       return (
         <Grow in appear {...springTransition()}>
           <Box>
@@ -108,84 +108,18 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               unmountOnExit
               {...collapseMotion}
             >
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Contributing Factors
-                </Typography>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(2, 1fr)",
-                    gap: 1,
-                    mt: 1,
-                    "& > *:last-of-type:nth-of-type(odd)": {
-                      gridColumn: "1 / -1",
-                    },
-                  }}
-                >
-                  {conditions.reasons?.map((reason, index) => {
-                    const Icon = reasonIcons[reason] ?? HelpOutlined;
-                    const label = describeReason(reason, {
-                      temperature: conditions.temperature,
-                      windSpeed: conditions.windSpeed,
-                    });
-                    return (
-                      <InfoPanel key={index}>
-                        <Icon fontSize="small" sx={{ color: "primary.main" }} />
-                        <Typography variant="body2">{label}</Typography>
-                      </InfoPanel>
-                    );
-                  })}
-                </Box>
-              </Box>
+              <ContributingFactors
+                reasons={conditions.reasons ?? []}
+                temperature={conditions.temperature}
+                windSpeed={conditions.windSpeed}
+              />
             </Collapse>
             <Collapse
-              in={!!(conditions.gustStatus || conditions.rainWhileWarm)}
+              in={beAwareItems.length > 0}
               unmountOnExit
               {...collapseMotion}
             >
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Be Aware
-                </Typography>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1,
-                    mt: 1,
-                  }}
-                >
-                  {conditions.gustStatus && (
-                    <InfoPanel>
-                      <Air fontSize="small" sx={{ color: "primary.main" }} />
-                      <Typography variant="body2">
-                        Gusts up to {formatWindGust(conditions.windGust!)}
-                      </Typography>
-                      <FiberManualRecord
-                        titleAccess={`Would be ${conditions.gustStatus} if sustained`}
-                        sx={{
-                          fontSize: 8,
-                          color: ragStatus[conditions.gustStatus].color,
-                          flexShrink: 0,
-                          ml: "auto",
-                        }}
-                      />
-                    </InfoPanel>
-                  )}
-                  {conditions.rainWhileWarm && (
-                    <InfoPanel>
-                      <WaterDrop
-                        fontSize="small"
-                        sx={{ color: "primary.main" }}
-                      />
-                      <Typography variant="body2">
-                        {conditions.weatherDescription || "Rain"}
-                      </Typography>
-                    </InfoPanel>
-                  )}
-                </Box>
-              </Box>
+              <BeAware items={beAwareItems} />
             </Collapse>
             <WeatherWarnings warnings={conditions.warnings} />
             <Box sx={{ mt: 2 }}>

@@ -142,7 +142,7 @@ export interface ForecastGraphDataPoint {
 
 export interface DayForecast {
   date: string; // "YYYY-MM-DD"
-  label: string; // "Today", "Mon 1", etc.
+  label: string; // "Today", "Mon", etc. - the five days never repeat a name
   graphData: ForecastGraphDataPoint[];
   sunrise: string | null;
   sunset: string | null;

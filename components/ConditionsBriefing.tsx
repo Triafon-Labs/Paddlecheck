@@ -8,10 +8,8 @@ import InfoPanel from "./InfoPanel";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { useBriefing } from "@/lib/useBriefing";
 import { DEFAULT_AI_MODEL } from "@/lib/config";
-import { STORAGE_KEYS } from "@/lib/storageKeys";
+import { STORAGE_KEYS, SETTINGS_CHANGED_EVENT } from "@/lib/storageKeys";
 import { m3Spring, springTransition } from "@/lib/m3-palette";
-
-export const SETTINGS_CHANGED_EVENT = "paddlecheck:settings-changed";
 
 interface Props {
   conditions: KayakConditions;

@@ -77,15 +77,44 @@ interface IconLabelProps {
   viewBox: { x: number; y: number; width: number; height: number };
   icon: React.ReactElement;
   time: string;
+  // Which side of the line the label hangs. A marker moved to the outer edge
+  // of the first or last bar sits right against the chart's edge, where a
+  // centred label would be cut off, so it hangs inwards instead.
+  align?: "start" | "middle" | "end";
 }
 
-const IconLabel = ({ viewBox, icon, time }: IconLabelProps) => {
+const LABEL_WIDTH = 60;
+// How far a hanging label overlaps back across its line, so the icon still
+// reads as belonging to it.
+const LABEL_OVERHANG = 8;
+
+const IconLabel = ({
+  viewBox,
+  icon,
+  time,
+  align = "middle",
+}: IconLabelProps) => {
   const { x } = viewBox;
   const timeText = time ? format(new Date(time), "HH:mm") : "";
+  const left =
+    align === "start"
+      ? x - LABEL_OVERHANG
+      : align === "end"
+        ? x - LABEL_WIDTH + LABEL_OVERHANG
+        : x - LABEL_WIDTH / 2;
   return (
-    <foreignObject x={x - 30} y={0} width={60} height={40}>
+    <foreignObject x={left} y={0} width={LABEL_WIDTH} height={40}>
       <Box
-        sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems:
+            align === "start"
+              ? "flex-start"
+              : align === "end"
+                ? "flex-end"
+                : "center",
+        }}
       >
         {icon}
         <Typography variant="caption" sx={{ color: "text.secondary" }}>
@@ -299,8 +328,28 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
 
   const renderChartBody = () => {
     if (data && data.length > 0) {
-      const sunriseHour = hourOfISO(sunrise);
-      const sunsetHour = hourOfISO(sunset);
+      // A marker sits on the bar for the hour the sun crosses in. When that
+      // hour is mostly dark it's hidden with the other night hours, so the
+      // marker moves to the edge of the neighbouring daylight bar that faces
+      // it, rather than vanishing or reading as mid-way through that bar.
+      const shownHours = new Set(data.map((d) => parseInt(d.time, 10)));
+      const placeMarker = (
+        hour: number | null,
+        step: 1 | -1
+      ): { x: string; position: "start" | "middle" | "end" } | null => {
+        if (hour === null) return null;
+        if (shownHours.has(hour))
+          return { x: `${hour}:00`, position: "middle" };
+        if (shownHours.has(hour + step)) {
+          return {
+            x: `${hour + step}:00`,
+            position: step === 1 ? "start" : "end",
+          };
+        }
+        return null;
+      };
+      const sunriseMarker = placeMarker(hourOfISO(sunrise), 1);
+      const sunsetMarker = placeMarker(hourOfISO(sunset), -1);
 
       const maxForecastLevel = Math.max(...data.map((d) => d.forecastLevel));
       const dayMaxLevel = Math.max(Math.ceil(maxForecastLevel), 1);
@@ -337,29 +386,33 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               tick={{ fontSize: 12 }}
             />
             <YAxis hide domain={[0, 1.2]} />
-            {sunriseHour !== null && sunrise && (
+            {sunriseMarker && sunrise && (
               <ReferenceLine
-                x={`${sunriseHour}:00`}
+                x={sunriseMarker.x}
+                position={sunriseMarker.position}
                 stroke={lineColor}
                 strokeDasharray="3 3"
                 label={
                   <IconLabel
                     icon={<WbSunny fontSize="small" fill={lineColor} />}
                     time={sunrise}
+                    align={sunriseMarker.position}
                     viewBox={{ x: 0, y: 0, width: 0, height: 0 }}
                   />
                 }
               />
             )}
-            {sunsetHour !== null && sunset && (
+            {sunsetMarker && sunset && (
               <ReferenceLine
-                x={`${sunsetHour}:00`}
+                x={sunsetMarker.x}
+                position={sunsetMarker.position}
                 stroke={lineColor}
                 strokeDasharray="3 3"
                 label={
                   <IconLabel
                     icon={<NightsStay fontSize="small" fill={lineColor} />}
                     time={sunset}
+                    align={sunsetMarker.position}
                     viewBox={{ x: 0, y: 0, width: 0, height: 0 }}
                   />
                 }

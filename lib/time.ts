@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { THRESHOLDS } from "./config";
 
 // Ticks once a minute so anything displaying data age stays accurate for as
 // long as the component stays mounted, even without a refetch.
@@ -91,20 +92,23 @@ export const hourOfISO = (iso: string | null): number | null => {
   return hhmm ? parseInt(hhmm.slice(0, 2), 10) : null;
 };
 
-// Whether the forecast hour starting at hour:00 counts as dark: wholly before
-// sunrise or after sunset. The hour the sun crosses in counts as daylight -
-// it's still partly light, and the forecast panel calls out the exact
-// sunrise/sunset time for that hour instead. Sunrise/sunset are the local
+const clampToHour = (minutes: number) => Math.min(Math.max(minutes, 0), 60);
+
+// Whether the forecast hour starting at hour:00 counts as dark: more than
+// THRESHOLDS.DARK_HOUR_FRACTION of it is before sunrise or after sunset.
+// With sunset at 18:10 the 18:00 hour is 50 minutes dark, so it's dark; at
+// 18:40 it's 20 minutes dark, so it isn't. Sunrise/sunset are the local
 // "YYYY-MM-DDTHH:MM" strings Open-Meteo returns for Europe/London.
 export const isDarkHour = (
   hour: number,
   sunrise: string | null,
   sunset: string | null
 ): boolean => {
-  const sunriseHour = hourOfISO(sunrise);
-  const sunsetHour = hourOfISO(sunset);
-  return (
-    (sunriseHour !== null && hour < sunriseHour) ||
-    (sunsetHour !== null && hour > sunsetHour)
-  );
+  const start = hour * 60;
+  const sunriseMinutes = minutesOfISO(sunrise);
+  const sunsetMinutes = minutesOfISO(sunset);
+  const darkMinutes =
+    (sunriseMinutes !== null ? clampToHour(sunriseMinutes - start) : 0) +
+    (sunsetMinutes !== null ? clampToHour(start + 60 - sunsetMinutes) : 0);
+  return darkMinutes > 60 * THRESHOLDS.DARK_HOUR_FRACTION;
 };

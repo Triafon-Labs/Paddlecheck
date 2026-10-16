@@ -85,9 +85,8 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   }
 
   const statusConfig = ragStatus[point.status] ?? ragStatus.Unknown;
-  // The hours the sun rises or sets in count as daylight in the status (see
-  // isDarkHour), so the exact time is called out here instead and the
-  // paddler can judge how much of the hour they'd have light for.
+  // The hour the sun rises in gets the exact time, since the status only
+  // knows whether most of the hour is light (see isDarkHour).
   // Sunset is also counted down over the hours leading up to it, measured
   // from the start of the picked hour, for planning when to get on the water.
   const hour = parseInt(point.time, 10);

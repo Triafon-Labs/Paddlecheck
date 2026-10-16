@@ -77,44 +77,15 @@ interface IconLabelProps {
   viewBox: { x: number; y: number; width: number; height: number };
   icon: React.ReactElement;
   time: string;
-  // Which side of the line the label hangs. A marker moved to the outer edge
-  // of the first or last bar sits right against the chart's edge, where a
-  // centred label would be cut off, so it hangs inwards instead.
-  align?: "start" | "middle" | "end";
 }
 
-const LABEL_WIDTH = 60;
-// How far a hanging label overlaps back across its line, so the icon still
-// reads as belonging to it.
-const LABEL_OVERHANG = 8;
-
-const IconLabel = ({
-  viewBox,
-  icon,
-  time,
-  align = "middle",
-}: IconLabelProps) => {
+const IconLabel = ({ viewBox, icon, time }: IconLabelProps) => {
   const { x } = viewBox;
   const timeText = time ? format(new Date(time), "HH:mm") : "";
-  const left =
-    align === "start"
-      ? x - LABEL_OVERHANG
-      : align === "end"
-        ? x - LABEL_WIDTH + LABEL_OVERHANG
-        : x - LABEL_WIDTH / 2;
   return (
-    <foreignObject x={left} y={0} width={LABEL_WIDTH} height={40}>
+    <foreignObject x={x - 30} y={0} width={60} height={40}>
       <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems:
-            align === "start"
-              ? "flex-start"
-              : align === "end"
-                ? "flex-end"
-                : "center",
-        }}
+        sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
       >
         {icon}
         <Typography variant="caption" sx={{ color: "text.secondary" }}>
@@ -125,12 +96,23 @@ const IconLabel = ({
   );
 };
 
+// A chart slot: a shown hour, or a "ghost" - a hidden night hour kept as an
+// empty slot because the sun rises or sets in it, so its marker can sit in
+// its true place rather than on a neighbouring bar.
+type ChartRow = Omit<ForecastGraphDataPoint, "value"> & {
+  value: number | null;
+  ghost?: boolean;
+};
+
 interface BarLabelProps {
   x?: number;
   y?: number;
   width?: number;
-  index?: number;
-  data: ForecastGraphDataPoint[];
+  // The bar's hour ("H:00"), from LabelList's dataKey. Matched on rather than
+  // on LabelList's index, which counts only the bars actually drawn and so
+  // drifts by one past an empty sunrise slot.
+  value?: string | number;
+  data: ChartRow[];
 }
 
 // Matches the <Bar> below's animationDuration/animationEasing so the No
@@ -148,19 +130,14 @@ const popIn = {
 } as const;
 
 const BarLabel = (props: BarLabelProps) => {
-  const { x, y, width, index, data } = props;
+  const { x, y, width, value, data } = props;
 
-  if (
-    x === undefined ||
-    y === undefined ||
-    width === undefined ||
-    index === undefined
-  ) {
+  if (x === undefined || y === undefined || width === undefined) {
     return null;
   }
 
-  const entry = data[index];
-  if (!entry) return null;
+  const entry = data.find((d) => d.time === value);
+  if (!entry || entry.ghost) return null;
 
   const elements: React.ReactNode[] = [];
   let clearAbove = 0;
@@ -249,6 +226,18 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
 
   const currentDay = forecastDays?.[selectedDay] ?? null;
   const data = currentDay ? visibleHours(currentDay) : null;
+  // What the chart draws: the shown hours, plus the hidden sunrise/sunset
+  // hours as empty slots for their markers to sit in.
+  const chartRows: ChartRow[] | null = currentDay
+    ? currentDay.graphData.flatMap((h) => {
+        if (data?.includes(h)) return [h];
+        const hour = parseInt(h.time, 10);
+        const sunCrossing =
+          hour === hourOfISO(currentDay.sunrise) ||
+          hour === hourOfISO(currentDay.sunset);
+        return sunCrossing ? [{ ...h, ghost: true }] : [];
+      })
+    : null;
   const sunrise = currentDay?.sunrise ?? null;
   const sunset = currentDay?.sunset ?? null;
 
@@ -300,17 +289,24 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   // bars sit on a band scale, so each hour owns an equal slice of the width.
   const pickHourAt = (clientX: number) => {
     const box = chartRef.current;
-    if (!box || !data || data.length === 0) return;
+    if (!box || !chartRows || !data || data.length === 0) return;
     const { left, width } = box.getBoundingClientRect();
     const plotWidth = width - CHART_MARGIN.left - CHART_MARGIN.right;
     if (plotWidth <= 0) return;
     const raw = Math.floor(
-      ((clientX - left - CHART_MARGIN.left) / plotWidth) * data.length
+      ((clientX - left - CHART_MARGIN.left) / plotWidth) * chartRows.length
     );
-    const index = Math.min(Math.max(raw, 0), data.length - 1);
-    if (data[index].time !== selectedPoint?.time) {
-      setSelectedTime(data[index].time);
-    }
+    const index = Math.min(Math.max(raw, 0), chartRows.length - 1);
+    // An empty sunrise/sunset slot isn't an hour you can pick; the nearest
+    // shown hour is. Ghosts only ever sit at the ends, so that's the first
+    // or last shown hour.
+    const row = chartRows[index];
+    const time = row.ghost
+      ? index === 0
+        ? data[0].time
+        : data[data.length - 1].time
+      : row.time;
+    if (time !== selectedPoint?.time) setSelectedTime(time);
   };
 
   const handleChartKeyDown = (e: React.KeyboardEvent) => {
@@ -328,38 +324,25 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
 
   const renderChartBody = () => {
     if (data && data.length > 0) {
-      // A marker sits on the bar for the hour the sun crosses in. When that
-      // hour is mostly dark it's hidden with the other night hours, so the
-      // marker moves to the edge of the neighbouring daylight bar that faces
-      // it, rather than vanishing or reading as mid-way through that bar.
-      const shownHours = new Set(data.map((d) => parseInt(d.time, 10)));
-      const placeMarker = (
-        hour: number | null,
-        step: 1 | -1
-      ): { x: string; position: "start" | "middle" | "end" } | null => {
-        if (hour === null) return null;
-        if (shownHours.has(hour))
-          return { x: `${hour}:00`, position: "middle" };
-        if (shownHours.has(hour + step)) {
-          return {
-            x: `${hour + step}:00`,
-            position: step === 1 ? "start" : "end",
-          };
-        }
-        return null;
-      };
-      const sunriseMarker = placeMarker(hourOfISO(sunrise), 1);
-      const sunsetMarker = placeMarker(hourOfISO(sunset), -1);
+      const rows: ChartRow[] = chartRows ?? data;
+      const sunriseHour = hourOfISO(sunrise);
+      const sunsetHour = hourOfISO(sunset);
+      const inChart = (hour: number | null) =>
+        hour !== null && rows.some((r) => parseInt(r.time, 10) === hour);
 
       const maxForecastLevel = Math.max(...data.map((d) => d.forecastLevel));
       const dayMaxLevel = Math.max(Math.ceil(maxForecastLevel), 1);
 
-      const chartData = data.map((d, i) => {
+      const chartData = rows.map((d, i) => {
+        // An empty slot draws nothing - no bar, no level line, no label.
+        if (d.ghost) {
+          return { ...d, value: null, bewdleyLevel: null, linearLevel: null };
+        }
         const scaled = d.forecastLevel / dayMaxLevel;
         const isBewdley = d.forecastSource === "bewdley";
-        const prevSource = i > 0 ? data[i - 1].forecastSource : null;
+        const prevSource = i > 0 ? rows[i - 1].forecastSource : null;
         const nextSource =
-          i < data.length - 1 ? data[i + 1].forecastSource : null;
+          i < rows.length - 1 ? rows[i + 1].forecastSource : null;
         const inBewdleyLine = isBewdley || prevSource === "bewdley";
         // Held hours get no line at all: they aren't a forecast, and a flat
         // line would read as one that says the river will stay steady.
@@ -386,33 +369,29 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               tick={{ fontSize: 12 }}
             />
             <YAxis hide domain={[0, 1.2]} />
-            {sunriseMarker && sunrise && (
+            {inChart(sunriseHour) && sunrise && (
               <ReferenceLine
-                x={sunriseMarker.x}
-                position={sunriseMarker.position}
+                x={`${sunriseHour}:00`}
                 stroke={lineColor}
                 strokeDasharray="3 3"
                 label={
                   <IconLabel
                     icon={<WbSunny fontSize="small" fill={lineColor} />}
                     time={sunrise}
-                    align={sunriseMarker.position}
                     viewBox={{ x: 0, y: 0, width: 0, height: 0 }}
                   />
                 }
               />
             )}
-            {sunsetMarker && sunset && (
+            {inChart(sunsetHour) && sunset && (
               <ReferenceLine
-                x={sunsetMarker.x}
-                position={sunsetMarker.position}
+                x={`${sunsetHour}:00`}
                 stroke={lineColor}
                 strokeDasharray="3 3"
                 label={
                   <IconLabel
                     icon={<NightsStay fontSize="small" fill={lineColor} />}
                     time={sunset}
-                    align={sunsetMarker.position}
                     viewBox={{ x: 0, y: 0, width: 0, height: 0 }}
                   />
                 }
@@ -423,7 +402,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               animationDuration={BAR_ANIMATION_DURATION}
               animationEasing={BAR_ANIMATION_EASING}
             >
-              {data.map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={
@@ -432,9 +411,11 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                   // The picked hour keeps full colour and gains an outline;
                   // the rest fade back enough to show which one it is
                   // without losing the shape of the day.
-                  fillOpacity={index === selectedIndex ? 1 : UNSELECTED_OPACITY}
+                  fillOpacity={
+                    entry.time === selectedPoint?.time ? 1 : UNSELECTED_OPACITY
+                  }
                   stroke={
-                    index === selectedIndex
+                    entry.time === selectedPoint?.time
                       ? theme.palette.text.primary
                       : "none"
                   }
@@ -442,7 +423,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                 />
               ))}
               <LabelList
-                dataKey="value"
+                dataKey="time"
                 content={<BarLabel data={chartData} />}
                 position="top"
               />

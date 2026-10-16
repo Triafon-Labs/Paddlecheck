@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.36.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.35.3...paddlecheck-v1.36.0) (2026-10-16)
+
+
+### Features
+
+* count a forecast hour as dark only when over 75% of it is ([d39621c](https://github.com/dylanr97/Paddlecheck/commit/d39621cc3c1494bed760f2f2f9758bc4ef0676d4))
+* count a forecast hour as dark when over half of it is ([9b70efe](https://github.com/dylanr97/Paddlecheck/commit/9b70efec37df8c42a012703a49f7221668f094c4))
+* count down to sunset in the forecast hour panel ([e4e8102](https://github.com/dylanr97/Paddlecheck/commit/e4e81026513135c53b3b093d4204db783ff2c426))
+* ease the forecast details card between hours' heights ([c2246e7](https://github.com/dylanr97/Paddlecheck/commit/c2246e753c79c5e377bc6e9728e167bc34abb810))
+* hide night hours in the forecast chart by default ([06ec1ce](https://github.com/dylanr97/Paddlecheck/commit/06ec1cead612cf9478d8d702bbe440f38e4b137e))
+* jump to any forecast hour from a list ([7988d8d](https://github.com/dylanr97/Paddlecheck/commit/7988d8d5e819bbaed15165dbf1d08d390d5c2695))
+* move night hours to Settings and flag sunrise/sunset hours ([6c307d7](https://github.com/dylanr97/Paddlecheck/commit/6c307d76554d9076aedffea5113ad1961ce0ff2b))
+* pick forecast hours on mobile with a details panel ([bd247ad](https://github.com/dylanr97/Paddlecheck/commit/bd247ad5e752122552c40e536638f2d9888f83f8))
+* start the sunset countdown two hours out, not three ([21c4a90](https://github.com/dylanr97/Paddlecheck/commit/21c4a90389aefc87b119b0abe600e0734e6e7aba))
+
+
+### Bug Fixes
+
+* address review findings on the forecast hour panel ([0d3743e](https://github.com/dylanr97/Paddlecheck/commit/0d3743e268ecd97da2a6510bf74fd5abbb4dcc2e))
+* count a forecast hour as light only when 75% of it is light ([6fd1f76](https://github.com/dylanr97/Paddlecheck/commit/6fd1f76849072bd9ecb22a56067e489871a422cc))
+* keep the forecast hour panel one height across the day ([fbc58d6](https://github.com/dylanr97/Paddlecheck/commit/fbc58d6d332cbe98d3cb0a33466a1f2e72a8382f))
+* size the forecast hour panel to the busiest hour of all five days ([5ba7fec](https://github.com/dylanr97/Paddlecheck/commit/5ba7fecb6a4984e54dc1ecf10b59832ac1b3c100))
+
+
+### Code Refactoring
+
+* drop the forecast hour list ([d85c14d](https://github.com/dylanr97/Paddlecheck/commit/d85c14dc2bfa76f2fc705cfb87c22160a5b9f17a))
+* drop the sunrise Be Aware item from the forecast panel ([62ff672](https://github.com/dylanr97/Paddlecheck/commit/62ff672cca326795423d0dd1100ebec46fe2d08f))
+* keep hidden sunrise/sunset hours as empty chart slots ([c835e68](https://github.com/dylanr97/Paddlecheck/commit/c835e6837f15ca4b35a910f976c32c1f41398ea0))
+* put the forecast panel's reserved space below the card ([35eb8e8](https://github.com/dylanr97/Paddlecheck/commit/35eb8e826bda5faffaf7d61e041241e8efbd1785))
+* share the factor sections between the status and forecast panel ([357e16d](https://github.com/dylanr97/Paddlecheck/commit/357e16d2e84768afd2e7e9ccae0b55265c558d17))
+
 ## [1.35.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.35.2...paddlecheck-v1.35.3) (2026-10-15)
 
 

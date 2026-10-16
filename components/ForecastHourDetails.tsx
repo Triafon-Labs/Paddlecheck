@@ -1,7 +1,19 @@
 "use client";
 
-import React, { useRef } from "react";
-import { Box, Chip, IconButton, Skeleton, Typography } from "@mui/material";
+import React, { useRef, useState } from "react";
+import {
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Skeleton,
+  Typography,
+} from "@mui/material";
+import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import Air from "@mui/icons-material/Air";
@@ -31,6 +43,9 @@ const padHour = (time: string) => time.padStart(5, "0");
 
 interface ForecastHourDetailsProps {
   point: ForecastGraphDataPoint | null;
+  // Every hour of the picked day, for the jump-to-hour list.
+  hours: ForecastGraphDataPoint[];
+  onSelectHour: (time: string) => void;
   dayLabel: string;
   loading?: boolean;
   onPrev: () => void;
@@ -44,6 +59,8 @@ interface ForecastHourDetailsProps {
 // finger doing the picking and vanished as soon as the finger lifted.
 const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   point,
+  hours,
+  onSelectHour,
   dayLabel,
   loading,
   onPrev,
@@ -52,6 +69,7 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   canNext,
 }) => {
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
 
   if (loading || !point) {
     return (
@@ -112,9 +130,19 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
             minWidth: 0,
           }}
         >
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          {/* Jumping straight to a far-off hour, rather than stepping to it
+              one press at a time or aiming for a 14px bar. */}
+          <Button
+            onClick={(e) => setMenuAnchor(e.currentTarget)}
+            endIcon={<ArrowDropDown />}
+            aria-haspopup="listbox"
+            aria-expanded={menuAnchor !== null}
+            aria-label={`${timeLabel}, choose hour`}
+            color="inherit"
+            sx={{ typography: "subtitle1", fontWeight: 600, minHeight: 44 }}
+          >
             {timeLabel}
-          </Typography>
+          </Button>
           <Chip
             label={point.status}
             size="small"
@@ -125,6 +153,44 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
             }}
           />
         </Box>
+        <Menu
+          anchorEl={menuAnchor}
+          open={menuAnchor !== null}
+          onClose={() => setMenuAnchor(null)}
+          // Opening focuses the selected hour, which scrolls it into view.
+          slotProps={{
+            paper: { sx: { maxHeight: "50dvh" } },
+            list: { role: "listbox", dense: true },
+          }}
+        >
+          {hours.map((hour) => (
+            <MenuItem
+              key={hour.time}
+              selected={hour.time === point.time}
+              role="option"
+              aria-selected={hour.time === point.time}
+              onClick={() => {
+                onSelectHour(hour.time);
+                setMenuAnchor(null);
+              }}
+            >
+              <ListItemText sx={{ flex: "none", mr: 2 }}>
+                {padHour(hour.time)}
+              </ListItemText>
+              <ListItemIcon sx={{ minWidth: 0, mr: 1 }}>
+                <FiberManualRecord
+                  sx={{
+                    fontSize: 12,
+                    color: (ragStatus[hour.status] ?? ragStatus.Unknown).color,
+                  }}
+                />
+              </ListItemIcon>
+              <Typography variant="body2" color="text.secondary">
+                {hour.status}
+              </Typography>
+            </MenuItem>
+          ))}
+        </Menu>
         <IconButton
           onClick={onNext}
           disabled={!canNext}

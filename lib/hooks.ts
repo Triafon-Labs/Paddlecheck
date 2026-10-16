@@ -498,10 +498,7 @@ export const useKayakData = () => {
           futureWeatherData.hourly.time[dayStartIndex].split("T")[0];
         // Use noon to avoid timezone offset issues when parsing date-only strings
         const dateObj = new Date(`${dayDateStr}T12:00:00`);
-        const label =
-          d === 0
-            ? "Today"
-            : `${DAY_NAMES[dateObj.getDay()]} ${dateObj.getDate()}`;
+        const label = d === 0 ? "Today" : DAY_NAMES[dateObj.getDay()];
 
         days.push({ date: dayDateStr, label, graphData, sunrise, sunset });
       }

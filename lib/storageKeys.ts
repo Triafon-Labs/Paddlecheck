@@ -16,3 +16,7 @@ export const STORAGE_KEYS = {
   WEATHER_DATA_RAW: "paddlecheck_weatherDataRaw",
   FUTURE_WEATHER_DATA_RAW: "paddlecheck_futureWeatherDataRaw",
 } as const;
+
+// Fired in this tab when a setting changes (the "storage" event only reaches
+// other tabs), so anything reading that setting can pick it up straight away.
+export const SETTINGS_CHANGED_EVENT = "paddlecheck:settings-changed";

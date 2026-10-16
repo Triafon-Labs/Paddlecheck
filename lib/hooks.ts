@@ -28,7 +28,12 @@ import {
   LINEAR_FORECAST_HOURS,
   RIVER_GRAPH_FORECAST_HOURS,
 } from "@/lib/config";
-import { getLondonHHMM, getLondonHour, hhmmOfISO } from "@/lib/time";
+import {
+  getLondonHHMM,
+  getLondonHour,
+  hhmmOfISO,
+  isDarkHour,
+} from "@/lib/time";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -378,12 +383,6 @@ export const useKayakData = () => {
         const dayStartIndex = d * 24;
         const sunrise = futureWeatherData.daily.sunrise[d] ?? null;
         const sunset = futureWeatherData.daily.sunset[d] ?? null;
-        const sunriseHour = sunrise
-          ? parseInt(sunrise.split("T")[1].split(":")[0], 10)
-          : null;
-        const sunsetHour = sunset
-          ? parseInt(sunset.split("T")[1].split(":")[0], 10)
-          : null;
 
         // Skip the hour we're already in - it's a mix of past and future by
         // the time it's shown, so the forecast starts from the next full hour.
@@ -442,12 +441,11 @@ export const useKayakData = () => {
           }
 
           // The hour containing the actual sunrise/sunset crossing is left
-          // out of "Dark" - it's still (partly) daylight, and formatWindow
-          // (lib/forecast.ts) trims its displayed start/end to the precise
-          // sunrise/sunset time using the neighbouring dark-only hour.
-          const darkBeforeSunrise = sunriseHour !== null && h < sunriseHour;
-          const darkAfterSunset = sunsetHour !== null && h > sunsetHour;
-          const dark = darkBeforeSunrise || darkAfterSunset;
+          // out of "Dark" (isDarkHour, lib/time.ts) - it's still (partly)
+          // daylight, and formatWindow (lib/forecast.ts) trims its displayed
+          // start/end to the precise sunrise/sunset time using the
+          // neighbouring dark-only hour.
+          const dark = isDarkHour(h, sunrise, sunset);
 
           const forecastConditions: Partial<KayakConditions> = {
             riverLevel: forecastRiverLevel,

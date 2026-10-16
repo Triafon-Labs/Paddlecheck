@@ -42,7 +42,7 @@ import {
   Foggy,
 } from "@mui/icons-material";
 import { useAppTheme, ThemeMode } from "@/lib/ThemeContext";
-import { SETTINGS_CHANGED_EVENT } from "@/components/ConditionsBriefing";
+import { useShowNightHours } from "@/lib/useShowNightHours";
 import { PADDLER_LEVEL_CHANGED_EVENT } from "@/components/PaddlingMatrixCard";
 import { PaddlerType, Status } from "@/types";
 import {
@@ -56,7 +56,7 @@ import {
   CLUB_NAME,
 } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
-import { STORAGE_KEYS } from "@/lib/storageKeys";
+import { STORAGE_KEYS, SETTINGS_CHANGED_EVENT } from "@/lib/storageKeys";
 import { m3Duration, m3Easing, m3Spring, spring } from "@/lib/m3-palette";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 
@@ -191,6 +191,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       typeof window !== "undefined" &&
       localStorage.getItem(STORAGE_KEYS.AUTO_SUMMARISE) === "true"
   );
+
+  const [showNightHours, setShowNightHours] = useShowNightHours();
 
   const handleAutoSummariseChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -470,6 +472,28 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
             >
               When off, tap &ldquo;Show Conditions Report&rdquo; inside the
               status card to get one on demand.
+            </Typography>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Typography variant="h6" gutterBottom>
+              Paddling Forecast
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showNightHours}
+                  onChange={(e) => setShowNightHours(e.target.checked)}
+                />
+              }
+              label="Show night hours"
+            />
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", mt: 0.5 }}
+            >
+              When off, the forecast chart shows daylight hours only.
             </Typography>
           </Box>
         </Box>

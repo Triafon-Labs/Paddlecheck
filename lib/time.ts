@@ -77,3 +77,26 @@ export const getLondonHour = (date: Date = new Date()): number =>
 // Extracts "HH:MM" from an ISO timestamp string, e.g. for sunrise/sunset fields.
 export const hhmmOfISO = (iso: string): string | null =>
   iso.split("T")[1]?.slice(0, 5) ?? null;
+
+export const hourOfISO = (iso: string | null): number | null => {
+  const hhmm = iso ? hhmmOfISO(iso) : null;
+  return hhmm ? parseInt(hhmm.slice(0, 2), 10) : null;
+};
+
+// Whether the forecast hour starting at hour:00 counts as dark: wholly before
+// sunrise or after sunset. The hour the sun crosses in counts as daylight -
+// it's still partly light, and the forecast panel calls out the exact
+// sunrise/sunset time for that hour instead. Sunrise/sunset are the local
+// "YYYY-MM-DDTHH:MM" strings Open-Meteo returns for Europe/London.
+export const isDarkHour = (
+  hour: number,
+  sunrise: string | null,
+  sunset: string | null
+): boolean => {
+  const sunriseHour = hourOfISO(sunrise);
+  const sunsetHour = hourOfISO(sunset);
+  return (
+    (sunriseHour !== null && hour < sunriseHour) ||
+    (sunsetHour !== null && hour > sunsetHour)
+  );
+};

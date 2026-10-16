@@ -7,10 +7,13 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
+import WbSunny from "@mui/icons-material/WbSunny";
+import NightsStay from "@mui/icons-material/NightsStay";
 import { ForecastGraphDataPoint, ForecastSource } from "@/types";
 import { ragStatus, describeReason } from "@/lib/rag";
 import { REASON_ICONS } from "@/lib/config";
 import { formatRiverLevel, formatWindGust } from "@/lib/units";
+import { hhmmOfISO, hourOfISO } from "@/lib/time";
 
 const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
   bewdley: "Bewdley upstream forecast",
@@ -32,6 +35,9 @@ const padHour = (time: string) => time.padStart(5, "0");
 interface ForecastHourDetailsProps {
   point: ForecastGraphDataPoint | null;
   dayLabel: string;
+  // The day's sunrise/sunset, to flag the hour each falls in.
+  sunrise: string | null;
+  sunset: string | null;
   loading?: boolean;
   onPrev: () => void;
   onNext: () => void;
@@ -45,6 +51,8 @@ interface ForecastHourDetailsProps {
 const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   point,
   dayLabel,
+  sunrise,
+  sunset,
   loading,
   onPrev,
   onNext,
@@ -64,6 +72,16 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   }
 
   const statusConfig = ragStatus[point.status] ?? ragStatus.Unknown;
+  // The hours the sun rises or sets in count as daylight in the status (see
+  // isDarkHour), so the exact time is called out here instead and the
+  // paddler can judge how much of the hour they'd have light for.
+  const hour = parseInt(point.time, 10);
+  const sunEvent =
+    sunrise && hourOfISO(sunrise) === hour
+      ? { label: `Sunrise at ${hhmmOfISO(sunrise)}`, Icon: WbSunny }
+      : sunset && hourOfISO(sunset) === hour
+        ? { label: `Sunset at ${hhmmOfISO(sunset)}`, Icon: NightsStay }
+        : null;
   const timeLabel = `${dayLabel} ${padHour(point.time)}`;
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -209,9 +227,18 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
             label={point.weatherDescription || "Rain"}
           />
         )}
+        {sunEvent && (
+          <Chip
+            size="small"
+            variant="outlined"
+            icon={<sunEvent.Icon fontSize="small" />}
+            label={sunEvent.label}
+          />
+        )}
         {point.reasons.length === 0 &&
           !point.gustStatus &&
-          !point.rainWhileWarm && (
+          !point.rainWhileWarm &&
+          !sunEvent && (
             <Typography variant="caption" color="text.secondary">
               No contributing factors
             </Typography>

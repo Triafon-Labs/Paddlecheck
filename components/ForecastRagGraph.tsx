@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Card,
   CardContent,
@@ -14,7 +14,6 @@ import {
   Stack,
   Grow,
   Collapse,
-  Chip,
   Button,
 } from "@mui/material";
 import {
@@ -37,7 +36,8 @@ import WarningIcon from "@mui/icons-material/Warning";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { isWarningOnDay, formatWarningTime } from "@/lib/warnings";
 import { springTransition } from "@/lib/m3-palette";
-import { STORAGE_KEYS } from "@/lib/storageKeys";
+import { hourOfISO, isDarkHour } from "@/lib/time";
+import { useShowNightHours } from "@/lib/useShowNightHours";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 import ForecastHourDetails from "./ForecastHourDetails";
 
@@ -53,23 +53,12 @@ const CHART_MARGIN = { top: 40, right: 15, left: 15, bottom: 5 };
 
 const UNSELECTED_OPACITY = 0.5;
 
-// The hour of an ISO "YYYY-MM-DDTHH:MM" time, or null when there isn't one.
-const hourOf = (iso: string | null): number | null =>
-  iso ? parseInt(iso.split("T")[1].split(":")[0], 10) : null;
-
-// Same rule as the "Dark" factor in lib/hooks.ts: the hours wholly before
-// sunrise or after sunset. Worked out from the times rather than read from
-// an hour's reasons, which skip "Dark" when something overrides it - a
-// thunderstorm at 2am would otherwise count as daylight.
-const isNightHour = (point: ForecastGraphDataPoint, day: DayForecast) => {
-  const hour = parseInt(point.time, 10);
-  const sunriseHour = hourOf(day.sunrise);
-  const sunsetHour = hourOf(day.sunset);
-  return (
-    (sunriseHour !== null && hour < sunriseHour) ||
-    (sunsetHour !== null && hour > sunsetHour)
-  );
-};
+// The same rule as the "Dark" factor in lib/hooks.ts, worked out again from
+// the times rather than read from an hour's reasons, which skip "Dark" when
+// something overrides it - a thunderstorm at 2am would otherwise count as
+// daylight.
+const isNightHour = (point: ForecastGraphDataPoint, day: DayForecast) =>
+  isDarkHour(parseInt(point.time, 10), day.sunrise, day.sunset);
 
 // The hour shown when a day is first opened: the next hour for Today, and the
 // first hour of daylight for later days - nobody planning Saturday wants to
@@ -220,17 +209,9 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   // hour after a refetch. null means the day's default hour.
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const chartRef = useRef<HTMLDivElement>(null);
-  // Night hours are hidden unless asked for: darkness alone pushes every one
-  // of them up a step, so for planning a paddle they're mostly noise, and
-  // dropping them roughly doubles each bar's width on a phone. This component
-  // is client-only (next/dynamic, ssr: false), so localStorage is safe here.
-  const [showNight, setShowNight] = useState(
-    () => localStorage.getItem(STORAGE_KEYS.FORECAST_SHOW_NIGHT) === "true"
-  );
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.FORECAST_SHOW_NIGHT, String(showNight));
-  }, [showNight]);
+  // Night hours are hidden unless turned on in Settings (see
+  // useShowNightHours for why).
+  const [showNight, setShowNight] = useShowNightHours();
 
   const visibleHours = (day: DayForecast) =>
     showNight
@@ -318,8 +299,8 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
 
   const renderChartBody = () => {
     if (data && data.length > 0) {
-      const sunriseHour = hourOf(sunrise);
-      const sunsetHour = hourOf(sunset);
+      const sunriseHour = hourOfISO(sunrise);
+      const sunsetHour = hourOfISO(sunset);
 
       const maxForecastLevel = Math.max(...data.map((d) => d.forecastLevel));
       const dayMaxLevel = Math.max(Math.ceil(maxForecastLevel), 1);
@@ -356,7 +337,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               tick={{ fontSize: 12 }}
             />
             <YAxis hide domain={[0, 1.2]} />
-            {sunriseHour && sunrise && (
+            {sunriseHour !== null && sunrise && (
               <ReferenceLine
                 x={`${sunriseHour}:00`}
                 stroke={lineColor}
@@ -370,7 +351,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                 }
               />
             )}
-            {sunsetHour && sunset && (
+            {sunsetHour !== null && sunset && (
               <ReferenceLine
                 x={`${sunsetHour}:00`}
                 stroke={lineColor}
@@ -499,30 +480,9 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   return (
     <Card sx={{ width: "100%" }}>
       <CardContent>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1,
-          }}
-        >
-          <Typography variant="h5" component="div">
-            Paddling Forecast
-          </Typography>
-          {/* Named for what it adds rather than "Daylight only", so turning
-              it on shows more instead of unticking a restriction. */}
-          <Chip
-            icon={<NightsStay fontSize="small" />}
-            label="Night"
-            variant={showNight ? "filled" : "outlined"}
-            color={showNight ? "primary" : "default"}
-            onClick={() => setShowNight((v) => !v)}
-            aria-pressed={showNight}
-            aria-label="Show night hours"
-            sx={{ flexShrink: 0 }}
-          />
-        </Box>
+        <Typography variant="h5" component="div">
+          Paddling Forecast
+        </Typography>
         {loading ? (
           <Box sx={{ pt: 2, pb: 2, display: "flex", gap: 1 }}>
             {Array.from({ length: 5 }).map((_, i) => (
@@ -634,6 +594,8 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
           <ForecastHourDetails
             point={selectedPoint}
             dayLabel={currentDay?.label ?? ""}
+            sunrise={currentDay?.sunrise ?? null}
+            sunset={currentDay?.sunset ?? null}
             loading={loading}
             onPrev={() => step(prevStep)}
             onNext={() => step(nextStep)}

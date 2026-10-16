@@ -435,11 +435,14 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                 position="top"
               />
             </Bar>
+            {/* No active dot: recharts would mark the touched hour on the
+                line too, a second "selected" marker beside the outlined bar. */}
             <Line
               type="monotone"
               dataKey="bewdleyLevel"
               stroke={theme.palette.primary.main}
               dot={false}
+              activeDot={false}
               strokeWidth={2}
               connectNulls={false}
             />
@@ -448,6 +451,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               dataKey="linearLevel"
               stroke={theme.palette.primary.main}
               dot={false}
+              activeDot={false}
               strokeWidth={2}
               strokeDasharray="5 5"
               strokeOpacity={0.5}

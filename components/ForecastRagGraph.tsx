@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Card,
   CardContent,
   Typography,
   Box,
   Skeleton,
-  Paper,
-  Chip,
   useTheme,
   ToggleButton,
   Divider,
@@ -23,32 +21,22 @@ import {
   Bar,
   XAxis,
   YAxis,
-  Tooltip,
   ResponsiveContainer,
   Cell,
-  TooltipContentProps,
   ReferenceLine,
   LabelList,
 } from "recharts";
-import {
-  DayForecast,
-  ForecastGraphDataPoint,
-  ForecastSource,
-  WeatherWarning,
-} from "@/types";
-import { ragStatus, describeReason } from "@/lib/rag";
-import { REASON_ICONS, WARNING_COLORS } from "@/lib/config";
-import { formatRiverLevel, formatWindGust } from "@/lib/units";
+import { DayForecast, ForecastGraphDataPoint, WeatherWarning } from "@/types";
+import { ragStatus } from "@/lib/rag";
+import { WARNING_COLORS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
-import Air from "@mui/icons-material/Air";
-import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { isWarningOnDay, formatWarningTime } from "@/lib/warnings";
 import { springTransition } from "@/lib/m3-palette";
-import { useTooltipDismiss } from "@/lib/useTooltipDismiss";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
+import ForecastHourDetails from "./ForecastHourDetails";
 
 interface ForecastRagGraphProps {
   forecastDays: DayForecast[] | null;
@@ -56,149 +44,23 @@ interface ForecastRagGraphProps {
   loading?: boolean;
 }
 
-import {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
-
-const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
-  bewdley: "Source: Bewdley upstream forecast",
-  linear: "Source: Local trend (linear)",
-  held: "Source: None – level held",
-};
-
-// Gap left between the tooltip and the edges of the viewport when it has to
-// be pulled back into view.
-const TOOLTIP_VIEWPORT_MARGIN = 8;
-
-interface CustomTooltipProps extends TooltipContentProps<ValueType, NameType> {
-  // Reports the rendered height back to the graph, which needs it to work out
-  // how far the tooltip has to be shifted to stay on screen.
-  onMeasure: (height: number) => void;
-}
-
-const CustomTooltip = ({
-  active,
-  payload,
-  label,
-  onMeasure,
-}: CustomTooltipProps) => {
-  const paperRef = useRef<HTMLDivElement>(null);
-  const visible = !!(active && payload && payload.length);
-
-  // Deliberately unkeyed: the height changes with the hovered hour, not just
-  // with visibility, so it has to be re-read after every render. onMeasure
-  // rounds and bails out on an unchanged value, so this settles immediately
-  // rather than looping.
-  useLayoutEffect(() => {
-    if (visible && paperRef.current) {
-      onMeasure(paperRef.current.offsetHeight);
-    }
-  });
-
-  if (visible && payload) {
-    const data = payload[0].payload as ForecastGraphDataPoint;
-    const statusConfig = ragStatus[data.status] ?? ragStatus.Unknown;
-    return (
-      <Paper
-        ref={paperRef}
-        sx={{
-          p: 2,
-          // The chart is only 200px tall and this content can run to twice
-          // that, so cap it at the viewport as a floor under the positioning
-          // below - there is nowhere to put a tooltip taller than the screen.
-          // dvh to match the window.innerHeight the positioning above works
-          // in - vh would let the cap exceed the visible viewport in a
-          // browser tab, putting the tooltip back out of reach.
-          maxHeight: `calc(100dvh - ${TOOLTIP_VIEWPORT_MARGIN * 2}px)`,
-          overflowY: "auto",
-          pointerEvents: "none",
-        }}
-      >
-        <Typography variant="body1">{`${label}`}</Typography>
-        <Box sx={{ my: 0.5 }}>
-          <Chip
-            label={data.status}
-            size="small"
-            sx={{
-              "--chip-bg": statusConfig.color,
-              "--chip-fg": statusConfig.onColor,
-              fontWeight: 600,
-            }}
-          />
-        </Box>
-        <Typography variant="body2" color="text.secondary">
-          {data.forecastSource === "held" ? "Assumed" : "Forecast"} Level:{" "}
-          {formatRiverLevel(data.forecastLevel)}
-        </Typography>
-        <Typography variant="caption" color="text.disabled">
-          {FORECAST_SOURCE_LABELS[data.forecastSource]}
-        </Typography>
-        {data.reasons && data.reasons.length > 0 && (
-          <Box sx={{ mt: 1 }}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Contributing Factors
-            </Typography>
-            {data.reasons.map((reason: string, index: number) => {
-              const Icon = REASON_ICONS[reason];
-              const label = describeReason(reason, {
-                temperature: data.temperature,
-                windSpeed: data.windSpeed,
-              });
-              return (
-                <Box
-                  key={index}
-                  sx={{ display: "flex", alignItems: "center", mt: 0.5 }}
-                >
-                  {Icon && <Icon fontSize="small" />}
-                  <Typography variant="caption" sx={{ ml: 1 }}>
-                    {label}
-                  </Typography>
-                </Box>
-              );
-            })}
-          </Box>
-        )}
-        {(data.gustStatus || data.rainWhileWarm) && (
-          <Box sx={{ mt: 1 }}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Be Aware
-            </Typography>
-            {data.gustStatus && (
-              <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
-                <Air fontSize="small" />
-                <Typography variant="caption" sx={{ ml: 1 }}>
-                  Gusts up to {formatWindGust(data.windGust!)}
-                </Typography>
-                <FiberManualRecord
-                  titleAccess={`Would be ${data.gustStatus} if sustained`}
-                  sx={{
-                    fontSize: 8,
-                    color: ragStatus[data.gustStatus].color,
-                    ml: 1,
-                    flexShrink: 0,
-                  }}
-                />
-              </Box>
-            )}
-            {data.rainWhileWarm && (
-              <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
-                <WaterDrop fontSize="small" />
-                <Typography variant="caption" sx={{ ml: 1 }}>
-                  {data.weatherDescription || "Rain"}
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        )}
-      </Paper>
-    );
-  }
-
-  return null;
-};
-
 import { format } from "date-fns";
+
+const CHART_MARGIN = { top: 40, right: 15, left: 15, bottom: 5 };
+
+const UNSELECTED_OPACITY = 0.5;
+
+// The hour shown when a day is first opened: the next hour for Today, and the
+// first hour of daylight for later days - nobody planning Saturday wants to
+// land on midnight.
+const defaultHourIndex = (
+  hours: ForecastGraphDataPoint[],
+  dayIndex: number
+): number => {
+  if (dayIndex === 0) return 0;
+  const firstLight = hours.findIndex((h) => !h.reasons.includes("Dark"));
+  return firstLight === -1 ? 0 : firstLight;
+};
 
 interface IconLabelProps {
   viewBox: { x: number; y: number; width: number; height: number };
@@ -331,33 +193,84 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   const theme = useTheme();
   const lineColor = theme.palette.text.secondary;
   const [selectedDay, setSelectedDay] = useState(0);
+  // The picked hour as its "H:00" label rather than an index: Today's first
+  // bar drops off every hour, so an index would silently slide onto the next
+  // hour after a refetch. null means the day's default hour.
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const chartRef = useRef<HTMLDivElement>(null);
-  const { tooltipActive, chartMoveProps } = useTooltipDismiss(chartRef);
-  const [tooltipY, setTooltipY] = useState(0);
-
-  // Recharts places the tooltip at the cursor and clamps it to the chart's own
-  // box, which doesn't work here: the tooltip is routinely taller than the
-  // 200px chart, so it spilled past the card and got cut off by the card's
-  // overflow. Pin it to the top of the chart instead, then pull it up or down
-  // by however much it takes to sit inside the viewport. Recharts honours a
-  // numeric `position.y` verbatim, so this fully replaces its own clamping;
-  // x is left alone and still tracks the cursor.
-  const measureTooltip = useCallback((height: number) => {
-    const chart = chartRef.current;
-    if (!chart || !height) return;
-    const { top } = chart.getBoundingClientRect();
-    const lowestTop = TOOLTIP_VIEWPORT_MARGIN - top;
-    const highestTop =
-      window.innerHeight - TOOLTIP_VIEWPORT_MARGIN - height - top;
-    // Anchored at 0 (the top of the chart) whenever that already fits.
-    const next = Math.round(Math.max(lowestTop, Math.min(0, highestTop)));
-    setTooltipY((prev) => (prev === next ? prev : next));
-  }, []);
 
   const currentDay = forecastDays?.[selectedDay] ?? null;
   const data = currentDay?.graphData ?? null;
   const sunrise = currentDay?.sunrise ?? null;
   const sunset = currentDay?.sunset ?? null;
+
+  const foundIndex =
+    data && selectedTime !== null
+      ? data.findIndex((d) => d.time === selectedTime)
+      : -1;
+  const selectedIndex =
+    foundIndex !== -1
+      ? foundIndex
+      : data
+        ? defaultHourIndex(data, selectedDay)
+        : -1;
+  const selectedPoint = data?.[selectedIndex] ?? null;
+
+  const selectDay = (day: number, time: string | null = null) => {
+    setSelectedDay(day);
+    setSelectedTime(time);
+  };
+
+  // Steps one hour, carrying on into the neighbouring day at either end so
+  // the five days read as one timeline. Days with no hours left in them (Today
+  // just before midnight) are skipped over.
+  const findStep = (direction: 1 | -1): [number, string] | null => {
+    if (!forecastDays || !data) return null;
+    const next = data[selectedIndex + direction];
+    if (next) return [selectedDay, next.time];
+    for (
+      let d = selectedDay + direction;
+      d >= 0 && d < forecastDays.length;
+      d += direction
+    ) {
+      const hours = forecastDays[d].graphData;
+      if (hours.length > 0) {
+        return [d, hours[direction === 1 ? 0 : hours.length - 1].time];
+      }
+    }
+    return null;
+  };
+  const prevStep = findStep(-1);
+  const nextStep = findStep(1);
+  const step = (target: [number, string] | null) => {
+    if (target) selectDay(...target);
+  };
+
+  // Picks the hour under the pointer. Worked out from the pointer's x against
+  // the plot area rather than read back from recharts' tooltip state, which
+  // is updated a frame late on touch and only exists with a <Tooltip>. The
+  // bars sit on a band scale, so each hour owns an equal slice of the width.
+  const pickHourAt = (clientX: number) => {
+    const box = chartRef.current;
+    if (!box || !data || data.length === 0) return;
+    const { left, width } = box.getBoundingClientRect();
+    const plotWidth = width - CHART_MARGIN.left - CHART_MARGIN.right;
+    if (plotWidth <= 0) return;
+    const raw = Math.floor(
+      ((clientX - left - CHART_MARGIN.left) / plotWidth) * data.length
+    );
+    const index = Math.min(Math.max(raw, 0), data.length - 1);
+    if (data[index].time !== selectedPoint?.time) {
+      setSelectedTime(data[index].time);
+    }
+  };
+
+  const handleChartKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") step(prevStep);
+    else if (e.key === "ArrowRight") step(nextStep);
+    else return;
+    e.preventDefault();
+  };
 
   // Find warnings active on the selected day
   const dailyWarnings =
@@ -401,11 +314,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
 
       return (
         <ResponsiveContainer width="100%" height={200}>
-          <ComposedChart
-            data={chartData}
-            margin={{ top: 40, right: 15, left: 15, bottom: 5 }}
-            {...chartMoveProps}
-          >
+          <ComposedChart data={chartData} margin={CHART_MARGIN}>
             <XAxis
               dataKey="time"
               ticks={xAxisTicks}
@@ -413,18 +322,6 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               tick={{ fontSize: 12 }}
             />
             <YAxis hide domain={[0, 1.2]} />
-            <Tooltip
-              content={(props: TooltipContentProps<ValueType, NameType>) => (
-                <CustomTooltip {...props} onMeasure={measureTooltip} />
-              )}
-              cursor={{ fill: "transparent" }}
-              active={tooltipActive}
-              position={{ y: tooltipY }}
-              // The pinned y is measured against the viewport, not the chart,
-              // so recharts must not second-guess it.
-              allowEscapeViewBox={{ x: false, y: true }}
-              wrapperStyle={{ pointerEvents: "none" }}
-            />
             {sunriseHour && sunrise && (
               <ReferenceLine
                 x={`${sunriseHour}:00`}
@@ -464,6 +361,16 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                   fill={
                     ragStatus[entry.status]?.color ?? ragStatus.Unknown.color
                   }
+                  // The picked hour keeps full colour and gains an outline;
+                  // the rest fade back enough to show which one it is
+                  // without losing the shape of the day.
+                  fillOpacity={index === selectedIndex ? 1 : UNSELECTED_OPACITY}
+                  stroke={
+                    index === selectedIndex
+                      ? theme.palette.text.primary
+                      : "none"
+                  }
+                  strokeWidth={2}
                 />
               ))}
               <LabelList
@@ -514,16 +421,39 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
     }
     return (
       <Grow in appear {...springTransition()}>
-        <Box ref={chartRef}>{renderChartBody()}</Box>
+        <Box
+          ref={chartRef}
+          tabIndex={0}
+          role="group"
+          aria-label="Hourly forecast chart. Use the left and right arrow keys to change hour."
+          onPointerDown={(e) => pickHourAt(e.clientX)}
+          // Only while pressed: following a hovering mouse would move the
+          // selection on the way down to the hour buttons below.
+          onPointerMove={(e) => {
+            if (e.buttons !== 0) pickHourAt(e.clientX);
+          }}
+          onKeyDown={handleChartKeyDown}
+          sx={{
+            // A horizontal drag scrubs through the hours; a vertical one
+            // still scrolls the page.
+            touchAction: "pan-y",
+            userSelect: "none",
+            WebkitTapHighlightColor: "transparent",
+            borderRadius: 1,
+            "&:focus-visible": {
+              outline: `2px solid ${theme.palette.primary.main}`,
+              outlineOffset: 2,
+            },
+          }}
+        >
+          {renderChartBody()}
+        </Box>
       </Grow>
     );
   };
 
   return (
-    // overflow is visible so the tooltip can hang outside the card - Card
-    // clips to its rounded corners by default, which is what was cutting the
-    // bottom off it. Nothing else in here paints outside the card's bounds.
-    <Card sx={{ width: "100%", overflow: "visible" }}>
+    <Card sx={{ width: "100%" }}>
       <CardContent>
         <Typography variant="h5" component="div">
           Paddling Forecast
@@ -548,7 +478,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
                 value={selectedDay}
                 exclusive
                 onChange={(_, val) => {
-                  if (val !== null) setSelectedDay(val);
+                  if (val !== null) selectDay(val);
                 }}
                 fullWidth
                 size="small"
@@ -635,6 +565,15 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         </Collapse>
 
         {renderChart()}
+        <ForecastHourDetails
+          point={selectedPoint}
+          dayLabel={currentDay?.label ?? ""}
+          loading={loading}
+          onPrev={() => step(prevStep)}
+          onNext={() => step(nextStep)}
+          canPrev={prevStep !== null}
+          canNext={nextStep !== null}
+        />
       </CardContent>
     </Card>
   );

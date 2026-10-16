@@ -1,6 +1,6 @@
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
@@ -79,7 +79,8 @@ components/
   PaddlingMatrixCard.tsx Skill-level guidance table (Beginner/Improver/Intermediate/Independent)
   StatsCard.tsx          Numeric stats – river level, temp, wind, visibility, launch notes
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
-  ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart)
+  ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
+  ForecastHourDetails.tsx The picked forecast hour's details, with prev/next hour stepping
   TopNavBar.tsx          Header – share, settings, refresh, freshness line, status banners
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)

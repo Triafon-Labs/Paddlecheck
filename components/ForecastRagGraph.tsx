@@ -453,7 +453,11 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
     if (!showNight && currentDay && currentDay.graphData.length > 0) {
       return (
         <Box sx={{ mt: 1, textAlign: "center" }}>
-          <Typography variant="body1">No daylight left today.</Typography>
+          <Typography variant="body1">
+            {selectedDay === 0
+              ? "No daylight left today."
+              : "No daylight hours forecast for this day."}
+          </Typography>
           <Button onClick={() => setShowNight(true)} sx={{ mt: 1 }}>
             Show night hours
           </Button>

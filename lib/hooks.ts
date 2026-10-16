@@ -440,8 +440,9 @@ export const useKayakData = () => {
             );
           }
 
-          // The hour containing sunrise or sunset is dark only if most of it
-          // is (isDarkHour, lib/time.ts). Either way formatWindow
+          // The hour containing sunrise or sunset is dark if more than
+          // DARK_HOUR_FRACTION of it is (isDarkHour, lib/time.ts). Either way
+          // formatWindow
           // (lib/forecast.ts) trims a window's displayed start/end to the
           // precise sunrise/sunset time using the neighbouring dark-only hour.
           const dark = isDarkHour(h, sunrise, sunset);

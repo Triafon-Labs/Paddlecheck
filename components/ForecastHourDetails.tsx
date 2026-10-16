@@ -13,7 +13,7 @@ import { ForecastGraphDataPoint, ForecastSource } from "@/types";
 import { ragStatus, describeReason } from "@/lib/rag";
 import { REASON_ICONS } from "@/lib/config";
 import { formatRiverLevel, formatWindGust } from "@/lib/units";
-import { hhmmOfISO, hourOfISO, minutesOfISO } from "@/lib/time";
+import { hhmmOfISO, isDarkHour, minutesOfISO } from "@/lib/time";
 
 const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
   bewdley: "Bewdley upstream forecast",
@@ -85,16 +85,21 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   }
 
   const statusConfig = ragStatus[point.status] ?? ragStatus.Unknown;
-  // The hour the sun rises in gets the exact time, since the status only
-  // knows whether most of the hour is light (see isDarkHour).
+  // Sunrise is called out on the day's first light hour - where a morning
+  // paddle would start - since the hour the sun actually rises in is often
+  // dark itself (see isDarkHour) and hidden with the night hours.
   // Sunset is also counted down over the hours leading up to it, measured
   // from the start of the picked hour, for planning when to get on the water.
   const hour = parseInt(point.time, 10);
   const sunsetMinutes = minutesOfISO(sunset);
   const minutesToSunset =
     sunsetMinutes !== null ? sunsetMinutes - hour * 60 : null;
+  const isFirstLightHour =
+    hour > 0 &&
+    !isDarkHour(hour, sunrise, sunset) &&
+    isDarkHour(hour - 1, sunrise, sunset);
   const sunEvent =
-    sunrise && hourOfISO(sunrise) === hour
+    sunrise && isFirstLightHour
       ? { label: `Sunrise at ${hhmmOfISO(sunrise)}`, Icon: WbSunny }
       : sunset &&
           minutesToSunset !== null &&
@@ -108,6 +113,12 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   const timeLabel = `${dayLabel} ${padHour(point.time)}`;
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    // A drag that starts on the hour buttons isn't a swipe: the button's own
+    // click would fire as well and step a second hour.
+    if ((e.target as HTMLElement).closest("button")) {
+      swipeStart.current = null;
+      return;
+    }
     swipeStart.current = { x: e.clientX, y: e.clientY };
   };
   const handlePointerUp = (e: React.PointerEvent) => {

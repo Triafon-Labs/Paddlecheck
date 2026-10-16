@@ -203,10 +203,11 @@ export const THRESHOLDS = {
   RIVER_LEVEL_INITIAL_RAG_3: 2.75,
   RIVER_LEVEL_TREND_THRESHOLD: 0.1,
   // A forecast hour counts as dark - and takes the "Dark" step - when more
-  // than this fraction of it falls before sunrise or after sunset, so the
-  // bar shows whatever most of the hour is. Not lower: civil twilight gives
-  // usable light for a good half hour either side of the sun's crossing.
-  DARK_HOUR_FRACTION: 0.5,
+  // than this fraction of it falls before sunrise or after sunset. Three
+  // quarters rather than half because twilight keeps it usably light for a
+  // while after sunset (streetlights come on roughly 10-20 minutes after),
+  // so an hour the sun sets a quarter of the way into is still a light one.
+  DARK_HOUR_FRACTION: 0.75,
 };
 
 // WMO weather interpretation codes 50–99 cover drizzle, rain, snow, showers

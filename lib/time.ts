@@ -97,7 +97,7 @@ const clampToHour = (minutes: number) => Math.min(Math.max(minutes, 0), 60);
 // Whether the forecast hour starting at hour:00 counts as dark: more than
 // THRESHOLDS.DARK_HOUR_FRACTION of it is before sunrise or after sunset.
 // With sunset at 18:10 the 18:00 hour is 50 minutes dark, so it's dark; at
-// 18:40 it's 20 minutes dark, so it isn't. Sunrise/sunset are the local
+// 18:20 it's 40 minutes dark, so it isn't. Sunrise/sunset are the local
 // "YYYY-MM-DDTHH:MM" strings Open-Meteo returns for Europe/London.
 export const isDarkHour = (
   hour: number,

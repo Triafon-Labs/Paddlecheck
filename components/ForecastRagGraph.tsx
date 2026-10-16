@@ -626,7 +626,6 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
           <ForecastHourDetails
             point={selectedPoint}
             dayLabel={currentDay?.label ?? ""}
-            sunrise={currentDay?.sunrise ?? null}
             sunset={currentDay?.sunset ?? null}
             loading={loading}
             onPrev={() => step(prevStep)}

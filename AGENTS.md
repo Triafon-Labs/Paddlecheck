@@ -168,7 +168,7 @@ The RAG status is calculated from river level first, then modifiers are applied:
 1. **Temperature** – below 5°C raises status significantly (cold water shock); 5–13°C raises status moderately and enables rain as a factor
 2. **Wind** – above 15 mph raises status at any temperature
 3. **Rain** – only a factor when temp is 5–13°C (moderate)
-4. **Darkness** – raises Green → Amber, Amber → Red. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the forecast panel shows "Sunrise at …" on the sunrise hour and counts down to sunset over the last two hours before it
+4. **Darkness** – raises Green → Amber, Amber → Red. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the forecast panel counts down to sunset over the last two hours before it
 5. **Poor visibility** – below 1 000 m raises Green → Amber, Amber → Red
 6. **Thunderstorms** – overrides everything → No Paddling
 

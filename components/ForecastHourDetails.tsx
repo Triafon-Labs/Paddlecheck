@@ -4,12 +4,11 @@ import React, { useRef } from "react";
 import { Box, Chip, IconButton, Skeleton, Typography } from "@mui/material";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
-import WbSunny from "@mui/icons-material/WbSunny";
 import NightsStay from "@mui/icons-material/NightsStay";
 import { ForecastGraphDataPoint, ForecastSource } from "@/types";
 import { ragStatus } from "@/lib/rag";
 import { formatRiverLevel } from "@/lib/units";
-import { hhmmOfISO, isDarkHour, minutesOfISO } from "@/lib/time";
+import { hhmmOfISO, minutesOfISO } from "@/lib/time";
 import {
   ContributingFactors,
   BeAware,
@@ -46,8 +45,7 @@ const padHour = (time: string) => time.padStart(5, "0");
 interface ForecastHourDetailsProps {
   point: ForecastGraphDataPoint | null;
   dayLabel: string;
-  // The day's sunrise/sunset, to flag the hour each falls in.
-  sunrise: string | null;
+  // The day's sunset, counted down to over the hours before it.
   sunset: string | null;
   loading?: boolean;
   onPrev: () => void;
@@ -62,7 +60,6 @@ interface ForecastHourDetailsProps {
 const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   point,
   dayLabel,
-  sunrise,
   sunset,
   loading,
   onPrev,
@@ -83,35 +80,27 @@ const ForecastHourDetails: React.FC<ForecastHourDetailsProps> = ({
   }
 
   const statusConfig = ragStatus[point.status] ?? ragStatus.Unknown;
-  // Sunrise is called out on the day's first light hour - where a morning
-  // paddle would start - since the hour the sun actually rises in is often
-  // dark itself (see isDarkHour) and hidden with the night hours.
-  // Sunset is also counted down over the hours leading up to it, measured
-  // from the start of the picked hour, for planning when to get on the water.
+  // Sunset is counted down over the hours leading up to it, measured from the
+  // start of the picked hour, for planning when to get off the water. Sunrise
+  // gets nothing: by the first light hour it only gets lighter.
   const hour = parseInt(point.time, 10);
   const sunsetMinutes = minutesOfISO(sunset);
   const minutesToSunset =
     sunsetMinutes !== null ? sunsetMinutes - hour * 60 : null;
-  const isFirstLightHour =
-    hour > 0 &&
-    !isDarkHour(hour, sunrise, sunset) &&
-    isDarkHour(hour - 1, sunrise, sunset);
-  const sunEvent: BeAwareItem | null =
-    sunrise && isFirstLightHour
-      ? { key: "sun", Icon: WbSunny, text: `Sunrise at ${hhmmOfISO(sunrise)}` }
-      : sunset &&
-          minutesToSunset !== null &&
-          minutesToSunset > 0 &&
-          minutesToSunset <= SUNSET_COUNTDOWN_MINUTES
-        ? {
-            key: "sun",
-            Icon: NightsStay,
-            text: `Sunset at ${hhmmOfISO(sunset)} (${formatDuration(minutesToSunset)} away)`,
-          }
-        : null;
+  const sunsetItem: BeAwareItem | null =
+    sunset &&
+    minutesToSunset !== null &&
+    minutesToSunset > 0 &&
+    minutesToSunset <= SUNSET_COUNTDOWN_MINUTES
+      ? {
+          key: "sunset",
+          Icon: NightsStay,
+          text: `Sunset at ${hhmmOfISO(sunset)} (${formatDuration(minutesToSunset)} away)`,
+        }
+      : null;
   const beAwareItems = [
     ...beAwareItemsFor(point),
-    ...(sunEvent ? [sunEvent] : []),
+    ...(sunsetItem ? [sunsetItem] : []),
   ];
   const timeLabel = `${dayLabel} ${padHour(point.time)}`;
 

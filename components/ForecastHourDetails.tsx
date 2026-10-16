@@ -19,8 +19,11 @@ import { ragStatus } from "@/lib/rag";
 import { formatRiverLevel } from "@/lib/units";
 import { hhmmOfISO, minutesOfISO } from "@/lib/time";
 import { m3Duration, m3Easing } from "@/lib/m3-palette";
-import InfoPanel from "./InfoPanel";
 import {
+  FactorHeading,
+  FactorChip,
+  FactorChipRow,
+  factorSizes,
   ContributingFactors,
   BeAware,
   BeAwareItem,
@@ -73,6 +76,9 @@ const sunsetItemFor = (
   };
 };
 
+// The forecast's details sit a size below the current status's.
+const compactSize = factorSizes(true);
+
 // Everything under the hour's header: its river level and factor sections.
 const HourBody: React.FC<{
   point: ForecastGraphDataPoint;
@@ -87,32 +93,27 @@ const HourBody: React.FC<{
     <>
       {/* Laid out like the factor sections below it - heading, then an
           InfoPanel - with where the level comes from trailing on the right. */}
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="subtitle2" color="text.secondary">
-          River Level
-        </Typography>
-        <InfoPanel sx={{ mt: 1 }}>
-          <Water fontSize="small" sx={{ color: "primary.main" }} />
-          <Typography variant="body2">
-            {formatRiverLevel(point.forecastLevel)}
-          </Typography>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ ml: "auto", textAlign: "right" }}
-          >
+      <Box sx={compactSize.sectionSx}>
+        <FactorHeading compact>River Level</FactorHeading>
+        <FactorChipRow>
+          <FactorChip
+            Icon={Water}
+            label={formatRiverLevel(point.forecastLevel)}
+          />
+          <Typography variant="caption" color="text.secondary">
             {FORECAST_SOURCE_LABELS[point.forecastSource]}
           </Typography>
-        </InfoPanel>
+        </FactorChipRow>
       </Box>
       {point.reasons.length > 0 && (
         <ContributingFactors
           reasons={point.reasons}
           temperature={point.temperature}
           windSpeed={point.windSpeed}
+          compact
         />
       )}
-      {beAwareItems.length > 0 && <BeAware items={beAwareItems} />}
+      {beAwareItems.length > 0 && <BeAware items={beAwareItems} compact />}
     </>
   );
 };
@@ -221,7 +222,7 @@ export const ForecastHourHeader: React.FC<ForecastHourHeaderProps> = ({
           minWidth: 0,
         }}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
           {timeLabel}
         </Typography>
         <Chip

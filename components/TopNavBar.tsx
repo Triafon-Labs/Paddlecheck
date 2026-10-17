@@ -191,11 +191,14 @@ const TopNavBar = () => {
     const text = buildShareText(conditions, forecastDays);
     // Give recipients a way back to the app - the summary alone has no link.
     const url = window.location.origin;
+    // The link goes in the text rather than share()'s url field: apps like
+    // WhatsApp join the two with a bare space, gluing it to the last line.
+    const message = `${text}\n\n${url}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Paddlecheck", text, url });
+        await navigator.share({ title: "Paddlecheck", text: message });
       } else {
-        await navigator.clipboard.writeText(`${text}\n\n${url}`);
+        await navigator.clipboard.writeText(message);
         setSnackbarOpen(true);
       }
     } catch (err) {

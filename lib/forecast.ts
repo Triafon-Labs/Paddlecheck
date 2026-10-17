@@ -95,13 +95,14 @@ function findGreenWindows(slots: DayForecast["graphData"]): {
 // adjacent hour is worse only for being dark (conditions are valid right up
 // to the sun).
 // When isNow is true, renders "now" as the start instead of a clock time.
+// endsAtSunset says the end is sunset rather than a change in conditions.
 function formatWindow(
   graphData: DayForecast["graphData"],
   w: Window,
   sunriseHHMM: string | null,
   sunsetHHMM: string | null,
   isNow: boolean
-): { start: string; end: string } {
+): { start: string; end: string; endsAtSunset: boolean } {
   let start: string;
   const prev = slotAtHour(graphData, w.startHour - 1);
   const isSunrise =
@@ -124,8 +125,13 @@ function formatWindow(
     isWorseOnlyForDark(next, slotAtHour(graphData, w.endHour));
   const end = isSunset ? sunsetHHMM : fmtHour(w.endHour + 1);
 
-  return { start, end };
+  return { start, end, endsAtSunset: !!isSunset };
 }
+
+// "09:00–17:00", or "09:00 until sunset at 18:12" when the window runs out
+// because it gets dark - a bare end time would read as conditions changing.
+const joinWindow = (start: string, end: string, endsAtSunset: boolean) =>
+  endsAtSunset ? `${start} until sunset at ${end}` : `${start}–${end}`;
 
 // Describes the block(s) of worse-status conditions that separate best-status
 // windows, e.g. "17:00–18:00 dark green due to High winds". Gaps are always
@@ -247,7 +253,7 @@ export function buildBestPaddlingTimes(
 
   const ranges = windows
     .map((w, i) => {
-      const { start, end } = formatWindow(
+      const { start, end, endsAtSunset } = formatWindow(
         lookup,
         w,
         sunriseHHMM,
@@ -262,10 +268,10 @@ export function buildBestPaddlingTimes(
         const [endH, endM] = end.split(":").map(Number);
         const remaining = endH * 60 + endM - (nowH * 60 + nowM);
         if (remaining > 0 && remaining < 60) {
-          note = ` – only ~${remaining} min remaining`;
+          note = ` – only ~${remaining} min left`;
         }
       }
-      return `${start}–${end}${note}`;
+      return `${joinWindow(start, end, endsAtSunset)}${note}`;
     })
     .join(", ");
 
@@ -423,14 +429,14 @@ export function buildNextDaytimeOutlook(
     const label = bestStatus === "Light Green" ? "light green" : "dark green";
     const ranges = windows
       .map((w) => {
-        const { start, end } = formatWindow(
+        const { start, end, endsAtSunset } = formatWindow(
           day.graphData,
           w,
           sunriseHHMM,
           sunsetHHMM,
           false
         );
-        return `${start}–${end}`;
+        return joinWindow(start, end, endsAtSunset);
       })
       .join(", ");
     bestTimes = `${ranges} (${label})`;

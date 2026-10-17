@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.37.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.36.1...paddlecheck-v1.37.0) (2026-10-17)
+
+
+### Features
+
+* add the best conditions line to the conditions report ([2f35cb6](https://github.com/dylanr97/Paddlecheck/commit/2f35cb6fe4b8da08259ab6faa2e7c98eacff3447))
+* work the best conditions window into the report's wording ([28f3420](https://github.com/dylanr97/Paddlecheck/commit/28f342072e8f98ee286433fe7dcff1516959815b))
+
 ## [1.36.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.36.0...paddlecheck-v1.36.1) (2026-10-16)
 
 

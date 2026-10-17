@@ -7,6 +7,7 @@ import { KayakConditions } from "@/types";
 import InfoPanel from "./InfoPanel";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { useBriefing } from "@/lib/useBriefing";
+import { buildBestConditionsLine } from "@/lib/forecast";
 import { DEFAULT_AI_MODEL } from "@/lib/config";
 import { STORAGE_KEYS, SETTINGS_CHANGED_EVENT } from "@/lib/storageKeys";
 import { m3Spring, springTransition } from "@/lib/m3-palette";
@@ -72,6 +73,15 @@ export default function ConditionsBriefing({
     );
   }
 
+  // The best-window line is worked out here from the forecast, the same one
+  // the share text carries, rather than asked of the model: it's a fact the
+  // app already knows exactly, and leaving statuses out of the prompt keeps
+  // the model describing conditions instead of grading them.
+  const bestConditions = buildBestConditionsLine(
+    forecastDays,
+    conditions.overallStatus
+  );
+
   // The reply streams in, but it is held back until it is complete and then
   // faded in whole: a "Thinking…" label and words typing themselves out behind
   // a cursor read as a chatbot, where a skeleton reads as any other content
@@ -81,9 +91,19 @@ export default function ConditionsBriefing({
       <NotesIcon fontSize="small" sx={{ color: "primary.main", mt: "2px" }} />
       {!loading ? (
         <Fade in appear {...springTransition(m3Spring.effectsDefault)}>
-          <Typography variant="body2" sx={{ lineHeight: 1.65 }}>
-            {text}
-          </Typography>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="body2" sx={{ lineHeight: 1.65 }}>
+              {text}
+            </Typography>
+            {bestConditions && (
+              <Typography
+                variant="body2"
+                sx={{ lineHeight: 1.65, mt: 1, fontWeight: 500 }}
+              >
+                {bestConditions}
+              </Typography>
+            )}
+          </Box>
         </Fade>
       ) : (
         <Box

@@ -364,3 +364,21 @@ export function buildNextDaytimeOutlook(
 
   return { dayLabel, bestTimes, rangesText, gapsText };
 }
+
+// One line naming the best paddling window(s) still to come: the rest of
+// today while there's daylight left, otherwise the next daylight period.
+// Shared by the share text and the conditions report, so both always agree.
+// Null when no green hours are forecast in that period.
+export function buildBestConditionsLine(
+  forecastDays: DayForecast[] | null,
+  currentStatus?: Status
+): string | null {
+  const todayForecast = forecastDays?.[0] ?? null;
+  if (hasDaylightRemaining(todayForecast)) {
+    return buildBestPaddlingTimes(todayForecast, currentStatus)?.text ?? null;
+  }
+  const outlook = buildNextDaytimeOutlook(forecastDays);
+  return outlook?.bestTimes
+    ? `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`
+    : null;
+}

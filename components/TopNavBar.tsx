@@ -26,7 +26,7 @@ import {
   formatTemperature,
   formatWindSpeed,
 } from "@/lib/units";
-import { buildBestConditions } from "@/lib/forecast";
+import { buildBestConditionsLine } from "@/lib/forecast";
 import { getRelativeTimeString, getLondonHHMM } from "@/lib/time";
 import { collapseMotion } from "@/lib/m3-palette";
 
@@ -117,14 +117,14 @@ const buildShareText = (
   const weatherLine = [tempStr, windStr].filter(Boolean).join(" | ");
   if (weatherLine) lines.push(weatherLine);
 
-  const bestConditions = buildBestConditions(
+  const bestConditions = buildBestConditionsLine(
     forecastDays,
     conditions.overallStatus,
     conditions.reasons
   );
   if (bestConditions) {
     lines.push("");
-    lines.push(`🟢 *${bestConditions.text}*`);
+    lines.push(`🟢 *${bestConditions}*`);
   }
 
   return lines.join("\n");

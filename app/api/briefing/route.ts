@@ -34,8 +34,6 @@ interface SummaryRequest {
   // The daylight window the summary covers: "the rest of today", or - when
   // it's already dark - "later today" or "tomorrow".
   period?: string | null;
-  // The best green window(s) in that period, e.g. "09:00–17:00 (light green)".
-  bestWindows?: string | null;
   outlook?: Outlook | null;
 }
 
@@ -56,9 +54,7 @@ Quote figures exactly as the data writes them - "36.3°C", "0.33 m", "12.3 mph" 
 
 Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising. Each warning is labelled "(currently active)" or "(upcoming - not yet in force)" - trust that label rather than working out timing from the dates yourself, and if it's upcoming, make that clear rather than implying it applies right now. Every warning supplied falls in the period you're summarising, so time it against that period - "an amber heat warning comes into force tomorrow morning", never by weekday ("from Thursday morning"), which sounds like a different day again.
 
-If the data gives a "Best paddling window", end with one short sentence that works it in naturally, e.g. "The best conditions are from 09:00 to 17:00, rated light green." or "It's light green from now until 16:00, and again from 17:00 until sunset at 18:12." Quote the times exactly, a start of "now" means the window is already open, and keep its colour as the data writes it (light green or dark green). This sentence doesn't count towards the three above and doesn't explain the rating - the rest of the summary already describes the conditions. If no window is given, don't mention one or guess at it.
-
-Beyond that one sentence, don't pass verdicts on whether or where to paddle ("a great day for a paddle") - the app's status rating covers that.
+Don't pass verdicts on whether or where to paddle ("a great day for a paddle") - the app's status rating covers that.
 
 Write only the summary - no headings, labels, or quote marks. Use British English (mild, favourable, metres) and a friendly, accessible tone for members ranging from beginners to experienced paddlers.`;
 
@@ -84,7 +80,6 @@ function buildConditionsParts(req: SummaryRequest): string {
     currentlyDark,
     currentTime,
     period,
-    bestWindows,
     outlook,
   } = req;
 
@@ -151,7 +146,6 @@ function buildConditionsParts(req: SummaryRequest): string {
     hourlyForecast
       ? `Hour-by-hour forecast for ${period ?? "the summarised daylight window"}:\n${hourlyForecast}`
       : null,
-    bestWindows ? `Best paddling window: ${bestWindows}` : null,
     currentlyDark && outlook
       ? `It is currently dark. The outlook for ${outlook.dayLabel} is: ${outlook.rangesText}.`
       : null,
@@ -263,7 +257,6 @@ async function summaryCacheKey(
     hourlyForecast: body.hourlyForecast ?? null,
     currentlyDark: body.currentlyDark ?? false,
     period: body.period ?? null,
-    bestWindows: body.bestWindows ?? null,
     outlook: body.outlook ?? null,
     model,
   });

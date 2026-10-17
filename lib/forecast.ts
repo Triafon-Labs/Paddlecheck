@@ -157,7 +157,6 @@ function formatGaps(
 
 export interface BestPaddlingTimes {
   text: string; // "Best conditions today: 09:00–17:00 (light green)"
-  windows: string; // "09:00–17:00 (light green)"
   gapsText: string | null; // "17:00–18:00 dark green due to High winds"
 }
 
@@ -277,7 +276,6 @@ export function buildBestPaddlingTimes(
 
   return {
     text: `Best conditions today: ${ranges} (${label})`,
-    windows: `${ranges} (${label})`,
     gapsText: formatGaps(todayForecast.graphData, gaps),
   };
 }
@@ -446,34 +444,24 @@ export function buildNextDaytimeOutlook(
   return { dayLabel, bestTimes, rangesText, gapsText };
 }
 
-export interface BestConditions {
-  text: string; // "Best conditions tomorrow: 09:00–17:00 (light green)"
-  windows: string; // "09:00–17:00 (light green)"
-}
-
-// The best paddling window(s) still to come: the rest of today while there's
-// daylight left, otherwise the next daylight period. Shared by the share text
-// and the conditions report, so both always agree. Null when no green hours
-// are forecast in that period.
-export function buildBestConditions(
+// One line naming the best paddling window(s) still to come: the rest of
+// today while there's daylight left, otherwise the next daylight period.
+// Used by the share text.
+// Null when no green hours are forecast in that period.
+export function buildBestConditionsLine(
   forecastDays: DayForecast[] | null,
   currentStatus?: Status,
   currentReasons?: string[]
-): BestConditions | null {
+): string | null {
   const todayForecast = forecastDays?.[0] ?? null;
   if (hasDaylightRemaining(todayForecast)) {
-    const best = buildBestPaddlingTimes(
-      todayForecast,
-      currentStatus,
-      currentReasons
+    return (
+      buildBestPaddlingTimes(todayForecast, currentStatus, currentReasons)
+        ?.text ?? null
     );
-    return best ? { text: best.text, windows: best.windows } : null;
   }
   const outlook = buildNextDaytimeOutlook(forecastDays);
   return outlook?.bestTimes
-    ? {
-        text: `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`,
-        windows: outlook.bestTimes,
-      }
+    ? `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`
     : null;
 }

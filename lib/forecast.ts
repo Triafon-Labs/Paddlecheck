@@ -13,8 +13,14 @@ const PREFERRED: Status[] = ["Light Green", "Dark Green"];
 const hourOf = (time: string) => parseInt(time.split(":")[0], 10);
 const fmtHour = (h: number) =>
   `${String(((h % 24) + 24) % 24).padStart(2, "0")}:00`;
-const isDarkOnly = (reasons: string[]) =>
-  reasons.length === 1 && reasons[0] === "Dark";
+type Slot = DayForecast["graphData"][number];
+
+// Whether a dark slot next to a window is worse only for being dark: every
+// other reason it has, the window's neighbouring slot has too. The window's
+// conditions then hold right up to sunrise/sunset.
+const isWorseOnlyForDark = (dark: Slot, light: Slot | undefined) =>
+  dark.reasons.includes("Dark") &&
+  dark.reasons.every((r) => r === "Dark" || !!light?.reasons.includes(r));
 
 const slotAtHour = (graphData: DayForecast["graphData"], hour: number) =>
   graphData.find((pt) => hourOf(pt.time) === hour);
@@ -86,18 +92,23 @@ function findGreenWindows(slots: DayForecast["graphData"]): {
 }
 
 // Format a window's start/end, extending to actual sunrise/sunset when the
-// adjacent hour is dark-only (conditions are valid right up to the sun).
+// adjacent hour is worse only for being dark (conditions are valid right up
+// to the sun).
 // When isNow is true, renders "now" as the start instead of a clock time.
+// endsAtSunset says the end is sunset rather than a change in conditions.
 function formatWindow(
   graphData: DayForecast["graphData"],
   w: Window,
   sunriseHHMM: string | null,
   sunsetHHMM: string | null,
   isNow: boolean
-): { start: string; end: string } {
+): { start: string; end: string; endsAtSunset: boolean } {
   let start: string;
   const prev = slotAtHour(graphData, w.startHour - 1);
-  const isSunrise = sunriseHHMM && prev && isDarkOnly(prev.reasons);
+  const isSunrise =
+    sunriseHHMM &&
+    prev &&
+    isWorseOnlyForDark(prev, slotAtHour(graphData, w.startHour));
 
   if (isNow) {
     start = "now";
@@ -108,11 +119,19 @@ function formatWindow(
   }
 
   const next = slotAtHour(graphData, w.endHour + 1);
-  const isSunset = sunsetHHMM && next && isDarkOnly(next.reasons);
+  const isSunset =
+    sunsetHHMM &&
+    next &&
+    isWorseOnlyForDark(next, slotAtHour(graphData, w.endHour));
   const end = isSunset ? sunsetHHMM : fmtHour(w.endHour + 1);
 
-  return { start, end };
+  return { start, end, endsAtSunset: !!isSunset };
 }
+
+// "09:00–17:00", or "09:00 until sunset at 18:12" when the window runs out
+// because it gets dark - a bare end time would read as conditions changing.
+const joinWindow = (start: string, end: string, endsAtSunset: boolean) =>
+  endsAtSunset ? `${start} until sunset at ${end}` : `${start}–${end}`;
 
 // Describes the block(s) of worse-status conditions that separate best-status
 // windows, e.g. "17:00–18:00 dark green due to High winds". Gaps are always
@@ -142,29 +161,87 @@ export interface BestPaddlingTimes {
   gapsText: string | null; // "17:00–18:00 dark green due to High winds"
 }
 
+// Whether it's light right now: between today's sunrise and sunset, by the
+// same comparison the current status uses for its "Dark" reason (hooks.ts).
+const isLightNow = (todayForecast: DayForecast): boolean => {
+  const sunriseHHMM = todayForecast.sunrise
+    ? hhmmOfISO(todayForecast.sunrise)
+    : null;
+  const sunsetHHMM = todayForecast.sunset
+    ? hhmmOfISO(todayForecast.sunset)
+    : null;
+  if (sunriseHHMM === null || sunsetHHMM === null) return false;
+  const now = getLondonHHMM();
+  return now > sunriseHHMM && now < sunsetHHMM;
+};
+
+// Today's daylight slots from the current hour on. The hour we're in is never
+// among todayForecast's hourly data (see hooks.ts), so while it's light it's
+// stood in for by a slot carrying the live status - otherwise the last
+// daylight hour, whose successor is already dark, would read as no daylight
+// left at all and hand over to tomorrow with the sun still up.
+function remainingDaylightSlots(
+  todayForecast: DayForecast,
+  currentStatus?: Status,
+  currentReasons: string[] = []
+): Slot[] {
+  const nowHour = getLondonHour();
+  const daylight = (pt: Slot) => !pt.reasons.includes("Dark");
+  if (!currentStatus || !isLightNow(todayForecast)) {
+    return todayForecast.graphData.filter(
+      (pt) => hourOf(pt.time) >= nowHour && daylight(pt)
+    );
+  }
+  // Only the hour, status and reasons are ever read from the stand-in.
+  const nowSlot: Slot = {
+    time: `${nowHour}:00`,
+    status: currentStatus,
+    reasons: currentReasons,
+    value: 0,
+    forecastLevel: 0,
+    forecastSource: "bewdley",
+  };
+  return [
+    nowSlot,
+    ...todayForecast.graphData.filter(
+      (pt) => hourOf(pt.time) > nowHour && daylight(pt)
+    ),
+  ];
+}
+
 // Best paddling windows for the rest of today, relative to the current time.
-// currentStatus is today's live overall status (not the forecast): the
-// hour we're currently in is always excluded from todayForecast's hourly
-// data (see hooks.ts), so there's no forecast slot to compare against "now"
-// - this is what lets us tell whether the first forecast window is really a
-// continuation of a window already under way right now.
+// currentStatus and currentReasons are today's live overall status (not the
+// forecast), which stands in for the hour we're currently in - see
+// remainingDaylightSlots.
 export function buildBestPaddlingTimes(
   todayForecast: DayForecast | null,
-  currentStatus?: Status
+  currentStatus?: Status,
+  currentReasons?: string[]
 ): BestPaddlingTimes | null {
   if (!todayForecast) return null;
 
   const nowHour = getLondonHour();
-  const futureSlots = todayForecast.graphData.filter(
-    (pt) => hourOf(pt.time) >= nowHour && !pt.reasons.includes("Dark")
+  const futureSlots = remainingDaylightSlots(
+    todayForecast,
+    currentStatus,
+    currentReasons
   );
   if (futureSlots.length === 0) return null;
+  // The slots windows are looked up in: those plus the dark hours after
+  // them, so a window's end can be checked against the hour that follows.
+  const lookup = [
+    ...futureSlots,
+    ...todayForecast.graphData.filter(
+      (pt) => hourOf(pt.time) > nowHour && pt.reasons.includes("Dark")
+    ),
+  ];
 
   const { bestStatus, windows, gaps } = findGreenWindows(futureSlots);
   if (!bestStatus || windows.length === 0) return null;
 
+  // A window opening on the hour we're in is already under way.
   const alreadyUnderway =
-    currentStatus === bestStatus && futureSlots[0].status === bestStatus;
+    currentStatus === bestStatus && windows[0].startHour === nowHour;
 
   const sunriseHHMM = todayForecast.sunrise
     ? hhmmOfISO(todayForecast.sunrise)
@@ -176,8 +253,8 @@ export function buildBestPaddlingTimes(
 
   const ranges = windows
     .map((w, i) => {
-      const { start, end } = formatWindow(
-        todayForecast.graphData,
+      const { start, end, endsAtSunset } = formatWindow(
+        lookup,
         w,
         sunriseHHMM,
         sunsetHHMM,
@@ -191,10 +268,10 @@ export function buildBestPaddlingTimes(
         const [endH, endM] = end.split(":").map(Number);
         const remaining = endH * 60 + endM - (nowH * 60 + nowM);
         if (remaining > 0 && remaining < 60) {
-          note = ` – only ~${remaining} min remaining`;
+          note = ` – only ~${remaining} min left`;
         }
       }
-      return `${start}–${end}${note}`;
+      return `${joinWindow(start, end, endsAtSunset)}${note}`;
     })
     .join(", ");
 
@@ -248,11 +325,13 @@ export function buildHourlyForecastText(
   return lines.join("\n");
 }
 
-// True if there are any non-dark slots still to come today.
+// True if there's any daylight left today: it's light now, or there are
+// non-dark slots still to come.
 export function hasDaylightRemaining(
   todayForecast: DayForecast | null
 ): boolean {
   if (!todayForecast) return false;
+  if (isLightNow(todayForecast)) return true;
   const nowHour = getLondonHour();
   return todayForecast.graphData.some(
     (pt) => hourOf(pt.time) >= nowHour && !pt.reasons.includes("Dark")
@@ -350,14 +429,14 @@ export function buildNextDaytimeOutlook(
     const label = bestStatus === "Light Green" ? "light green" : "dark green";
     const ranges = windows
       .map((w) => {
-        const { start, end } = formatWindow(
+        const { start, end, endsAtSunset } = formatWindow(
           day.graphData,
           w,
           sunriseHHMM,
           sunsetHHMM,
           false
         );
-        return `${start}–${end}`;
+        return joinWindow(start, end, endsAtSunset);
       })
       .join(", ");
     bestTimes = `${ranges} (${label})`;
@@ -378,11 +457,16 @@ export interface BestConditions {
 // are forecast in that period.
 export function buildBestConditions(
   forecastDays: DayForecast[] | null,
-  currentStatus?: Status
+  currentStatus?: Status,
+  currentReasons?: string[]
 ): BestConditions | null {
   const todayForecast = forecastDays?.[0] ?? null;
   if (hasDaylightRemaining(todayForecast)) {
-    const best = buildBestPaddlingTimes(todayForecast, currentStatus);
+    const best = buildBestPaddlingTimes(
+      todayForecast,
+      currentStatus,
+      currentReasons
+    );
     return best ? { text: best.text, windows: best.windows } : null;
   }
   const outlook = buildNextDaytimeOutlook(forecastDays);

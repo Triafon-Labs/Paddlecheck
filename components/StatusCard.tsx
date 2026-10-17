@@ -17,7 +17,10 @@ import {
   ContributingFactors,
   BeAware,
   beAwareItemsFor,
+  sunsetItemFor,
 } from "./ConditionFactors";
+import { useKayakContext } from "@/lib/KayakDataContext";
+import { getLondonHHMM, useNowTicking } from "@/lib/time";
 import { collapseMotion, springTransition } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
 import WeatherWarnings from "./WeatherWarnings";
@@ -34,6 +37,9 @@ const SCALE_SEGMENT_COUNT = (
 ).filter((s) => s !== "Unknown").length;
 
 const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
+  const { forecastDays } = useKayakContext();
+  // Ticks so the sunset countdown stays right while the page is left open.
+  const now = useNowTicking();
   const renderContent = () => {
     if (loading) {
       return (
@@ -92,7 +98,15 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
       );
     }
     if (conditions) {
-      const beAwareItems = beAwareItemsFor(conditions);
+      const [nowH, nowM] = getLondonHHMM(now).split(":").map(Number);
+      const sunsetItem = sunsetItemFor(
+        nowH * 60 + nowM,
+        forecastDays?.[0]?.sunset ?? null
+      );
+      const beAwareItems = [
+        ...beAwareItemsFor(conditions),
+        ...(sunsetItem ? [sunsetItem] : []),
+      ];
       return (
         <Grow in appear {...springTransition()}>
           <Box>

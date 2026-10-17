@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions, DayForecast } from "@/types";
 import {
+  buildBestConditions,
   buildHourlyForecastText,
   buildNextDaytimeOutlook,
   relativeDayLabel,
@@ -56,6 +57,13 @@ async function streamBriefing(
   const hourlyForecast = targetDay ? buildHourlyForecastText(targetDay) : null;
   const outlook = currentlyDark ? buildNextDaytimeOutlook(forecastDays) : null;
 
+  // The same window the share text names, worked out here rather than left
+  // to the model: it only has to put it into words, not read it off the
+  // forecast, and it never sees an hour's status beyond this.
+  const bestWindows =
+    buildBestConditions(forecastDays, conditions.overallStatus)?.windows ??
+    null;
+
   // Only surface warnings that actually fall within the day being summarised
   // (today, or the next daylight day if it's currently dark) - a warning for
   // later in the week shouldn't show up in "today's" briefing.
@@ -79,6 +87,7 @@ async function streamBriefing(
       currentTime,
       model,
       period,
+      bestWindows,
       outlook: outlook
         ? { dayLabel: outlook.dayLabel, rangesText: outlook.rangesText }
         : null,

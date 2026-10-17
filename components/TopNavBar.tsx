@@ -26,11 +26,7 @@ import {
   formatTemperature,
   formatWindSpeed,
 } from "@/lib/units";
-import {
-  buildBestPaddlingTimes,
-  buildNextDaytimeOutlook,
-  hasDaylightRemaining,
-} from "@/lib/forecast";
+import { buildBestConditions } from "@/lib/forecast";
 import { getRelativeTimeString, getLondonHHMM } from "@/lib/time";
 import { collapseMotion } from "@/lib/m3-palette";
 
@@ -121,26 +117,13 @@ const buildShareText = (
   const weatherLine = [tempStr, windStr].filter(Boolean).join(" | ");
   if (weatherLine) lines.push(weatherLine);
 
-  const todayForecast = forecastDays?.[0] ?? null;
-  if (hasDaylightRemaining(todayForecast)) {
-    const bestTimes = buildBestPaddlingTimes(
-      todayForecast,
-      conditions.overallStatus
-    );
-    if (bestTimes) {
-      lines.push("");
-      lines.push(`🟢 *${bestTimes.text}*`);
-    }
-  } else {
-    const outlook = buildNextDaytimeOutlook(forecastDays);
-    if (outlook && outlook.bestTimes) {
-      // Format tomorrow's times directly as "🟢 *Best conditions tomorrow: ...*" or "🟢 *Best conditions later today: ...*"
-      // instead of mentioning it is currently dark and outputting raw weather summary text.
-      lines.push("");
-      lines.push(
-        `🟢 *Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}*`
-      );
-    }
+  const bestConditions = buildBestConditions(
+    forecastDays,
+    conditions.overallStatus
+  );
+  if (bestConditions) {
+    lines.push("");
+    lines.push(`🟢 *${bestConditions.text}*`);
   }
 
   return lines.join("\n");

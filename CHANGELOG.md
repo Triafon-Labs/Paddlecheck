@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.37.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.37.0...paddlecheck-v1.37.1) (2026-10-17)
+
+
+### Bug Fixes
+
+* count the last daylight hour as today and show the sunset countdown on the current status ([1fdc49f](https://github.com/dylanr97/Paddlecheck/commit/1fdc49f679b109bcc1ba689aab9d3788b54ccf6a))
+* name sunset as a best window's end and keep the share link on its own line ([16ebae8](https://github.com/dylanr97/Paddlecheck/commit/16ebae891dfe0b6d2fad0213edb32d3df3a3029d))
+
 ## [1.37.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.36.1...paddlecheck-v1.37.0) (2026-10-17)
 
 

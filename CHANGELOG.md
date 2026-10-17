@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.37.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.37.1...paddlecheck-v1.37.2) (2026-10-17)
+
+
+### Bug Fixes
+
+* keep the conditions report a neutral description of conditions ([06fbbf9](https://github.com/dylanr97/Paddlecheck/commit/06fbbf9699de320006e38bfc15144b83ff260890))
+
 ## [1.37.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.37.0...paddlecheck-v1.37.1) (2026-10-17)
 
 

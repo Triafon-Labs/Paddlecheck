@@ -119,7 +119,8 @@ const buildShareText = (
 
   const bestConditions = buildBestConditions(
     forecastDays,
-    conditions.overallStatus
+    conditions.overallStatus,
+    conditions.reasons
   );
   if (bestConditions) {
     lines.push("");

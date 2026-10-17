@@ -61,8 +61,11 @@ async function streamBriefing(
   // to the model: it only has to put it into words, not read it off the
   // forecast, and it never sees an hour's status beyond this.
   const bestWindows =
-    buildBestConditions(forecastDays, conditions.overallStatus)?.windows ??
-    null;
+    buildBestConditions(
+      forecastDays,
+      conditions.overallStatus,
+      conditions.reasons
+    )?.windows ?? null;
 
   // Only surface warnings that actually fall within the day being summarised
   // (today, or the next daylight day if it's currently dark) - a warning for

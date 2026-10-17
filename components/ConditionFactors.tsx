@@ -6,10 +6,12 @@ import HelpOutlined from "@mui/icons-material/HelpOutlined";
 import Air from "@mui/icons-material/Air";
 import WaterDrop from "@mui/icons-material/WaterDrop";
 import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
+import NightsStay from "@mui/icons-material/NightsStay";
 import { Status } from "@/types";
 import InfoPanel from "./InfoPanel";
 import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
 import { formatWindGust } from "@/lib/units";
+import { hhmmOfISO, minutesOfISO } from "@/lib/time";
 
 // The "Contributing Factors" and "Be Aware" sections, shared by the current
 // status (StatusCard) and a picked forecast hour (ForecastHourDetails) so the
@@ -175,6 +177,40 @@ export const beAwareItemsFor = ({
     ? [{ key: "rain", Icon: WaterDrop, text: weatherDescription || "Rain" }]
     : []),
 ];
+
+// How far ahead of sunset to start counting down to it - about a club
+// session's length, so it's there when choosing when to start without
+// turning up on most of the afternoon.
+const SUNSET_COUNTDOWN_MINUTES = 2 * 60;
+
+// 70 -> "1 h 10 min", 60 -> "1 h", 10 -> "10 min".
+const formatDuration = (minutes: number) => {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m} min`;
+  return m === 0 ? `${h} h` : `${h} h ${m} min`;
+};
+
+// Sunset is counted down over the hours leading up to it, for planning when
+// to get off the water - from now for the current status, from the start of
+// the hour for a forecast hour. Sunrise gets nothing: once it's light it
+// only gets lighter.
+export const sunsetItemFor = (
+  fromMinutes: number,
+  sunset: string | null
+): BeAwareItem | null => {
+  const sunsetMinutes = minutesOfISO(sunset);
+  if (!sunset || sunsetMinutes === null) return null;
+  const minutesToSunset = sunsetMinutes - fromMinutes;
+  if (minutesToSunset <= 0 || minutesToSunset > SUNSET_COUNTDOWN_MINUTES) {
+    return null;
+  }
+  return {
+    key: "sunset",
+    Icon: NightsStay,
+    text: `Sunset at ${hhmmOfISO(sunset)} (${formatDuration(minutesToSunset)} away)`,
+  };
+};
 
 export const BeAware: React.FC<{
   items: BeAwareItem[];

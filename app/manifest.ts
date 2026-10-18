@@ -10,9 +10,10 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#0A1929",
     theme_color: "#0A1929",
     // A plain ("any") and a maskable icon at each of 192 and 512px. Chrome
-    // won't offer to install without an "any" icon of at least 144px; that
-    // used to be favicon.svg, which is a 1.25MB PNG wrapped in an SVG rather
-    // than a vector. These are the same transparent artwork, resized.
+    // won't offer to install without an "any" icon of at least 144px. All of
+    // them are rendered from favicon.svg: the "any" pair transparent, the
+    // maskable pair on white with the whole logo - paddle tips included -
+    // inside the central 80% safe zone that launcher masks never crop.
     icons: [
       {
         src: "/icon-192.png",

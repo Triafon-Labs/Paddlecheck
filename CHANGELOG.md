@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.38.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.37.2...paddlecheck-v1.38.0) (2026-10-18)
+
+
+### Features
+
+* add a flat highlight to the logo's sun ([f6ae692](https://github.com/dylanr97/Paddlecheck/commit/f6ae6929a713efd6c7cb40216bd54c08ef9c2698))
+* draw the logo's storm cloud as overlapping puffs ([a328eda](https://github.com/dylanr97/Paddlecheck/commit/a328eda89f85f77092b1f4426ec65e3f7acb5941))
+* give the logo's sun its shading back ([c88c2c2](https://github.com/dylanr97/Paddlecheck/commit/c88c2c247a7e7b6ceb246d5d2fe24c2bd9111013))
+* replace the logo with a real vector and regenerate every icon ([cce8d94](https://github.com/dylanr97/Paddlecheck/commit/cce8d94932b53c631f87986143a1a14d4e721f03))
+* shade the logo's storm cloud to match the sun ([61d3dd4](https://github.com/dylanr97/Paddlecheck/commit/61d3dd4a83e06aebc6515085f9fce05107b36e2a))
+
+
+### Bug Fixes
+
+* drop the overlap lines from the logo's cloud ([4ac8e20](https://github.com/dylanr97/Paddlecheck/commit/4ac8e202be77e047643fba204d484c8272a17b13))
+* layer the logo's cloud puffs asymmetrically ([650eac4](https://github.com/dylanr97/Paddlecheck/commit/650eac499e530e634a0de859e0e47c970b0abfcc))
+* make the logo's stormy water one deep blue ([f164c17](https://github.com/dylanr97/Paddlecheck/commit/f164c17b4f385fb13422e9bd818b835b53937ff0))
+* shade the logo's sun with a flat crescent instead of a soft sheen ([8e6f050](https://github.com/dylanr97/Paddlecheck/commit/8e6f05055f935d38160f8566f6052f14f8dbfdd1))
+
 ## [1.37.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.37.1...paddlecheck-v1.37.2) (2026-10-17)
 
 

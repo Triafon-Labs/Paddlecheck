@@ -64,9 +64,9 @@ export default function RootLayout({
           modeStorageKey={STORAGE_KEYS.THEME_MODE}
         />
         <link rel="icon" href="/favicon.ico" />
-        {/* Not favicon.svg, which browsers prefer when offered: it is a
-            1.25MB PNG wrapped in an SVG rather than a vector, so it cost a
-            tab icon a megabyte for no gain in sharpness. */}
+        {/* Browsers that support SVG favicons prefer it and stay sharp at any
+            density; the .ico and PNG cover the rest. */}
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link
           rel="icon"
           type="image/png"

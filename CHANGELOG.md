@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.38.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.38.0...paddlecheck-v1.38.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* measure river level changes back from the latest reading ([5420434](https://github.com/dylanr97/Paddlecheck/commit/5420434e3e167abe1769d7aa8bcba670c190c534))
+* start the Bewdley forecast on the latest Worcester reading ([fd10fb9](https://github.com/dylanr97/Paddlecheck/commit/fd10fb9b9769d8957d2d2e7c8b9140e9fa8dd5d2))
+
+
+### Documentation
+
+* label station 2642 as Worcester (Barbourne), not Diglis ([01977d5](https://github.com/dylanr97/Paddlecheck/commit/01977d549dd8df824098cec640119c7eca36e2b4))
+
 ## [1.38.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.37.2...paddlecheck-v1.38.0) (2026-10-18)
 
 

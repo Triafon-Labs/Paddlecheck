@@ -59,7 +59,7 @@ export const USEFUL_LINKS = [
 // Station ID for the Environment Agency Flood Monitoring API.
 // Browse available stations at: https://environment.data.gov.uk/flood-monitoring/id/stations
 // Find your nearest station, then copy the numeric ID from the URL (e.g. "2642").
-export const RIVER_STATION_ID = "2642"; // Diglis, Worcester
+export const RIVER_STATION_ID = "2642"; // Worcester (Barbourne)
 export const LATITUDE = 52.2;
 export const LONGITUDE = -2.2;
 export const HISTORICAL_DAYS = 5;

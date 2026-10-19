@@ -8,8 +8,7 @@ const read = () =>
   localStorage.getItem(STORAGE_KEYS.FORECAST_SHOW_NIGHT) === "true";
 
 // Whether the forecast chart shows night hours, shared between the Settings
-// switch and the chart (and the chart's own "Show night hours" prompt when
-// no daylight is left), which all need to agree without a reload. Off by
+// switch and the chart, which need to agree without a reload. Off by
 // default: darkness alone pushes every night hour up a step, so for
 // planning a paddle they're mostly noise.
 export const useShowNightHours = (): [boolean, (show: boolean) => void] => {

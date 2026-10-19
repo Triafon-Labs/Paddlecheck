@@ -214,8 +214,11 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const chartRef = useRef<HTMLDivElement>(null);
   // Night hours are hidden unless turned on in Settings (see
-  // useShowNightHours for why).
-  const [showNight, setShowNight] = useShowNightHours();
+  // useShowNightHours for why). The "No daylight left" prompt only reveals
+  // them until the page is reloaded, leaving the setting itself alone.
+  const [showNightSetting] = useShowNightHours();
+  const [revealNight, setRevealNight] = useState(false);
+  const showNight = showNightSetting || revealNight;
 
   const visibleHours = (day: DayForecast) =>
     showNight
@@ -469,7 +472,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               ? "No daylight left today."
               : "No daylight hours forecast for this day."}
           </Typography>
-          <Button onClick={() => setShowNight(true)} sx={{ mt: 1 }}>
+          <Button onClick={() => setRevealNight(true)} sx={{ mt: 1 }}>
             Show night hours
           </Button>
         </Box>

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.39.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.38.1...paddlecheck-v1.39.0) (2026-10-19)
+
+
+### Features
+
+* dash the forecast level lines by source ([bb79b80](https://github.com/dylanr97/Paddlecheck/commit/bb79b80bfde7f07d654137b8968c6a581df7df80))
+
+
+### Bug Fixes
+
+* draw the forecast level lines in on every day ([f123f0a](https://github.com/dylanr97/Paddlecheck/commit/f123f0aa69cf233e66d0fd93826d99da304e7188))
+* keep the no-daylight 'Show night hours' button out of Settings ([fb971b7](https://github.com/dylanr97/Paddlecheck/commit/fb971b7f235b773ffc634c607741a425dde3c388))
+
 ## [1.38.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.38.0...paddlecheck-v1.38.1) (2026-10-19)
 
 

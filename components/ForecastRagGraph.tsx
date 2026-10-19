@@ -133,6 +133,8 @@ interface BarLabelProps {
 // grows in, rather than settling before (or after) the bar finishes.
 const BAR_ANIMATION_DURATION = 400;
 const BAR_ANIMATION_EASING = "ease";
+// How long the level line takes to draw across the whole chart.
+const LINE_SWEEP_DURATION = 1200;
 
 const popIn = {
   animation: `barLabelPopIn ${BAR_ANIMATION_DURATION}ms ${BAR_ANIMATION_EASING} both`,
@@ -385,6 +387,18 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         };
       });
 
+      // Each source's line draws over its own stretch of the sweep, so the
+      // Bewdley and linear lines read as one line drawn left to right.
+      const lineSweep = (source: keyof typeof FORECAST_LINE_DASH) => {
+        const first = chartData.findIndex((d) => d[source] !== null);
+        const last = chartData.findLastIndex((d) => d[source] !== null);
+        const slot = LINE_SWEEP_DURATION / Math.max(chartData.length - 1, 1);
+        return {
+          animationBegin: Math.max(first, 0) * slot,
+          animationDuration: Math.max(last - first, 1) * slot,
+        };
+      };
+
       const xAxisTicks = chartData
         .filter((d) => parseInt(d.time, 10) % 3 === 0)
         .map((d) => d.time);
@@ -455,10 +469,16 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               />
             </Bar>
             {/* No active dot: recharts would mark the touched hour on the
-                line too, a second "selected" marker beside the outlined bar. */}
+                line too, a second "selected" marker beside the outlined bar.
+                Keyed on the day and slot count so each line redraws from
+                scratch: recharts only plays the draw-in on a line's first
+                render, and a line that mounted empty (no hours from its
+                source that day) would otherwise pop in without it. */}
             {FORECAST_LINES.map(({ source, opacity }) => (
               <Line
-                key={source}
+                key={`${source}-${selectedDay}-${chartData.length}`}
+                {...lineSweep(source)}
+                animationEasing="linear"
                 type="monotone"
                 dataKey={source}
                 stroke={theme.palette.primary.main}

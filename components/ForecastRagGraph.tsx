@@ -27,9 +27,14 @@ import {
   ReferenceLine,
   LabelList,
 } from "recharts";
-import { DayForecast, ForecastGraphDataPoint, WeatherWarning } from "@/types";
+import {
+  DayForecast,
+  ForecastGraphDataPoint,
+  ForecastSource,
+  WeatherWarning,
+} from "@/types";
 import { ragStatus } from "@/lib/rag";
-import { WARNING_COLORS } from "@/lib/config";
+import { FORECAST_LINE_DASH, WARNING_COLORS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -93,6 +98,16 @@ const IconLabel = ({ viewBox, icon, time }: IconLabelProps) => {
     </foreignObject>
   );
 };
+
+// The level line for each forecast source, drawn in this order. Only
+// Bewdley's is full strength; the estimates beyond it are faded.
+const FORECAST_LINES: {
+  source: keyof typeof FORECAST_LINE_DASH;
+  opacity: number;
+}[] = [
+  { source: "bewdley", opacity: 1 },
+  { source: "linear", opacity: 0.5 },
+];
 
 // A chart slot: a shown hour, or a "ghost" - a hidden night hour kept as an
 // empty slot because the sun rises or sets in it, so its marker can sit in
@@ -350,22 +365,23 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
       const chartData = rows.map((d, i) => {
         // An empty slot draws nothing - no bar, no level line, no label.
         if (d.ghost) {
-          return { ...d, value: null, bewdleyLevel: null, linearLevel: null };
+          return { ...d, value: null, bewdley: null, linear: null };
         }
         const scaled = d.forecastLevel / dayMaxLevel;
-        const isBewdley = d.forecastSource === "bewdley";
+        // Each source's line runs on to the next hour's point, so the lines
+        // join up where the source changes without overlapping. Held hours
+        // get no line at all: they aren't a forecast, and a flat line would
+        // read as one that says the river will stay steady.
         const prevSource = i > 0 ? rows[i - 1].forecastSource : null;
-        const nextSource =
-          i < rows.length - 1 ? rows[i + 1].forecastSource : null;
-        const inBewdleyLine = isBewdley || prevSource === "bewdley";
-        // Held hours get no line at all: they aren't a forecast, and a flat
-        // line would read as one that says the river will stay steady.
-        const inLinearLine =
-          d.forecastSource === "linear" || nextSource === "linear";
+        const inLine = (source: ForecastSource) =>
+          d.forecastSource === source ||
+          (prevSource === source && d.forecastSource !== "held")
+            ? scaled
+            : null;
         return {
           ...d,
-          bewdleyLevel: inBewdleyLine ? scaled : null,
-          linearLevel: inLinearLine ? scaled : null,
+          bewdley: inLine("bewdley"),
+          linear: inLine("linear"),
         };
       });
 
@@ -440,26 +456,20 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
             </Bar>
             {/* No active dot: recharts would mark the touched hour on the
                 line too, a second "selected" marker beside the outlined bar. */}
-            <Line
-              type="monotone"
-              dataKey="bewdleyLevel"
-              stroke={theme.palette.primary.main}
-              dot={false}
-              activeDot={false}
-              strokeWidth={2}
-              connectNulls={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="linearLevel"
-              stroke={theme.palette.primary.main}
-              dot={false}
-              activeDot={false}
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              strokeOpacity={0.5}
-              connectNulls={false}
-            />
+            {FORECAST_LINES.map(({ source, opacity }) => (
+              <Line
+                key={source}
+                type="monotone"
+                dataKey={source}
+                stroke={theme.palette.primary.main}
+                dot={false}
+                activeDot={false}
+                strokeWidth={2}
+                strokeDasharray={FORECAST_LINE_DASH[source]}
+                strokeOpacity={opacity}
+                connectNulls={false}
+              />
+            ))}
           </ComposedChart>
         </ResponsiveContainer>
       );

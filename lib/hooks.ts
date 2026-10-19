@@ -376,6 +376,14 @@ export const useKayakData = () => {
 
       // Tracks the last Bewdley-based forecast level and the hoursAhead at
       // which the Bewdley data ran out, so linear regression is anchored there.
+      // The Bewdley delta is measured from the moment Worcester's latest
+      // reading was taken, so the forecast picks up exactly where it ends.
+      const latestReading =
+        riverData.historicalData[riverData.historicalData.length - 1];
+      const latestReadingTime = latestReading
+        ? new Date(latestReading.dateTime)
+        : now;
+
       let lastBewdleyForecast: number | null = null;
       let transitionHoursAhead: number | null = null;
 
@@ -407,7 +415,7 @@ export const useKayakData = () => {
                   bewdleyData.forecasts,
                   bewdleyData.observations,
                   targetWorcesterTime,
-                  now
+                  latestReadingTime
                 )
               : null;
 

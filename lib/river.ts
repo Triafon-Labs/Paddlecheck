@@ -80,49 +80,82 @@ export const fetchBewdleyForecast = async (
 };
 
 // Apply a delta-transfer from Bewdley's data to forecast Worcester's level.
-// Worcester's current level already reflects what Bewdley was doing 6 hours
-// ago, so the reference baseline is Bewdley at (now – 6h), not Bewdley now.
-// delta = bewdley(targetWorcesterTime - 6h) – bewdley(now – 6h)
+// Worcester's latest reading already reflects what Bewdley was doing 6 hours
+// before it was taken, so that is the baseline – anchored to the reading's own
+// timestamp, not "now", so the forecast starts exactly on the last reading
+// instead of jumping by however much Bewdley moved while the feed lagged.
+// delta = bewdley(targetWorcesterTime - 6h) – bewdley(worcesterReadingTime - 6h)
 // worcesterForecasted = worcesterCurrentLevel + delta
 export const getBewdleyBasedWorcesterLevel = (
   worcesterCurrentLevel: number,
   bewdleyForecasts: BewdleyForecastPoint[],
   bewdleyObservations: BewdleyForecastPoint[],
   targetWorcesterTime: Date,
-  now: Date
+  worcesterReadingTime: Date
 ): number | null => {
-  const allPoints = [...bewdleyObservations, ...bewdleyForecasts];
-  if (!allPoints.length) return null;
+  const series = buildBewdleySeries(bewdleyObservations, bewdleyForecasts);
+  const lagMs = BEWDLEY_TRAVEL_HOURS * TIME_PERIODS.ONE_HOUR;
 
-  const findClosest = (target: Date): BewdleyForecastPoint | null => {
-    let closest: BewdleyForecastPoint | null = null;
-    let minDiff = Infinity;
-    for (const pt of allPoints) {
-      const diff = Math.abs(pt.timestamp.getTime() - target.getTime());
-      if (diff < minDiff) {
-        minDiff = diff;
-        closest = pt;
-      }
-    }
-    return closest && minDiff <= 45 * 60 * 1000 ? closest : null;
-  };
-
-  // Baseline: what Bewdley was reading 6h ago (already baked into Worcester's current level)
-  const baselineBewdleyTime = new Date(
-    now.getTime() - BEWDLEY_TRAVEL_HOURS * TIME_PERIODS.ONE_HOUR
+  const baseline = interpolateLevel(
+    series,
+    worcesterReadingTime.getTime() - lagMs
   );
-  const baseline = findClosest(baselineBewdleyTime);
-  if (!baseline) return null;
-
-  // Target: what Bewdley was/is/will be at (targetWorcesterTime – 6h)
-  const targetBewdleyTime = new Date(
-    targetWorcesterTime.getTime() - BEWDLEY_TRAVEL_HOURS * TIME_PERIODS.ONE_HOUR
+  const target = interpolateLevel(
+    series,
+    targetWorcesterTime.getTime() - lagMs
   );
-  const target = findClosest(targetBewdleyTime);
-  if (!target) return null;
+  if (baseline === null || target === null) return null;
 
-  const delta = target.level - baseline.level;
-  return Math.max(0, worcesterCurrentLevel + delta);
+  return Math.max(0, worcesterCurrentLevel + (target - baseline));
+};
+
+// One time-ordered Bewdley series: observations up to the latest one, then the
+// published forecast after it. The forecast was issued some time ago and rarely
+// starts on the latest observation, so it is shifted to start there – otherwise
+// the gap between the two shows up as a step in Worcester's forecast.
+const buildBewdleySeries = (
+  observations: BewdleyForecastPoint[],
+  forecasts: BewdleyForecastPoint[]
+): BewdleyForecastPoint[] => {
+  const observed = [...observations].sort(
+    (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+  );
+  const forecast = [...forecasts].sort(
+    (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+  );
+  const latest = observed[observed.length - 1];
+  if (!latest) return forecast;
+
+  const latestMs = latest.timestamp.getTime();
+  const forecastAtLatest = interpolateLevel(forecast, latestMs);
+  const offset =
+    forecastAtLatest === null ? 0 : latest.level - forecastAtLatest;
+  const future = forecast
+    .filter((pt) => pt.timestamp.getTime() > latestMs)
+    .map((pt) => ({ timestamp: pt.timestamp, level: pt.level + offset }));
+
+  return [...observed, ...future];
+};
+
+// Linearly interpolates a time-ordered series at `ms`. Null outside the series,
+// or across a gap wider than BEWDLEY_MAX_GAP_MS (missing data, not a trend).
+const BEWDLEY_MAX_GAP_MS = 3 * TIME_PERIODS.ONE_HOUR;
+const interpolateLevel = (
+  series: BewdleyForecastPoint[],
+  ms: number
+): number | null => {
+  for (let i = 0; i < series.length; i++) {
+    const b = series[i];
+    const bMs = b.timestamp.getTime();
+    if (bMs === ms) return b.level;
+    if (bMs < ms) continue;
+    if (i === 0) return null;
+    const a = series[i - 1];
+    const aMs = a.timestamp.getTime();
+    if (bMs - aMs > BEWDLEY_MAX_GAP_MS) return null;
+    return a.level + ((b.level - a.level) * (ms - aMs)) / (bMs - aMs);
+  }
+  return null;
 };
 
 export const fetchRiverData = async (

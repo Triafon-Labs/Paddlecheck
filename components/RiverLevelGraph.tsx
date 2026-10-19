@@ -40,7 +40,7 @@ import {
 
 import { ChartDataPoint } from "@/types";
 import { useNowTicking, formatDataAge } from "@/lib/time";
-import { TIME_PERIODS } from "@/lib/config";
+import { FORECAST_LINE_DASH, TIME_PERIODS } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { springTransition } from "@/lib/m3-palette";
@@ -453,11 +453,12 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               connectNulls={false}
               dot={false}
             />
+            {/* forecastData only holds Bewdley-backed hours (lib/hooks.ts). */}
             <Line
               type="monotone"
               dataKey="forecasted"
               stroke={theme.palette.primary.main}
-              strokeDasharray="5 5"
+              strokeDasharray={FORECAST_LINE_DASH.bewdley}
               strokeOpacity={0.7}
               dot={false}
               connectNulls={false}

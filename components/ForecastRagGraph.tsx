@@ -27,9 +27,14 @@ import {
   ReferenceLine,
   LabelList,
 } from "recharts";
-import { DayForecast, ForecastGraphDataPoint, WeatherWarning } from "@/types";
+import {
+  DayForecast,
+  ForecastGraphDataPoint,
+  ForecastSource,
+  WeatherWarning,
+} from "@/types";
 import { ragStatus } from "@/lib/rag";
-import { WARNING_COLORS } from "@/lib/config";
+import { FORECAST_LINE_DASH, WARNING_COLORS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -94,6 +99,16 @@ const IconLabel = ({ viewBox, icon, time }: IconLabelProps) => {
   );
 };
 
+// The level line for each forecast source, drawn in this order. Only
+// Bewdley's is full strength; the estimates beyond it are faded.
+const FORECAST_LINES: {
+  source: keyof typeof FORECAST_LINE_DASH;
+  opacity: number;
+}[] = [
+  { source: "bewdley", opacity: 1 },
+  { source: "linear", opacity: 0.5 },
+];
+
 // A chart slot: a shown hour, or a "ghost" - a hidden night hour kept as an
 // empty slot because the sun rises or sets in it, so its marker can sit in
 // its true place rather than on a neighbouring bar.
@@ -118,6 +133,8 @@ interface BarLabelProps {
 // grows in, rather than settling before (or after) the bar finishes.
 const BAR_ANIMATION_DURATION = 400;
 const BAR_ANIMATION_EASING = "ease";
+// How long the level line takes to draw across the whole chart.
+const LINE_SWEEP_DURATION = 1200;
 
 const popIn = {
   animation: `barLabelPopIn ${BAR_ANIMATION_DURATION}ms ${BAR_ANIMATION_EASING} both`,
@@ -214,8 +231,11 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const chartRef = useRef<HTMLDivElement>(null);
   // Night hours are hidden unless turned on in Settings (see
-  // useShowNightHours for why).
-  const [showNight, setShowNight] = useShowNightHours();
+  // useShowNightHours for why). The "No daylight left" prompt only reveals
+  // them until the page is reloaded, leaving the setting itself alone.
+  const [showNightSetting] = useShowNightHours();
+  const [revealNight, setRevealNight] = useState(false);
+  const showNight = showNightSetting || revealNight;
 
   const visibleHours = (day: DayForecast) =>
     showNight
@@ -347,24 +367,37 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
       const chartData = rows.map((d, i) => {
         // An empty slot draws nothing - no bar, no level line, no label.
         if (d.ghost) {
-          return { ...d, value: null, bewdleyLevel: null, linearLevel: null };
+          return { ...d, value: null, bewdley: null, linear: null };
         }
         const scaled = d.forecastLevel / dayMaxLevel;
-        const isBewdley = d.forecastSource === "bewdley";
+        // Each source's line runs on to the next hour's point, so the lines
+        // join up where the source changes without overlapping. Held hours
+        // get no line at all: they aren't a forecast, and a flat line would
+        // read as one that says the river will stay steady.
         const prevSource = i > 0 ? rows[i - 1].forecastSource : null;
-        const nextSource =
-          i < rows.length - 1 ? rows[i + 1].forecastSource : null;
-        const inBewdleyLine = isBewdley || prevSource === "bewdley";
-        // Held hours get no line at all: they aren't a forecast, and a flat
-        // line would read as one that says the river will stay steady.
-        const inLinearLine =
-          d.forecastSource === "linear" || nextSource === "linear";
+        const inLine = (source: ForecastSource) =>
+          d.forecastSource === source ||
+          (prevSource === source && d.forecastSource !== "held")
+            ? scaled
+            : null;
         return {
           ...d,
-          bewdleyLevel: inBewdleyLine ? scaled : null,
-          linearLevel: inLinearLine ? scaled : null,
+          bewdley: inLine("bewdley"),
+          linear: inLine("linear"),
         };
       });
+
+      // Each source's line draws over its own stretch of the sweep, so the
+      // Bewdley and linear lines read as one line drawn left to right.
+      const lineSweep = (source: keyof typeof FORECAST_LINE_DASH) => {
+        const first = chartData.findIndex((d) => d[source] !== null);
+        const last = chartData.findLastIndex((d) => d[source] !== null);
+        const slot = LINE_SWEEP_DURATION / Math.max(chartData.length - 1, 1);
+        return {
+          animationBegin: Math.max(first, 0) * slot,
+          animationDuration: Math.max(last - first, 1) * slot,
+        };
+      };
 
       const xAxisTicks = chartData
         .filter((d) => parseInt(d.time, 10) % 3 === 0)
@@ -436,27 +469,27 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               />
             </Bar>
             {/* No active dot: recharts would mark the touched hour on the
-                line too, a second "selected" marker beside the outlined bar. */}
-            <Line
-              type="monotone"
-              dataKey="bewdleyLevel"
-              stroke={theme.palette.primary.main}
-              dot={false}
-              activeDot={false}
-              strokeWidth={2}
-              connectNulls={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="linearLevel"
-              stroke={theme.palette.primary.main}
-              dot={false}
-              activeDot={false}
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              strokeOpacity={0.5}
-              connectNulls={false}
-            />
+                line too, a second "selected" marker beside the outlined bar.
+                Keyed on the day and slot count so each line redraws from
+                scratch: recharts only plays the draw-in on a line's first
+                render, and a line that mounted empty (no hours from its
+                source that day) would otherwise pop in without it. */}
+            {FORECAST_LINES.map(({ source, opacity }) => (
+              <Line
+                key={`${source}-${selectedDay}-${chartData.length}`}
+                {...lineSweep(source)}
+                animationEasing="linear"
+                type="monotone"
+                dataKey={source}
+                stroke={theme.palette.primary.main}
+                dot={false}
+                activeDot={false}
+                strokeWidth={2}
+                strokeDasharray={FORECAST_LINE_DASH[source]}
+                strokeOpacity={opacity}
+                connectNulls={false}
+              />
+            ))}
           </ComposedChart>
         </ResponsiveContainer>
       );
@@ -469,7 +502,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
               ? "No daylight left today."
               : "No daylight hours forecast for this day."}
           </Typography>
-          <Button onClick={() => setShowNight(true)} sx={{ mt: 1 }}>
+          <Button onClick={() => setRevealNight(true)} sx={{ mt: 1 }}>
             Show night hours
           </Button>
         </Box>

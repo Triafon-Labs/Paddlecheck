@@ -17,7 +17,7 @@ import {
   AcUnit,
   Foggy,
 } from "@mui/icons-material";
-import { Status } from "@/types";
+import { ForecastSource, Status } from "@/types";
 import { STATUS_COLORS, ON_STATUS_COLORS } from "./statusColors";
 import { formatRiverLevel } from "./units";
 import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
@@ -86,6 +86,17 @@ export const LINEAR_FORECAST_HOURS = 18;
 // BEWDLEY_FORECAST_HOURS on purpose: a round day keeps the view tidy, and the
 // paddling forecast still uses the full Bewdley window.
 export const RIVER_GRAPH_FORECAST_HOURS = 24;
+
+// Dash pattern for each forecast source's level line, shared by the river
+// level graph and the forecast chart: Bewdley tight, the linear trend wider.
+// Held hours get no line (see ForecastRagGraph).
+export const FORECAST_LINE_DASH: Record<
+  Exclude<ForecastSource, "held">,
+  string
+> = {
+  bewdley: "2 3",
+  linear: "6 4",
+};
 
 export const API_ENDPOINTS = {
   RIVER: `https://environment.data.gov.uk/flood-monitoring/id/stations`,

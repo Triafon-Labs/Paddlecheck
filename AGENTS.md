@@ -180,9 +180,11 @@ The word "raises" means incrementing one step up the severity scale.
 
 Two sources are combined transparently:
 
-- **Bewdley delta transfer** (primary, 0–30 h forecast, `BEWDLEY_FORECAST_HOURS`): Upstream Bewdley readings are shifted 6 h forward and applied as a delta to the latest Barbourne reading, measured from Bewdley 6 h before that reading was taken so the forecast starts exactly on it. Bewdley's published forecast is shifted to start on its latest observation, and levels are interpolated between points. Displayed as solid lines in graphs; the river level graph only draws the first `RIVER_GRAPH_FORECAST_HOURS` (24 h).
-- **Linear regression** (fallback, beyond Bewdley horizon): Uses the last 8 h of Barbourne readings to extrapolate a trend, for at most `LINEAR_FORECAST_HOURS` (18 h) after the Bewdley data ends. Displayed as dashed lines.
+- **Bewdley delta transfer** (primary, 0–30 h forecast, `BEWDLEY_FORECAST_HOURS`): Upstream Bewdley readings are shifted 6 h forward and applied as a delta to the latest Barbourne reading, measured from Bewdley 6 h before that reading was taken so the forecast starts exactly on it. Bewdley's published forecast is shifted to start on its latest observation, and levels are interpolated between points. Displayed as tightly dashed lines in both graphs; the river level graph only draws the first `RIVER_GRAPH_FORECAST_HOURS` (24 h).
+- **Linear regression** (fallback, beyond Bewdley horizon): Uses the last 8 h of Barbourne readings to extrapolate a trend, for at most `LINEAR_FORECAST_HOURS` (18 h) after the Bewdley data ends. Displayed as medium dashed lines.
 - **Held** (everything after that): The level is held flat at the last linear estimate, so the RAG status for those hours is driven by the weather. No line is drawn for these hours, and the tooltip reads "Assumed Level" / "Source: None – level held".
+
+The dash patterns live in `FORECAST_LINE_DASH` (`lib/config.ts`).
 
 Bewdley data failure is non-fatal – the app falls back to linear regression silently.
 

@@ -196,8 +196,13 @@ export const fetchRiverData = async (
     const oldestLevel5d = sortedItems[0].value;
     change5d = latestLevel - oldestLevel5d;
 
-    const now = new Date().getTime();
-    const oneHourAgo = new Date(now - TIME_PERIODS.ONE_HOUR);
+    // Measure each window back from the latest reading, not from now: the
+    // feed often lags by up to an hour, and a "now"-anchored 1h window would
+    // then hold only the latest reading and always read 0.00 m.
+    const latestTime = new Date(
+      sortedItems[sortedItems.length - 1].dateTime
+    ).getTime();
+    const oneHourAgo = new Date(latestTime - TIME_PERIODS.ONE_HOUR);
     const oneHourIndex = sortedItems.findIndex(
       (item: RiverReading) => new Date(item.dateTime) >= oneHourAgo
     );
@@ -206,7 +211,9 @@ export const fetchRiverData = async (
       change1h = latestLevel - oldestLevel1h;
     }
 
-    const twentyFourHoursAgo = new Date(now - TIME_PERIODS.TWENTY_FOUR_HOURS);
+    const twentyFourHoursAgo = new Date(
+      latestTime - TIME_PERIODS.TWENTY_FOUR_HOURS
+    );
     const twentyFourHourIndex = sortedItems.findIndex(
       (item: RiverReading) => new Date(item.dateTime) >= twentyFourHoursAgo
     );
@@ -215,7 +222,7 @@ export const fetchRiverData = async (
       change24h = latestLevel - oldestLevel24h;
     }
 
-    const eightHoursAgo = new Date(now - TIME_PERIODS.EIGHT_HOURS);
+    const eightHoursAgo = new Date(latestTime - TIME_PERIODS.EIGHT_HOURS);
     const eightHourIndex = sortedItems.findIndex(
       (item: RiverReading) => new Date(item.dateTime) >= eightHoursAgo
     );

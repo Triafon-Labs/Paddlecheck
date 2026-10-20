@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.40.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.0...paddlecheck-v1.40.1) (2026-10-20)
+
+
+### Performance Improvements
+
+* make every animation run at 60 fps on a phone ([#394](https://github.com/dylanr97/Paddlecheck/issues/394)) ([fe01d31](https://github.com/dylanr97/Paddlecheck/commit/fe01d31321509e7f8cae0021c319dd210786ed04))
+
 ## [1.40.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.39.1...paddlecheck-v1.40.0) (2026-10-20)
 
 

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.40.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.1...paddlecheck-v1.40.2) (2026-10-20)
+
+
+### Performance Improvements
+
+* remove the pauses before forecast, river and settings animations; fix hydration ([#395](https://github.com/dylanr97/Paddlecheck/issues/395)) ([ac9be72](https://github.com/dylanr97/Paddlecheck/commit/ac9be72469c91799fe49dc8cb8e918ea84833977))
+
 ## [1.40.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.0...paddlecheck-v1.40.1) (2026-10-20)
 
 

@@ -5,7 +5,7 @@ import {
   TIME_PERIODS,
   BEWDLEY_CSV_URL,
   BEWDLEY_TRAVEL_HOURS,
-  BEWDLEY_FORECAST_HOURS,
+  BEWDLEY_TREND_HOURS,
 } from "@/lib/config";
 import { FetchLiveness, fetchCacheOptions } from "@/lib/fetchCache";
 
@@ -16,8 +16,8 @@ export interface BewdleyForecastPoint {
 
 /**
  * Fetches the upstream Bewdley river level forecast and observations.
- * Forecast points are kept only as far ahead as they can reach Worcester
- * within BEWDLEY_FORECAST_HOURS, after the travel time.
+ * The whole published forecast is kept – its length varies (24–36 h has been
+ * seen), so the feed decides how far ahead the Bewdley-based forecast reaches.
  */
 export const fetchBewdleyForecast = async (
   liveness: FetchLiveness = {}
@@ -34,12 +34,6 @@ export const fetchBewdleyForecast = async (
 
   const forecasts: BewdleyForecastPoint[] = [];
   const observations: BewdleyForecastPoint[] = [];
-
-  const now = new Date();
-  const forecastCutoff = new Date(
-    now.getTime() +
-      (BEWDLEY_FORECAST_HOURS - BEWDLEY_TRAVEL_HOURS) * TIME_PERIODS.ONE_HOUR
-  );
 
   // Skip header row (index 0)
   for (let i = 1; i < lines.length; i++) {
@@ -58,9 +52,7 @@ export const fetchBewdleyForecast = async (
     if (isNaN(level) || isNaN(timestamp.getTime())) continue;
 
     if (type === "forecast") {
-      if (timestamp <= forecastCutoff) {
-        forecasts.push({ timestamp, level });
-      }
+      forecasts.push({ timestamp, level });
     } else if (type === "observed") {
       observations.push({ timestamp, level });
     }
@@ -107,6 +99,26 @@ export const getBewdleyBasedWorcesterLevel = (
   if (baseline === null || target === null) return null;
 
   return Math.max(0, worcesterCurrentLevel + (target - baseline));
+};
+
+// Bewdley's trend (m/h) over the last BEWDLEY_TREND_HOURS of its series, so
+// the linear fallback carries on where the Bewdley forecast ends rather than
+// from Worcester's own recent readings – on a rise those lag Bewdley by the
+// travel time and are still flat when the Bewdley data runs out.
+export const getBewdleyEndSlope = (
+  bewdleyForecasts: BewdleyForecastPoint[],
+  bewdleyObservations: BewdleyForecastPoint[]
+): number | null => {
+  const series = buildBewdleySeries(bewdleyObservations, bewdleyForecasts);
+  const end = series[series.length - 1];
+  if (!end) return null;
+  const endMs = end.timestamp.getTime();
+  const start = interpolateLevel(
+    series,
+    endMs - BEWDLEY_TREND_HOURS * TIME_PERIODS.ONE_HOUR
+  );
+  if (start === null) return null;
+  return (end.level - start) / BEWDLEY_TREND_HOURS;
 };
 
 // One time-ordered Bewdley series: observations up to the latest one, then the

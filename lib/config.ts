@@ -73,17 +73,17 @@ export const BEWDLEY_CSV_URL =
   "https://check-for-flooding.service.gov.uk/station-csv/2001";
 export const BEWDLEY_TRAVEL_HOURS = 6;
 
-// How far ahead (at Worcester) the Bewdley-based forecast is used: its ~24h
-// published forecast plus the travel time.
-export const BEWDLEY_FORECAST_HOURS = 30;
+// How many hours at the end of the Bewdley series set the trend that the
+// linear fallback continues once the Bewdley forecast runs out.
+export const BEWDLEY_TREND_HOURS = 6;
 
-// How long the local linear trend is extrapolated once the Bewdley forecast
+// How long the linear trend is extrapolated once the Bewdley forecast
 // runs out. Past this the level is held flat at the last estimate – a straight
 // line carried on for days invents floods and droughts the river never sees.
 export const LINEAR_FORECAST_HOURS = 18;
 
 // How far ahead the river level graph's forecast view is drawn. Shorter than
-// BEWDLEY_FORECAST_HOURS on purpose: a round day keeps the view tidy, and the
+// the Bewdley forecast on purpose: a round day keeps the view tidy, and the
 // paddling forecast still uses the full Bewdley window.
 export const RIVER_GRAPH_FORECAST_HOURS = 24;
 

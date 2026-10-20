@@ -140,12 +140,12 @@ public/                  Static assets – icons, favicon, sw.js (offline shell)
 
 ## Data Sources
 
-| Data                             | API                                                                             | Notes                                        |
-| -------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------- |
-| River level readings             | Environment Agency Flood-Monitoring API – station `2642` (Worcester, Barbourne) | Historical readings                          |
-| Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)                  | Used for 0–30 h forecast with 6 h travel lag |
-| Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                     | No API key required                          |
-| Weather warnings                 | Met Office warnings RSS, West Midlands region                                   | Parsed in `lib/metOfficeWarnings.ts`         |
+| Data                             | API                                                                             | Notes                                     |
+| -------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------- |
+| River level readings             | Environment Agency Flood-Monitoring API – station `2642` (Worcester, Barbourne) | Historical readings                       |
+| Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)                  | Used for 0–~42 h forecast, 6 h travel lag |
+| Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                     | No API key required                       |
+| Weather warnings                 | Met Office warnings RSS, West Midlands region                                   | Parsed in `lib/metOfficeWarnings.ts`      |
 
 All of these are fetched server-side by `lib/conditions.ts` for `/api/conditions`; the
 browser never calls them directly.
@@ -184,8 +184,8 @@ The word "raises" means incrementing one step up the severity scale.
 
 Two sources are combined transparently:
 
-- **Bewdley delta transfer** (primary, 0–30 h forecast, `BEWDLEY_FORECAST_HOURS`): Upstream Bewdley readings are shifted 6 h forward and applied as a delta to the latest Barbourne reading, measured from Bewdley 6 h before that reading was taken so the forecast starts exactly on it. Bewdley's published forecast is shifted to start on its latest observation, and levels are interpolated between points. Displayed as tightly dashed lines in both graphs; the river level graph only draws the first `RIVER_GRAPH_FORECAST_HOURS` (24 h).
-- **Linear regression** (fallback, beyond Bewdley horizon): Uses the last 8 h of Barbourne readings to extrapolate a trend, for at most `LINEAR_FORECAST_HOURS` (18 h) after the Bewdley data ends. Displayed as medium dashed lines.
+- **Bewdley delta transfer** (primary, as far as the published forecast reaches plus the 6 h travel time – about 42 h for a 36 h feed): Upstream Bewdley readings are shifted 6 h forward and applied as a delta to the latest Barbourne reading, measured from Bewdley 6 h before that reading was taken so the forecast starts exactly on it. Bewdley's published forecast is shifted to start on its latest observation, and levels are interpolated between points. Displayed as tightly dashed lines in both graphs; the river level graph only draws the first `RIVER_GRAPH_FORECAST_HOURS` (24 h).
+- **Linear trend** (fallback, beyond Bewdley horizon): Continues Bewdley's trend over the last `BEWDLEY_TREND_HOURS` (6 h) of its series from where the Bewdley forecast ends, for at most `LINEAR_FORECAST_HOURS` (18 h). With no Bewdley data it uses a regression over the last 8 h of Barbourne readings instead – Barbourne lags Bewdley by the travel time, so on a rise its own trend is still flat when the Bewdley data runs out. Displayed as medium dashed lines.
 - **Held** (everything after that): The level is held flat at the last linear estimate, so the RAG status for those hours is driven by the weather. No line is drawn for these hours, and the tooltip reads "Assumed Level" / "Source: None – level held".
 
 The dash patterns live in `FORECAST_LINE_DASH` (`lib/config.ts`).
@@ -381,16 +381,16 @@ If Git hooks are not firing:
 
 ## Key Configuration Constants (`lib/config.ts`)
 
-| Constant                 | Value                  | Meaning                                      |
-| ------------------------ | ---------------------- | -------------------------------------------- |
-| `RIVER_STATION_ID`       | `2642`                 | EA API station (Worcester, Barbourne)        |
-| `BEWDLEY_STATION_ID`     | `2001`                 | Upstream station for forecast                |
-| `BEWDLEY_LAG_HOURS`      | `6`                    | Travel time Bewdley → Worcester              |
-| `BEWDLEY_FORECAST_HOURS` | `30`                   | How far ahead the Bewdley forecast is used   |
-| `LINEAR_FORECAST_HOURS`  | `18`                   | Linear trend after Bewdley; level held after |
-| `RAG_THRESHOLDS`         | `[1.0, 1.4, 2.2, 5.0]` | River level breakpoints (metres)             |
-| `TEMP_HIGH`              | `13°C`                 | Above this: no temperature penalty           |
-| `TEMP_LOW`               | `5°C`                  | Below this: cold water shock risk            |
-| `WIND_THRESHOLD`         | `15` mph               | Above this: wind penalty applied             |
-| `VISIBILITY_THRESHOLD`   | `1000` m               | Below this: fog penalty applied              |
-| Coordinates              | `52.2, -2.2`           | Open-Meteo weather location                  |
+| Constant                | Value                  | Meaning                                      |
+| ----------------------- | ---------------------- | -------------------------------------------- |
+| `RIVER_STATION_ID`      | `2642`                 | EA API station (Worcester, Barbourne)        |
+| `BEWDLEY_STATION_ID`    | `2001`                 | Upstream station for forecast                |
+| `BEWDLEY_LAG_HOURS`     | `6`                    | Travel time Bewdley → Worcester              |
+| `BEWDLEY_TREND_HOURS`   | `6`                    | Bewdley trend window for the linear fallback |
+| `LINEAR_FORECAST_HOURS` | `18`                   | Linear trend after Bewdley; level held after |
+| `RAG_THRESHOLDS`        | `[1.0, 1.4, 2.2, 5.0]` | River level breakpoints (metres)             |
+| `TEMP_HIGH`             | `13°C`                 | Above this: no temperature penalty           |
+| `TEMP_LOW`              | `5°C`                  | Below this: cold water shock risk            |
+| `WIND_THRESHOLD`        | `15` mph               | Above this: wind penalty applied             |
+| `VISIBILITY_THRESHOLD`  | `1000` m               | Below this: fog penalty applied              |
+| Coordinates             | `52.2, -2.2`           | Open-Meteo weather location                  |

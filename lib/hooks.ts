@@ -18,13 +18,16 @@ import {
   RAG_STATUS_MAP,
   ragHeight,
 } from "@/lib/rag";
-import { forecastRiverLevel, getBewdleyBasedWorcesterLevel } from "@/lib/river";
+import {
+  forecastRiverLevel,
+  getBewdleyBasedWorcesterLevel,
+  getBewdleyEndSlope,
+} from "@/lib/river";
 import { getVisibilityDescription, getWeatherDescription } from "@/lib/weather";
 import {
   isRainy,
   TIME_PERIODS,
   DATA_STALE_THRESHOLD_MS,
-  BEWDLEY_FORECAST_HOURS,
   LINEAR_FORECAST_HOURS,
   RIVER_GRAPH_FORECAST_HOURS,
 } from "@/lib/config";
@@ -364,15 +367,19 @@ export const useKayakData = () => {
       const days: DayForecast[] = [];
       const forecastPoints: ChartDataPoint[] = [];
 
-      // Pre-compute Worcester's linear trend slope (m/h) once so the fallback
-      // after the Bewdley window can continue smoothly from wherever Bewdley
-      // left off, rather than jumping back to the current level.
+      // Worcester's own linear trend (m/h), for when there's no Bewdley data
+      // at all. Once a Bewdley forecast has run out, the fallback continues
+      // Bewdley's final trend instead (getBewdleyEndSlope).
       const worcesterSlopePerHour =
         forecastRiverLevel(
           riverData.latestLevel ?? 0,
           riverData.historicalData,
           1
         ) - (riverData.latestLevel ?? 0);
+      const bewdleySlopePerHour = getBewdleyEndSlope(
+        bewdleyData.forecasts,
+        bewdleyData.observations
+      );
 
       // Tracks the last Bewdley-based forecast level and the hoursAhead at
       // which the Bewdley data ran out, so linear regression is anchored there.
@@ -408,8 +415,7 @@ export const useKayakData = () => {
           );
 
           const bewdleyLevel =
-            bewdleyData.currentLevel !== null &&
-            hoursAhead <= BEWDLEY_FORECAST_HOURS
+            bewdleyData.currentLevel !== null
               ? getBewdleyBasedWorcesterLevel(
                   riverData.latestLevel ?? 0,
                   bewdleyData.forecasts,
@@ -427,8 +433,9 @@ export const useKayakData = () => {
             lastBewdleyForecast = bewdleyLevel;
             transitionHoursAhead = hoursAhead;
           } else {
-            // Anchor linear regression to the last Bewdley-forecasted level so
-            // there's no jump at the transition point. The trend only runs for
+            // Anchor the trend to the last Bewdley-forecasted level so there's
+            // no jump at the transition point, and continue Bewdley's own
+            // trend from there when there is one. The trend only runs for
             // LINEAR_FORECAST_HOURS; after that the level is held where the
             // trend left it rather than extrapolated for days.
             const baseLevel =
@@ -442,9 +449,13 @@ export const useKayakData = () => {
               hoursAhead - baseHours > LINEAR_FORECAST_HOURS
                 ? "held"
                 : "linear";
+            const slopePerHour =
+              lastBewdleyForecast !== null && bewdleySlopePerHour !== null
+                ? bewdleySlopePerHour
+                : worcesterSlopePerHour;
             forecastRiverLevel = Math.max(
               0,
-              baseLevel + worcesterSlopePerHour * linearHours
+              baseLevel + slopePerHour * linearHours
             );
           }
 

@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 import { Status, PaddlerType } from "@/types";
-import { STORAGE_KEYS } from "@/lib/storageKeys";
 import {
   getPaddlingMatrix,
   hasDetailsToShow,
@@ -271,11 +270,6 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
     );
   };
 
-  const savedLevelForSkeleton =
-    typeof window !== "undefined"
-      ? (localStorage.getItem(STORAGE_KEYS.PADDLER_LEVEL) as PaddlerType | null)
-      : null;
-
   return (
     <Card sx={{ width: "100%" }}>
       <CardContent>
@@ -284,10 +278,12 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
         </Typography>
         {loading ? (
           <Box sx={{ mt: 1 }}>
-            {/* Mirrors the layout below, reading the saved level directly
-                rather than from state (which is only populated once the effect
-                runs) so the skeleton reserves the shape the card will take. */}
-            {savedLevelForSkeleton && (
+            {/* Mirrors the layout below for the saved level. That's read
+                after the first render (usePaddlerLevel), not during it: the
+                server can't see localStorage, so reading it here rendered a
+                different skeleton on each side and broke hydration. The first
+                frame shows the no-level shape; the next has the right one. */}
+            {selectedLevel && (
               <Skeleton
                 variant="rounded"
                 height={150}
@@ -304,14 +300,14 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
             />
             <Stack spacing={0.75}>
               {Array.from({
-                length: savedLevelForSkeleton
+                length: selectedLevel
                   ? paddlerTypes.length - 1
                   : paddlerTypes.length,
               }).map((_, i) => (
                 <Skeleton
                   key={i}
                   variant="rounded"
-                  height={savedLevelForSkeleton ? 40 : 96}
+                  height={selectedLevel ? 40 : 96}
                   animation="wave"
                   sx={{ borderRadius: 1.5 }}
                 />

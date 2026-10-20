@@ -8,7 +8,13 @@ import {
   CalendarToday,
   Update,
 } from "@mui/icons-material";
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useDeferredValue,
+} from "react";
 import {
   Card,
   CardContent,
@@ -208,16 +214,20 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   const theme = useTheme();
   const chartRef = useRef<HTMLDivElement>(null);
   const { tooltipActive, chartMoveProps } = useTooltipDismiss(chartRef);
-  const [timeRange, setTimeRange] = useState(
+  const [selectedRange, setSelectedRange] = useState(
     () =>
       (typeof window !== "undefined"
         ? localStorage.getItem(STORAGE_KEYS.RIVER_GRAPH_TIME_RANGE)
         : null) ?? "24h"
   );
+  // The toggle follows a tap at once; the graph follows at low priority, so
+  // building the new range's chart (~200 ms for 5 days on a phone-speed CPU)
+  // happens behind the pill's slide rather than before it.
+  const timeRange = useDeferredValue(selectedRange);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.RIVER_GRAPH_TIME_RANGE, timeRange);
-  }, [timeRange]);
+    localStorage.setItem(STORAGE_KEYS.RIVER_GRAPH_TIME_RANGE, selectedRange);
+  }, [selectedRange]);
 
   const now = useNowTicking();
 
@@ -594,11 +604,11 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               </Typography>
             )}
             <SlidingToggleButtonGroup
-              value={timeRange}
+              value={selectedRange}
               exclusive
               onChange={(_event, newTimeRange) => {
                 if (newTimeRange) {
-                  setTimeRange(newTimeRange);
+                  setSelectedRange(newTimeRange);
                 }
               }}
               aria-label="time range"

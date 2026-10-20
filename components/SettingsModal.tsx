@@ -296,11 +296,28 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     }
   };
 
+  const [prebuilt, setPrebuilt] = useState(false);
+  useEffect(() => {
+    const build = () => setPrebuilt(true);
+    // Safari has no requestIdleCallback; a few seconds after load stands in.
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(build, { timeout: 5000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(build, 3000);
+    return () => window.clearTimeout(id);
+  }, []);
+
   return (
     <Drawer
       anchor="bottom"
       open={open}
       onClose={onClose}
+      // Built ahead of time once the page is idle, then kept, so opening is
+      // only the slide. Built on the tap, the whole sheet - and every style
+      // Emotion has to insert for it - held the first frame for ~200-450 ms
+      // on a phone-speed CPU.
+      ModalProps={{ keepMounted: prebuilt }}
       slotProps={{
         paper: {
           ref: paperRef,

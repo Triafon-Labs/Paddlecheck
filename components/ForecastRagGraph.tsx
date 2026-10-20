@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, {
+  memo,
+  useDeferredValue,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Card,
   CardContent,
@@ -218,6 +224,193 @@ const BarLabel = (props: BarLabelProps) => {
   return <g>{elements}</g>;
 };
 
+// The day's chart. Memoised on the day's data and the theme's colours, and
+// nothing else: the picked hour is outlined by a CSS rule on the box around
+// it (selectionSx) rather than through recharts, so stepping hours never
+// re-renders the chart. Recharts redrew all of it to move one bar's outline,
+// ~130-180 ms a step on a phone-speed CPU.
+interface DayChartProps {
+  data: ForecastGraphDataPoint[];
+  rows: ChartRow[];
+  dayIndex: number;
+  sunrise: string | null;
+  sunset: string | null;
+  lineColor: string;
+  lineStroke: string;
+}
+
+const DayChart = memo(function DayChart({
+  data,
+  rows,
+  dayIndex,
+  sunrise,
+  sunset,
+  lineColor,
+  lineStroke,
+}: DayChartProps) {
+  const sunriseHour = hourOfISO(sunrise);
+  const sunsetHour = hourOfISO(sunset);
+  const inChart = (hour: number | null) =>
+    hour !== null && rows.some((r) => parseInt(r.time, 10) === hour);
+
+  const maxForecastLevel = Math.max(...data.map((d) => d.forecastLevel));
+  const dayMaxLevel = Math.max(Math.ceil(maxForecastLevel), 1);
+
+  const chartData = rows.map((d, i) => {
+    // An empty slot draws nothing - no bar, no level line, no label.
+    if (d.ghost) {
+      return { ...d, value: null, bewdley: null, linear: null };
+    }
+    const scaled = d.forecastLevel / dayMaxLevel;
+    // Each source's line runs on to the next hour's point, so the lines
+    // join up where the source changes without overlapping. Held hours
+    // get no line at all: they aren't a forecast, and a flat line would
+    // read as one that says the river will stay steady.
+    const prevSource = i > 0 ? rows[i - 1].forecastSource : null;
+    const inLine = (source: ForecastSource) =>
+      d.forecastSource === source ||
+      (prevSource === source && d.forecastSource !== "held")
+        ? scaled
+        : null;
+    return {
+      ...d,
+      bewdley: inLine("bewdley"),
+      linear: inLine("linear"),
+    };
+  });
+
+  // Each source's line draws over its own stretch of the sweep, so the
+  // Bewdley and linear lines read as one line drawn left to right.
+  const lineSweep = (source: keyof typeof FORECAST_LINE_DASH) => {
+    const first = chartData.findIndex((d) => d[source] !== null);
+    const last = chartData.findLastIndex((d) => d[source] !== null);
+    const slot = LINE_SWEEP_DURATION / Math.max(chartData.length - 1, 1);
+    return revealSx(
+      `.forecast-line-${source}`,
+      Math.max(last - first, 1) * slot,
+      "linear",
+      Math.max(first, 0) * slot
+    );
+  };
+  // Bars grow and lines draw in CSS, not through recharts
+  // (lib/chartMotion.ts). Both are keyed on the day, so a new day plays
+  // them again and stepping hours within one doesn't.
+  const motionSx = {
+    ...barGrowSx("forecast-bars", BAR_ANIMATION_DURATION, BAR_ANIMATION_EASING),
+    ...FORECAST_LINES.reduce(
+      (sx, { source }) => ({ ...sx, ...lineSweep(source) }),
+      {}
+    ),
+  };
+
+  const xAxisTicks = chartData
+    .filter((d) => parseInt(d.time, 10) % 3 === 0)
+    .map((d) => d.time);
+
+  return (
+    <Box sx={motionSx}>
+      <ResponsiveContainer width="100%" height={200}>
+        <ComposedChart data={chartData} margin={CHART_MARGIN}>
+          <XAxis
+            dataKey="time"
+            ticks={xAxisTicks}
+            interval={0}
+            tick={{ fontSize: 12 }}
+          />
+          <YAxis hide domain={[0, 1.2]} />
+          {inChart(sunriseHour) && sunrise && (
+            <ReferenceLine
+              x={`${sunriseHour}:00`}
+              stroke={lineColor}
+              strokeDasharray="3 3"
+              label={
+                <IconLabel
+                  icon={<WbSunny fontSize="small" fill={lineColor} />}
+                  time={sunrise}
+                  viewBox={{ x: 0, y: 0, width: 0, height: 0 }}
+                />
+              }
+            />
+          )}
+          {inChart(sunsetHour) && sunset && (
+            <ReferenceLine
+              x={`${sunsetHour}:00`}
+              stroke={lineColor}
+              strokeDasharray="3 3"
+              label={
+                <IconLabel
+                  icon={<NightsStay fontSize="small" fill={lineColor} />}
+                  time={sunset}
+                  viewBox={{ x: 0, y: 0, width: 0, height: 0 }}
+                />
+              }
+            />
+          )}
+          <Bar
+            key={`bars-${dayIndex}-${chartData.length}`}
+            className="forecast-bars"
+            dataKey="value"
+            isAnimationActive={false}
+          >
+            {chartData.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={ragStatus[entry.status]?.color ?? ragStatus.Unknown.color}
+                // The picked hour is outlined - by its parent's CSS, which
+                // finds it by this class (selectionSx) - and every bar
+                // keeps its full colour so the day still reads at a glance.
+                className={`forecast-bar-${index}`}
+                stroke="none"
+                strokeWidth={2}
+              />
+            ))}
+            <LabelList
+              dataKey="time"
+              content={<BarLabel data={chartData} />}
+              position="top"
+            />
+          </Bar>
+          {/* No active dot: recharts would mark the touched hour on the
+            line too, a second "selected" marker beside the outlined bar.
+            Keyed on the day and slot count so each line redraws from
+            scratch: the draw-in (motionSx above) plays when a line
+            mounts, so a new day remounts it. */}
+          {FORECAST_LINES.map(({ source, opacity }) => (
+            <Line
+              key={`${source}-${dayIndex}-${chartData.length}`}
+              className={`forecast-line-${source}`}
+              isAnimationActive={false}
+              type="monotone"
+              dataKey={source}
+              stroke={lineStroke}
+              dot={false}
+              activeDot={false}
+              strokeWidth={2}
+              strokeDasharray={FORECAST_LINE_DASH[source]}
+              strokeOpacity={opacity}
+              connectNulls={false}
+            />
+          ))}
+        </ComposedChart>
+      </ResponsiveContainer>
+    </Box>
+  );
+});
+
+// What the chart draws: the shown hours, plus the hidden sunrise/sunset
+// hours as empty slots for their markers to sit in.
+const chartRowsFor = (
+  day: DayForecast,
+  shown: ForecastGraphDataPoint[]
+): ChartRow[] =>
+  day.graphData.flatMap((h) => {
+    if (shown.includes(h)) return [h];
+    const hour = parseInt(h.time, 10);
+    const sunCrossing =
+      hour === hourOfISO(day.sunrise) || hour === hourOfISO(day.sunset);
+    return sunCrossing ? [{ ...h, ghost: true }] : [];
+  });
+
 const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
   forecastDays,
   warnings,
@@ -259,20 +452,9 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
       ),
     [forecastDays, showNight]
   );
-  // What the chart draws: the shown hours, plus the hidden sunrise/sunset
-  // hours as empty slots for their markers to sit in.
-  const chartRows: ChartRow[] | null = currentDay
-    ? currentDay.graphData.flatMap((h) => {
-        if (data?.includes(h)) return [h];
-        const hour = parseInt(h.time, 10);
-        const sunCrossing =
-          hour === hourOfISO(currentDay.sunrise) ||
-          hour === hourOfISO(currentDay.sunset);
-        return sunCrossing ? [{ ...h, ghost: true }] : [];
-      })
-    : null;
-  const sunrise = currentDay?.sunrise ?? null;
-  const sunset = currentDay?.sunset ?? null;
+  // The picked day's chart slots, for working out which hour a press lands on.
+  const chartRows: ChartRow[] | null =
+    currentDay && data ? chartRowsFor(currentDay, data) : null;
 
   const foundIndex =
     data && selectedTime !== null
@@ -363,170 +545,58 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
       currentDay?.date ? isWarningOnDay(w, currentDay.date) : false
     ) || [];
 
-  const renderChartBody = () => {
-    if (data && data.length > 0) {
-      const rows: ChartRow[] = chartRows ?? data;
-      const sunriseHour = hourOfISO(sunrise);
-      const sunsetHour = hourOfISO(sunset);
-      const inChart = (hour: number | null) =>
-        hour !== null && rows.some((r) => parseInt(r.time, 10) === hour);
-
-      const maxForecastLevel = Math.max(...data.map((d) => d.forecastLevel));
-      const dayMaxLevel = Math.max(Math.ceil(maxForecastLevel), 1);
-
-      const chartData = rows.map((d, i) => {
-        // An empty slot draws nothing - no bar, no level line, no label.
-        if (d.ghost) {
-          return { ...d, value: null, bewdley: null, linear: null };
+  // The chart follows the picked day at low priority. The day tabs, the hour
+  // header and the details below follow it at once, and the new day's chart
+  // is built in the background rather than holding up the frame that moves
+  // the tab - a day's chart takes recharts ~200 ms on a phone-speed CPU.
+  const chartDay = useDeferredValue(selectedDay);
+  const chartView = useMemo(() => {
+    const day = forecastDays?.[chartDay];
+    if (!day) return null;
+    const shown = showNight
+      ? day.graphData
+      : day.graphData.filter((h) => !isNightHour(h, day));
+    return { day, data: shown, rows: chartRowsFor(day, shown) };
+  }, [forecastDays, chartDay, showNight]);
+  // Outlines the picked hour's bar (DayChart). Only once the chart is showing
+  // the picked day: the same "H:00" recurs on every day, so while the chart
+  // is still a day behind it would outline the wrong one.
+  const highlightIndex =
+    chartView && chartDay === selectedDay && selectedPoint
+      ? chartView.rows.findIndex(
+          (r) => !r.ghost && r.time === selectedPoint.time
+        )
+      : -1;
+  const selectionSx =
+    highlightIndex >= 0
+      ? {
+          [`& .forecast-bar-${highlightIndex}`]: {
+            stroke: theme.palette.text.primary,
+          },
         }
-        const scaled = d.forecastLevel / dayMaxLevel;
-        // Each source's line runs on to the next hour's point, so the lines
-        // join up where the source changes without overlapping. Held hours
-        // get no line at all: they aren't a forecast, and a flat line would
-        // read as one that says the river will stay steady.
-        const prevSource = i > 0 ? rows[i - 1].forecastSource : null;
-        const inLine = (source: ForecastSource) =>
-          d.forecastSource === source ||
-          (prevSource === source && d.forecastSource !== "held")
-            ? scaled
-            : null;
-        return {
-          ...d,
-          bewdley: inLine("bewdley"),
-          linear: inLine("linear"),
-        };
-      });
+      : undefined;
 
-      // Each source's line draws over its own stretch of the sweep, so the
-      // Bewdley and linear lines read as one line drawn left to right.
-      const lineSweep = (source: keyof typeof FORECAST_LINE_DASH) => {
-        const first = chartData.findIndex((d) => d[source] !== null);
-        const last = chartData.findLastIndex((d) => d[source] !== null);
-        const slot = LINE_SWEEP_DURATION / Math.max(chartData.length - 1, 1);
-        return revealSx(
-          `.forecast-line-${source}`,
-          Math.max(last - first, 1) * slot,
-          "linear",
-          Math.max(first, 0) * slot
-        );
-      };
-      // Bars grow and lines draw in CSS, not through recharts
-      // (lib/chartMotion.ts). Both are keyed on the day, so a new day plays
-      // them again and stepping hours within one doesn't.
-      const motionSx = {
-        ...barGrowSx(
-          "forecast-bars",
-          BAR_ANIMATION_DURATION,
-          BAR_ANIMATION_EASING
-        ),
-        ...FORECAST_LINES.reduce(
-          (sx, { source }) => ({ ...sx, ...lineSweep(source) }),
-          {}
-        ),
-      };
-
-      const xAxisTicks = chartData
-        .filter((d) => parseInt(d.time, 10) % 3 === 0)
-        .map((d) => d.time);
-
+  const renderChartBody = () => {
+    if (chartView && chartView.data.length > 0) {
       return (
-        <Box sx={motionSx}>
-          <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart data={chartData} margin={CHART_MARGIN}>
-              <XAxis
-                dataKey="time"
-                ticks={xAxisTicks}
-                interval={0}
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis hide domain={[0, 1.2]} />
-              {inChart(sunriseHour) && sunrise && (
-                <ReferenceLine
-                  x={`${sunriseHour}:00`}
-                  stroke={lineColor}
-                  strokeDasharray="3 3"
-                  label={
-                    <IconLabel
-                      icon={<WbSunny fontSize="small" fill={lineColor} />}
-                      time={sunrise}
-                      viewBox={{ x: 0, y: 0, width: 0, height: 0 }}
-                    />
-                  }
-                />
-              )}
-              {inChart(sunsetHour) && sunset && (
-                <ReferenceLine
-                  x={`${sunsetHour}:00`}
-                  stroke={lineColor}
-                  strokeDasharray="3 3"
-                  label={
-                    <IconLabel
-                      icon={<NightsStay fontSize="small" fill={lineColor} />}
-                      time={sunset}
-                      viewBox={{ x: 0, y: 0, width: 0, height: 0 }}
-                    />
-                  }
-                />
-              )}
-              <Bar
-                key={`bars-${selectedDay}-${chartData.length}`}
-                className="forecast-bars"
-                dataKey="value"
-                isAnimationActive={false}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={
-                      ragStatus[entry.status]?.color ?? ragStatus.Unknown.color
-                    }
-                    // The picked hour is outlined; every bar keeps its full
-                    // colour so the day still reads at a glance.
-                    stroke={
-                      entry.time === selectedPoint?.time
-                        ? theme.palette.text.primary
-                        : "none"
-                    }
-                    strokeWidth={2}
-                  />
-                ))}
-                <LabelList
-                  dataKey="time"
-                  content={<BarLabel data={chartData} />}
-                  position="top"
-                />
-              </Bar>
-              {/* No active dot: recharts would mark the touched hour on the
-                line too, a second "selected" marker beside the outlined bar.
-                Keyed on the day and slot count so each line redraws from
-                scratch: the draw-in (motionSx above) plays when a line
-                mounts, so a new day remounts it. */}
-              {FORECAST_LINES.map(({ source, opacity }) => (
-                <Line
-                  key={`${source}-${selectedDay}-${chartData.length}`}
-                  className={`forecast-line-${source}`}
-                  isAnimationActive={false}
-                  type="monotone"
-                  dataKey={source}
-                  stroke={theme.palette.primary.main}
-                  dot={false}
-                  activeDot={false}
-                  strokeWidth={2}
-                  strokeDasharray={FORECAST_LINE_DASH[source]}
-                  strokeOpacity={opacity}
-                  connectNulls={false}
-                />
-              ))}
-            </ComposedChart>
-          </ResponsiveContainer>
+        <Box sx={selectionSx}>
+          <DayChart
+            data={chartView.data}
+            rows={chartView.rows}
+            dayIndex={chartDay}
+            sunrise={chartView.day.sunrise ?? null}
+            sunset={chartView.day.sunset ?? null}
+            lineColor={lineColor}
+            lineStroke={theme.palette.primary.main}
+          />
         </Box>
       );
     }
-    if (!showNight && currentDay && currentDay.graphData.length > 0) {
+    if (!showNight && chartView && chartView.day.graphData.length > 0) {
       return (
         <Box sx={{ mt: 1, textAlign: "center" }}>
           <Typography variant="body1">
-            {selectedDay === 0
+            {chartDay === 0
               ? "No daylight left today."
               : "No daylight hours forecast for this day."}
           </Typography>

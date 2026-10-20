@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.40.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.2...paddlecheck-v1.40.3) (2026-10-20)
+
+
+### Bug Fixes
+
+* use the whole Bewdley forecast and continue its trend after it ([#396](https://github.com/dylanr97/Paddlecheck/issues/396)) ([c67bfa7](https://github.com/dylanr97/Paddlecheck/commit/c67bfa72c6b7a0e4663a71008e5fa31348ded4ba))
+
 ## [1.40.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.1...paddlecheck-v1.40.2) (2026-10-20)
 
 

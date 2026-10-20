@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.40.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.39.1...paddlecheck-v1.40.0) (2026-10-20)
+
+
+### Features
+
+* show your level's verdict for each forecast hour ([#393](https://github.com/dylanr97/Paddlecheck/issues/393)) ([b4d48fd](https://github.com/dylanr97/Paddlecheck/commit/b4d48fd217a939165a1d85d286514648d4c60071))
+
 ## [1.39.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.39.0...paddlecheck-v1.39.1) (2026-10-20)
 
 

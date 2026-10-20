@@ -102,6 +102,7 @@ lib/
   metOfficeWarnings.ts   Met Office warnings RSS fetch and parsing
   warnings.ts            Warning display and per-day helpers
   forecast.ts            Best-paddling-time windows and forecast summaries
+  chartMotion.ts         Chart entrances in CSS (bars grow, lines/areas wipe in) instead of recharts' JS animation
   paddlingMatrix.ts      What each paddler level may do for a status and river level (club rules)
   usePaddlerLevel.ts     The paddler level from Settings, kept in step across components and tabs
   hooks.ts               useKayakData hook – orchestrates all fetching and state

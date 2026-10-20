@@ -45,6 +45,12 @@ import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { springTransition } from "@/lib/m3-palette";
 import { useTooltipDismiss } from "@/lib/useTooltipDismiss";
+import { revealSx } from "@/lib/chartMotion";
+
+// The level's area and the forecast line draw in left to right, in CSS
+// rather than through recharts (lib/chartMotion.ts) - recharts' default
+// duration and easing, which this used before.
+const chartRevealSx = revealSx(".recharts-area, .recharts-line", 1500, "ease");
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 
 interface RiverLevelGraphProps {
@@ -445,6 +451,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               strokeDasharray="3 3"
             />
             <Area
+              isAnimationActive={false}
               type="monotone"
               dataKey="actual"
               stroke={theme.palette.primary.main}
@@ -455,6 +462,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             />
             {/* forecastData only holds Bewdley-backed hours (lib/hooks.ts). */}
             <Line
+              isAnimationActive={false}
               type="monotone"
               dataKey="forecasted"
               stroke={theme.palette.primary.main}
@@ -470,7 +478,8 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
 
     if (filteredData) {
       return (
-        <ResponsiveContainer width="100%" height={200}>
+        // Keyed on the range so each one draws in afresh (chartMotion).
+        <ResponsiveContainer key={timeRange} width="100%" height={200}>
           <ComposedChart
             data={filteredDataWithTs ?? undefined}
             margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
@@ -514,6 +523,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               wrapperStyle={{ pointerEvents: "none" }}
             />
             <Area
+              isAnimationActive={false}
               type="monotone"
               dataKey="level"
               stroke={theme.palette.primary.main}
@@ -544,7 +554,9 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     }
     return (
       <Grow in appear {...springTransition()}>
-        <Box ref={chartRef}>{renderChartBody()}</Box>
+        <Box ref={chartRef} sx={chartRevealSx}>
+          {renderChartBody()}
+        </Box>
       </Grow>
     );
   };

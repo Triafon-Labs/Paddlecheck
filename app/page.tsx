@@ -15,6 +15,7 @@ import PaddlingMatrixCard from "@/components/PaddlingMatrixCard";
 import StatsCard from "@/components/StatsCard";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { OFFLINE_NO_CACHE_ERROR } from "@/lib/hooks";
+import { collapseMotion } from "@/lib/m3-palette";
 
 // Placeholder shown only while a chart's JS chunk downloads - the components
 // render their own richer skeletons once mounted and `loading` is true.
@@ -72,6 +73,7 @@ export default function HomePage() {
         <Collapse
           in={!!error && error !== OFFLINE_NO_CACHE_ERROR}
           unmountOnExit
+          {...collapseMotion}
         >
           {/* Radius left to the MuiAlert override, which sets the M3 12px.
               Overriding it to 8 here made this the one status surface on the

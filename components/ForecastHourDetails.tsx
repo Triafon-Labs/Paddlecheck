@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  memo,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Box,
   Card,
@@ -63,8 +70,10 @@ interface YouProps {
   level: PaddlerType;
   open: boolean;
   onToggle: () => void;
-  // Called once the list has finished opening or closing; only the visible
-  // card's copy passes it.
+  // Set only on the visible card: it animates the list and calls this once
+  // the list has finished opening or closing. The invisible copies just show
+  // or hide it - animating every hour's copy at once relaid out dozens of
+  // them each frame, which made the visible collapse stutter.
   onSettled?: () => void;
 }
 
@@ -84,6 +93,23 @@ const YourVerdict: React.FC<{
   const ui = PADDLING_STATUS_UI[verdict.status];
   const expandable = hasDetailsToShow(verdict.details);
   const open = expandable && you.open;
+  const list = (
+    <Box
+      component="ul"
+      sx={{
+        m: 0,
+        mt: 0.75,
+        pl: 2.5,
+        "& li:not(:last-of-type)": { mb: 0.5 },
+      }}
+    >
+      {verdict.details.map((line) => (
+        <Typography key={line} component="li" variant="body2">
+          {line}
+        </Typography>
+      ))}
+    </Box>
+  );
   return (
     <Box sx={compactSize.sectionSx}>
       <FactorHeading compact>You – {you.level}</FactorHeading>
@@ -130,29 +156,19 @@ const YourVerdict: React.FC<{
           })}
         />
       </FactorChipRow>
-      <Collapse
-        in={open}
-        unmountOnExit
-        {...collapseMotion}
-        onEntered={you.onSettled}
-        onExited={you.onSettled}
-      >
-        <Box
-          component="ul"
-          sx={{
-            m: 0,
-            mt: 0.75,
-            pl: 2.5,
-            "& li:not(:last-of-type)": { mb: 0.5 },
-          }}
+      {you.onSettled ? (
+        <Collapse
+          in={open}
+          unmountOnExit
+          {...collapseMotion}
+          onEntered={you.onSettled}
+          onExited={you.onSettled}
         >
-          {verdict.details.map((line) => (
-            <Typography key={line} component="li" variant="body2">
-              {line}
-            </Typography>
-          ))}
-        </Box>
-      </Collapse>
+          {list}
+        </Collapse>
+      ) : (
+        open && list
+      )}
     </Box>
   );
 };
@@ -328,6 +344,62 @@ export const ForecastHourHeader: React.FC<ForecastHourHeaderProps> = ({
   );
 };
 
+type HourRow = { point: ForecastGraphDataPoint; sunset: string | null };
+const NO_ROWS: HourRow[] = [];
+
+// The invisible copy of every shown hour, stacked in one grid cell so the
+// layer is as tall as the busiest hour. Memoised, so the visible card's own
+// updates - each step of a collapse included - don't re-render dozens of
+// copies.
+//
+// The layer is absolutely placed and layout-contained, outside the visible
+// card's flow. It used to share a grid cell with the card, so any change to
+// the card - every frame of its height easing between hours - made the
+// browser lay out all ~50 copies again, ~1,500 boxes, which stalled stepping
+// hours and switching days for hundreds of milliseconds on a phone.
+const HourCopies = memo(function HourCopies({
+  rows,
+  you,
+  copyRefs,
+  layerRef,
+}: {
+  rows: HourRow[];
+  you: YouProps | null;
+  copyRefs: React.RefObject<(HTMLDivElement | null)[]>;
+  layerRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <Box
+      ref={layerRef}
+      aria-hidden
+      sx={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        display: "grid",
+        visibility: "hidden",
+        pointerEvents: "none",
+        contain: "layout style",
+      }}
+    >
+      {rows.map((h, index) => (
+        <Box
+          key={index}
+          ref={(el: HTMLDivElement | null) => {
+            copyRefs.current[index] = el;
+          }}
+          sx={{ gridArea: "1 / 1", alignSelf: "start" }}
+        >
+          <CardContent sx={{ pt: 0 }}>
+            <HourBody point={h.point} sunset={h.sunset} you={you} />
+          </CardContent>
+        </Box>
+      ))}
+    </Box>
+  );
+});
+
 interface ForecastHourBodiesProps extends StepProps {
   point: ForecastGraphDataPoint;
   // Every shown hour across the forecast, each with its own day's sunset.
@@ -339,11 +411,12 @@ interface ForecastHourBodiesProps extends StepProps {
 // The picked hour's details, as a card that continues the forecast card above
 // it - flush, same surface, square top corners - so the two read as one.
 //
-// Every shown hour of the forecast is also laid out, invisibly, in the same
-// grid cell. The cell is therefore always as tall as the busiest hour, so the
-// page never changes height - shifting the chart and the step buttons under
-// the reader's thumb - as they step through hours or days, and the space the
-// quieter hours leave shows as page background below the card.
+// Every shown hour of the forecast is also laid out, invisibly, in a layer
+// behind the card (HourCopies). The panel reserves that layer's height - the
+// busiest hour's - so the page never changes height - shifting the chart and
+// the step buttons under the reader's thumb - as they step through hours or
+// days, and the space the quieter hours leave shows as page background below
+// the card.
 //
 // The visible card sits on top, sized to the picked hour's invisible copy and
 // easing to each new hour's height. It clips its content while it does, so a
@@ -368,75 +441,98 @@ export const ForecastHourBodies: React.FC<ForecastHourBodiesProps> = ({
     setVerdictOpen((o) => !o);
     setFollowContent(true);
   };
-  // Every hour's copy gets the same open state, so the cell is sized for the
-  // busiest hour as it would be shown - stepping with the details open
-  // doesn't move anything either.
   const you: YouProps | null = level
     ? {
         level,
         open: verdictOpen,
         onToggle: toggleVerdict,
+        onSettled: () => setFollowContent(false),
       }
     : null;
-  const rows = hours.some((h) => h.point === point)
-    ? hours
-    : [{ point, sunset }];
+  // Every hour's copy gets the same open state, so the cell is sized for the
+  // busiest hour as it would be shown - stepping with the details open
+  // doesn't move anything either. Deferred, so re-rendering every copy never
+  // holds up the visible card's first frame; until they catch up the card
+  // sizes to its own content anyway.
+  const copiesOpen = useDeferredValue(verdictOpen);
+  const copyYou = useMemo<YouProps | null>(
+    () =>
+      level ? { level, open: copiesOpen, onToggle: () => undefined } : null,
+    [level, copiesOpen]
+  );
+  const rows = useMemo(
+    () => (hours.some((h) => h.point === point) ? hours : [{ point, sunset }]),
+    [hours, point, sunset]
+  );
   const pickedIndex = rows.findIndex((h) => h.point === point);
   const picked = rows[pickedIndex];
+  // The copies are built at low priority, starting from none, so mounting
+  // the panel - dozens of hours at once, ~400 ms on a phone - never holds up
+  // its first frame. Until they arrive the card sizes to its own content and
+  // the reserved height catches up a moment later.
+  const copyRows = useDeferredValue(rows, NO_ROWS);
+  const copyPickedIndex = copyRows.findIndex((h) => h.point === point);
 
   const copyRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const layerRef = useRef<HTMLDivElement | null>(null);
   const [height, setHeight] = useState<number | null>(null);
+  // The copies' layer is out of flow, so the space it reserved by being in
+  // the grid is now a min-height: the busiest hour's, so the page never
+  // changes height - shifting the chart and step buttons - between hours.
+  const [reserved, setReserved] = useState<number | null>(null);
+  useEffect(() => {
+    const layer = layerRef.current;
+    if (!layer) return;
+    const observer = new ResizeObserver(() => setReserved(layer.offsetHeight));
+    observer.observe(layer);
+    return () => observer.disconnect();
+  }, []);
 
   // Follows the picked copy's height, including when it reflows (a rotated
   // phone, a refetch). The first measurement lands on a card already at its
   // natural height, so nothing animates on load.
   useEffect(() => {
-    const copy = copyRefs.current[pickedIndex];
+    const copy = copyRefs.current[copyPickedIndex];
     if (!copy) return;
     const observer = new ResizeObserver(() => setHeight(copy.offsetHeight));
     observer.observe(copy);
     return () => observer.disconnect();
-  }, [pickedIndex, rows.length]);
+  }, [copyPickedIndex, copyRows]);
 
   return (
     <Box
       {...swipe}
       // Overlaps the card above by a pixel so no seam shows between them at
       // fractional device pixel ratios.
-      sx={{ ...swipeSx, display: "grid", mt: "-1px" }}
+      sx={{
+        ...swipeSx,
+        position: "relative",
+        mt: "-1px",
+        minHeight: reserved ?? undefined,
+      }}
     >
-      {rows.map((h, index) => (
-        <Box
-          key={index}
-          ref={(el: HTMLDivElement | null) => {
-            copyRefs.current[index] = el;
-          }}
-          aria-hidden
-          sx={{ gridArea: "1 / 1", alignSelf: "start", visibility: "hidden" }}
-        >
-          <CardContent sx={{ pt: 0 }}>
-            <HourBody point={h.point} sunset={h.sunset} you={you} />
-          </CardContent>
-        </Box>
-      ))}
+      <HourCopies
+        rows={copyRows}
+        you={copyYou}
+        copyRefs={copyRefs}
+        layerRef={layerRef}
+      />
       <Card
         sx={{
-          gridArea: "1 / 1",
-          alignSelf: "start",
           borderTopLeftRadius: 0,
           borderTopRightRadius: 0,
-          height: followContent ? "auto" : (height ?? "auto"),
+          // Its own content's height until its copy exists to measure.
+          height:
+            followContent || copyPickedIndex === -1
+              ? "auto"
+              : (height ?? "auto"),
           transition: followContent
             ? "none"
             : `height ${m3Duration.medium1}ms ${m3Easing.standard}`,
         }}
       >
         <CardContent sx={{ pt: 0 }}>
-          <HourBody
-            point={picked.point}
-            sunset={picked.sunset}
-            you={you && { ...you, onSettled: () => setFollowContent(false) }}
-          />
+          <HourBody point={picked.point} sunset={picked.sunset} you={you} />
         </CardContent>
       </Card>
     </Box>

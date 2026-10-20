@@ -87,7 +87,6 @@ export default function HomePage() {
         <StatsCard
           conditions={conditions}
           loading={loading}
-          reasons={conditions?.reasons || []}
           riverReadings={riverGraphData}
         />
         <RiverLevelGraph

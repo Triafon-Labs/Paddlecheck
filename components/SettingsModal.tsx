@@ -43,7 +43,6 @@ import {
 } from "@mui/icons-material";
 import { useAppTheme, ThemeMode } from "@/lib/ThemeContext";
 import { useShowNightHours } from "@/lib/useShowNightHours";
-import { PADDLER_LEVEL_CHANGED_EVENT } from "@/components/PaddlingMatrixCard";
 import { PaddlerType, Status } from "@/types";
 import {
   RAG_STATUS_UI,
@@ -56,7 +55,11 @@ import {
   CLUB_NAME,
 } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
-import { STORAGE_KEYS, SETTINGS_CHANGED_EVENT } from "@/lib/storageKeys";
+import {
+  STORAGE_KEYS,
+  SETTINGS_CHANGED_EVENT,
+  PADDLER_LEVEL_CHANGED_EVENT,
+} from "@/lib/storageKeys";
 import { m3Duration, m3Easing, m3Spring, spring } from "@/lib/m3-palette";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 

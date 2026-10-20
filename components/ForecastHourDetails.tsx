@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
   Chip,
+  Collapse,
   IconButton,
   Skeleton,
   Typography,
@@ -13,10 +14,19 @@ import {
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import Water from "@mui/icons-material/Water";
-import { ForecastGraphDataPoint, ForecastSource } from "@/types";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import { ForecastGraphDataPoint, ForecastSource, PaddlerType } from "@/types";
 import { ragStatus } from "@/lib/rag";
+import { getPaddlingMatrix, hasDetailsToShow } from "@/lib/paddlingMatrix";
+import { usePaddlerLevel } from "@/lib/usePaddlerLevel";
 import { formatRiverLevel } from "@/lib/units";
-import { m3Duration, m3Easing } from "@/lib/m3-palette";
+import {
+  collapseMotion,
+  m3Duration,
+  m3Easing,
+  m3Spring,
+  spring,
+} from "@/lib/m3-palette";
 import {
   FactorHeading,
   FactorChip,
@@ -27,6 +37,7 @@ import {
   beAwareItemsFor,
   sunsetItemFor,
 } from "./ConditionFactors";
+import { StatusFace, PADDLING_STATUS_UI } from "./StatusFace";
 
 // Where the hour's level comes from, shown in brackets after "River Level".
 const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
@@ -45,11 +56,114 @@ const padHour = (time: string) => time.padStart(5, "0");
 // The forecast's details sit a size below the current status's.
 const compactSize = factorSizes(true);
 
-// Everything under the hour's header: its river level and factor sections.
+// The reader's level, and whether their verdict's details are open. Open
+// state is shared by every hour, so stepping through the day with it open
+// shows how the caveats change.
+interface YouProps {
+  level: PaddlerType;
+  open: boolean;
+  onToggle: () => void;
+  // Called once the list has finished opening or closing; only the visible
+  // card's copy passes it.
+  onSettled?: () => void;
+}
+
+// What the hour's status means for the reader's own level, from the same
+// rules as Who Can Paddle. The RAG chip in the header is the club's rating;
+// this answers "can I go?" without scrolling back up to the table. Tapping
+// the chip lists the rules behind it, for when "with caveats" isn't enough
+// to remember what the caveats are.
+const YourVerdict: React.FC<{
+  point: ForecastGraphDataPoint;
+  you: YouProps;
+}> = ({ point, you }) => {
+  const verdict = getPaddlingMatrix(point.status, point.forecastLevel)[
+    you.level
+  ];
+  if (!verdict) return null;
+  const ui = PADDLING_STATUS_UI[verdict.status];
+  const expandable = hasDetailsToShow(verdict.details);
+  const open = expandable && you.open;
+  return (
+    <Box sx={compactSize.sectionSx}>
+      <FactorHeading compact>You – {you.level}</FactorHeading>
+      <FactorChipRow>
+        <Chip
+          size="small"
+          icon={
+            <StatusFace
+              face={ui.face}
+              color={ui.color}
+              onColor={ui.onColor}
+              size={16}
+            />
+          }
+          // The full sentence, as Who Can Paddle says it, with a chevron
+          // when there's more to show - without it this reads as one of
+          // the static chips below.
+          label={
+            <Box
+              component="span"
+              sx={{ display: "inline-flex", alignItems: "center", gap: 0.25 }}
+            >
+              {ui.headline}
+              {expandable && (
+                <ExpandMore
+                  aria-hidden
+                  sx={{
+                    fontSize: 18,
+                    mr: -0.5,
+                    transform: open ? "rotate(180deg)" : "none",
+                    transition: spring("transform", m3Spring.spatialFast),
+                  }}
+                />
+              )}
+            </Box>
+          }
+          {...(expandable && {
+            onClick: you.onToggle,
+            "aria-expanded": open,
+          })}
+          // The same text colour as the factor chips below it.
+          sx={(theme) => ({
+            "--chip-fg": (theme.vars ?? theme).palette.text.primary,
+          })}
+        />
+      </FactorChipRow>
+      <Collapse
+        in={open}
+        unmountOnExit
+        {...collapseMotion}
+        onEntered={you.onSettled}
+        onExited={you.onSettled}
+      >
+        <Box
+          component="ul"
+          sx={{
+            m: 0,
+            mt: 0.75,
+            pl: 2.5,
+            "& li:not(:last-of-type)": { mb: 0.5 },
+          }}
+        >
+          {verdict.details.map((line) => (
+            <Typography key={line} component="li" variant="body2">
+              {line}
+            </Typography>
+          ))}
+        </Box>
+      </Collapse>
+    </Box>
+  );
+};
+
+// Everything under the hour's header: the verdict for the reader's level,
+// then its river level and factor sections.
 const HourBody: React.FC<{
   point: ForecastGraphDataPoint;
   sunset: string | null;
-}> = ({ point, sunset }) => {
+  you: YouProps | null;
+}> = ({ point, sunset, you }) => {
   // Measured from the start of the hour.
   const sunsetItem = sunsetItemFor(parseInt(point.time, 10) * 60, sunset);
   const beAwareItems = [
@@ -58,6 +172,7 @@ const HourBody: React.FC<{
   ];
   return (
     <>
+      {you && <YourVerdict point={point} you={you} />}
       {/* Laid out like the factor sections below it - heading, then an
           InfoPanel - with where the level comes from trailing on the right. */}
       <Box sx={compactSize.sectionSx}>
@@ -241,6 +356,28 @@ export const ForecastHourBodies: React.FC<ForecastHourBodiesProps> = ({
   ...step
 }) => {
   const swipe = useSwipeStep(step);
+  // Read once here rather than in every hour's copy below.
+  const level = usePaddlerLevel() ?? null;
+  const [verdictOpen, setVerdictOpen] = useState(false);
+  // While the verdict's list opens or closes, the card sizes to its own
+  // content, so it grows and shrinks with the list's collapse rather than
+  // chasing the measured height a frame behind with a transition of its own.
+  // It goes back to the measured height once the collapse has finished.
+  const [followContent, setFollowContent] = useState(false);
+  const toggleVerdict = () => {
+    setVerdictOpen((o) => !o);
+    setFollowContent(true);
+  };
+  // Every hour's copy gets the same open state, so the cell is sized for the
+  // busiest hour as it would be shown - stepping with the details open
+  // doesn't move anything either.
+  const you: YouProps | null = level
+    ? {
+        level,
+        open: verdictOpen,
+        onToggle: toggleVerdict,
+      }
+    : null;
   const rows = hours.some((h) => h.point === point)
     ? hours
     : [{ point, sunset }];
@@ -278,7 +415,7 @@ export const ForecastHourBodies: React.FC<ForecastHourBodiesProps> = ({
           sx={{ gridArea: "1 / 1", alignSelf: "start", visibility: "hidden" }}
         >
           <CardContent sx={{ pt: 0 }}>
-            <HourBody point={h.point} sunset={h.sunset} />
+            <HourBody point={h.point} sunset={h.sunset} you={you} />
           </CardContent>
         </Box>
       ))}
@@ -288,12 +425,18 @@ export const ForecastHourBodies: React.FC<ForecastHourBodiesProps> = ({
           alignSelf: "start",
           borderTopLeftRadius: 0,
           borderTopRightRadius: 0,
-          height: height ?? "auto",
-          transition: `height ${m3Duration.medium1}ms ${m3Easing.standard}`,
+          height: followContent ? "auto" : (height ?? "auto"),
+          transition: followContent
+            ? "none"
+            : `height ${m3Duration.medium1}ms ${m3Easing.standard}`,
         }}
       >
         <CardContent sx={{ pt: 0 }}>
-          <HourBody point={picked.point} sunset={picked.sunset} />
+          <HourBody
+            point={picked.point}
+            sunset={picked.sunset}
+            you={you && { ...you, onSettled: () => setFollowContent(false) }}
+          />
         </CardContent>
       </Card>
     </Box>

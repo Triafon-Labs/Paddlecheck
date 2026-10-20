@@ -77,10 +77,11 @@ components/
   StatusCard.tsx         Current RAG status, contributing factors, warnings, conditions report
   PaddlingStatusHero.tsx The status panel and five-step scale strip at the top of StatusCard
   PaddlingMatrixCard.tsx Skill-level guidance table (Beginner/Improver/Intermediate/Independent)
+  StatusFace.tsx         The verdict faces (a face on a status-colour disc) and their labels
   StatsCard.tsx          Numeric stats – river level, temp, wind, visibility, launch notes
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
-  ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below
+  ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below, opening with the verdict for your level
   TopNavBar.tsx          Header – share, settings, refresh, freshness line, status banners
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
@@ -101,6 +102,8 @@ lib/
   metOfficeWarnings.ts   Met Office warnings RSS fetch and parsing
   warnings.ts            Warning display and per-day helpers
   forecast.ts            Best-paddling-time windows and forecast summaries
+  paddlingMatrix.ts      What each paddler level may do for a status and river level (club rules)
+  usePaddlerLevel.ts     The paddler level from Settings, kept in step across components and tabs
   hooks.ts               useKayakData hook – orchestrates all fetching and state
   KayakDataContext.tsx   React Context wrapping the hook for component tree access
   useBriefing.ts         AI briefing request and state

@@ -20,3 +20,6 @@ export const STORAGE_KEYS = {
 // Fired in this tab when a setting changes (the "storage" event only reaches
 // other tabs), so anything reading that setting can pick it up straight away.
 export const SETTINGS_CHANGED_EVENT = "paddlecheck:settings-changed";
+
+// Fired in this tab when the paddler level changes in Settings.
+export const PADDLER_LEVEL_CHANGED_EVENT = "paddlecheck:paddler-level-changed";

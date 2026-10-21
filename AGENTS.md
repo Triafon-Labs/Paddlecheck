@@ -144,11 +144,18 @@ public/                  Static assets – icons, favicon, sw.js (offline shell)
 | -------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------- |
 | River level readings             | Environment Agency Flood-Monitoring API – station `2642` (Worcester, Barbourne) | Historical readings                       |
 | Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)                  | Used for 0–~42 h forecast, 6 h travel lag |
-| Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                     | No API key required                       |
+| Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                     | No API key required; wind see below       |
 | Weather warnings                 | Met Office warnings RSS, West Midlands region                                   | Parsed in `lib/metOfficeWarnings.ts`      |
 
 All of these are fetched server-side by `lib/conditions.ts` for `/api/conditions`; the
 browser never calls them directly.
+
+Wind speed and gusts (current and hourly) are the highest of Open-Meteo's default
+`best_match` and the models in `EXTRA_WIND_MODELS` (UK Met Office, ECMWF). On a
+borderline day `best_match` can sit at the calm end of the models and under the 15 mph
+threshold while other forecasts are over it. Open-Meteo returns only one model for
+`current`, so each extra model is its own request. A failed extra model is ignored;
+every other weather field still comes from `best_match` alone.
 
 No environment variables are required for local development, except `GROQ_API_KEY` for
 the AI briefing, which is the one feature that won't work without it.

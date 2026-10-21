@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.40.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.3...paddlecheck-v1.40.4) (2026-10-21)
+
+
+### Bug Fixes
+
+* use the highest wind across several forecast models ([93d4df0](https://github.com/dylanr97/Paddlecheck/commit/93d4df04511340dfb5b0f5be28c9e899a294d45c))
+
 ## [1.40.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.2...paddlecheck-v1.40.3) (2026-10-20)
 
 

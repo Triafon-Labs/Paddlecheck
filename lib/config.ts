@@ -103,6 +103,12 @@ export const API_ENDPOINTS = {
   WEATHER: `https://api.open-meteo.com/v1/forecast`,
 };
 
+// Open-Meteo's default model blend (best_match) can sit at the calm end of the
+// models on a borderline day, so wind and gusts are also fetched from these
+// models and the highest value is used. A model that fails or returns nothing
+// is ignored, leaving best_match on its own.
+export const EXTRA_WIND_MODELS = ["ukmo_seamless", "ecmwf_ifs025"];
+
 // --- Weather Warning Colors ---
 export const WARNING_COLORS = {
   Red: STATUS_COLORS.red,

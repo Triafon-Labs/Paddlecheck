@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.40.5](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.4...paddlecheck-v1.40.5) (2026-10-23)
+
+
+### Bug Fixes
+
+* use whole numbers for temperature and wind across the app ([#398](https://github.com/dylanr97/Paddlecheck/issues/398)) ([b82d111](https://github.com/dylanr97/Paddlecheck/commit/b82d111b00ceedfd733a32d6b97c22538fac1f93))
+
 ## [1.40.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.3...paddlecheck-v1.40.4) (2026-10-21)
 
 

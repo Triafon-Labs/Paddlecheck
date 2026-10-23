@@ -10,7 +10,7 @@ import NightsStay from "@mui/icons-material/NightsStay";
 import { Status } from "@/types";
 import InfoPanel from "./InfoPanel";
 import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
-import { formatWindGust } from "@/lib/units";
+import { formatWindSpeed } from "@/lib/units";
 import { hhmmOfISO, minutesOfISO } from "@/lib/time";
 
 // The "Contributing Factors" and "Be Aware" sections, shared by the current
@@ -167,7 +167,7 @@ export const beAwareItemsFor = ({
         {
           key: "gust",
           Icon: Air,
-          text: `Gusts up to ${formatWindGust(windGust)}`,
+          text: `Gusts up to ${formatWindSpeed(windGust)}`,
           dotStatus: gustStatus,
           dotTitle: `Would be ${gustStatus} if sustained`,
         },

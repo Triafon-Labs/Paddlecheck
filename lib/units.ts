@@ -8,13 +8,16 @@
 export const formatRiverLevel = (value: number): string =>
   `${value.toFixed(2)} m`;
 
-export const formatTemperature = (value: number): string =>
-  `${value.toFixed(1)}°C`;
+// Temperature and wind are whole numbers, as UK forecasts give them: the
+// readings are model output, and a tenth of a degree or a mph is precision
+// they don't have. The RAG thresholds are judged on the same whole numbers
+// (lib/rag.ts), so the figure on screen always agrees with the status.
+// River level keeps two places - its thresholds and hourly changes are a
+// matter of centimetres.
+// Math.round(-0.4) is -0, which would print as "-0°C"; adding 0 clears it.
+export const whole = (value: number): number => Math.round(value) + 0;
 
-export const formatWindSpeed = (value: number): string =>
-  `${value.toFixed(1)} mph`;
+export const formatTemperature = (value: number): string => `${whole(value)}°C`;
 
-// Gusts are noisy instantaneous peaks phrased as "gusts up to X mph" -
-// whole-number rounding is intentional here, not a gap to close.
-export const formatWindGust = (value: number): string =>
-  `${Math.round(value)} mph`;
+// Also used for gusts.
+export const formatWindSpeed = (value: number): string => `${whole(value)} mph`;

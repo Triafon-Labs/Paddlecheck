@@ -4,7 +4,7 @@ import {
   formatRiverLevel,
   formatTemperature,
   formatWindSpeed,
-  formatWindGust,
+  whole,
 } from "@/lib/units";
 import { getLondonHHMM, getLondonHour, hhmmOfISO } from "@/lib/time";
 
@@ -306,8 +306,9 @@ export function buildHourlyForecastText(
         ? `${formatWindSpeed(pt.windSpeed)} wind`
         : null;
     const gust =
-      pt.windGust !== undefined && pt.windGust >= THRESHOLDS.WIND_GUST_NOTABLE
-        ? `gusts up to ${formatWindGust(pt.windGust)}`
+      pt.windGust !== undefined &&
+      whole(pt.windGust) >= THRESHOLDS.WIND_GUST_NOTABLE
+        ? `gusts up to ${formatWindSpeed(pt.windGust)}`
         : null;
     const weather = pt.weatherDescription ?? null;
     const stats = [level, temp, wind, gust, weather].filter(Boolean).join(", ");
@@ -346,7 +347,7 @@ export const relativeDayLabel = (dayIndex: number): string =>
 export interface DaytimeOutlook {
   dayLabel: string; // "later today" | "tomorrow"
   bestTimes: string | null; // "09:00–17:00 (light green)" or null
-  rangesText: string; // "river level between 0.55 m and 0.62 m, air temperature between 11.0°C and 18.0°C, wind up to 14.0 mph"
+  rangesText: string; // "river level between 0.55 m and 0.62 m, air temperature between 11°C and 18°C, wind up to 14 mph"
   gapsText: string | null; // "17:00–18:00 dark green due to High winds"
 }
 
@@ -400,8 +401,8 @@ export function buildNextDaytimeOutlook(
     .filter((g): g is number => typeof g === "number");
   const maxGust = gusts.length ? Math.max(...gusts) : null;
   const gustText =
-    maxGust !== null && maxGust >= THRESHOLDS.WIND_GUST_NOTABLE
-      ? `gusts up to ${formatWindGust(maxGust)}`
+    maxGust !== null && whole(maxGust) >= THRESHOLDS.WIND_GUST_NOTABLE
+      ? `gusts up to ${formatWindSpeed(maxGust)}`
       : null;
 
   const rainWhileWarmText = daySlots.some((s) => s.rainWhileWarm)

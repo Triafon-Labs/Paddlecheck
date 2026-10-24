@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.40.7](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.6...paddlecheck-v1.40.7) (2026-10-24)
+
+
+### Bug Fixes
+
+* unblock this month's Dependabot PRs ([#404](https://github.com/dylanr97/Paddlecheck/issues/404)) ([8e9e16a](https://github.com/dylanr97/Paddlecheck/commit/8e9e16a1057dc2a56df6c8ae2af6f8f20f7ced7b))
+
 ## [1.40.6](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.5...paddlecheck-v1.40.6) (2026-10-24)
 
 ## [1.40.5](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.4...paddlecheck-v1.40.5) (2026-10-23)

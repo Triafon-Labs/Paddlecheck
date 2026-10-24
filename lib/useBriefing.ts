@@ -145,6 +145,7 @@ export function useBriefing(
   }, [conditions, forecastDays, model]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (auto && conditions) doFetch();
   }, [auto, conditions, doFetch]);
 

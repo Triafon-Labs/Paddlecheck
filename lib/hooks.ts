@@ -109,6 +109,7 @@ export const useKayakData = () => {
   const fetchInFlightRef = useRef(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOffline(!navigator.onLine);
     isOfflineRef.current = !navigator.onLine;
     const handleOnline = () => {
@@ -175,6 +176,7 @@ export const useKayakData = () => {
       // effect above, which has already set isOfflineRef synchronously.
       if (isOfflineRef.current) {
         if (hasCachedConditions) setLoading(false);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (hasCachedForecast) setForecastLoading(false);
       }
     }
@@ -604,6 +606,7 @@ export const useKayakData = () => {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, [fetchData]);
 

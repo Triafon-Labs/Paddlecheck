@@ -1,6 +1,6 @@
 {
   "name": "paddlecheck",
-  "version": "1.40.7",
+  "version": "1.40.8",
   "private": true,
   "engines": {
     "node": ">=22"

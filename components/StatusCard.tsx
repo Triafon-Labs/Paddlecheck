@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -16,14 +16,19 @@ import { ragStatus } from "@/lib/rag";
 import {
   ContributingFactors,
   BeAware,
+  FactorHeading,
   beAwareItemsFor,
   sunsetItemFor,
 } from "./ConditionFactors";
 import { useKayakContext } from "@/lib/KayakDataContext";
-import { getLondonHHMM, useNowTicking } from "@/lib/time";
+import { formatDataAge, getLondonHHMM, useNowTicking } from "@/lib/time";
+import { THRESHOLDS } from "@/lib/config";
 import { collapseMotion, springTransition } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
 import WeatherWarnings from "./WeatherWarnings";
+import RiverLevelLandmarks, {
+  RiverLevelLandmarksSkeleton,
+} from "./RiverLevelLandmarks";
 
 interface StatusCardProps {
   conditions: KayakConditions | null;
@@ -37,9 +42,16 @@ const SCALE_SEGMENT_COUNT = (
 ).filter((s) => s !== "Unknown").length;
 
 const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
-  const { forecastDays } = useKayakContext();
+  const { forecastDays, riverGraphData } = useKayakContext();
   // Ticks so the sunset countdown stays right while the page is left open.
   const now = useNowTicking();
+  const dataAgeLabel = useMemo(() => {
+    if (!riverGraphData || riverGraphData.length === 0) return null;
+    return formatDataAge(
+      new Date(riverGraphData[riverGraphData.length - 1].dateTime).getTime(),
+      now
+    );
+  }, [riverGraphData, now]);
   const renderContent = () => {
     if (loading) {
       return (
@@ -62,6 +74,11 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                 />
               ))}
             </Box>
+          </Box>
+
+          <Box sx={{ mt: 2 }}>
+            <Skeleton variant="text" width={140} height={20} animation="wave" />
+            <RiverLevelLandmarksSkeleton />
           </Box>
 
           <Box sx={{ mt: 2 }}>
@@ -116,6 +133,28 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
             <Box sx={{ mt: 2 }}>
               <PaddlingStatusHero status={conditions.overallStatus} />
             </Box>
+
+            {conditions.riverLevel !== undefined && (
+              <Box sx={{ mt: 2 }}>
+                <FactorHeading>
+                  River Level
+                  {conditions.levelChange &&
+                    ` · ${
+                      conditions.levelChange.value >
+                      THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
+                        ? "Rising"
+                        : conditions.levelChange.value <
+                            -THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
+                          ? "Falling"
+                          : "Steady"
+                    }`}
+                </FactorHeading>
+                <RiverLevelLandmarks
+                  riverLevel={conditions.riverLevel}
+                  dataAgeLabel={dataAgeLabel}
+                />
+              </Box>
+            )}
 
             <Collapse
               in={!!conditions.reasons && conditions.reasons.length > 0}

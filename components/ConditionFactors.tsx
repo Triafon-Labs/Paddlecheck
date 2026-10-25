@@ -18,10 +18,9 @@ export const factorSizes = (compact?: boolean) =>
   compact
     ? ({
         sectionSx: { mt: 1.5 },
-        heading: {
-          variant: "caption",
-          sx: { display: "block", fontWeight: 500 },
-        },
+        // The same heading as the current status's; the forecast stays a
+        // step down through its tighter spacing, not smaller text.
+        heading: { variant: "subtitle2", sx: {} },
         listMt: 0.5,
       } as const)
     : ({

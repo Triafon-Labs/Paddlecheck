@@ -69,24 +69,19 @@ export const CompactReadingRow: React.FC<{
       sx={{
         display: "flex",
         flexShrink: 0,
-        // Centres the 16px icon on the label's first line.
-        pt: "1px",
+        // Centres the 16px icon on the label's first line of body text.
+        pt: "2px",
         "& svg": { fontSize: 16, color: "primary.main" },
       }}
     >
       {icon}
     </Box>
     <Box sx={{ flex: 1, minWidth: 0 }}>
-      <Typography variant="caption" component="div" sx={{ fontWeight: 500 }}>
+      <Typography variant="body2" component="div" sx={{ fontWeight: 500 }}>
         {label}
       </Typography>
       {note && (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          component="div"
-          sx={{ fontSize: "0.6875rem" }}
-        >
+        <Typography variant="caption" color="text.secondary" component="div">
           {note}
         </Typography>
       )}

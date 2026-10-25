@@ -23,7 +23,8 @@ interface PaddlerLevelRowProps {
   // Called once the list has finished opening or closing.
   onSettled?: () => void;
   // The forecast panel's size, matching the compact rows around it
-  // (CompactReadingRow): caption text, tighter padding, smaller face.
+  // (CompactReadingRow): the same text, with tighter padding and a smaller
+  // face and chevron.
   compact?: boolean;
 }
 
@@ -39,7 +40,6 @@ const PaddlerLevelRow: React.FC<PaddlerLevelRowProps> = ({
   onSettled,
   compact,
 }) => {
-  const textVariant = compact ? "caption" : "body2";
   const iconSize = compact ? 16 : 20;
   const ui = statusInfo
     ? PADDLING_STATUS_UI[statusInfo.status]
@@ -61,7 +61,7 @@ const PaddlerLevelRow: React.FC<PaddlerLevelRowProps> = ({
       }}
     >
       {statusInfo.details.map((line, index) => (
-        <Typography key={index} component="li" variant={textVariant}>
+        <Typography key={index} component="li" variant="body2">
           {line}
         </Typography>
       ))}
@@ -125,10 +125,10 @@ const PaddlerLevelRow: React.FC<PaddlerLevelRowProps> = ({
           onColor={ui.onColor}
           size={iconSize}
         />
-        <Typography variant={textVariant} sx={{ fontWeight: 500, flex: 1 }}>
+        <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
           {paddler}
         </Typography>
-        <Typography variant={textVariant} color="text.secondary">
+        <Typography variant="body2" color="text.secondary">
           {ui.short}
         </Typography>
         {expandable ? (

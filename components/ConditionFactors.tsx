@@ -184,7 +184,7 @@ export const beAwareItemsFor = ({
 const SUNSET_COUNTDOWN_MINUTES = 2 * 60;
 
 // 70 -> "1 h 10 min", 60 -> "1 h", 10 -> "10 min".
-const formatDuration = (minutes: number) => {
+export const formatDuration = (minutes: number) => {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   if (h === 0) return `${m} min`;

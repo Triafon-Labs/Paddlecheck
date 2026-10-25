@@ -10,6 +10,7 @@ export interface KayakConditions {
   launchMessage?: string;
   initialStatus?: Status;
   temperature?: number;
+  apparentTemperature?: number;
   windSpeed?: number;
   windGust?: number;
   gustStatus?: Status;
@@ -58,6 +59,9 @@ export interface ChartDataPoint {
 
 export interface WeatherData {
   temperature: number;
+  // Best_match's "feels like", from its own wind - not the highest-model
+  // wind shown beside it.
+  apparentTemperature?: number;
   windSpeed: number;
   windGust: number;
   windDirection: number;

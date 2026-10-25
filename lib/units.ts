@@ -21,3 +21,10 @@ export const formatTemperature = (value: number): string => `${whole(value)}°C`
 
 // Also used for gusts.
 export const formatWindSpeed = (value: number): string => `${whole(value)} mph`;
+
+// Visibility is metres from the API. Under a kilometre it stays in metres -
+// that's where the fog threshold sits, so 600 m shouldn't read as "1 km".
+export const formatVisibility = (metres: number): string =>
+  metres < 1000
+    ? `${Math.round(metres / 100) * 100} m`
+    : `${Math.round(metres / 1000)} km`;

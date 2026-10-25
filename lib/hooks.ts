@@ -318,6 +318,7 @@ export const useKayakData = () => {
         riverLevel:
           riverData.latestLevel === null ? undefined : riverData.latestLevel,
         temperature: weatherData.temperature,
+        apparentTemperature: weatherData.apparentTemperature,
         windSpeed: weatherData.windSpeed,
         windGust: weatherData.windGust,
         windDirection: weatherData.windDirection,

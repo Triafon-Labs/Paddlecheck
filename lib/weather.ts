@@ -85,7 +85,7 @@ export const fetchWeatherData = async (
 ): Promise<WeatherData> => {
   const [response, ...extraWind] = await Promise.all([
     fetch(
-      `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,precipitation,visibility,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon`,
+      `${API_ENDPOINTS.WEATHER}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,apparent_temperature,precipitation,visibility,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code&wind_speed_unit=mph&timezone=Europe%2FLondon`,
       fetchCacheOptions(liveness)
     ),
     ...EXTRA_WIND_MODELS.map((model) =>
@@ -100,6 +100,7 @@ export const fetchWeatherData = async (
   const otherWind = extraWind.filter((w): w is WindReading => w !== null);
   return {
     temperature: current.temperature_2m,
+    apparentTemperature: current.apparent_temperature,
     windSpeed: highest(
       current.wind_speed_10m,
       ...otherWind.map((w) => w.speed)

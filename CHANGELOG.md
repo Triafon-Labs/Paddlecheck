@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.42.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.41.0...paddlecheck-v1.42.0) (2026-10-25)
+
+### Features
+
+* rework Detailed Stats into a weather panel with gusts, feels-like and daylight ([#408](https://github.com/dylanr97/Paddlecheck/issues/408)) ([b04fa57](https://github.com/dylanr97/Paddlecheck/commit/b04fa57997c3ac09aae92f59d3120631fffd5076))
+
 ## [1.41.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.9...paddlecheck-v1.41.0) (2026-10-25)
 
 ### Features

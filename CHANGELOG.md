@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.41.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.9...paddlecheck-v1.41.0) (2026-10-25)
+
+### Features
+
+* show nearby river landmarks in the Paddling Status card ([#407](https://github.com/dylanr97/Paddlecheck/issues/407)) ([bd00f0b](https://github.com/dylanr97/Paddlecheck/commit/bd00f0b3d536e1a134e6b2e3716291f223981e47))
+
 ## [1.40.9](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.8...paddlecheck-v1.40.9) (2026-10-24)
 
 ## [1.40.8](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.40.7...paddlecheck-v1.40.8) (2026-10-24)

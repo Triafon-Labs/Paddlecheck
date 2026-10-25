@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.43.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.42.0...paddlecheck-v1.43.0) (2026-10-25)
+
+### Features
+
+* Weather card follow-ups, shared tiles and rows, forecast hour rework, Be Aware removed ([#409](https://github.com/dylanr97/Paddlecheck/issues/409)) ([f0cc13f](https://github.com/dylanr97/Paddlecheck/commit/f0cc13fdfa61cb2ec6afa13847b1040905d7c2ae))
+
 ## [1.42.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.41.0...paddlecheck-v1.42.0) (2026-10-25)
 
 ### Features

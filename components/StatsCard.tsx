@@ -25,7 +25,7 @@ import AcUnit from "@mui/icons-material/AcUnit";
 import Thunderstorm from "@mui/icons-material/Thunderstorm";
 import WbTwilight from "@mui/icons-material/WbTwilight";
 import { KayakConditions } from "@/types";
-import { degreesToCompass } from "@/lib/weather";
+import { degreesToCompassName } from "@/lib/weather";
 import {
   formatTemperature,
   formatVisibility,
@@ -34,12 +34,13 @@ import {
 import { springTransition } from "@/lib/m3-palette";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import {
+  formatDuration,
   getLondonHHMM,
   hhmmOfISO,
   minutesOfISO,
   useNowTicking,
 } from "@/lib/time";
-import { formatDuration } from "./ConditionFactors";
+import StatTile, { TileHeading, TileValue, tileSx } from "./StatTile";
 
 interface StatsCardProps {
   conditions: KayakConditions | null;
@@ -67,64 +68,6 @@ const SkyIcon: React.FC<{ code?: number; dark?: boolean } & SvgIconProps> = ({
   return dark ? <Bedtime {...props} /> : <WbSunny {...props} />;
 };
 
-// A tile that is one of the reasons behind the current status is filled in
-// the warning container, so the card points at what's driving the verdict
-// without repeating the Contributing Factors list. A fill rather than amber
-// text or icons: the amber is around 2:1 as a bare glyph (lib/m3-palette.ts).
-const tileSx = (flagged?: boolean) => ({
-  p: 1.5,
-  // See ChangeIndicator in RiverLevelGraph: without it a long value holds
-  // the grid column wider than its share on a narrow phone.
-  minWidth: 0,
-  backgroundColor: flagged ? "warning.container" : "surfaces.containerHigh",
-  color: flagged ? "warning.onContainer" : "text.primary",
-});
-
-// Secondary text inherits the flagged tile's on-colour instead of the grey,
-// which washes out on the amber container.
-const secondary = (flagged?: boolean) =>
-  flagged ? "inherit" : "text.secondary";
-
-const TileHeading: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  flagged?: boolean;
-}> = ({ icon, label, flagged }) => (
-  <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-    <Box
-      sx={{
-        display: "flex",
-        color: flagged ? "inherit" : "primary.main",
-      }}
-    >
-      {icon}
-    </Box>
-    <Typography variant="subtitle2" color={secondary(flagged)}>
-      {label}
-    </Typography>
-  </Box>
-);
-
-const StatTile: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  value: React.ReactNode;
-  detail?: React.ReactNode;
-  flagged?: boolean;
-}> = ({ icon, label, value, detail, flagged }) => (
-  <Paper elevation={0} sx={tileSx(flagged)}>
-    <TileHeading icon={icon} label={label} flagged={flagged} />
-    <Typography variant="h6" component="div" sx={{ mt: 0.5 }}>
-      {value}
-    </Typography>
-    {detail && (
-      <Typography variant="body2" color={secondary(flagged)}>
-        {detail}
-      </Typography>
-    )}
-  </Paper>
-);
-
 // The day as a 24-hour track: daylight is the lit stretch, the dot is now.
 const DaylightTile: React.FC<{
   sunrise: string | null;
@@ -148,29 +91,21 @@ const DaylightTile: React.FC<{
   } else {
     summary = `${formatDuration(setMinutes - nowMinutes)} of daylight left`;
   }
-  const isDark = nowMinutes <= riseMinutes || nowMinutes >= setMinutes;
-  // On the amber container the primary-blue track would clash; the bar
-  // follows the tile's on-colour instead.
-  const accent = isDark ? "warning.onContainer" : "primary.main";
   const pct = (minutes: number) => `${(minutes / MINUTES_PER_DAY) * 100}%`;
 
   return (
-    <Paper elevation={0} sx={{ ...tileSx(isDark), gridColumn: "1 / -1" }}>
-      <TileHeading icon={<WbTwilight />} label="Daylight" flagged={isDark} />
-      <Typography variant="h6" component="div" sx={{ mt: 0.5 }}>
-        {summary}
-      </Typography>
+    <Paper elevation={0} sx={{ ...tileSx, gridColumn: "1 / -1" }}>
+      <TileHeading icon={<WbTwilight />} label="Daylight" />
+      <TileValue>{summary}</TileValue>
       <Box
         role="img"
         aria-label={`Sunrise ${hhmmOfISO(sunrise)}, sunset ${hhmmOfISO(sunset)}`}
         sx={{
           position: "relative",
-          height: 8,
-          mt: 1.5,
+          height: 6,
+          mt: 1.25,
           borderRadius: 9999,
-          backgroundColor: isDark
-            ? "rgba(0, 0, 0, 0.12)"
-            : "surfaces.containerHighest",
+          backgroundColor: "surfaces.containerHighest",
         }}
       >
         <Box
@@ -181,7 +116,7 @@ const DaylightTile: React.FC<{
             left: pct(riseMinutes),
             width: pct(setMinutes - riseMinutes),
             borderRadius: 9999,
-            backgroundColor: accent,
+            backgroundColor: "primary.main",
             opacity: 0.35,
           }}
         />
@@ -190,23 +125,21 @@ const DaylightTile: React.FC<{
             position: "absolute",
             top: "50%",
             left: pct(nowMinutes),
-            width: 14,
-            height: 14,
+            width: 12,
+            height: 12,
             borderRadius: "50%",
             transform: "translate(-50%, -50%)",
-            backgroundColor: accent,
+            backgroundColor: "primary.main",
             border: "2px solid",
-            borderColor: isDark
-              ? "warning.container"
-              : "surfaces.containerHigh",
+            borderColor: "surfaces.containerHigh",
           }}
         />
       </Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}>
-        <Typography variant="body2" color={secondary(isDark)}>
+        <Typography variant="body2" color="text.secondary">
           Sunrise {hhmmOfISO(sunrise)}
         </Typography>
-        <Typography variant="body2" color={secondary(isDark)}>
+        <Typography variant="body2" color="text.secondary">
           Sunset {hhmmOfISO(sunset)}
         </Typography>
       </Box>
@@ -234,26 +167,26 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading }) => {
       <Card sx={{ width: "100%" }}>
         <CardContent>
           <Typography variant="h5" component="div" gutterBottom>
-            Detailed Stats
+            Weather
           </Typography>
           <Skeleton
             variant="rounded"
-            height={104}
+            height={64}
             animation="wave"
-            sx={{ mt: 1, borderRadius: "28px" }}
+            sx={{ mt: 1 }}
           />
           <Box sx={tileGridSx}>
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton
                 key={i}
                 variant="rounded"
-                height={88}
+                height={76}
                 animation="wave"
               />
             ))}
             <Skeleton
               variant="rounded"
-              height={120}
+              height={100}
               animation="wave"
               sx={{ gridColumn: "1 / -1" }}
             />
@@ -267,69 +200,59 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading }) => {
     return null;
   }
 
-  const reasons = conditions.reasons ?? [];
   const [nowH, nowM] = getLondonHHMM(now).split(":").map(Number);
   const today = forecastDays?.[0];
   const compass =
     conditions.windDirection !== undefined
-      ? degreesToCompass(conditions.windDirection)
+      ? degreesToCompassName(conditions.windDirection)
       : null;
 
   return (
     <Card sx={{ width: "100%" }}>
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
-          Detailed Stats
+          Weather
         </Typography>
         <Grow in appear {...springTransition()}>
           <Box>
+            {/* Sized to sit with the cards above it rather than outrank
+                them: the temperature is a step below the card title, like
+                the Who Can Paddle verdict, not a display-size number on a
+                filled disc, which made this the loudest card on the page. */}
             <Paper
               elevation={0}
               sx={{
                 mt: 1,
-                p: 2,
+                p: 1.5,
                 display: "flex",
                 alignItems: "center",
-                gap: 2,
-                borderRadius: "28px",
+                gap: 1.5,
                 backgroundColor: "surfaces.containerHigh",
               }}
             >
-              <Box
-                sx={{
-                  display: "grid",
-                  placeItems: "center",
-                  width: 64,
-                  height: 64,
-                  flexShrink: 0,
-                  borderRadius: "50%",
-                  backgroundColor: "primary.main",
-                  color: "primary.contrastText",
-                }}
-              >
-                <SkyIcon
-                  code={conditions.weatherCode}
-                  dark={conditions.dark}
-                  sx={{ fontSize: 36 }}
-                />
-              </Box>
+              <SkyIcon
+                code={conditions.weatherCode}
+                dark={conditions.dark}
+                sx={{ fontSize: 32, color: "primary.main", flexShrink: 0 }}
+              />
               <Box sx={{ minWidth: 0 }}>
-                <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
-                  <Typography variant="h3" component="div">
-                    {conditions.temperature !== undefined
-                      ? formatTemperature(conditions.temperature)
-                      : "N/A"}
+                <Typography
+                  component="div"
+                  sx={{ fontSize: "1.25rem", fontWeight: 500, lineHeight: 1.2 }}
+                >
+                  {conditions.temperature !== undefined
+                    ? formatTemperature(conditions.temperature)
+                    : "N/A"}
+                  <Typography component="span" variant="body2" sx={{ ml: 1 }}>
+                    {conditions.weatherDescription ?? "Unknown"}
                   </Typography>
-                  {conditions.apparentTemperature !== undefined && (
-                    <Typography variant="body2" color="text.secondary">
-                      Feels like{" "}
-                      {formatTemperature(conditions.apparentTemperature)}
-                    </Typography>
-                  )}
-                </Box>
-                <Typography variant="subtitle1" color="text.secondary">
-                  {conditions.weatherDescription ?? "Unknown"}
                 </Typography>
+                {conditions.apparentTemperature !== undefined && (
+                  <Typography variant="body2" color="text.secondary">
+                    Feels like{" "}
+                    {formatTemperature(conditions.apparentTemperature)}
+                  </Typography>
+                )}
               </Box>
             </Paper>
 
@@ -355,7 +278,6 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading }) => {
                     : "N/A"
                 }
                 detail={compass ? `From the ${compass}` : undefined}
-                flagged={reasons.includes("High winds")}
               />
               <StatTile
                 icon={<Air />}
@@ -365,12 +287,6 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading }) => {
                     ? formatWindSpeed(conditions.windGust)
                     : "N/A"
                 }
-                detail={
-                  conditions.gustStatus
-                    ? `${conditions.gustStatus} if sustained`
-                    : undefined
-                }
-                flagged={!!conditions.gustStatus}
               />
               <StatTile
                 icon={<Visibility />}
@@ -381,7 +297,6 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading }) => {
                     ? formatVisibility(conditions.visibility)
                     : undefined
                 }
-                flagged={reasons.includes("Foggy")}
               />
               <DaylightTile
                 sunrise={today?.sunrise ?? null}

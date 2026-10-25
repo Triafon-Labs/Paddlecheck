@@ -151,7 +151,7 @@ const m3Typography: ThemeOptions["typography"] = {
     letterSpacing: "0em",
     fontVariationSettings: OPSZ_DEFAULT,
   },
-  // Headline Small – used for card titles ("Paddling Status", "Detailed Stats")
+  // Headline Small – used for card titles ("Paddling Status", "Weather")
   h5: {
     fontSize: "1.5rem",
     fontWeight: 600,

@@ -4,12 +4,10 @@ import {
   CardContent,
   Typography,
   Box,
-  Collapse,
   Skeleton,
   Grow,
   Stack,
 } from "@mui/material";
-import { ExpandMore } from "@mui/icons-material";
 import { Status, PaddlerType } from "@/types";
 import {
   getPaddlingMatrix,
@@ -17,17 +15,9 @@ import {
   paddlerTypes,
 } from "@/lib/paddlingMatrix";
 import { usePaddlerLevel } from "@/lib/usePaddlerLevel";
-import {
-  StatusFace,
-  PADDLING_STATUS_UI,
-  UNKNOWN_PADDLING_UI,
-} from "./StatusFace";
-import {
-  collapseMotion,
-  m3Spring,
-  spring,
-  springTransition,
-} from "@/lib/m3-palette";
+import PaddlerLevelRow from "./PaddlerLevelRow";
+import { StatusFace, PADDLING_STATUS_UI } from "./StatusFace";
+import { springTransition } from "@/lib/m3-palette";
 
 interface PaddlingMatrixCardProps {
   overallStatus?: Status;
@@ -81,122 +71,15 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
   // is the question this card exists to answer, and it used to be a 22px icon
   // on a row weighted the same as the three levels that don't apply. The
   // others stay, one compact line each, expandable where there's more to show.
-  const renderCompactRow = (paddler: PaddlerType) => {
-    const statusInfo = paddlingMatrix[paddler];
-    const ui = statusInfo
-      ? PADDLING_STATUS_UI[statusInfo.status]
-      : UNKNOWN_PADDLING_UI;
-    // A row with nothing more to show isn't a button: no chevron, no state
-    // layer, nothing to open. A spacer keeps its label in line with the rest.
-    const expandable = !!statusInfo && hasDetailsToShow(statusInfo.details);
-    const isOpen = expandable && open[paddler];
-    return (
-      <Box
-        key={paddler}
-        sx={{
-          backgroundColor: "surfaces.containerHigh",
-          borderRadius: 1.5,
-          overflow: "hidden",
-        }}
-      >
-        <Box
-          {...(expandable && {
-            onClick: () => handleToggle(paddler),
-            role: "button",
-            tabIndex: 0,
-            "aria-expanded": isOpen,
-            onKeyDown: (e: React.KeyboardEvent) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleToggle(paddler);
-              }
-            },
-          })}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            px: 1.5,
-            py: 1,
-            cursor: expandable ? "pointer" : "default",
-            position: "relative",
-            // These rows are real buttons (click, Enter/Space, aria-expanded)
-            // and carry the M3 onSurface state layer at 8%/10% plus a focus
-            // indicator, so a keyboard user can tell which row they are on.
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              backgroundColor: "text.primary",
-              opacity: 0,
-              transition: spring("opacity", m3Spring.effectsFast),
-              pointerEvents: "none",
-            },
-            ...(expandable && {
-              "&:hover::after": { opacity: 0.08 },
-              "&:active::after": { opacity: 0.1 },
-            }),
-            "&:focus-visible": {
-              outline: "3px solid",
-              outlineColor: "primary.main",
-              outlineOffset: -3,
-            },
-          }}
-        >
-          <StatusFace
-            face={ui.face}
-            color={ui.color}
-            onColor={ui.onColor}
-            size={20}
-          />
-          <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
-            {paddler}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {ui.short}
-          </Typography>
-          {expandable ? (
-            <ExpandMore
-              sx={{
-                fontSize: 20,
-                color: "text.secondary",
-                transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                transition: spring("transform", m3Spring.spatialFast),
-              }}
-            />
-          ) : (
-            <Box sx={{ width: 20, flexShrink: 0 }} aria-hidden />
-          )}
-        </Box>
-        <Collapse
-          in={isOpen}
-          timeout="auto"
-          unmountOnExit
-          easing={collapseMotion.easing}
-        >
-          {expandable && (
-            <Box
-              component="ul"
-              sx={{
-                m: 0,
-                pl: 4.5,
-                pr: 1.5,
-                pt: 0.5,
-                pb: 1.5,
-                "& li:not(:last-of-type)": { mb: 0.75 },
-              }}
-            >
-              {statusInfo.details.map((line, index) => (
-                <Typography key={index} component="li" variant="body2">
-                  {line}
-                </Typography>
-              ))}
-            </Box>
-          )}
-        </Collapse>
-      </Box>
-    );
-  };
+  const renderCompactRow = (paddler: PaddlerType) => (
+    <PaddlerLevelRow
+      key={paddler}
+      paddler={paddler}
+      statusInfo={paddlingMatrix[paddler]}
+      open={open[paddler]}
+      onToggle={() => handleToggle(paddler)}
+    />
+  );
 
   const selectedInfo = selectedLevel
     ? paddlingMatrix[selectedLevel]

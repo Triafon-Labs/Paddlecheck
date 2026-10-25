@@ -206,8 +206,9 @@ export const THRESHOLDS = {
   TEMP_HIGH: 13,
   TEMP_MODERATE: 5,
   WIND_HIGH: 15,
-  // Gusts above this are called out as a heads-up (not fed into the RAG
-  // calculation itself, which only reacts to sustained wind speed).
+  // Gusts at or above this are mentioned in the share text and the AI
+  // briefing's forecast summary (lib/forecast.ts). Never fed into the RAG
+  // calculation, which only reacts to sustained wind speed.
   WIND_GUST_NOTABLE: 15,
   VISIBILITY_POOR: 1000,
   RIVER_LEVEL_NO_PADDLING: 5.0,

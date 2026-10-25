@@ -2,12 +2,21 @@
 
 import React from "react";
 import { Box, Skeleton, Typography } from "@mui/material";
+import Water from "@mui/icons-material/Water";
 import { LEVEL_DESCRIPTIONS } from "@/lib/rag";
 import { formatRiverLevel } from "@/lib/units";
 
 interface RiverLevelLandmarksProps {
   riverLevel: number;
-  dataAgeLabel: string | null;
+  // Shown under the reading's own row: how old it is, or where a forecast
+  // level comes from.
+  readingNote: string | null;
+  // The forecast panel's size: the reading's row alone (CompactReadingRow),
+  // so a forecast hour reads as secondary to the current status.
+  compact?: boolean;
+  // What the reading's own row is called - "Forecast level" for an hour
+  // ahead.
+  readingLabel?: string;
 }
 
 interface ScaleRow {
@@ -34,10 +43,63 @@ const TRACK_WIDTH = 4;
 const formatDistance = (metres: number): string =>
   `${formatRiverLevel(Math.abs(metres))} ${metres > 0 ? "above" : "below"}`;
 
+// One reading in the forecast panel's size: an icon, then the reading and a
+// note beneath it. The forecast hour's river level, weather and
+// contributing factors all use it, so every row lines up - an icon column
+// rather than a figure column, which left short figures indented and icons
+// floating in a gap.
+export const CompactReadingRow: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  note?: string | null;
+}> = ({ icon, label, note }) => (
+  <Box
+    sx={{
+      mt: 0.5,
+      display: "flex",
+      alignItems: "flex-start",
+      gap: 1,
+      px: 1.5,
+      py: 0.5,
+      backgroundColor: "surfaces.containerHigh",
+      borderRadius: 1,
+    }}
+  >
+    <Box
+      sx={{
+        display: "flex",
+        flexShrink: 0,
+        // Centres the 16px icon on the label's first line.
+        pt: "1px",
+        "& svg": { fontSize: 16, color: "primary.main" },
+      }}
+    >
+      {icon}
+    </Box>
+    <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Typography variant="caption" component="div" sx={{ fontWeight: 500 }}>
+        {label}
+      </Typography>
+      {note && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          component="div"
+          sx={{ fontSize: "0.6875rem" }}
+        >
+          {note}
+        </Typography>
+      )}
+    </Box>
+  </Box>
+);
+
 // The reading on a short scale of the club's landmarks either side of it.
 const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
   riverLevel,
-  dataAgeLabel,
+  readingNote,
+  compact,
+  readingLabel = "Current level",
 }) => {
   const levels = Object.entries(LEVEL_DESCRIPTIONS)
     .map(([level, desc]) => ({ level: parseFloat(level), desc }))
@@ -54,11 +116,28 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
   const below = others.filter((l) => l.level < riverLevel).slice(-1);
   const above = others.filter((l) => l.level > riverLevel).slice(0, 1);
 
+  const reading: ScaleRow = onLandmark
+    ? { ...onLandmark, isReading: true, onLandmark: true }
+    : { level: riverLevel, desc: readingLabel, isReading: true };
+  // Compact is the reading's row alone - the landmarks either side are the
+  // status card's job, and in a forecast hour they made a long panel longer.
+  if (compact) {
+    return (
+      <CompactReadingRow
+        icon={<Water />}
+        label={
+          onLandmark
+            ? `${formatRiverLevel(riverLevel)} – ${onLandmark.desc}`
+            : formatRiverLevel(riverLevel)
+        }
+        note={readingNote}
+      />
+    );
+  }
+
   const rows: ScaleRow[] = [
     ...above.map((l) => ({ ...l, isReading: false })),
-    onLandmark
-      ? { ...onLandmark, isReading: true, onLandmark: true }
-      : { level: riverLevel, desc: "Current level", isReading: true },
+    reading,
     ...below.map((l) => ({ ...l, isReading: false })),
   ];
 
@@ -128,7 +207,7 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
               />
             )}
             {/* The track stops at the bottom dot: below the lowest landmark
-                shown there is nothing to measure against. */}
+              shown there is nothing to measure against. */}
             {i < rows.length - 1 && (
               <Box
                 sx={{
@@ -183,27 +262,22 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
               }}
             >
               {row.desc}
-              {row.isReading && !row.onLandmark && dataAgeLabel && (
-                <Typography
-                  component="span"
-                  variant="caption"
-                  sx={{
-                    color: "text.secondary",
-                    fontWeight: 400,
-                    ml: 0.5,
-                  }}
-                >
-                  ({dataAgeLabel})
-                </Typography>
-              )}
             </Typography>
-            {(row.onLandmark || !row.isReading) && (
-              <Typography variant="caption" color="text.secondary">
-                {row.onLandmark
-                  ? `Current level${dataAgeLabel ? ` (${dataAgeLabel})` : ""}`
-                  : formatDistance(row.level - riverLevel)}
-              </Typography>
-            )}
+            {/* The secondary line under each row: a landmark's distance, or
+                the reading's age or source - on a line of its own rather than
+                bracketed onto the end of the text above it. */}
+            {(() => {
+              const note = !row.isReading
+                ? formatDistance(row.level - riverLevel)
+                : row.onLandmark
+                  ? [readingLabel, readingNote].filter(Boolean).join(" – ")
+                  : readingNote;
+              return note ? (
+                <Typography variant="caption" color="text.secondary">
+                  {note}
+                </Typography>
+              ) : null;
+            })()}
           </Box>
         </Box>
       ))}
@@ -247,7 +321,8 @@ export const RiverLevelLandmarksSkeleton: React.FC = () => (
     <LandmarkRowSkeleton />
     <Skeleton
       variant="rounded"
-      height={39}
+      // The reading row with its "Gauge read …" line beneath.
+      height={64}
       animation="wave"
       sx={{ borderRadius: 1 }}
     />

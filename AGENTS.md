@@ -77,9 +77,10 @@ components/
   StatusCard.tsx         Current RAG status, river level landmarks, contributing factors, warnings, conditions report
   PaddlingStatusHero.tsx The status panel and five-step scale strip at the top of StatusCard
   PaddlingMatrixCard.tsx Skill-level guidance table (Beginner/Improver/Intermediate/Independent)
+  PaddlerLevelRow.tsx    One level's verdict as an expandable row – Who Can Paddle and the forecast hour's "You"
   StatusFace.tsx         The verdict faces (a face on a status-colour disc) and their labels
   StatsCard.tsx          Weather panel (sky, temp, feels-like) + tiles – wind, gusts, visibility, daylight
-  RiverLevelLandmarks.tsx The reading between its nearest club landmarks, with distances (in StatusCard)
+  RiverLevelLandmarks.tsx The reading between its nearest club landmarks, with distances (StatusCard); compact: the reading row alone (forecast hour)
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
   ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below, opening with the verdict for your level
@@ -88,7 +89,8 @@ components/
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners
   InfoPanel.tsx          Shared tonal "icon + text" panel, optionally a button
-  ConditionFactors.tsx   "Contributing Factors" / "Be Aware" sections, shared by StatusCard and the forecast panel
+  StatTile.tsx           Labelled-figure tile (icon + label, value, detail) – weather, factors, river changes
+  ConditionFactors.tsx   "Contributing Factors" section, shared by StatusCard and the forecast panel
   SlidingToggleButtonGroup.tsx  Segmented control with a sliding pill
   ThemeRegistry.tsx      Emotion cache + AppThemeProvider for SSR
   ServiceWorkerRegistration.tsx  Registers public/sw.js in production
@@ -180,7 +182,7 @@ The RAG status is calculated from river level first, then modifiers are applied:
 1. **Temperature** – below 5°C raises status significantly (cold water shock); 5–13°C raises status moderately and enables rain as a factor
 2. **Wind** – above 15 mph raises status at any temperature
 3. **Rain** – only a factor when temp is 5–13°C (moderate)
-4. **Darkness** – raises Green → Amber, Amber → Red. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the current status and the forecast panel both count down to sunset (a "Be Aware" item) over the last two hours before it
+4. **Darkness** – raises Green → Amber, Amber → Red. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the Weather card's Daylight tile counts down to sunset
 5. **Poor visibility** – below 1 000 m raises Green → Amber, Amber → Red
 6. **Thunderstorms** – overrides everything → No Paddling
 

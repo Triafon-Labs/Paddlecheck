@@ -1,21 +1,16 @@
 "use client";
 
 import React from "react";
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import HelpOutlined from "@mui/icons-material/HelpOutlined";
-import Air from "@mui/icons-material/Air";
-import WaterDrop from "@mui/icons-material/WaterDrop";
-import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
-import NightsStay from "@mui/icons-material/NightsStay";
-import { Status } from "@/types";
-import InfoPanel from "./InfoPanel";
-import { ragStatus, reasonIcons, describeReason } from "@/lib/rag";
-import { formatWindSpeed } from "@/lib/units";
-import { hhmmOfISO, minutesOfISO } from "@/lib/time";
+import StatTile, { tileGridSx } from "./StatTile";
+import { CompactReadingRow } from "./RiverLevelLandmarks";
+import { reasonIcons } from "@/lib/rag";
+import { formatTemperature, formatWindSpeed } from "@/lib/units";
 
-// The "Contributing Factors" and "Be Aware" sections, shared by the current
-// status (StatusCard) and a picked forecast hour (ForecastHourDetails) so the
-// two always read the same way.
+// The "Contributing Factors" section, shared by the current status
+// (StatusCard) and a picked forecast hour (ForecastHourDetails) so the two
+// always read the same way.
 //
 // `compact` is the forecast's size: the same layout one step smaller, so a
 // forecast hour reads as secondary to the current status above it.
@@ -34,41 +29,6 @@ export const factorSizes = (compact?: boolean) =>
         heading: { variant: "subtitle2", sx: {} },
         listMt: 1,
       } as const);
-
-// The compact form of a factor: a small chip in the same style for every
-// section, so the headings - not the element - say what kind of item it is.
-export const FactorChip: React.FC<{
-  Icon: React.ElementType;
-  label: React.ReactNode;
-}> = ({ Icon, label }) => (
-  <Chip
-    size="small"
-    icon={<Icon sx={{ fontSize: 16, "&&": { color: "primary.main" } }} />}
-    label={label}
-    // The theme's default chip text is the muted onSurfaceVariant; these
-    // carry the same content as the full-size panels, so they take the same
-    // text colour. Set through --chip-fg, which the theme's chip rule reads.
-    sx={(theme) => ({
-      "--chip-fg": (theme.vars ?? theme).palette.text.primary,
-    })}
-  />
-);
-
-export const FactorChipRow: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => (
-  <Box
-    sx={{
-      display: "flex",
-      flexWrap: "wrap",
-      alignItems: "center",
-      gap: 0.75,
-      mt: 0.5,
-    }}
-  >
-    {children}
-  </Box>
-);
 
 // A section heading in the given size.
 export const FactorHeading: React.FC<{
@@ -91,187 +51,126 @@ interface ContributingFactorsProps {
   reasons: string[];
   temperature?: number;
   windSpeed?: number;
+  weatherDescription?: string;
   compact?: boolean;
 }
+
+interface TileText {
+  label: string;
+  value: string;
+  detail?: string;
+}
+
+// A reason split into the Weather card's tile shape: what it's about, the
+// reading, and how the rules class it - "Temperature", "10°C", "Moderately
+// low". The chips use reasonChip below.
+const reasonTile = (
+  reason: string,
+  values: {
+    temperature?: number;
+    windSpeed?: number;
+    weatherDescription?: string;
+  }
+): TileText => {
+  // "Slightly elevated river level (> 1.00 m)" and its siblings.
+  const river = reason.match(/^(\w+ elevated) river level \(> (.+)\)$/);
+  if (river) {
+    return {
+      label: "River level",
+      value: river[1],
+      detail: `Above ${river[2]}`,
+    };
+  }
+  switch (reason) {
+    case "Low temperature":
+    case "Moderately low temperature":
+      return {
+        label: "Temperature",
+        value:
+          values.temperature !== undefined
+            ? formatTemperature(values.temperature)
+            : reason,
+        detail: reason === "Low temperature" ? "Low" : "Moderately low",
+      };
+    case "High winds":
+      return {
+        label: "Wind",
+        value:
+          values.windSpeed !== undefined
+            ? formatWindSpeed(values.windSpeed)
+            : reason,
+        detail: "High",
+      };
+    case "Rain":
+      return { label: "Rain", value: values.weatherDescription ?? "Rain" };
+    case "Dark":
+      return { label: "Daylight", value: "Dark" };
+    case "Foggy":
+      return { label: "Visibility", value: "Fog" };
+    case "River level is dangerously high":
+      return { label: "River level", value: "Dangerously high" };
+    case "Thunderstorms":
+      return { label: "Weather", value: "Thunderstorms" };
+    default:
+      return { label: "Conditions", value: reason };
+  }
+};
+
+// A reason in one of the forecast's compact rows: the reason, and its
+// figure beneath - "Moderately low temperature" / "12°C".
+const reasonChip = (
+  reason: string,
+  values: { temperature?: number; windSpeed?: number }
+): { label: string; aside?: string } => {
+  const river = reason.match(/^(.+ river level) \(> (.+)\)$/);
+  if (river) return { label: river[1], aside: `over ${river[2]}` };
+  if (
+    (reason === "Low temperature" || reason === "Moderately low temperature") &&
+    values.temperature !== undefined
+  ) {
+    return { label: reason, aside: formatTemperature(values.temperature) };
+  }
+  if (reason === "High winds" && values.windSpeed !== undefined) {
+    return { label: reason, aside: formatWindSpeed(values.windSpeed) };
+  }
+  return { label: reason };
+};
 
 export const ContributingFactors: React.FC<ContributingFactorsProps> = ({
   reasons,
   temperature,
   windSpeed,
+  weatherDescription,
   compact,
 }) => {
   const size = factorSizes(compact);
   const items = reasons.map((reason) => ({
     reason,
     Icon: reasonIcons[reason] ?? HelpOutlined,
-    label: describeReason(reason, { temperature, windSpeed }),
+    chip: reasonChip(reason, { temperature, windSpeed }),
+    tile: reasonTile(reason, { temperature, windSpeed, weatherDescription }),
   }));
   return (
     <Box sx={size.sectionSx}>
       <FactorHeading compact={compact}>Contributing Factors</FactorHeading>
       {compact ? (
-        <FactorChipRow>
-          {items.map(({ reason, Icon, label }) => (
-            <FactorChip key={reason} Icon={Icon} label={label} />
-          ))}
-        </FactorChipRow>
-      ) : (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 1,
-            mt: size.listMt,
-            "& > *:last-of-type:nth-of-type(odd)": {
-              gridColumn: "1 / -1",
-            },
-          }}
-        >
-          {items.map(({ reason, Icon, label }) => (
-            <InfoPanel key={reason}>
-              <Icon fontSize="small" sx={{ color: "primary.main" }} />
-              <Typography variant="body2">{label}</Typography>
-            </InfoPanel>
-          ))}
-        </Box>
-      )}
-    </Box>
-  );
-};
-
-export interface BeAwareItem {
-  key: string;
-  Icon: React.ElementType;
-  text: string;
-  // A trailing dot in this status's colour, e.g. what a gust would make the
-  // status if it were sustained.
-  dotStatus?: Status;
-  dotTitle?: string;
-}
-
-// The gust and warm-rain heads-ups, which neither change the status nor
-// would otherwise show anywhere.
-export const beAwareItemsFor = ({
-  gustStatus,
-  windGust,
-  rainWhileWarm,
-  weatherDescription,
-}: {
-  gustStatus?: Status;
-  windGust?: number;
-  rainWhileWarm?: boolean;
-  weatherDescription?: string;
-}): BeAwareItem[] => [
-  ...(gustStatus && windGust !== undefined
-    ? [
-        {
-          key: "gust",
-          Icon: Air,
-          text: `Gusts up to ${formatWindSpeed(windGust)}`,
-          dotStatus: gustStatus,
-          dotTitle: `Would be ${gustStatus} if sustained`,
-        },
-      ]
-    : []),
-  ...(rainWhileWarm
-    ? [{ key: "rain", Icon: WaterDrop, text: weatherDescription || "Rain" }]
-    : []),
-];
-
-// How far ahead of sunset to start counting down to it - about a club
-// session's length, so it's there when choosing when to start without
-// turning up on most of the afternoon.
-const SUNSET_COUNTDOWN_MINUTES = 2 * 60;
-
-// 70 -> "1 h 10 min", 60 -> "1 h", 10 -> "10 min".
-export const formatDuration = (minutes: number) => {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (h === 0) return `${m} min`;
-  return m === 0 ? `${h} h` : `${h} h ${m} min`;
-};
-
-// Sunset is counted down over the hours leading up to it, for planning when
-// to get off the water - from now for the current status, from the start of
-// the hour for a forecast hour. Sunrise gets nothing: once it's light it
-// only gets lighter.
-export const sunsetItemFor = (
-  fromMinutes: number,
-  sunset: string | null
-): BeAwareItem | null => {
-  const sunsetMinutes = minutesOfISO(sunset);
-  if (!sunset || sunsetMinutes === null) return null;
-  const minutesToSunset = sunsetMinutes - fromMinutes;
-  if (minutesToSunset <= 0 || minutesToSunset > SUNSET_COUNTDOWN_MINUTES) {
-    return null;
-  }
-  return {
-    key: "sunset",
-    Icon: NightsStay,
-    text: `Sunset at ${hhmmOfISO(sunset)} (${formatDuration(minutesToSunset)} away)`,
-  };
-};
-
-export const BeAware: React.FC<{
-  items: BeAwareItem[];
-  compact?: boolean;
-}> = ({ items, compact }) => {
-  const size = factorSizes(compact);
-  const dot = (
-    status: Status,
-    title?: string,
-    ml: number | string = "auto"
-  ) => (
-    <FiberManualRecord
-      titleAccess={title}
-      sx={{
-        fontSize: 8,
-        color: ragStatus[status].color,
-        flexShrink: 0,
-        ml,
-      }}
-    />
-  );
-  return (
-    <Box sx={size.sectionSx}>
-      <FactorHeading compact={compact}>Be Aware</FactorHeading>
-      {compact ? (
-        <FactorChipRow>
-          {items.map(({ key, Icon, text, dotStatus, dotTitle }) => (
-            <FactorChip
-              key={key}
-              Icon={Icon}
-              label={
-                dotStatus ? (
-                  <Box
-                    component="span"
-                    sx={{ display: "inline-flex", alignItems: "center" }}
-                  >
-                    {text}
-                    {dot(dotStatus, dotTitle, 0.75)}
-                  </Box>
-                ) : (
-                  text
-                )
-              }
+        // Rows like the river level and weather above them, one per reason
+        // at the panel's full width - chips sized to their text sat ragged
+        // under those rows.
+        <Box sx={{ mt: size.listMt }}>
+          {items.map(({ reason, Icon, chip }) => (
+            <CompactReadingRow
+              key={reason}
+              icon={<Icon />}
+              label={chip.label}
+              note={chip.aside}
             />
           ))}
-        </FactorChipRow>
+        </Box>
       ) : (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-            mt: size.listMt,
-          }}
-        >
-          {items.map(({ key, Icon, text, dotStatus, dotTitle }) => (
-            <InfoPanel key={key}>
-              <Icon fontSize="small" sx={{ color: "primary.main" }} />
-              <Typography variant="body2">{text}</Typography>
-              {dotStatus && dot(dotStatus, dotTitle)}
-            </InfoPanel>
+        <Box sx={{ ...tileGridSx, mt: size.listMt }}>
+          {items.map(({ reason, Icon, tile }) => (
+            <StatTile key={reason} icon={<Icon />} {...tile} />
           ))}
         </Box>
       )}

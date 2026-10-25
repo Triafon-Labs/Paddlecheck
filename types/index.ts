@@ -13,7 +13,6 @@ export interface KayakConditions {
   apparentTemperature?: number;
   windSpeed?: number;
   windGust?: number;
-  gustStatus?: Status;
   windDirection?: number;
   rain?: boolean;
   rainWhileWarm?: boolean;
@@ -139,7 +138,6 @@ export interface ForecastGraphDataPoint {
   temperature?: number;
   windSpeed?: number;
   windGust?: number;
-  gustStatus?: Status;
   rainWhileWarm?: boolean;
   weatherDescription?: string;
 }

@@ -44,7 +44,6 @@ import { FORECAST_LINE_DASH, WARNING_COLORS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
 import WarningIcon from "@mui/icons-material/Warning";
-import FiberManualRecord from "@mui/icons-material/FiberManualRecord";
 import { isWarningOnDay, formatWarningTime } from "@/lib/warnings";
 import { collapseMotion, springTransition } from "@/lib/m3-palette";
 import { barGrowSx, revealSx } from "@/lib/chartMotion";
@@ -136,8 +135,8 @@ interface BarLabelProps {
 }
 
 // The bars' grow-in (motionSx below), shared with the label pop-in so the No
-// Paddling icon and gust dot fade in over the same span the bar itself
-// grows in, rather than settling before (or after) the bar finishes.
+// Paddling icon fades in over the same span the bar itself grows in, rather
+// than settling before (or after) the bar finishes.
 const BAR_ANIMATION_DURATION = 400;
 const BAR_ANIMATION_EASING = "ease";
 // How long the level line takes to draw across the whole chart.
@@ -162,7 +161,6 @@ const BarLabel = (props: BarLabelProps) => {
   if (!entry || entry.ghost) return null;
 
   const elements: React.ReactNode[] = [];
-  let clearAbove = 0;
 
   if (entry.status === "No Paddling") {
     // Straight from the RAG palette rather than the theme's error role: this
@@ -181,43 +179,7 @@ const BarLabel = (props: BarLabelProps) => {
           <Icon sx={{ color, fontSize: 24, ...popIn }} />
         </foreignObject>
       );
-      clearAbove = 28;
     }
-  }
-
-  // Heads-up dot for a notable gust - coloured by the status that gust would
-  // imply if it were sustained wind. Sits above any No Paddling icon so the
-  // two never overlap. Skipped when the gust wouldn't change the status: a
-  // dot the same colour as the bar beneath it says nothing.
-  if (entry.gustStatus && entry.gustStatus !== entry.status) {
-    elements.push(
-      <foreignObject
-        key="gust-dot"
-        x={x + width / 2 - 6}
-        y={y - clearAbove - 13}
-        width={12}
-        height={12}
-      >
-        <Box
-          title={`Would be ${entry.gustStatus} if sustained`}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 12,
-            height: 12,
-            ...popIn,
-          }}
-        >
-          <FiberManualRecord
-            sx={{
-              fontSize: 8,
-              color: ragStatus[entry.gustStatus].color,
-            }}
-          />
-        </Box>
-      </foreignObject>
-    );
   }
 
   if (elements.length === 0) return null;
@@ -448,7 +410,7 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         (showNight
           ? day.graphData
           : day.graphData.filter((h) => !isNightHour(h, day))
-        ).map((point) => ({ point, sunset: day.sunset }))
+        ).map((point) => ({ point }))
       ),
     [forecastDays, showNight]
   );
@@ -804,7 +766,6 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
         <ForecastHourBodies
           point={selectedPoint}
           hours={allShownHours}
-          sunset={currentDay?.sunset ?? null}
           {...stepProps}
         />
       )}

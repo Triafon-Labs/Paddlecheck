@@ -69,12 +69,16 @@ export const getPaddlingMatrix = (
       beginner.details = ["PFD required"];
       improver.status = "Discretion";
       improver.details = ["PFD required"];
-      intermediate.status = "Discretion";
+      // The rules allow this outright with supervision - "In AMBER
+      // conditions they can be supervised by an Independent paddler or club
+      // coach" - rather than leaving it to a coach's discretion, as they do
+      // for beginners and improvers.
+      intermediate.status = "Warning";
       // The PFD line stays a bullet of its own here rather than merging into
       // the one above: addHighWaterPfdWarning below rewrites it in place when
       // the river is up, and it can only find it if it stands alone.
       intermediate.details = [
-        "Supervised by an independent paddler or coach",
+        "Must be supervised by an independent paddler or club coach",
         "PFD required",
       ];
       independent.status = "Yes";

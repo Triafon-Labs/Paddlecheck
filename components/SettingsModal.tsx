@@ -685,22 +685,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   chipLabel="Raises Rating"
                   chipColor="error"
                 />
-                <ThresholdRow
-                  icon={
-                    <Box
-                      sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        backgroundColor: "text.secondary",
-                      }}
-                    />
-                  }
-                  label={`Gust dot (${THRESHOLDS.WIND_GUST_NOTABLE} mph+)`}
-                  description="Not a rating change - shown for awareness. Colour shows what the rating would be if the gust were sustained wind."
-                  chipLabel="Be Aware"
-                  chipColor="default"
-                />
 
                 <Typography
                   variant="subtitle2"
@@ -736,7 +720,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                           <Visibility fontSize="small" />
                         )
                       }
-                      label={`${desc} (${range})`}
+                      // The chip already names the band, so the label is just
+                      // its range - like the wind rows' "Below 15 mph".
+                      label={range}
                       description={
                         isBad
                           ? "Fog conditions – raises Green to Amber, and Amber to Red."
@@ -775,14 +761,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 <ThresholdRow
                   icon={<WaterDrop fontSize="small" />}
                   label={`Rain at ${THRESHOLDS.TEMP_HIGH}°C+`}
-                  description="Not a rating change - shown for awareness. Lets you know it's raining, even though rain doesn't count against the rating once it's this warm."
-                  chipLabel="Be Aware"
+                  description="Rain doesn't count against the rating once it's this warm."
+                  chipLabel="No Change"
                   chipColor="default"
                 />
                 <ThresholdRow
                   icon={<NightsStay fontSize="small" />}
-                  label="Dark (streetlights on)"
-                  description="Raises Green to Amber, and Amber to Red."
+                  label="Dark"
+                  // The club's rules define dark as streetlights lit; the app
+                  // can't see streetlights, so it uses sunrise and sunset.
+                  description={`Streetlights lit, in the club's rules. Paddlecheck uses sunrise and sunset in its place, and counts a forecast hour as dark when over ${60 * THRESHOLDS.DARK_HOUR_FRACTION} minutes of it is. Raises Green to Amber, and Amber to Red.`}
                   chipLabel="Raises Rating"
                   chipColor="warning"
                 />

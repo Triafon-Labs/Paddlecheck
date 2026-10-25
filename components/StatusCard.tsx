@@ -13,15 +13,9 @@ import {
 import { KayakConditions } from "@/types";
 import PaddlingStatusHero from "./PaddlingStatusHero";
 import { ragStatus } from "@/lib/rag";
-import {
-  ContributingFactors,
-  BeAware,
-  FactorHeading,
-  beAwareItemsFor,
-  sunsetItemFor,
-} from "./ConditionFactors";
+import { ContributingFactors, FactorHeading } from "./ConditionFactors";
 import { useKayakContext } from "@/lib/KayakDataContext";
-import { formatDataAge, getLondonHHMM, useNowTicking } from "@/lib/time";
+import { formatDataAge, useNowTicking } from "@/lib/time";
 import { THRESHOLDS } from "@/lib/config";
 import { collapseMotion, springTransition } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
@@ -42,8 +36,8 @@ const SCALE_SEGMENT_COUNT = (
 ).filter((s) => s !== "Unknown").length;
 
 const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
-  const { forecastDays, riverGraphData } = useKayakContext();
-  // Ticks so the sunset countdown stays right while the page is left open.
+  const { riverGraphData } = useKayakContext();
+  // Ticks so the reading's age stays right while the page is left open.
   const now = useNowTicking();
   const dataAgeLabel = useMemo(() => {
     if (!riverGraphData || riverGraphData.length === 0) return null;
@@ -94,11 +88,13 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                 },
               }}
             >
-              {Array.from({ length: 3 }).map((_, i) => (
+              {/* Two factor tiles, the commonest count, at their real
+                  height with a detail line. */}
+              {Array.from({ length: 2 }).map((_, i) => (
                 <Skeleton
                   key={i}
                   variant="rounded"
-                  height={56}
+                  height={96}
                   animation="wave"
                 />
               ))}
@@ -115,15 +111,6 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
       );
     }
     if (conditions) {
-      const [nowH, nowM] = getLondonHHMM(now).split(":").map(Number);
-      const sunsetItem = sunsetItemFor(
-        nowH * 60 + nowM,
-        forecastDays?.[0]?.sunset ?? null
-      );
-      const beAwareItems = [
-        ...beAwareItemsFor(conditions),
-        ...(sunsetItem ? [sunsetItem] : []),
-      ];
       return (
         <Grow in appear {...springTransition()}>
           <Box>
@@ -151,7 +138,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                 </FactorHeading>
                 <RiverLevelLandmarks
                   riverLevel={conditions.riverLevel}
-                  dataAgeLabel={dataAgeLabel}
+                  readingNote={dataAgeLabel && `Gauge read ${dataAgeLabel}`}
                 />
               </Box>
             )}
@@ -165,14 +152,8 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                 reasons={conditions.reasons ?? []}
                 temperature={conditions.temperature}
                 windSpeed={conditions.windSpeed}
+                weatherDescription={conditions.weatherDescription}
               />
-            </Collapse>
-            <Collapse
-              in={beAwareItems.length > 0}
-              unmountOnExit
-              {...collapseMotion}
-            >
-              <BeAware items={beAwareItems} />
             </Collapse>
             <WeatherWarnings warnings={conditions.warnings} />
             <Box sx={{ mt: 2 }}>

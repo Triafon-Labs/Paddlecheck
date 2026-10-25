@@ -8,12 +8,7 @@ import {
   REASON_ICONS,
   RAG_HEIGHT_MAP,
 } from "./config";
-import {
-  formatRiverLevel,
-  formatTemperature,
-  formatWindSpeed,
-  whole,
-} from "./units";
+import { formatRiverLevel, whole } from "./units";
 
 export {
   RAG_STATUS_MAP,
@@ -192,22 +187,6 @@ export const calculateFinalRagStatus = (
   };
 };
 
-// Informational only: what the RAG status would be if the gust speed were
-// the sustained wind speed. Never fed back into the real RAG calculation -
-// a gust isn't sustained wind, so it shouldn't move the actual status.
-export const getGustStatus = (
-  conditions: Partial<KayakConditions>
-): Status | undefined => {
-  const { windGust } = conditions;
-  if (
-    windGust === undefined ||
-    whole(windGust) < THRESHOLDS.WIND_GUST_NOTABLE
-  ) {
-    return undefined;
-  }
-  return calculateFinalRagStatus({ ...conditions, windSpeed: windGust }).status;
-};
-
 // Rain is only counted towards the RAG when it's not warm (see
 // getWeatherConditions above) - above TEMP_HIGH it's dropped entirely, so
 // there'd otherwise be no signal at all that it's raining.
@@ -217,23 +196,4 @@ export const isRainWhileWarm = (
   const { temperature, rain } = conditions;
   if (temperature === undefined || !rain) return false;
   return whole(temperature) >= THRESHOLDS.TEMP_HIGH;
-};
-
-// Appends the underlying reading to a reason string for display, e.g.
-// "High winds (18 mph)". Reason text itself stays untouched everywhere
-// else (icon lookup, "Dark" checks, etc.) - this is purely a UI label.
-export const describeReason = (
-  reason: string,
-  values: { temperature?: number; windSpeed?: number }
-): string => {
-  if (reason === "High winds" && values.windSpeed !== undefined) {
-    return `${reason} (${formatWindSpeed(values.windSpeed)})`;
-  }
-  if (
-    (reason === "Low temperature" || reason === "Moderately low temperature") &&
-    values.temperature !== undefined
-  ) {
-    return `${reason} (${formatTemperature(values.temperature)})`;
-  }
-  return reason;
 };

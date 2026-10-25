@@ -13,7 +13,6 @@ import {
   calculateFinalRagStatus,
   findLevelDescription,
   calculateInitialRagStatus,
-  getGustStatus,
   isRainWhileWarm,
   RAG_STATUS_MAP,
   ragHeight,
@@ -333,7 +332,6 @@ export const useKayakData = () => {
       );
       const initialStatus = RAG_STATUS_MAP[initialRagNumber];
       const { status, reasons } = calculateFinalRagStatus(currentConditions);
-      const gustStatus = getGustStatus(currentConditions);
       const rainWhileWarm = isRainWhileWarm(currentConditions);
       const visibilityDescription = getVisibilityDescription(
         currentConditions.visibility ?? 0
@@ -347,7 +345,6 @@ export const useKayakData = () => {
         initialStatus,
         overallStatus: status,
         reasons: reasons,
-        gustStatus,
         rainWhileWarm,
         warnings: warningsData,
         levelChange: {
@@ -482,7 +479,6 @@ export const useKayakData = () => {
 
           const { status: forecastStatus, reasons: forecastReasons } =
             calculateFinalRagStatus(forecastConditions);
-          const forecastGustStatus = getGustStatus(forecastConditions);
           const forecastRainWhileWarm = isRainWhileWarm(forecastConditions);
 
           graphData.push({
@@ -495,7 +491,6 @@ export const useKayakData = () => {
             temperature: futureWeatherData.hourly.temperature_2m[index],
             windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
             windGust: futureWeatherData.hourly.wind_gusts_10m[index],
-            gustStatus: forecastGustStatus,
             rainWhileWarm: forecastRainWhileWarm,
             weatherDescription: getWeatherDescription(
               futureWeatherData.hourly.weather_code[index]

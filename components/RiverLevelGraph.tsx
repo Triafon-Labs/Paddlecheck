@@ -58,6 +58,7 @@ import { revealSx } from "@/lib/chartMotion";
 // duration and easing, which this used before.
 const chartRevealSx = revealSx(".recharts-area, .recharts-line", 1500, "ease");
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
+import { TileHeading, TileValue, tileSx } from "./StatTile";
 
 interface RiverLevelGraphProps {
   data: ChartDataPoint[] | null;
@@ -83,75 +84,35 @@ const ChangeIndicator: React.FC<{
   const isFlat = rounded !== null && rounded === 0;
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 2,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-        height: "100%",
-        // Grid items default to `min-width: auto`, so on a narrow phone the
-        // "24h Change" label held the column wider than its 1fr share and
-        // the pair overflowed the card. Zero lets the track win and the
-        // label wrap instead.
-        minWidth: 0,
-        backgroundColor: "surfaces.containerHigh",
-      }}
-    >
-      <Box
-        sx={{ display: "flex", alignItems: "center", color: "primary.main" }}
-      >
+    <Paper elevation={0} sx={{ ...tileSx, height: "100%" }}>
+      <TileHeading icon={icon} label={period} />
+      <TileValue>
         {loading ? (
-          <>
-            <Skeleton
-              variant="circular"
-              width={24}
-              height={24}
-              animation="wave"
-            />
-            <Skeleton
-              variant="text"
-              width={70}
-              height={20}
-              animation="wave"
-              sx={{ ml: 0.5 }}
-            />
-          </>
+          <Skeleton variant="text" width={70} animation="wave" />
         ) : (
-          <>
-            {icon}
-            <Typography
-              variant="subtitle2"
-              color="text.secondary"
-              sx={{ ml: 0.5 }}
-            >
-              {period}
-            </Typography>
-          </>
-        )}
-      </Box>
-      <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-        {loading ? (
-          <Skeleton variant="text" width={50} height={32} animation="wave" />
-        ) : (
-          <>
+          <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
             {rounded !== null ? (
               isFlat ? (
-                <TrendingFlat sx={{ color: "text.secondary", mr: 0.5 }} />
+                <TrendingFlat
+                  fontSize="small"
+                  sx={{ color: "text.secondary", mr: 0.5 }}
+                />
               ) : rounded > 0 ? (
-                <TrendingUp sx={{ color: "error.main", mr: 0.5 }} />
+                <TrendingUp
+                  fontSize="small"
+                  sx={{ color: "error.main", mr: 0.5 }}
+                />
               ) : (
-                <TrendingDown sx={{ color: "success.main", mr: 0.5 }} />
+                <TrendingDown
+                  fontSize="small"
+                  sx={{ color: "success.main", mr: 0.5 }}
+                />
               )
             ) : null}
-            <Typography variant="h6" component="span">
-              {changeStr !== null ? changeStr : "N/A"}
-            </Typography>
-          </>
+            {changeStr !== null ? changeStr : "N/A"}
+          </Box>
         )}
-      </Box>
+      </TileValue>
     </Paper>
   );
 };
@@ -645,7 +606,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           sx={{
             display: "grid",
             gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 2,
+            gap: 1,
             mt: 2,
           }}
         >
@@ -674,7 +635,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             loading={loading}
           />
         </Box>
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mt: 1 }}>
           <ChangeIndicator
             period="24h Forecast"
             change={forecastedChange24h}

@@ -184,7 +184,7 @@ const TopNavBar = () => {
     : null;
   const freshnessText =
     lastUpdatedClockTime && relativeLastUpdated
-      ? `${lastUpdatedClockTime} (${relativeLastUpdated})`
+      ? `${lastUpdatedClockTime} · ${relativeLastUpdated}`
       : relativeLastUpdated;
 
   const handleShare = async () => {

@@ -13,44 +13,32 @@ import {
   Card,
   CardContent,
   Chip,
-  Collapse,
   IconButton,
   Skeleton,
   Typography,
 } from "@mui/material";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
-import Water from "@mui/icons-material/Water";
-import ExpandMore from "@mui/icons-material/ExpandMore";
 import { ForecastGraphDataPoint, ForecastSource, PaddlerType } from "@/types";
 import { ragStatus } from "@/lib/rag";
-import { getPaddlingMatrix, hasDetailsToShow } from "@/lib/paddlingMatrix";
+import { getPaddlingMatrix } from "@/lib/paddlingMatrix";
 import { usePaddlerLevel } from "@/lib/usePaddlerLevel";
-import { formatRiverLevel } from "@/lib/units";
-import {
-  collapseMotion,
-  m3Duration,
-  m3Easing,
-  m3Spring,
-  spring,
-} from "@/lib/m3-palette";
+import { m3Duration, m3Easing } from "@/lib/m3-palette";
 import {
   FactorHeading,
-  FactorChip,
-  FactorChipRow,
   factorSizes,
   ContributingFactors,
-  BeAware,
-  beAwareItemsFor,
-  sunsetItemFor,
 } from "./ConditionFactors";
-import { StatusFace, PADDLING_STATUS_UI } from "./StatusFace";
+import PaddlerLevelRow from "./PaddlerLevelRow";
+import Thermostat from "@mui/icons-material/Thermostat";
+import RiverLevelLandmarks, { CompactReadingRow } from "./RiverLevelLandmarks";
+import { formatTemperature, formatWindSpeed } from "@/lib/units";
 
-// Where the hour's level comes from, shown in brackets after "River Level".
+// Where the hour's level comes from, under its row on the scale.
 const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
-  bewdley: "upstream forecast",
-  linear: "local trend",
-  held: "held – no forecast",
+  bewdley: "From the upstream forecast",
+  linear: "From the local trend",
+  held: "Held – no forecast this far ahead",
 };
 
 // A horizontal drag this far across the panel steps one hour. Anything
@@ -85,123 +73,71 @@ interface YouProps {
 const YourVerdict: React.FC<{
   point: ForecastGraphDataPoint;
   you: YouProps;
-}> = ({ point, you }) => {
-  const verdict = getPaddlingMatrix(point.status, point.forecastLevel)[
-    you.level
-  ];
-  if (!verdict) return null;
-  const ui = PADDLING_STATUS_UI[verdict.status];
-  const expandable = hasDetailsToShow(verdict.details);
-  const open = expandable && you.open;
-  const list = (
-    <Box
-      component="ul"
-      sx={{
-        m: 0,
-        mt: 0.75,
-        pl: 2.5,
-        "& li:not(:last-of-type)": { mb: 0.5 },
-      }}
-    >
-      {verdict.details.map((line) => (
-        <Typography key={line} component="li" variant="body2">
-          {line}
-        </Typography>
-      ))}
+}> = ({ point, you }) => (
+  <Box sx={compactSize.sectionSx}>
+    <FactorHeading compact>You</FactorHeading>
+    {/* Who Can Paddle's own row for the reader's level, so the forecast's
+        verdict looks and opens the same way as the current one. */}
+    <Box sx={{ mt: compactSize.listMt }}>
+      <PaddlerLevelRow
+        paddler={you.level}
+        statusInfo={
+          getPaddlingMatrix(point.status, point.forecastLevel)[you.level]
+        }
+        open={you.open}
+        onToggle={you.onToggle}
+        animate={!!you.onSettled}
+        onSettled={you.onSettled}
+        compact
+      />
     </Box>
-  );
-  return (
-    <Box sx={compactSize.sectionSx}>
-      <FactorHeading compact>You – {you.level}</FactorHeading>
-      <FactorChipRow>
-        <Chip
-          size="small"
-          icon={
-            <StatusFace
-              face={ui.face}
-              color={ui.color}
-              onColor={ui.onColor}
-              size={16}
-            />
-          }
-          // The full sentence, as Who Can Paddle says it, with a chevron
-          // when there's more to show - without it this reads as one of
-          // the static chips below.
-          label={
-            <Box
-              component="span"
-              sx={{ display: "inline-flex", alignItems: "center", gap: 0.25 }}
-            >
-              {ui.headline}
-              {expandable && (
-                <ExpandMore
-                  aria-hidden
-                  sx={{
-                    fontSize: 18,
-                    mr: -0.5,
-                    transform: open ? "rotate(180deg)" : "none",
-                    transition: spring("transform", m3Spring.spatialFast),
-                  }}
-                />
-              )}
-            </Box>
-          }
-          {...(expandable && {
-            onClick: you.onToggle,
-            "aria-expanded": open,
-          })}
-          // The same text colour as the factor chips below it.
-          sx={(theme) => ({
-            "--chip-fg": (theme.vars ?? theme).palette.text.primary,
-          })}
-        />
-      </FactorChipRow>
-      {you.onSettled ? (
-        <Collapse
-          in={open}
-          unmountOnExit
-          {...collapseMotion}
-          onEntered={you.onSettled}
-          onExited={you.onSettled}
-        >
-          {list}
-        </Collapse>
-      ) : (
-        open && list
-      )}
-    </Box>
-  );
-};
+  </Box>
+);
 
 // Everything under the hour's header: the verdict for the reader's level,
 // then its river level and factor sections.
 const HourBody: React.FC<{
   point: ForecastGraphDataPoint;
-  sunset: string | null;
   you: YouProps | null;
-}> = ({ point, sunset, you }) => {
-  // Measured from the start of the hour.
-  const sunsetItem = sunsetItemFor(parseInt(point.time, 10) * 60, sunset);
-  const beAwareItems = [
-    ...beAwareItemsFor(point),
-    ...(sunsetItem ? [sunsetItem] : []),
-  ];
+}> = ({ point, you }) => {
   return (
     <>
       {you && <YourVerdict point={point} you={you} />}
-      {/* Laid out like the factor sections below it - heading, then an
-          InfoPanel - with where the level comes from trailing on the right. */}
+      {/* The status card's reading row, a size down, with where the level
+          comes from beneath it. */}
       <Box sx={compactSize.sectionSx}>
-        <FactorHeading compact>
-          River Level ({FORECAST_SOURCE_LABELS[point.forecastSource]})
-        </FactorHeading>
-        <FactorChipRow>
-          <FactorChip
-            Icon={Water}
-            label={formatRiverLevel(point.forecastLevel)}
-          />
-        </FactorChipRow>
+        <FactorHeading compact>River Level</FactorHeading>
+        <RiverLevelLandmarks
+          riverLevel={point.forecastLevel}
+          readingNote={FORECAST_SOURCE_LABELS[point.forecastSource]}
+          compact
+        />
       </Box>
+      {/* Every hour's weather, in the same row as the river level - not only
+          the hours where it counts against the status. */}
+      {point.temperature !== undefined && (
+        <Box sx={compactSize.sectionSx}>
+          <FactorHeading compact>Weather</FactorHeading>
+          <CompactReadingRow
+            icon={<Thermostat />}
+            label={[
+              formatTemperature(point.temperature),
+              point.weatherDescription,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+            note={
+              point.windSpeed !== undefined
+                ? `Wind ${formatWindSpeed(point.windSpeed)}${
+                    point.windGust !== undefined
+                      ? `, gusts ${formatWindSpeed(point.windGust)}`
+                      : ""
+                  }`
+                : null
+            }
+          />
+        </Box>
+      )}
       {point.reasons.length > 0 && (
         <ContributingFactors
           reasons={point.reasons}
@@ -210,7 +146,6 @@ const HourBody: React.FC<{
           compact
         />
       )}
-      {beAwareItems.length > 0 && <BeAware items={beAwareItems} compact />}
     </>
   );
 };
@@ -344,7 +279,7 @@ export const ForecastHourHeader: React.FC<ForecastHourHeaderProps> = ({
   );
 };
 
-type HourRow = { point: ForecastGraphDataPoint; sunset: string | null };
+type HourRow = { point: ForecastGraphDataPoint };
 const NO_ROWS: HourRow[] = [];
 
 // The invisible copy of every shown hour, stacked in one grid cell so the
@@ -392,7 +327,7 @@ const HourCopies = memo(function HourCopies({
           sx={{ gridArea: "1 / 1", alignSelf: "start" }}
         >
           <CardContent sx={{ pt: 0 }}>
-            <HourBody point={h.point} sunset={h.sunset} you={you} />
+            <HourBody point={h.point} you={you} />
           </CardContent>
         </Box>
       ))}
@@ -402,10 +337,8 @@ const HourCopies = memo(function HourCopies({
 
 interface ForecastHourBodiesProps extends StepProps {
   point: ForecastGraphDataPoint;
-  // Every shown hour across the forecast, each with its own day's sunset.
-  hours: { point: ForecastGraphDataPoint; sunset: string | null }[];
-  // The picked hour's own day's sunset, for when it isn't among `hours`.
-  sunset: string | null;
+  // Every shown hour across the forecast.
+  hours: HourRow[];
 }
 
 // The picked hour's details, as a card that continues the forecast card above
@@ -425,7 +358,6 @@ interface ForecastHourBodiesProps extends StepProps {
 export const ForecastHourBodies: React.FC<ForecastHourBodiesProps> = ({
   point,
   hours,
-  sunset,
   ...step
 }) => {
   const swipe = useSwipeStep(step);
@@ -461,8 +393,8 @@ export const ForecastHourBodies: React.FC<ForecastHourBodiesProps> = ({
     [level, copiesOpen]
   );
   const rows = useMemo(
-    () => (hours.some((h) => h.point === point) ? hours : [{ point, sunset }]),
-    [hours, point, sunset]
+    () => (hours.some((h) => h.point === point) ? hours : [{ point }]),
+    [hours, point]
   );
   const pickedIndex = rows.findIndex((h) => h.point === point);
   const picked = rows[pickedIndex];
@@ -532,7 +464,7 @@ export const ForecastHourBodies: React.FC<ForecastHourBodiesProps> = ({
         }}
       >
         <CardContent sx={{ pt: 0 }}>
-          <HourBody point={picked.point} sunset={picked.sunset} you={you} />
+          <HourBody point={picked.point} you={you} />
         </CardContent>
       </Card>
     </Box>

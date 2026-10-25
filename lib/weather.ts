@@ -118,6 +118,21 @@ export const degreesToCompass = (degrees: number): string => {
   return dirs[Math.round(degrees / 45) % 8];
 };
 
+// The same eight points in words, hyphenated as UK forecasts write them.
+export const degreesToCompassName = (degrees: number): string => {
+  const dirs = [
+    "north",
+    "north-east",
+    "east",
+    "south-east",
+    "south",
+    "south-west",
+    "west",
+    "north-west",
+  ];
+  return dirs[Math.round(degrees / 45) % 8];
+};
+
 export const getVisibilityDescription = (visibility: number): string => {
   if (visibility > VISIBILITY_DESCRIPTIONS.EXCELLENT.min)
     return VISIBILITY_DESCRIPTIONS.EXCELLENT.desc;

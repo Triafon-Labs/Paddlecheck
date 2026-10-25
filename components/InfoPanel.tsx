@@ -16,9 +16,8 @@ interface InfoPanelProps {
   sx?: SxProps<Theme>;
 }
 
-// Shared wrapper for the "icon + text on a muted background" panels used
-// across StatusCard, ConditionsBriefing and WeatherWarnings, so the same
-// padding/spacing/background doesn't get hand-duplicated at each call site.
+// The "icon + text on a muted background" panel, now used by the Conditions
+// Report (ConditionsBriefing). Readings with a figure use StatTile instead.
 //
 // The background is the tonal surfaceContainerHigh role, one step up from the
 // card these sit inside. It used to be `action.hover`, which is a state layer

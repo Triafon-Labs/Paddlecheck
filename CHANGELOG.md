@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.44.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.43.0...paddlecheck-v1.44.0) (2026-10-25)
+
+### Features
+
+* body-size text in the forecast hour panel ([#410](https://github.com/dylanr97/Paddlecheck/issues/410)) ([8d96830](https://github.com/dylanr97/Paddlecheck/commit/8d968301ca73f7c7cf2f1e71d3a3b5b8eb59099b))
+
 ## [1.43.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.42.0...paddlecheck-v1.43.0) (2026-10-25)
 
 ### Features

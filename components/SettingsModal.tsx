@@ -412,7 +412,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
       {/* Both panels are always mounted, stacked in the same grid cell, so
           the row's auto-sized height is the taller of the two - switching
           tabs never resizes the drawer, it just crossfades which panel is
-          visible. Simpler and steadier than animating the height itself. */}
+          visible. Simpler and steadier than animating the height itself.
+
+          The active panel's visibility is "inherit" rather than "visible":
+          the drawer is kept mounted while closed (`prebuilt` above), and an
+          explicit "visible" overrides the closed drawer's own hidden -
+          leaving that panel's controls in the tab order while it's shut. */}
       <Box sx={{ display: "grid", overflowY: "auto" }}>
         <Box
           aria-hidden={activeTab !== "settings"}
@@ -426,7 +431,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               activeTab === "settings"
                 ? `opacity ${m3Duration.short4}ms ${m3Easing.standard}`
                 : `opacity ${m3Duration.short4}ms ${m3Easing.standard}, visibility 0s linear ${m3Duration.short4}ms`,
-            visibility: activeTab === "settings" ? "visible" : "hidden",
+            visibility: activeTab === "settings" ? "inherit" : "hidden",
           }}
         >
           <Box>
@@ -530,7 +535,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               activeTab === "info"
                 ? `opacity ${m3Duration.short4}ms ${m3Easing.standard}`
                 : `opacity ${m3Duration.short4}ms ${m3Easing.standard}, visibility 0s linear ${m3Duration.short4}ms`,
-            visibility: activeTab === "info" ? "visible" : "hidden",
+            visibility: activeTab === "info" ? "inherit" : "hidden",
           }}
         >
           <Box>

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.44.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.44.1...paddlecheck-v1.44.2) (2026-10-27)
+
+### Bug Fixes
+
+* keep the closed settings drawer out of the tab order ([#411](https://github.com/dylanr97/Paddlecheck/issues/411)) ([8d4b7a3](https://github.com/dylanr97/Paddlecheck/commit/8d4b7a3a8f36ff7065ecdec43c4e27d170976253))
+
 ## [1.44.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.44.0...paddlecheck-v1.44.1) (2026-10-27)
 
 ## [1.44.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.43.0...paddlecheck-v1.44.0) (2026-10-25)

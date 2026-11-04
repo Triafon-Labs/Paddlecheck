@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.44.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.44.2...paddlecheck-v1.44.3) (2026-11-04)
+
 ## [1.44.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.44.1...paddlecheck-v1.44.2) (2026-10-27)
 
 ### Bug Fixes

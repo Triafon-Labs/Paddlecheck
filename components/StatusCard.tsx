@@ -18,7 +18,7 @@ import { useKayakContext } from "@/lib/KayakDataContext";
 import { formatDataAge } from "@/lib/time";
 import { useNowTicking } from "@/lib/useNowTicking";
 import { useFreshness } from "@/lib/useFreshness";
-import { THRESHOLDS } from "@/lib/config";
+import { THRESHOLDS, CONDITIONS_REPORT_ENABLED } from "@/lib/config";
 import { collapseMotion, springTransition } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
 import WeatherWarnings from "./WeatherWarnings";
@@ -157,14 +157,16 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               />
             </Collapse>
             <WeatherWarnings warnings={conditions.warnings} />
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary">
-                Conditions Report
-              </Typography>
-              <Box sx={{ mt: 1 }}>
-                <ConditionsBriefing conditions={conditions} />
+            {CONDITIONS_REPORT_ENABLED && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Conditions Report
+                </Typography>
+                <Box sx={{ mt: 1 }}>
+                  <ConditionsBriefing conditions={conditions} />
+                </Box>
               </Box>
-            </Box>
+            )}
           </Box>
         </Grow>
       );

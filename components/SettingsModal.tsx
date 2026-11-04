@@ -51,6 +51,7 @@ import {
   CLUB_NAME,
   RULES,
   CONDITIONS_KEY_WEATHER,
+  CONDITIONS_REPORT_ENABLED,
 } from "@/lib/config";
 import { statusUi, TOP_STEP } from "@/lib/rag";
 import { paddlerTypes, toPaddlerLevel } from "@/lib/paddlingMatrix";
@@ -478,28 +479,32 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               </Select>
             </FormControl>
 
-            <Divider sx={{ my: 2 }} />
+            {CONDITIONS_REPORT_ENABLED && (
+              <>
+                <Divider sx={{ my: 2 }} />
 
-            <Typography variant="h6" gutterBottom>
-              Conditions Report
-            </Typography>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={autoSummarise}
-                  onChange={handleAutoSummariseChange}
+                <Typography variant="h6" gutterBottom>
+                  Conditions Report
+                </Typography>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={autoSummarise}
+                      onChange={handleAutoSummariseChange}
+                    />
+                  }
+                  label="Show the conditions report on load"
                 />
-              }
-              label="Show the conditions report on load"
-            />
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: "block", mt: 0.5 }}
-            >
-              When off, tap &ldquo;Show Conditions Report&rdquo; inside the
-              status card to get one on demand.
-            </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block", mt: 0.5 }}
+                >
+                  When off, tap &ldquo;Show Conditions Report&rdquo; inside the
+                  status card to get one on demand.
+                </Typography>
+              </>
+            )}
 
             <Divider sx={{ my: 2 }} />
 

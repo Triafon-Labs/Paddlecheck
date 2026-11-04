@@ -231,6 +231,10 @@ export const DATA_STALE_THRESHOLD_MS =
   CONDITIONS_REVALIDATE_SECONDS * 1000 + STALE_GRACE_MS;
 
 // --- AI Summary ---
+// Off when the site was built without GROQ_API_KEY: the Conditions Report
+// section and its setting are then left out (see next.config.ts).
+export const CONDITIONS_REPORT_ENABLED =
+  process.env.NEXT_PUBLIC_CONDITIONS_REPORT === "on";
 export const DEFAULT_AI_MODEL = "openai/gpt-oss-120b";
 // Models /api/briefing will accept from the client. Anything else falls back
 // to DEFAULT_AI_MODEL so visitors can't run arbitrary models on our API key.

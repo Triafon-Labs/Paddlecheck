@@ -74,7 +74,7 @@ The summary needs a [Groq API key](https://console.groq.com/keys) (Groq has a fr
 GROQ_API_KEY=your-key-here
 ```
 
-Without a key the rest of the app is unaffected, and the summary panel says reports aren't set up on this site. The model used is `DEFAULT_AI_MODEL` in `lib/config.ts`.
+Without a key the Conditions Report section simply isn't there – nor its switch in Settings – and the rest of the app is unaffected. Whether it's shown is decided when the app is built or `npm run dev` starts, so restart after adding the key. The model used is `DEFAULT_AI_MODEL` in `lib/config.ts`.
 
 The server builds the summary from its own copy of the conditions and only reads the model name from the browser, so visitors can't send their own text to Groq on your key. Generated summaries are cached for each 15-minute data window, so most visits don't make a Groq call at all.
 
@@ -217,7 +217,7 @@ The app is a standard Next.js app, but it needs a server (the API routes fetch a
 [Vercel](https://vercel.com) is what this project uses, and needs no configuration:
 
 1. Sign in to Vercel with GitHub and **Add New → Project**, then import your repository.
-2. If you want the AI summary, add `GROQ_API_KEY` under **Environment Variables**.
+2. If you want the AI summary, add `GROQ_API_KEY` under **Environment Variables**. Adding it later? Redeploy afterwards (**Deployments → ⋯ → Redeploy**) – the summary only appears in a build made with the key.
 3. Deploy. Every push to `main` redeploys, and pull requests get preview deployments.
 
 You'll get a `<project>.vercel.app` address, and can add your own domain under the project's **Domains** settings. Vercel's free Hobby plan is meant for personal, non-commercial use; check [their terms](https://vercel.com/docs/limits/fair-use-guidelines) cover a club site, or use the Pro plan.
@@ -230,8 +230,9 @@ Any host that runs Node 22 works – for example [Netlify](https://www.netlify.c
 
 ```bash
 npm ci
-npm run build
-GROQ_API_KEY=your-key-here npm start   # serves on port 3000
+export GROQ_API_KEY=your-key-here   # optional – for the AI summary
+npm run build                       # needs the key, to include the summary
+npm start                           # serves on port 3000; also needs the key
 ```
 
 Off Vercel, the analytics scripts simply fail to load; remove them as above if you'd rather they weren't requested at all. Make sure the site is served over HTTPS, or the service worker won't register and the app can't be installed.

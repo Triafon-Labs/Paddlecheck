@@ -186,7 +186,9 @@ threshold while other forecasts are over it. Open-Meteo returns only one model f
 every other weather field still comes from `best_match` alone.
 
 No environment variables are required for local development, except `GROQ_API_KEY` for
-the AI briefing, which is the one feature that won't work without it.
+the AI briefing. `next.config.ts` turns its presence at build time into
+`NEXT_PUBLIC_CONDITIONS_REPORT` (`CONDITIONS_REPORT_ENABLED` in `lib/config.ts`); without it
+the Conditions Report section and its Settings switch aren't rendered at all.
 
 ---
 

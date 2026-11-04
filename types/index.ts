@@ -160,6 +160,30 @@ export type PaddlerType = (typeof PADDLER_LEVELS)[number];
 
 export type PaddlingStatusValue = "Yes" | "No" | "Discretion" | "Warning";
 
+// One cell of the Who Can Paddle table (WHO_CAN_PADDLE in lib/config.ts).
+export interface PaddlingVerdict {
+  verdict: PaddlingStatusValue;
+  details?: string[];
+}
+
+// A rule applied on top of the table (WHO_CAN_PADDLE_EXTRAS).
+export interface PaddlingExtraRule {
+  // When it applies. Every condition given must hold; none means always.
+  when?: {
+    status?: Status[];
+    notStatus?: Status[];
+    riverLevelAtLeast?: number;
+  };
+  levels: PaddlerType[];
+  // Replace the verdict outright - the only change made to a "No".
+  set?: PaddlingVerdict;
+  // Turn a "Yes" into this, e.g. "Warning".
+  yesBecomes?: PaddlingStatusValue;
+  // Add this line, or put it in place of `replacing` if that line is there.
+  addDetail?: string;
+  replacing?: string;
+}
+
 export interface PaddlingStatus {
   status: PaddlingStatusValue;
   details: string[];

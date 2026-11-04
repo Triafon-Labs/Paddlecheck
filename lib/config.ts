@@ -17,7 +17,13 @@ import {
   AcUnit,
   Foggy,
 } from "@mui/icons-material";
-import { ForecastSource, Status } from "@/types";
+import {
+  ForecastSource,
+  PaddlerType,
+  PaddlingExtraRule,
+  PaddlingVerdict,
+  Status,
+} from "@/types";
 import { STATUS_COLORS, ON_STATUS_COLORS } from "./statusColors";
 import { formatRiverLevel } from "./units";
 import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
@@ -35,6 +41,10 @@ import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
 // --- Club Identity ---
 // Update these to reflect your own club.
 export const CLUB_NAME = "Worcester Canoe Club";
+// Shown under "Paddlecheck" in the top bar, so it has to fit beside three
+// buttons on a phone: about 20 characters before it's cut short. Use an
+// abbreviation if your club's name is longer (e.g. "Worcester CC").
+export const CLUB_SHORT_NAME = "Worcester Canoe Club";
 // Where the "Feedback welcome" link in the Settings drawer goes. Any URL
 // works - an issue tracker, a form, or a mailto: link.
 export const FEEDBACK_URL = "https://github.com/dylanr97/Paddlecheck/issues";
@@ -282,6 +292,143 @@ export const THRESHOLDS = {
   // more than 15 minutes of dark in an hour makes it a dark hour.
   DARK_HOUR_FRACTION: 0.25,
 };
+
+// --- Who can paddle ---
+// What each paddler level (PADDLER_LEVELS) may do on each status step, shown
+// under "Who Can Paddle" and for each forecast hour. A verdict is one of:
+//   "Yes"        - "Can paddle"
+//   "Warning"    - "With caveats" (can paddle, read the details)
+//   "Discretion" - "Coach's discretion"
+//   "No"         - "Cannot paddle"
+// `details` are the lines shown under it. A step can give one verdict for
+// every level, or one per level - in which case every level must be listed.
+const SABRINA_SLIP = "Stay between Sabrina Bridge and the Slip";
+const COACH_AND_PFD = "Coach supervision and PFD required";
+
+export const WHO_CAN_PADDLE: Record<
+  Status,
+  PaddlingVerdict | Record<PaddlerType, PaddlingVerdict>
+> = {
+  "Light Green": {
+    Beginner: { verdict: "Warning", details: [COACH_AND_PFD] },
+    Improver: {
+      verdict: "Warning",
+      details: [
+        "No coach needed, but paddle with at least one other improver or intermediate (preferably more)",
+        "Someone in the group carries a mobile phone",
+        "Familiar boat only",
+        SABRINA_SLIP,
+        "PFD required",
+      ],
+    },
+    Intermediate: {
+      verdict: "Yes",
+      details: [
+        "May paddle solo",
+        "Carry a mobile phone",
+        "Familiar boat only",
+        SABRINA_SLIP,
+        "PFD required",
+      ],
+    },
+    Independent: { verdict: "Yes" },
+  },
+  "Dark Green": {
+    Beginner: { verdict: "Warning", details: [COACH_AND_PFD] },
+    Improver: { verdict: "Warning", details: [COACH_AND_PFD] },
+    Intermediate: {
+      verdict: "Warning",
+      details: [
+        "Pair up with another intermediate, no coach needed",
+        "Solo K2 crews must be able to self-rescue",
+        "Carry a mobile phone",
+        "Familiar boat only",
+        SABRINA_SLIP,
+        "PFD required",
+      ],
+    },
+    Independent: { verdict: "Yes" },
+  },
+  Amber: {
+    Beginner: { verdict: "Discretion", details: ["PFD required"] },
+    Improver: { verdict: "Discretion", details: ["PFD required"] },
+    // The rules allow this outright with supervision - "In AMBER conditions
+    // they can be supervised by an Independent paddler or club coach" -
+    // rather than leaving it to a coach's discretion.
+    Intermediate: {
+      verdict: "Warning",
+      details: [
+        "Must be supervised by an independent paddler or club coach",
+        "PFD required",
+      ],
+    },
+    Independent: {
+      verdict: "Yes",
+      details: [
+        "May supervise intermediates",
+        "PFD required above the concrete step",
+      ],
+    },
+  },
+  Red: {
+    Beginner: { verdict: "No" },
+    Improver: { verdict: "No" },
+    // Above the 10th step this becomes a "No" - see WHO_CAN_PADDLE_EXTRAS.
+    Intermediate: { verdict: "Discretion", details: ["PFD required"] },
+    Independent: {
+      verdict: "Warning",
+      details: ["Avoid paddling alone, PFD required"],
+    },
+  },
+  "No Paddling": {
+    verdict: "No",
+    details: ["Applies to every level, independents included"],
+  },
+  Unknown: {
+    verdict: "No",
+    details: ["Conditions could not be checked", "Ask a coach before paddling"],
+  },
+};
+
+// Rules applied on top of WHO_CAN_PADDLE, in order - for anything that
+// depends on the river level rather than the status, or that adds the same
+// line across several steps. Apart from `set`, they leave a "No" alone.
+// Leave the list empty if the table says everything.
+export const WHO_CAN_PADDLE_EXTRAS: PaddlingExtraRule[] = [
+  {
+    // "No paddling for intermediates above 10 steps from the car park" holds
+    // however the status got to Red, so it's keyed to the level itself.
+    when: {
+      status: ["Red"],
+      riverLevelAtLeast: THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3,
+    },
+    levels: ["Intermediate"],
+    set: {
+      verdict: "No",
+      details: ["No paddling above 10 steps from the car park"],
+    },
+  },
+  {
+    // PFDs above the concrete step, even when the weather keeps the status
+    // below Red (whose own lines already require one).
+    when: {
+      notStatus: ["Red"],
+      riverLevelAtLeast: THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2,
+    },
+    levels: ["Independent", "Intermediate"],
+    yesBecomes: "Warning",
+    addDetail: "PFD required – river is high",
+    replacing: "PFD required",
+  },
+  {
+    // From the club email introducing bibs: "All coaching groups of Adult and
+    // Junior Beginners and Intermediate paddlers will wear luminous bibs."
+    // Improvers and non-coaching groups are included too - deliberately wider
+    // than the email, since a bib costs nothing.
+    levels: ["Beginner", "Improver", "Intermediate"],
+    addDetail: "Wear a luminous bib",
+  },
+];
 
 // WMO weather interpretation codes 50–99 cover drizzle, rain, snow, showers
 // and thunderstorms. Used as the single source of truth for "is it raining?"

@@ -146,12 +146,22 @@ export const RAG_HEIGHT_MAP: Record<Status, number> = {
   Unknown: 0.1,
 };
 
-// `color` is the status hue itself, `onColor` the label colour to put on top
-// of it - see ON_STATUS_COLORS in lib/statusColors.ts for why the pairing
-// isn't simply white throughout.
+// How each status step looks. The keys are fixed step names the code uses
+// internally - the five steps from best to worst, plus Unknown. Everything a
+// visitor sees comes from here:
+//   `label`   - the name shown for the step (rename them to your club's terms,
+//               e.g. "Low", "Moderate", "High", "Severe")
+//   `color`   - the step's colour; `onColor` the text colour on top of it.
+//               Keep the pairs from lib/statusColors.ts, which are checked for
+//               contrast (e.g. STATUS_COLORS.yellow with ON_STATUS_COLORS.yellow).
+//   `emoji` / `icon` - used in the share text and on the status panel.
+// The worst step ("No Paddling") is also what thunderstorms give if
+// RULES.THUNDERSTORMS is on, so give it a label that fits both. What each
+// paddler level may do on each step is set in lib/paddlingMatrix.ts.
 export const RAG_STATUS_UI: Record<
   Status,
   {
+    label: string;
     color: string;
     onColor: string;
     emoji: string;
@@ -159,42 +169,75 @@ export const RAG_STATUS_UI: Record<
   }
 > = {
   Unknown: {
+    label: "Unknown",
     color: STATUS_COLORS.grey,
     onColor: ON_STATUS_COLORS.grey,
     emoji: "🤷",
     icon: HelpOutlined,
   },
   "Light Green": {
+    label: "Light Green",
     color: STATUS_COLORS.lightGreen,
     onColor: ON_STATUS_COLORS.lightGreen,
     emoji: "✅",
     icon: Check,
   },
   "Dark Green": {
+    label: "Dark Green",
     color: STATUS_COLORS.darkGreen,
     onColor: ON_STATUS_COLORS.darkGreen,
     emoji: "📈",
     icon: TrendingUpOutlined,
   },
   Amber: {
+    label: "Amber",
     color: WARNING_COLORS.Amber,
     onColor: ON_STATUS_COLORS.amber,
     emoji: "⚠️",
     icon: WarningAmberOutlined,
   },
   Red: {
+    label: "Red",
     color: WARNING_COLORS.Red,
     onColor: ON_STATUS_COLORS.red,
     emoji: "🚨",
     icon: CrisisAlert,
   },
   "No Paddling": {
+    label: "No Paddling",
     color: STATUS_COLORS.maroon,
     onColor: ON_STATUS_COLORS.maroon,
     emoji: "⛔",
     icon: DoNotDisturbOutlined,
   },
 };
+
+// --- Which rules apply ---
+// Switch off any factor your club's rules don't use.
+export const RULES = {
+  // Temperature, wind and rain adjust the river level's status through
+  // CRITERIA_TABLE below. Off: the river level alone sets the status, before
+  // the factors that follow.
+  WEATHER_TABLE: true,
+  // Darkness raises the status one step (e.g. Dark Green -> Amber).
+  DARKNESS: true,
+  // Fog or poor visibility raises the status one step.
+  FOG: true,
+  // Thunderstorms move straight to the worst step, overriding everything.
+  THUNDERSTORMS: true,
+};
+
+// --- Paddler levels ---
+// The levels offered in Settings and shown in "Who Can Paddle", in order from
+// least to most experienced. What each may do is in lib/paddlingMatrix.ts -
+// change the names here and TypeScript will point at every rule in that file
+// that still uses an old one.
+export const PADDLER_LEVELS = [
+  "Beginner",
+  "Improver",
+  "Intermediate",
+  "Independent",
+] as const;
 
 // --- RAG Calculation Criteria ---
 // Adjust these thresholds based on your local safety guidelines
@@ -267,6 +310,29 @@ export const RAG_DESCRIPTIONS: Record<Status, string> = {
   "No Paddling":
     "Do not paddle. Triggered by thunderstorms or dangerously high river level.",
   Unknown: "Data unavailable.",
+};
+
+// The weather half of the conditions key. The headings and figures (e.g.
+// "Below 15 mph") come from THRESHOLDS; this is the explanation beside each.
+// Rows for a factor switched off in RULES aren't shown.
+export const CONDITIONS_KEY_WEATHER = {
+  tempWarm: "Warm. No temperature penalty applied.",
+  tempCool: "Cool. Raises the base risk rating. Rain also becomes a factor.",
+  tempCold:
+    "Cold air, and likely cold water too - capsizing is far more dangerous with nowhere warm to recover. Significant increase in risk rating.",
+  windCalm: "Calm. No wind penalty applied.",
+  windHigh: "Windy. Raises the risk rating at all temperatures.",
+  rainCool:
+    "Rain raises the risk rating whenever it isn't warm, by the same step as windy conditions.",
+  // Shown only when set. Worcester's printed table doesn't cover cold rain.
+  rainCold: `The club's printed table sets out rain only for the cool band, listing just calm and windy at ${THRESHOLDS.TEMP_MODERATE}°C and below. Paddlecheck treats cold rain like cold wind rather than ignoring it, so it is stricter than the printed rules here.`,
+  rainWarm: "Rain doesn't count against the rating once it's this warm.",
+  // The club's rules define dark as streetlights lit; the app can't see
+  // streetlights, so it uses sunrise and sunset.
+  dark: `Streetlights lit, in the club's rules. Paddlecheck uses sunrise and sunset in its place, and counts a forecast hour as dark when over ${60 * THRESHOLDS.DARK_HOUR_FRACTION} minutes of it is. Raises the rating one step.`,
+  fog: "Raises the rating one step.",
+  thunderstorm:
+    "No paddling when thunder is near – overrides all other conditions.",
 };
 
 // Descriptions for each river level band in the conditions key.

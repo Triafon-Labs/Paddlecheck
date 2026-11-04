@@ -8,7 +8,7 @@ import {
   Grow,
   Stack,
 } from "@mui/material";
-import { Status, PaddlerType } from "@/types";
+import { Status, PaddlerType, PaddlingMatrix } from "@/types";
 import {
   getPaddlingMatrix,
   hasDetailsToShow,
@@ -30,7 +30,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
   riverLevel,
   loading,
 }) => {
-  const paddlingMatrix =
+  const paddlingMatrix: Partial<PaddlingMatrix> =
     !loading && overallStatus
       ? getPaddlingMatrix(overallStatus, riverLevel)
       : {};

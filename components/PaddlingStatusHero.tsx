@@ -3,7 +3,7 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { Status } from "@/types";
-import { ragStatus } from "@/lib/rag";
+import { ragStatus, statusLabel } from "@/lib/rag";
 import { RAG_STATUS_MAP } from "@/lib/config";
 import { m3Spring, spring } from "@/lib/m3-palette";
 
@@ -75,13 +75,13 @@ const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
             fontSize: { xs: "1.625rem", sm: "2rem" },
           }}
         >
-          {status}
+          {statusLabel(status)}
         </Typography>
       </Box>
 
       <Box
         role="img"
-        aria-label={`Paddling scale: ${status}, step ${
+        aria-label={`Paddling scale: ${statusLabel(status)}, step ${
           SCALE.indexOf(status) + 1
         } of ${SCALE.length}`}
         sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 1.5 }}
@@ -91,7 +91,7 @@ const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
           return (
             <Box
               key={s}
-              title={s}
+              title={statusLabel(s)}
               sx={{
                 flex: isActive ? 2.2 : 1,
                 height: isActive ? 10 : 6,

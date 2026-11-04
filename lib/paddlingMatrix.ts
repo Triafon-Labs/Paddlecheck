@@ -1,5 +1,5 @@
 import { Status, PaddlerType, PaddlingMatrix, PaddlingStatus } from "@/types";
-import { THRESHOLDS } from "./config";
+import { THRESHOLDS, PADDLER_LEVELS } from "./config";
 
 // What each paddler level may do, from the club's rules, for a given RAG
 // status and river level. Used for the current conditions (Who Can Paddle)
@@ -17,8 +17,6 @@ export const getPaddlingMatrix = (
   overallStatus: Status,
   riverLevel?: number
 ): PaddlingMatrix => {
-  const matrix: PaddlingMatrix = {};
-
   const beginner: PaddlingStatus = { status: "No", details: [] };
   const improver: PaddlingStatus = { status: "No", details: [] };
   const intermediate: PaddlingStatus = { status: "No", details: [] };
@@ -161,17 +159,21 @@ export const getPaddlingMatrix = (
     }
   }
 
-  matrix["Beginner"] = beginner;
-  matrix["Improver"] = improver;
-  matrix["Intermediate"] = intermediate;
-  matrix["Independent"] = independent;
-
-  return matrix;
+  // One entry per level in PADDLER_LEVELS (lib/config.ts) - TypeScript
+  // flags a level missing here, or one here that no longer exists.
+  return {
+    Beginner: beginner,
+    Improver: improver,
+    Intermediate: intermediate,
+    Independent: independent,
+  };
 };
 
-export const paddlerTypes: PaddlerType[] = [
-  "Beginner",
-  "Improver",
-  "Intermediate",
-  "Independent",
-];
+export const paddlerTypes: PaddlerType[] = [...PADDLER_LEVELS];
+
+// A stored level, or null if it isn't one of today's PADDLER_LEVELS - e.g.
+// saved before a level was renamed or removed.
+export const toPaddlerLevel = (value: string | null): PaddlerType | null =>
+  value !== null && (paddlerTypes as string[]).includes(value)
+    ? (value as PaddlerType)
+    : null;

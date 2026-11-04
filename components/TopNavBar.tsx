@@ -19,7 +19,7 @@ import SettingsModal from "./SettingsModal";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { OFFLINE_NO_CACHE_ERROR } from "@/lib/hooks";
 import { degreesToCompass } from "@/lib/weather";
-import { ragStatus } from "@/lib/rag";
+import { ragStatus, statusLabel } from "@/lib/rag";
 import { THRESHOLDS, DATA_STALE_THRESHOLD_MS } from "@/lib/config";
 import {
   formatRiverLevel,
@@ -65,7 +65,9 @@ const buildShareText = (
   const lines: string[] = [];
 
   const emoji = ragStatus[conditions.overallStatus]?.emoji ?? "";
-  lines.push(`🚦 *Overall Status:* ${conditions.overallStatus} ${emoji}`);
+  lines.push(
+    `🚦 *Overall Status:* ${statusLabel(conditions.overallStatus)} ${emoji}`
+  );
   lines.push("");
 
   if (conditions.riverLevel !== undefined) {

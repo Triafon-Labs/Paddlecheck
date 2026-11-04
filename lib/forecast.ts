@@ -1,5 +1,6 @@
 import { DayForecast, Status } from "@/types";
 import { THRESHOLDS } from "@/lib/config";
+import { statusLabel } from "@/lib/rag";
 import {
   formatRiverLevel,
   formatTemperature,
@@ -15,11 +16,17 @@ const fmtHour = (h: number) =>
   `${String(((h % 24) + 24) % 24).padStart(2, "0")}:00`;
 type Slot = DayForecast["graphData"][number];
 
+// Whether a forecast hour is dark. Read from the hour's own flag rather than
+// its "Dark" reason, which is only there when darkness raises the status
+// (RULES.DARKNESS); forecasts cached by older versions only have the reason.
+export const isDarkSlot = (pt: Slot): boolean =>
+  pt.dark ?? pt.reasons.includes("Dark");
+
 // Whether a dark slot next to a window is worse only for being dark: every
 // other reason it has, the window's neighbouring slot has too. The window's
 // conditions then hold right up to sunrise/sunset.
 const isWorseOnlyForDark = (dark: Slot, light: Slot | undefined) =>
-  dark.reasons.includes("Dark") &&
+  isDarkSlot(dark) &&
   dark.reasons.every((r) => r === "Dark" || !!light?.reasons.includes(r));
 
 const slotAtHour = (graphData: DayForecast["graphData"], hour: number) =>
@@ -144,7 +151,7 @@ function formatGaps(
 
   const describeBlock = (b: StatusBlock) => {
     const { start, end } = formatWindow(graphData, b, null, null, false);
-    const label = b.status.toLowerCase();
+    const label = statusLabel(b.status).toLowerCase();
     const reasonText =
       b.reasons.length > 0 ? ` due to ${b.reasons.join(", ")}` : "";
     return `${start}–${end} ${label}${reasonText}`;
@@ -185,7 +192,7 @@ function remainingDaylightSlots(
   currentReasons: string[] = []
 ): Slot[] {
   const nowHour = getLondonHour();
-  const daylight = (pt: Slot) => !pt.reasons.includes("Dark");
+  const daylight = (pt: Slot) => !isDarkSlot(pt);
   if (!currentStatus || !isLightNow(todayForecast)) {
     return todayForecast.graphData.filter(
       (pt) => hourOf(pt.time) >= nowHour && daylight(pt)
@@ -199,6 +206,7 @@ function remainingDaylightSlots(
     value: 0,
     forecastLevel: 0,
     forecastSource: "upstream",
+    dark: false,
   };
   return [
     nowSlot,
@@ -231,7 +239,7 @@ export function buildBestPaddlingTimes(
   const lookup = [
     ...futureSlots,
     ...todayForecast.graphData.filter(
-      (pt) => hourOf(pt.time) > nowHour && pt.reasons.includes("Dark")
+      (pt) => hourOf(pt.time) > nowHour && isDarkSlot(pt)
     ),
   ];
 
@@ -248,7 +256,7 @@ export function buildBestPaddlingTimes(
   const sunsetHHMM = todayForecast.sunset
     ? hhmmOfISO(todayForecast.sunset)
     : null;
-  const label = bestStatus === "Light Green" ? "light green" : "dark green";
+  const label = statusLabel(bestStatus).toLowerCase();
 
   const ranges = windows
     .map((w, i) => {
@@ -286,9 +294,7 @@ export function buildBestPaddlingTimes(
 export function buildHourlyForecastText(
   todayForecast: DayForecast
 ): string | null {
-  const slots = todayForecast.graphData.filter(
-    (pt) => !pt.reasons.includes("Dark")
-  );
+  const slots = todayForecast.graphData.filter((pt) => !isDarkSlot(pt));
   if (slots.length === 0) return null;
 
   const sunsetHHMM = todayForecast.sunset
@@ -333,7 +339,7 @@ export function hasDaylightRemaining(
   if (isLightNow(todayForecast)) return true;
   const nowHour = getLondonHour();
   return todayForecast.graphData.some(
-    (pt) => hourOf(pt.time) >= nowHour && !pt.reasons.includes("Dark")
+    (pt) => hourOf(pt.time) >= nowHour && !isDarkSlot(pt)
   );
 }
 
@@ -359,12 +365,12 @@ export function buildNextDaytimeOutlook(
   if (!forecastDays || forecastDays.length === 0) return null;
 
   const dayIndex = forecastDays.findIndex((day) =>
-    day.graphData.some((pt) => !pt.reasons.includes("Dark"))
+    day.graphData.some((pt) => !isDarkSlot(pt))
   );
   if (dayIndex === -1) return null;
 
   const day = forecastDays[dayIndex];
-  const daySlots = day.graphData.filter((pt) => !pt.reasons.includes("Dark"));
+  const daySlots = day.graphData.filter((pt) => !isDarkSlot(pt));
   if (daySlots.length === 0) return null;
 
   const dayLabel = relativeDayLabel(dayIndex);
@@ -425,7 +431,7 @@ export function buildNextDaytimeOutlook(
   if (bestStatus && windows.length > 0) {
     const sunriseHHMM = day.sunrise ? hhmmOfISO(day.sunrise) : null;
     const sunsetHHMM = day.sunset ? hhmmOfISO(day.sunset) : null;
-    const label = bestStatus === "Light Green" ? "light green" : "dark green";
+    const label = statusLabel(bestStatus).toLowerCase();
     const ranges = windows
       .map((w) => {
         const { start, end, endsAtSunset } = formatWindow(

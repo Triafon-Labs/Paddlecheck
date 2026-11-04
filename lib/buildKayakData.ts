@@ -258,6 +258,7 @@ export const buildKayakData = (
         value: ragHeight[forecastStatus] || 0.1,
         forecastLevel: forecastRiverLevel,
         forecastSource,
+        dark,
         temperature: futureWeatherData.hourly.temperature_2m[index],
         windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
         windGust: futureWeatherData.hourly.wind_gusts_10m[index],

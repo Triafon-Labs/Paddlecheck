@@ -20,7 +20,7 @@ import {
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { ForecastGraphDataPoint, ForecastSource, PaddlerType } from "@/types";
-import { ragStatus } from "@/lib/rag";
+import { ragStatus, statusLabel } from "@/lib/rag";
 import { getPaddlingMatrix } from "@/lib/paddlingMatrix";
 import { usePaddlerLevel } from "@/lib/usePaddlerLevel";
 import { m3Duration, m3Easing } from "@/lib/m3-palette";
@@ -258,7 +258,7 @@ export const ForecastHourHeader: React.FC<ForecastHourHeaderProps> = ({
           {timeLabel}
         </Typography>
         <Chip
-          label={point.status}
+          label={statusLabel(point.status)}
           size="small"
           sx={{
             "--chip-bg": statusConfig.color,

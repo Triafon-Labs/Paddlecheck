@@ -1,3 +1,4 @@
+import type { PADDLER_LEVELS } from "@/lib/config";
 export type Status =
   "Unknown" | "Light Green" | "Dark Green" | "Amber" | "Red" | "No Paddling";
 
@@ -135,6 +136,10 @@ export interface ForecastGraphDataPoint {
   value: number;
   forecastLevel: number;
   forecastSource: ForecastSource;
+  // Whether the hour counts as dark (isDarkHour), whether or not darkness
+  // raises its status (RULES.DARKNESS). Missing from forecasts cached by
+  // older versions, which only had the "Dark" reason to go on.
+  dark?: boolean;
   temperature?: number;
   windSpeed?: number;
   windGust?: number;
@@ -150,8 +155,8 @@ export interface DayForecast {
   sunset: string | null;
 }
 
-export type PaddlerType =
-  "Beginner" | "Improver" | "Intermediate" | "Independent";
+// The paddler levels, as set in PADDLER_LEVELS (lib/config.ts).
+export type PaddlerType = (typeof PADDLER_LEVELS)[number];
 
 export type PaddlingStatusValue = "Yes" | "No" | "Discretion" | "Warning";
 
@@ -160,6 +165,4 @@ export interface PaddlingStatus {
   details: string[];
 }
 
-export type PaddlingMatrix = {
-  [key in PaddlerType]?: PaddlingStatus;
-};
+export type PaddlingMatrix = Record<PaddlerType, PaddlingStatus>;

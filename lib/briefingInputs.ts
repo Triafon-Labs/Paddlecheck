@@ -3,6 +3,7 @@ import {
   buildHourlyForecastText,
   buildNextDaytimeOutlook,
   relativeDayLabel,
+  isDarkSlot,
 } from "@/lib/forecast";
 import { getLondonHHMM, hhmmOfISO } from "@/lib/time";
 import { isWarningOnDay } from "@/lib/warnings";
@@ -45,7 +46,7 @@ export function buildBriefingInputs(
   let targetDayIndex = 0;
   if (currentlyDark && forecastDays) {
     const dayIndex = forecastDays.findIndex((day) =>
-      day.graphData.some((pt) => !pt.reasons.includes("Dark"))
+      day.graphData.some((pt) => !isDarkSlot(pt))
     );
     if (dayIndex !== -1) {
       targetDay = forecastDays[dayIndex];

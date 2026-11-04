@@ -7,6 +7,7 @@ import {
   RAG_STATUS_UI,
   REASON_ICONS,
   RAG_HEIGHT_MAP,
+  RULES,
 } from "./config";
 import { formatRiverLevel, whole } from "./units";
 
@@ -17,6 +18,10 @@ export {
   REASON_ICONS as reasonIcons,
   RAG_HEIGHT_MAP as ragHeight,
 };
+
+// The name a status is shown under (RAG_STATUS_UI in lib/config.ts).
+export const statusLabel = (status: Status): string =>
+  RAG_STATUS_UI[status]?.label ?? status;
 
 // --- Helper Functions for RAG Calculation ---
 
@@ -86,13 +91,14 @@ const adjustRagForFactors = (
 ): { ragNumber: number; reasons: string[] } => {
   let ragNumber = baseRag;
   const reasons: string[] = [];
-  if (isDark) {
+  if (isDark && RULES.DARKNESS) {
     reasons.push("Dark");
     ragNumber += 1;
   }
   const isFoggy =
-    visibility < THRESHOLDS.VISIBILITY_POOR ||
-    THRESHOLDS.FOG_CODES.includes(weatherCode);
+    RULES.FOG &&
+    (visibility < THRESHOLDS.VISIBILITY_POOR ||
+      THRESHOLDS.FOG_CODES.includes(weatherCode));
   if (isFoggy) {
     reasons.push("Foggy");
     ragNumber += 1;
@@ -145,7 +151,10 @@ export const calculateFinalRagStatus = (
       reasons: ["River level is dangerously high"],
     };
   }
-  if (THRESHOLDS.THUNDERSTORM_CODES.includes(weatherCode!)) {
+  if (
+    RULES.THUNDERSTORMS &&
+    THRESHOLDS.THUNDERSTORM_CODES.includes(weatherCode!)
+  ) {
     return { status: "No Paddling", reasons: ["Thunderstorms"] };
   }
 
@@ -161,8 +170,11 @@ export const calculateFinalRagStatus = (
     tempCondition
   );
 
-  const finalRag =
-    CRITERIA_TABLE[tempCondition]?.[weatherCondition]?.[initialRag];
+  // With the weather table off, the river level's own step stands and
+  // temperature, wind and rain aren't given as reasons.
+  const finalRag = RULES.WEATHER_TABLE
+    ? CRITERIA_TABLE[tempCondition]?.[weatherCondition]?.[initialRag]
+    : initialRag;
   if (finalRag === undefined) {
     return {
       status: "Unknown",
@@ -179,8 +191,7 @@ export const calculateFinalRagStatus = (
 
   const allReasons = [
     getRiverLevelReason(initialRag),
-    tempReason,
-    weatherReason,
+    ...(RULES.WEATHER_TABLE ? [tempReason, weatherReason] : []),
     ...adjustmentReasons,
   ].filter(Boolean) as string[];
 

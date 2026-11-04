@@ -117,7 +117,7 @@ export const CLUB_SHORT_NAME = "Worcester Canoe Club";
 export const FEEDBACK_URL = "https://github.com/your-name/your-repo/issues";
 ```
 
-`CLUB_SHORT_NAME` sits under "Paddlecheck" in the top bar, so people can tell your copy from another club's. Keep it to about 20 characters, or it's cut short on smaller phones – "Worcester CC" rather than "Worcester and District Canoe Club". The full `CLUB_NAME` is shown in the About section of the Settings drawer, and `FEEDBACK_URL` is where its "Feedback welcome" link goes – your fork's GitHub issues, a form, or a `mailto:` link. Whatever you put here is public to anyone using the app.
+`CLUB_SHORT_NAME` sits above "Paddlecheck" in the top bar, so people can tell your copy from another club's. Keep it to about 20 characters, or it's cut short on smaller phones – "Worcester CC" rather than "Worcester and District Canoe Club". The full `CLUB_NAME` is shown in the About section of the Settings drawer, and `FEEDBACK_URL` is where its "Feedback welcome" link goes – your fork's GitHub issues, a form, or a `mailto:` link. Whatever you put here is public to anyone using the app.
 
 #### 2. Useful links
 

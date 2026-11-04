@@ -41,7 +41,7 @@ import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
 // --- Club Identity ---
 // Update these to reflect your own club.
 export const CLUB_NAME = "Worcester Canoe Club";
-// Shown under "Paddlecheck" in the top bar, so it has to fit beside three
+// Shown above "Paddlecheck" in the top bar, so it has to fit beside three
 // buttons on a phone: about 20 characters before it's cut short. Use an
 // abbreviation if your club's name is longer (e.g. "Worcester CC").
 export const CLUB_SHORT_NAME = "Worcester Canoe Club";

@@ -290,22 +290,22 @@ const TopNavBar = () => {
             />
             <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
               <Typography
-                variant="h6"
-                noWrap
-                // A step down from h6's 1.25rem so the three lines - app,
-                // club, freshness - sit inside the bar with room to spare.
-                sx={{ fontWeight: 600, lineHeight: 1.15, fontSize: "1.125rem" }}
-                color="text.primary"
-              >
-                Paddlecheck
-              </Typography>
-              <Typography
                 variant="caption"
                 color="text.secondary"
                 noWrap
                 sx={{ lineHeight: 1.25, fontWeight: 600 }}
               >
                 {CLUB_SHORT_NAME}
+              </Typography>
+              <Typography
+                variant="h6"
+                noWrap
+                // A step down from h6's 1.25rem so the three lines - club,
+                // app, freshness - sit inside the bar with room to spare.
+                sx={{ fontWeight: 600, lineHeight: 1.15, fontSize: "1.125rem" }}
+                color="text.primary"
+              >
+                Paddlecheck
               </Typography>
               {(isRefreshing || freshnessText) && (
                 <Typography

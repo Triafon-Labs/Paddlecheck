@@ -83,7 +83,7 @@ components/
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
   ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below, opening with the verdict for your level
-  TopNavBar.tsx          Header – app and club name (CLUB_SHORT_NAME), freshness line, share, settings, refresh, status banners
+  TopNavBar.tsx          Header – app and club name (CLUB_SHORT_NAME) above the app name, freshness line, share, settings, refresh, status banners
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners

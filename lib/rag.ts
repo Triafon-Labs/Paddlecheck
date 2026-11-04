@@ -1,31 +1,81 @@
-import { KayakConditions, Status } from "@/types";
+import { KayakConditions, Status, StatusStep } from "@/types";
 import {
-  RAG_STATUS_MAP,
   CRITERIA_TABLE,
   LEVEL_DESCRIPTIONS,
   THRESHOLDS,
-  RAG_STATUS_UI,
   REASON_ICONS,
-  RAG_HEIGHT_MAP,
+  RULES,
+  STATUS_STEPS,
+  UNKNOWN_STATUS,
 } from "./config";
 import { formatRiverLevel, whole } from "./units";
 
-export {
-  RAG_STATUS_MAP,
-  LEVEL_DESCRIPTIONS,
-  RAG_STATUS_UI as ragStatus,
-  REASON_ICONS as reasonIcons,
-  RAG_HEIGHT_MAP as ragHeight,
+export { LEVEL_DESCRIPTIONS };
+
+// --- The status scale (STATUS_STEPS in lib/config.ts) ---
+
+const STEPS: readonly StatusStep[] = STATUS_STEPS;
+
+// Every step's name, best first.
+export const STEP_NAMES = STEPS.map((step) => step.name) as Status[];
+// The last step: reached only by the river passing its fromLevel, or a
+// thunderstorm. Weather, darkness and fog stop one step short of it.
+export const TOP_STEP = STEP_NAMES[STEP_NAMES.length - 1];
+const TOP_INDEX = STEPS.length - 1;
+// The steps that count as a good time to paddle in the forecast summaries.
+export const BEST_TIME_STEPS = STEPS.filter((step) => step.bestTimes).map(
+  (step) => step.name
+) as Status[];
+// The level at which the river first counts as a contributing factor.
+export const FIRST_ELEVATED_LEVEL = STEPS[1]?.fromLevel ?? Infinity;
+
+type StatusUi = Omit<StatusStep, "fromLevel" | "riverDescription">;
+
+// How a status looks. A name that's no longer in STATUS_STEPS - e.g. one
+// cached before a step was renamed - is shown as Unknown.
+export const statusUi = (status: Status | string): StatusUi =>
+  STEPS.find((step) => step.name === status) ?? UNKNOWN_STATUS;
+
+export const statusLabel = (status: Status | string): string =>
+  statusUi(status).name;
+
+// Bar height in the forecast chart: full for the best step down to a stub for
+// the top one, evenly spaced between (1, 0.75, 0.5, 0.25, 0.1 for five).
+export const ragHeight = (status: Status): number => {
+  const i = STEP_NAMES.indexOf(status);
+  if (i === -1 || i === TOP_INDEX) return 0.1;
+  return TOP_INDEX <= 1 ? 1 : 1 - (0.75 * i) / (TOP_INDEX - 1);
 };
+
+// Contributing-factor icons: the weather ones from REASON_ICONS, and one per
+// step for its river level reason.
+export const reasonIcons: Record<string, React.ElementType> = {
+  ...REASON_ICONS,
+  ...Object.fromEntries(
+    STEPS.flatMap((step, i) => {
+      const reason = riverLevelReason(i);
+      return reason && step.reasonIcon ? [[reason, step.reasonIcon]] : [];
+    })
+  ),
+};
+
+function riverLevelReason(stepIndex: number): string | undefined {
+  const step = STEPS[stepIndex];
+  if (stepIndex === 0 || !step?.riverReason) return undefined;
+  return `${step.riverReason} river level (> ${formatRiverLevel(step.fromLevel)})`;
+}
 
 // --- Helper Functions for RAG Calculation ---
 
-export const findLevelDescription = (level: number): string => {
-  if (level <= 1.0) return LEVEL_DESCRIPTIONS[1.0];
-
+export const findLevelDescription = (level: number): string | undefined => {
   const allLevels = Object.keys(LEVEL_DESCRIPTIONS)
     .map(parseFloat)
     .sort((a, b) => a - b);
+
+  // No landmarks recorded yet (a fresh adaptation): nothing to say.
+  if (allLevels.length === 0) return undefined;
+  // At or below the lowest landmark, that landmark applies as-is.
+  if (level <= allLevels[0]) return LEVEL_DESCRIPTIONS[allLevels[0]];
 
   const nextLevelUp = allLevels.find((key) => key >= level);
 
@@ -41,11 +91,14 @@ export const findLevelDescription = (level: number): string => {
     : description;
 };
 
+// The step the river level alone puts conditions on, as an index into
+// STATUS_STEPS. Never the top step - that's handled before this is asked.
 export const calculateInitialRagStatus = (level: number): number => {
-  if (level < THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1) return 0;
-  if (level < THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2) return 1;
-  if (level < THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3) return 2;
-  return 3;
+  let index = 0;
+  for (let i = 1; i < TOP_INDEX; i++) {
+    if (level >= STEPS[i].fromLevel) index = i;
+  }
+  return index;
 };
 
 const getTemperatureConditions = (
@@ -83,28 +136,19 @@ const adjustRagForFactors = (
 ): { ragNumber: number; reasons: string[] } => {
   let ragNumber = baseRag;
   const reasons: string[] = [];
-  if (isDark) {
+  if (isDark && RULES.DARKNESS) {
     reasons.push("Dark");
     ragNumber += 1;
   }
   const isFoggy =
-    visibility < THRESHOLDS.VISIBILITY_POOR ||
-    THRESHOLDS.FOG_CODES.includes(weatherCode);
+    RULES.FOG &&
+    (visibility < THRESHOLDS.VISIBILITY_POOR ||
+      THRESHOLDS.FOG_CODES.includes(weatherCode));
   if (isFoggy) {
     reasons.push("Foggy");
     ragNumber += 1;
   }
-  return { ragNumber: Math.min(ragNumber, 3), reasons };
-};
-
-const getRiverLevelReason = (initialRag: number): string | undefined => {
-  if (initialRag === 1)
-    return `Slightly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)})`;
-  if (initialRag === 2)
-    return `Moderately elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)})`;
-  if (initialRag === 3)
-    return `Significantly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)})`;
-  return undefined;
+  return { ragNumber: Math.min(ragNumber, TOP_INDEX - 1), reasons };
 };
 
 // --- Main RAG Calculation Function ---
@@ -122,44 +166,52 @@ export const calculateFinalRagStatus = (
     weatherCode,
   } = conditions;
 
-  if (
-    [
-      riverLevel,
-      temperature,
-      windSpeed,
-      rain,
-      dark,
-      visibility,
-      weatherCode,
-    ].some((v) => v === undefined)
-  ) {
+  // Only the readings the club's rules use are required: with the weather
+  // table off, say, a missing wind reading mustn't make the status Unknown.
+  const needed = [
+    riverLevel,
+    ...(RULES.WEATHER_TABLE ? [temperature, windSpeed, rain] : []),
+    ...(RULES.DARKNESS ? [dark] : []),
+    ...(RULES.FOG ? [visibility, weatherCode] : []),
+    ...(RULES.THUNDERSTORMS ? [weatherCode] : []),
+  ];
+  if (needed.some((v) => v === undefined)) {
     return { status: "Unknown", reasons: ["Missing data"] };
   }
 
-  if (riverLevel! >= THRESHOLDS.RIVER_LEVEL_NO_PADDLING) {
+  if (riverLevel! >= STEPS[TOP_INDEX].fromLevel) {
     return {
-      status: "No Paddling",
+      status: TOP_STEP,
       reasons: ["River level is dangerously high"],
     };
   }
-  if (THRESHOLDS.THUNDERSTORM_CODES.includes(weatherCode!)) {
-    return { status: "No Paddling", reasons: ["Thunderstorms"] };
+  if (
+    RULES.THUNDERSTORMS &&
+    THRESHOLDS.THUNDERSTORM_CODES.includes(weatherCode!)
+  ) {
+    return { status: TOP_STEP, reasons: ["Thunderstorms"] };
   }
 
   const initialRag = calculateInitialRagStatus(riverLevel!);
-  // Judged on the whole numbers the app displays, so a reading shown as
-  // "15 mph" or "5°C" always gets the status that figure implies.
-  const { tempCondition, reason: tempReason } = getTemperatureConditions(
-    whole(temperature!)
-  );
-  const { weatherCondition, reason: weatherReason } = getWeatherConditions(
-    whole(windSpeed!),
-    rain!,
-    tempCondition
-  );
 
-  const finalRag =
-    CRITERIA_TABLE[tempCondition]?.[weatherCondition]?.[initialRag];
+  // With the weather table off, the river level's own step stands and
+  // temperature, wind and rain aren't given as reasons.
+  let finalRag: number | undefined = initialRag;
+  const weatherReasons: (string | undefined)[] = [];
+  if (RULES.WEATHER_TABLE) {
+    // Judged on the whole numbers the app displays, so a reading shown as
+    // "15 mph" or "5°C" always gets the status that figure implies.
+    const { tempCondition, reason: tempReason } = getTemperatureConditions(
+      whole(temperature!)
+    );
+    const { weatherCondition, reason: weatherReason } = getWeatherConditions(
+      whole(windSpeed!),
+      rain!,
+      tempCondition
+    );
+    finalRag = CRITERIA_TABLE[tempCondition]?.[weatherCondition]?.[initialRag];
+    weatherReasons.push(tempReason, weatherReason);
+  }
   if (finalRag === undefined) {
     return {
       status: "Unknown",
@@ -167,22 +219,23 @@ export const calculateFinalRagStatus = (
     };
   }
 
+  // Readings a switched-off rule doesn't need may be missing; these stand-ins
+  // are never looked at, since adjustRagForFactors checks RULES first.
   const { ragNumber, reasons: adjustmentReasons } = adjustRagForFactors(
     finalRag,
-    dark!,
-    visibility!,
-    weatherCode!
+    dark === true,
+    visibility ?? Infinity,
+    weatherCode ?? -1
   );
 
   const allReasons = [
-    getRiverLevelReason(initialRag),
-    tempReason,
-    weatherReason,
+    riverLevelReason(initialRag),
+    ...weatherReasons,
     ...adjustmentReasons,
   ].filter(Boolean) as string[];
 
   return {
-    status: RAG_STATUS_MAP[ragNumber] || "Unknown",
+    status: STEP_NAMES[ragNumber] ?? "Unknown",
     reasons: allReasons,
   };
 };

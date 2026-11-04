@@ -1,0 +1,363 @@
+# yaml-language-server: $schema=./club.schema.json
+#
+# Everything about your club that Paddlecheck needs. This is the only file you
+# have to change to adapt the app – see "Adapting for Your Club" in README.md.
+#
+# A few YAML basics:
+#   - Indentation matters: use spaces (two per level), never tabs.
+#   - Anything after a # is a comment.
+#   - Text normally needs no quotes. Quote it if it contains ": " or " #", or
+#     starts with a symbol such as * & ! [ { > | % @ or a quote mark.
+#   - Write "No" and "Yes" verdicts in quotes – unquoted, older YAML tools
+#     read them as true/false.
+#
+# Settings marked (optional) can be left out; the comment says what happens
+# then. Starting a new club? examples/starter.club.yaml is a shorter file to
+# begin from.
+#
+# If something here is wrong, `npm run dev` and `npm run build` stop with a
+# message naming the setting. In VS Code, the YAML extension (Red Hat) checks
+# this file and suggests settings as you type.
+
+app: # (optional – the name is Paddlecheck if left out)
+  # The app's name: top bar, browser tab, share text, and the name it installs
+  # under on a phone. Changing it renames the app on phones that already have it.
+  name: Paddlecheck
+
+club:
+  name: Worcester Canoe Club
+  # Shown above the app name in the top bar – about 20 characters fit before
+  # it's cut short on a phone. Abbreviate a longer name (e.g. "Worcester CC").
+  shortName: Worcester Canoe Club
+  # Where "Feedback welcome" in Settings goes: an issue tracker, a form, or a
+  # mailto: link. Public to anyone using the app.
+  feedbackUrl: https://github.com/dylanr97/Paddlecheck/issues
+  # The "Useful Links" section in Settings. (optional)
+  usefulLinks:
+    - name: River Severn level at Worcester (Barbourne)
+      url: https://check-for-flooding.service.gov.uk/station/2092
+    - name: River Severn level at Bewdley
+      url: https://check-for-flooding.service.gov.uk/station/2001
+    - name: Worcester Canoe Club
+      url: https://worcestercanoeclub.org/
+
+# Your launch point, for weather, sunrise and sunset.
+location:
+  latitude: 52.2
+  longitude: -2.2
+
+river:
+  # Your gauge's Environment Agency flood-monitoring API ID – NOT the number
+  # on the Check for flooding website (README.md, "River gauge station").
+  stationId: "2642" # Worcester (Barbourne)
+  # Optional: a gauge with an Environment Agency forecast, and how many hours
+  # a change there takes to reach your gauge. Use your own gauge's CSV with
+  # travelHours: 0 if it has a forecast, or `forecastCsv: null` for none.
+  forecastCsv: https://check-for-flooding.service.gov.uk/station-csv/2001 # Bewdley
+  travelHours: 6
+
+# Met Office warnings: your region's feed (https://www.metoffice.gov.uk/weather/guides/rss)
+# and the area name a warning must mention to be shown.
+warnings:
+  feed: https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm
+  area: Worcestershire
+
+# Switch off any factor your club's rules don't use. (optional – each one is
+# on if left out)
+rules:
+  weatherTable: true # temperature, wind and rain adjust the status (weatherTable below)
+  darkness: true # darkness raises the status one step
+  fog: true # fog or poor visibility raises the status one step
+  thunderstorms: true # a thunderstorm jumps straight to the last step
+
+# (optional – each one is the value shown here if left out)
+thresholds:
+  tempHigh: 13 # °C – at or above this, temperature isn't a factor
+  tempModerate: 5 # °C – above this is "cool", at or below is "cold"
+  windHigh: 15 # mph – sustained wind above this counts as windy
+  visibilityPoor: 1000 # metres – below this counts as fog
+  # Also darkHourFraction: a forecast hour counts as dark when more than this
+  # fraction of it is before sunrise or after sunset (0.25 = over 15 minutes).
+
+# The scale conditions are rated on, best first – as many steps as your rules
+# have. The last step is reached only by the river passing its fromLevel or,
+# with rules.thunderstorms on, by a thunderstorm; weather, darkness and fog
+# stop one step short of it.
+#
+#   name             shown everywhere, and used as the step's key below
+#   fromLevel        gauge reading (m) the step starts at; the first is 0
+#   colour           one of the app's fixed colours, each paired with a
+#                    text colour that's checked for contrast:
+#                      lightGreen #4CBB17   darkGreen #008000   yellow #FBC02D
+#                      amber #FF8F00   red #B71C1C   maroon #800000   grey #9E9E9E
+#                    See them: docs/club-yaml/colours.svg
+#   icon             check, trendingUp, warning, alert, stop, help, water,
+#                    waves, tsunami or flood (Material icons).
+#                    See them: docs/club-yaml/icons.svg
+#   emoji            (optional) used in the share text
+#   description      what the step means for your club (Conditions Key)
+#   riverDescription (optional) what the river looks like in this band
+#                    (Conditions Key)
+#   riverReason      how the level reads as a contributing factor, e.g.
+#                    "Slightly elevated" -> "Slightly elevated river level
+#                    (> 1.00 m)". Not needed on the first step.
+#   reasonIcon       (optional) icon for that factor and the band – same list
+#                    as icon; water if left out
+#   bestTimes        (optional) true if it's a good time to paddle in forecast
+#                    summaries
+steps:
+  - name: Light Green
+    fromLevel: 0
+    colour: lightGreen
+    icon: check
+    emoji: ✅
+    description: Ideal conditions. Beginners need coach supervision. Improvers may paddle as a group without a coach. Intermediates may paddle solo.
+    riverDescription: Below the wooden landing stage. Good launch conditions.
+    bestTimes: true
+
+  - name: Dark Green
+    fromLevel: 1.0 # the landing stage
+    colour: darkGreen
+    icon: trendingUp
+    emoji: 📈
+    description: Good conditions. Beginners and improvers need coach supervision. Intermediates may paddle with at least one other intermediate.
+    riverDescription: Between landing stage and concrete step. Still paddleable with care.
+    riverReason: Slightly elevated
+    reasonIcon: water
+    bestTimes: true
+
+  - name: Amber
+    fromLevel: 1.48 # the concrete step
+    colour: amber
+    icon: warning
+    emoji: ⚠️
+    description: Coach's discretion required. Beginners and improvers may only paddle at coach's discretion. Intermediates need supervision by an independent paddler or coach.
+    riverDescription: Above the concrete step. PFDs must be worn by all.
+    riverReason: Moderately elevated
+    reasonIcon: waves
+
+  - name: Red
+    fromLevel: 2.75 # the 10th step from the car park
+    colour: red
+    icon: alert
+    emoji: 🚨
+    description: Risky conditions. No paddling for beginners or improvers. Intermediates at coach's discretion only (not above 10 steps from car park). PFDs must be worn by all.
+    riverDescription: Above 10 steps from the car park. No paddling for intermediates and below.
+    riverReason: Significantly elevated
+    reasonIcon: tsunami
+
+  - name: No Paddling
+    fromLevel: 5.0 # boathouse flooding
+    colour: maroon
+    icon: stop
+    emoji: ⛔
+    description: Do not paddle. Triggered by thunderstorms or dangerously high river level.
+    riverDescription: Boathouse flooding. No paddling under any circumstances.
+    reasonIcon: flood
+
+# Used when rules.weatherTable is on: the club's conditions table. For each
+# temperature band (high: at or above tempHigh, moderate: above tempModerate,
+# low: the rest) and weather (calm, windy, or rainy – rain only counts below
+# tempHigh), the step that results in each river level band.
+#
+# Each row lists one step per river level band, in the same order as the
+# steps above but without the last one. So for Worcester, the four columns
+# are what happens when the river alone says Light Green, Dark Green, Amber
+# and Red; a row that repeats those names unchanged means the weather makes
+# no difference.
+weatherTable:
+  high:
+    calm: [Light Green, Dark Green, Amber, Red]
+    windy: [Dark Green, Amber, Amber, Red]
+  moderate:
+    calm: [Dark Green, Amber, Amber, Red]
+    windy: [Amber, Amber, Amber, Red]
+    rainy: [Amber, Amber, Amber, Red]
+  # The printed table only lists calm and windy at 5°C and below. Cold rain is
+  # treated like cold wind here – stricter than the printed rules, and the
+  # Conditions Key says so (conditionsKey.rainCold).
+  low:
+    calm: [Amber, Amber, Red, Red]
+    windy: [Amber, Red, Red, Red]
+    rainy: [Amber, Red, Red, Red]
+
+# The levels offered in Settings and shown under "Who Can Paddle", least
+# experienced first. Use as many as your club has.
+paddlerLevels:
+  - Beginner
+  - Improver
+  - Intermediate
+  - Independent
+
+# What each level may do on each step. A verdict is "Yes" (Can paddle),
+# "Warning" (With caveats), "Discretion" (Coach's discretion) or "No"
+# (Cannot paddle); details are the lines shown under it. A step gives one
+# verdict for everyone, or one per level – then every level must be listed.
+# You can also add an "Unknown" entry for when conditions can't be checked;
+# without one, every level gets "No" and "Ask a coach before paddling".
+whoCanPaddle:
+  Light Green:
+    Beginner:
+      verdict: Warning
+      details:
+        - Coach supervision and PFD required
+    Improver:
+      verdict: Warning
+      details:
+        - No coach needed, but paddle with at least one other improver or intermediate (preferably more)
+        - Someone in the group carries a mobile phone
+        - Familiar boat only
+        - Stay between Sabrina Bridge and the Slip
+        - PFD required
+    Intermediate:
+      verdict: "Yes"
+      details:
+        - May paddle solo
+        - Carry a mobile phone
+        - Familiar boat only
+        - Stay between Sabrina Bridge and the Slip
+        - PFD required
+    Independent:
+      verdict: "Yes"
+
+  Dark Green:
+    Beginner:
+      verdict: Warning
+      details:
+        - Coach supervision and PFD required
+    Improver:
+      verdict: Warning
+      details:
+        - Coach supervision and PFD required
+    Intermediate:
+      verdict: Warning
+      details:
+        - Pair up with another intermediate, no coach needed
+        - Solo K2 crews must be able to self-rescue
+        - Carry a mobile phone
+        - Familiar boat only
+        - Stay between Sabrina Bridge and the Slip
+        - PFD required
+    Independent:
+      verdict: "Yes"
+
+  Amber:
+    Beginner:
+      verdict: Discretion
+      details:
+        - PFD required
+    Improver:
+      verdict: Discretion
+      details:
+        - PFD required
+    # The rules allow this outright with supervision – "In AMBER conditions
+    # they can be supervised by an Independent paddler or club coach" –
+    # rather than leaving it to a coach's discretion.
+    Intermediate:
+      verdict: Warning
+      details:
+        - Must be supervised by an independent paddler or club coach
+        - PFD required
+    Independent:
+      verdict: "Yes"
+      details:
+        - May supervise intermediates
+        - PFD required above the concrete step
+
+  Red:
+    Beginner:
+      verdict: "No"
+    Improver:
+      verdict: "No"
+    # Above the 10th step this becomes a "No" – see whoCanPaddleExtras.
+    Intermediate:
+      verdict: Discretion
+      details:
+        - PFD required
+    Independent:
+      verdict: Warning
+      details:
+        - Avoid paddling alone, PFD required
+
+  No Paddling:
+    verdict: "No"
+    details:
+      - Applies to every level, independents included
+
+# (optional) Rules applied on top of whoCanPaddle, in order – for anything that depends
+# on the river level rather than the step, or adds the same line to several
+# levels. Each has:
+#   when    (optional) status: [steps], notStatus: [steps], riverLevelAtLeast: metres
+#   levels  the paddler levels it applies to
+#   then one or more of:
+#     set         replace the verdict outright – the only change made to a "No"
+#     yesBecomes  turn a "Yes" into this verdict
+#     addDetail   add this line – in place of `replacing`, if that line is there
+# Most clubs won't need any: leave this out if whoCanPaddle says everything.
+whoCanPaddleExtras:
+  # "No paddling for intermediates above 10 steps from the car park" holds
+  # however the status got to Red, so it's keyed to the level itself.
+  - when:
+      status: [Red]
+      riverLevelAtLeast: 2.75
+    levels: [Intermediate]
+    set:
+      verdict: "No"
+      details:
+        - No paddling above 10 steps from the car park
+
+  # PFDs above the concrete step, even when the weather keeps the status below
+  # Red (whose own lines already require one).
+  - when:
+      notStatus: [Red]
+      riverLevelAtLeast: 1.48
+    levels: [Independent, Intermediate]
+    yesBecomes: Warning
+    addDetail: PFD required – river is high
+    replacing: PFD required
+
+  # From the club email introducing bibs: "All coaching groups of Adult and
+  # Junior Beginners and Intermediate paddlers will wear luminous bibs."
+  # Improvers and non-coaching groups are included too – deliberately wider
+  # than the email, since a bib costs nothing.
+  - levels: [Beginner, Improver, Intermediate]
+    addDetail: Wear a luminous bib
+
+# What the river looks like at particular gauge readings, shown either side
+# of the current level. Build it up by noting the gauge reading each time you
+# visit at a different level. (optional – leave it out until you have some)
+landmarks:
+  1.0: Able to launch from the landing stage – OK
+  1.15: Water over one end of the landing stage
+  1.38: 10cm over landing stage, able to launch OK
+  1.48: On concrete lower deck – wet feet!
+  1.52: +5cm concrete lower deck, not deep enough – still wet feet!
+  1.68: +10cm concrete lower deck, deep enough for boat to float – dry feet!
+  1.96: Bollards submerged, launch with care – rudder may still ground on the step even once the boat floats
+  2.12: Half way up steps – have to portage around the lock at Diglis
+  2.52: 11-12 steps below the car park visible – approaching the 10-step Red threshold
+  2.75: 10th step wet, wet feet possible
+  4.28: Almost on the car park – dry feet!
+  4.37: 5cm on the car park – not deep enough for boats, wet feet!
+  4.49: Water on car park, safe to park only if falling
+  4.7: Just in the boat house!!
+  5.01: Boathouse flooding – paddle with extreme care
+  5.02: Deep water in boathouse, boats can float out – paddle with extreme care
+  5.18: Grand Stand Road flooded, unsafe to access boathouse
+  5.34: Water over the lower boat racks – boats at risk of damage
+  5.54: Sabrina Bridge closed, North Parade underwater, dangerous flows
+  5.55: Boathouse inaccessible, dangerous flow, no paddling advised
+
+# (optional) The text beside each weather row of the Conditions Key, for
+# any row you want to word differently. Rows for a factor switched off in
+# rules aren't shown. The other rows are tempWarm, tempCool, tempCold,
+# windCalm, windHigh, rainCool, rainWarm, fog and thunderstorm – see
+# lib/clubConfig.ts for their standard wording. Text can include {appName},
+# {tempHigh}, {tempModerate}, {windHigh} and {darkMinutes}.
+conditionsKey:
+  # An extra row only Worcester needs: its printed table doesn't cover cold
+  # rain. Leave rainCold out and the row isn't shown.
+  rainCold: The club's printed table sets out rain only for the cool band, listing just calm and windy at {tempModerate}°C and below. {appName} treats cold rain like cold wind rather than ignoring it, so it is stricter than the printed rules here.
+  # The club's rules define dark as streetlights lit; the app can't see
+  # streetlights, so it uses sunrise and sunset.
+  dark: Streetlights lit, in the club's rules. {appName} uses sunrise and sunset in its place, and counts a forecast hour as dark when over {darkMinutes} minutes of it is. Raises the rating one step.

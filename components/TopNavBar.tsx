@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -19,15 +19,15 @@ import SettingsModal from "./SettingsModal";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { OFFLINE_NO_CACHE_ERROR } from "@/lib/hooks";
 import { degreesToCompass } from "@/lib/weather";
-import { ragStatus } from "@/lib/rag";
-import { THRESHOLDS, DATA_STALE_THRESHOLD_MS } from "@/lib/config";
+import { statusUi, statusLabel, FIRST_ELEVATED_LEVEL } from "@/lib/rag";
+import { THRESHOLDS, CLUB_SHORT_NAME, APP_NAME } from "@/lib/config";
 import {
   formatRiverLevel,
   formatTemperature,
   formatWindSpeed,
 } from "@/lib/units";
 import { buildBestConditionsLine } from "@/lib/forecast";
-import { getRelativeTimeString, getLondonHHMM } from "@/lib/time";
+import { useFreshness } from "@/lib/useFreshness";
 import { collapseMotion } from "@/lib/m3-palette";
 
 // Filled with the saturated accent rather than the tonal container pair.
@@ -60,12 +60,14 @@ const buildShareText = (
   conditions: ReturnType<typeof useKayakContext>["conditions"],
   forecastDays: ReturnType<typeof useKayakContext>["forecastDays"]
 ): string => {
-  if (!conditions) return "Check current paddling conditions at Paddlecheck.";
+  if (!conditions) return `Check current paddling conditions at ${APP_NAME}.`;
 
   const lines: string[] = [];
 
-  const emoji = ragStatus[conditions.overallStatus]?.emoji ?? "";
-  lines.push(`🚦 *Overall Status:* ${conditions.overallStatus} ${emoji}`);
+  const emoji = statusUi(conditions.overallStatus).emoji;
+  lines.push(
+    `🚦 *Overall Status:* ${statusLabel(conditions.overallStatus)} ${emoji}`
+  );
   lines.push("");
 
   if (conditions.riverLevel !== undefined) {
@@ -86,7 +88,7 @@ const buildShareText = (
   if (
     conditions.launchMessage &&
     conditions.riverLevel !== undefined &&
-    conditions.riverLevel >= THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1
+    conditions.riverLevel >= FIRST_ELEVATED_LEVEL
   ) {
     lines.push("");
     lines.push(conditions.launchMessage);
@@ -130,11 +132,6 @@ const buildShareText = (
   return lines.join("\n");
 };
 
-const isDataStale = (lastUpdated: string | undefined): boolean => {
-  if (!lastUpdated) return false;
-  return Date.now() - new Date(lastUpdated).getTime() > DATA_STALE_THRESHOLD_MS;
-};
-
 const TopNavBar = () => {
   const scrolled = useScrollTrigger({ disableHysteresis: true, threshold: 8 });
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -151,41 +148,7 @@ const TopNavBar = () => {
 
   const isOfflineError = error === OFFLINE_NO_CACHE_ERROR;
 
-  // Initialize state dynamically based on the current context value on render
-  const [relativeLastUpdated, setRelativeLastUpdated] = useState<string>(() =>
-    getRelativeTimeString(conditions?.lastUpdated)
-  );
-  const [isStale, setIsStale] = useState<boolean>(() =>
-    isDataStale(conditions?.lastUpdated)
-  );
-
-  useEffect(() => {
-    const dateStr = conditions?.lastUpdated;
-
-    // Breaking synchronous context execution using queueMicrotask blocks cascading render lint rules
-    queueMicrotask(() => {
-      setRelativeLastUpdated(getRelativeTimeString(dateStr));
-      setIsStale(isDataStale(dateStr));
-    });
-
-    const interval = setInterval(() => {
-      setRelativeLastUpdated(getRelativeTimeString(dateStr));
-      setIsStale(isDataStale(dateStr));
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [conditions?.lastUpdated]);
-
-  // "Updated just now" alone reads as if this instant triggered a live fetch,
-  // when it may just be a fast cache hit on data fetched slightly earlier -
-  // pairing it with the clock time it was actually fetched keeps that honest.
-  const lastUpdatedClockTime = conditions?.lastUpdated
-    ? getLondonHHMM(new Date(conditions.lastUpdated))
-    : null;
-  const freshnessText =
-    lastUpdatedClockTime && relativeLastUpdated
-      ? `${lastUpdatedClockTime} · ${relativeLastUpdated}`
-      : relativeLastUpdated;
+  const { freshnessText, isStale } = useFreshness(conditions?.lastUpdated);
 
   const handleShare = async () => {
     const text = buildShareText(conditions, forecastDays);
@@ -196,7 +159,7 @@ const TopNavBar = () => {
     const message = `${text}\n\n${url}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Paddlecheck", text: message });
+        await navigator.share({ title: APP_NAME, text: message });
       } else {
         await navigator.clipboard.writeText(message);
         setSnackbarOpen(true);
@@ -258,7 +221,7 @@ const TopNavBar = () => {
         elevation={0}
         data-scrolled={scrolled}
       >
-        <Toolbar sx={{ justifyContent: "space-between" }}>
+        <Toolbar sx={{ justifyContent: "space-between", py: 1.25 }}>
           {/* minWidth: 0 lets this half shrink past its content on a narrow
               phone. Without it the title sets a floor on the flex item's
               width and the action buttons get pushed off the right edge
@@ -268,7 +231,7 @@ const TopNavBar = () => {
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 1.5,
+              gap: 2,
               minWidth: 0,
             }}
           >
@@ -277,30 +240,29 @@ const TopNavBar = () => {
                 is what we want here - there's nothing to resize. */}
             <Image
               src="/favicon.svg"
-              alt="Paddlecheck Logo"
-              width={40}
-              height={40}
+              alt={`${APP_NAME} logo`}
+              width={44}
+              height={44}
               style={{ flexShrink: 0 }}
             />
             <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
               <Typography
+                variant="caption"
+                color="text.secondary"
+                noWrap
+                sx={{ lineHeight: 1.5, fontWeight: 600 }}
+              >
+                {CLUB_SHORT_NAME}
+              </Typography>
+              <Typography
                 variant="h6"
                 noWrap
-                sx={{ fontWeight: 600, lineHeight: 1.2 }}
+                // A step down from h6's 1.25rem, under the club name.
+                sx={{ fontWeight: 600, lineHeight: 1.25, fontSize: "1.125rem" }}
                 color="text.primary"
               >
-                Paddlecheck
+                {APP_NAME}
               </Typography>
-              {(isRefreshing || freshnessText) && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  noWrap
-                  sx={{ lineHeight: 1.2, mt: -0.2 }}
-                >
-                  {isRefreshing ? "Updating…" : `Updated ${freshnessText}`}
-                </Typography>
-              )}
             </Box>
           </Box>
           <Box sx={{ display: "flex", flexShrink: 0 }}>

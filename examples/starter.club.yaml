@@ -1,0 +1,113 @@
+# A starting point for a new club: the fewest settings that make a working
+# app. Copy it over the club.yaml at the top of the project, then work
+# through every line marked CHANGE. Run `npm run dev` as you go: if anything
+# is wrong it tells you which setting.
+#
+# It rates conditions on the river level alone, plus darkness, fog and
+# thunderstorms. When you're ready for more – weather rules, more steps,
+# rules that depend on the level – the main club.yaml (Worcester Canoe
+# Club's) shows every setting, and README.md explains them.
+#
+# YAML basics: indent with spaces (two per level), never tabs; # starts a
+# comment; put "Yes" and "No" in quotes.
+
+club:
+  name: Your Canoe Club # CHANGE
+  shortName: Your Canoe Club # CHANGE – about 20 characters fit in the top bar
+  feedbackUrl: https://example.com/contact # CHANGE – where "Feedback welcome" goes
+
+# CHANGE – your launch point (right-click it in Google Maps to copy these).
+location:
+  latitude: 52.2
+  longitude: -2.2
+
+river:
+  # CHANGE – your gauge's ID from the Environment Agency's station list
+  # (README.md, "River gauge"). This one is Worcester's, as an example.
+  stationId: "2642"
+  # Leave as null for now; README.md, "Level forecast", explains adding one.
+  forecastCsv: null
+
+# CHANGE – your Met Office region's feed (https://www.metoffice.gov.uk/weather/guides/rss)
+# and your county, as the Met Office writes it.
+warnings:
+  feed: https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm
+  area: Worcestershire
+
+# The river level alone sets the status; darkness, fog and thunderstorms
+# still count.
+rules:
+  weatherTable: false
+
+# CHANGE – your club's bands, best first. fromLevel is the gauge reading in
+# metres where each one starts, and only means anything for your gauge.
+# Colours and icons come from fixed lists: see docs/club-yaml/colours.svg and
+# docs/club-yaml/icons.svg. The last step is the only one a thunderstorm or
+# the highest river levels can reach.
+steps:
+  - name: Green
+    fromLevel: 0
+    colour: lightGreen
+    icon: check
+    description: Good conditions for everyone. # CHANGE
+    bestTimes: true
+
+  - name: Amber
+    fromLevel: 1.5 # CHANGE
+    colour: amber
+    icon: warning
+    description: Take care – experienced paddlers only without a coach. # CHANGE
+    riverReason: Elevated # shown as "Elevated river level (> 1.50 m)"
+
+  - name: Red
+    fromLevel: 2.5 # CHANGE
+    colour: red
+    icon: alert
+    description: High water – experienced paddlers at a coach's discretion. # CHANGE
+    riverReason: High
+
+  - name: No Paddling
+    fromLevel: 4.0 # CHANGE
+    colour: maroon
+    icon: stop
+    description: Do not paddle. # CHANGE
+
+# CHANGE – your club's levels, least experienced first.
+paddlerLevels:
+  - Beginner
+  - Intermediate
+  - Experienced
+
+# CHANGE – what each level may do on each step. A verdict is "Yes",
+# "Warning" (can paddle, with caveats), "Discretion" (coach's discretion) or
+# "No"; details are the lines shown under it. A step gives one verdict for
+# everyone, or one for every level.
+whoCanPaddle:
+  Green:
+    verdict: "Yes"
+
+  Amber:
+    Beginner:
+      verdict: "No"
+    Intermediate:
+      verdict: Discretion
+      details:
+        - Buoyancy aid required
+    Experienced:
+      verdict: Warning
+      details:
+        - Buoyancy aid required
+
+  Red:
+    Beginner:
+      verdict: "No"
+    Intermediate:
+      verdict: "No"
+    Experienced:
+      verdict: Discretion
+      details:
+        - Buoyancy aid required
+        - Never paddle alone
+
+  No Paddling:
+    verdict: "No"

@@ -1,100 +1,75 @@
 import {
   HelpOutlined,
-  Check,
-  WarningAmberOutlined,
-  DoNotDisturbOutlined,
-  TrendingUpOutlined,
   Thermostat,
-  CrisisAlert,
   Air,
   WaterDrop,
   NightsStay,
   Thunderstorm,
   Flood,
-  Water,
-  Waves,
-  Tsunami,
   AcUnit,
   Foggy,
 } from "@mui/icons-material";
-import { ForecastSource, Status } from "@/types";
+import {
+  ForecastSource,
+  PaddlerType,
+  PaddlingExtraRule,
+  PaddlingVerdict,
+  Status,
+  StatusStep,
+} from "@/types";
 import { STATUS_COLORS, ON_STATUS_COLORS } from "./statusColors";
-import { formatRiverLevel } from "./units";
+import { CLUB } from "./clubConfig";
 import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
 
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
-// This file contains all the configuration for the Paddlecheck application.
-// It is currently set up for Worcester Canoe Club (UK) on the River Severn.
-// If you are forking this repo for another club, you will need to update
-// the values below to match your location and river conditions.
-// See README.md for a full adaptation guide.
+// Everything specific to a club lives in club.yaml at the project root, read
+// and checked by lib/clubConfig.ts. This file turns it into the constants the
+// app uses, alongside the app's own settings (data sources, caching, chart
+// styling) that a club shouldn't need to touch. See README.md.
 // ============================================================================
 
-// --- Club Identity ---
-// Update these to reflect your own club.
-export const CLUB_NAME = "Worcester Canoe Club";
-export const CONTACT_EMAIL = "REDACTED";
+// --- App and Club Identity (club.yaml: app, club) ---
+export const APP_NAME = CLUB.appName;
+export const CLUB_NAME = CLUB.club.name;
+export const CLUB_SHORT_NAME = CLUB.club.shortName;
+export const FEEDBACK_URL = CLUB.club.feedbackUrl;
+export const USEFUL_LINKS = CLUB.club.usefulLinks;
 
-// --- Club Information & Links ---
-// Links displayed in the "Useful Links" section of the settings drawer.
-// Replace or extend these with links relevant to your venue.
-export const USEFUL_LINKS = [
-  {
-    name: "River Severn level at Worcester (Barbourne)",
-    url: "https://check-for-flooding.service.gov.uk/station/2092",
-  },
-  {
-    name: "River Severn level at Bewdley",
-    url: "https://check-for-flooding.service.gov.uk/station/2001",
-  },
-  {
-    name: "Worcester Canoe Club",
-    url: "https://worcestercanoeclub.org/",
-  },
-];
-
-// --- River and Weather Service ---
-// Station ID for the Environment Agency Flood Monitoring API.
-// Browse available stations at: https://environment.data.gov.uk/flood-monitoring/id/stations
-// Find your nearest station, then copy the numeric ID from the URL (e.g. "2642").
-export const RIVER_STATION_ID = "2642"; // Worcester (Barbourne)
-export const LATITUDE = 52.2;
-export const LONGITUDE = -2.2;
+// --- River and Weather Service (club.yaml: location, river) ---
+export const RIVER_STATION_ID = CLUB.river.stationId;
+export const LATITUDE = CLUB.latitude;
+export const LONGITUDE = CLUB.longitude;
 export const HISTORICAL_DAYS = 5;
 
-// Upstream station forecast – used to improve near-future level forecasts.
-// The app fetches CSV data from an upstream gauge and shifts it forward by
-// BEWDLEY_TRAVEL_HOURS to estimate when a flood wave will arrive.
-// CSV URLs follow the pattern: https://check-for-flooding.service.gov.uk/station-csv/<station-id>
-// Set both to null / 0 if you don't have a useful upstream station.
-export const BEWDLEY_CSV_URL =
-  "https://check-for-flooding.service.gov.uk/station-csv/2001";
-export const BEWDLEY_TRAVEL_HOURS = 6;
+// The gauge whose Environment Agency forecast drives the level forecast,
+// shifted forward by the travel time (null: continue the club gauge's trend).
+export const UPSTREAM_CSV_URL: string | null = CLUB.river.forecastCsv;
+export const UPSTREAM_TRAVEL_HOURS = CLUB.river.travelHours;
 
-// How many hours at the end of the Bewdley series set the trend that the
-// linear fallback continues once the Bewdley forecast runs out.
-export const BEWDLEY_TREND_HOURS = 6;
+// How many hours at the end of the upstream series set the trend that the
+// linear fallback continues once the upstream forecast runs out.
+export const UPSTREAM_TREND_HOURS = 6;
 
-// How long the linear trend is extrapolated once the Bewdley forecast
+// How long the linear trend is extrapolated once the upstream forecast
 // runs out. Past this the level is held flat at the last estimate – a straight
 // line carried on for days invents floods and droughts the river never sees.
 export const LINEAR_FORECAST_HOURS = 18;
 
 // How far ahead the river level graph's forecast view is drawn. Shorter than
-// the Bewdley forecast on purpose: a round day keeps the view tidy, and the
-// paddling forecast still uses the full Bewdley window.
+// the upstream forecast on purpose: a round day keeps the view tidy, and the
+// paddling forecast still uses the full upstream window.
 export const RIVER_GRAPH_FORECAST_HOURS = 24;
 
 // Dash pattern for each forecast source's level line, shared by the river
-// level graph and the forecast chart: Bewdley tight, the linear trend wider.
+// level graph and the forecast chart: upstream tight, the linear trend wider.
 // Held hours get no line (see ForecastRagGraph).
 export const FORECAST_LINE_DASH: Record<
   Exclude<ForecastSource, "held">,
   string
 > = {
-  bewdley: "2 3",
+  upstream: "2 3",
   linear: "6 4",
 };
 
@@ -109,6 +84,10 @@ export const API_ENDPOINTS = {
 // is ignored, leaving best_match on its own.
 export const EXTRA_WIND_MODELS = ["ukmo_seamless", "ecmwf_ifs025"];
 
+// --- Met Office Weather Warnings (club.yaml: warnings) ---
+export const MET_OFFICE_WARNINGS_RSS_URL = CLUB.warnings.feed;
+export const WARNING_AREA = CLUB.warnings.area;
+
 // --- Weather Warning Colors ---
 export const WARNING_COLORS = {
   Red: STATUS_COLORS.red,
@@ -116,116 +95,64 @@ export const WARNING_COLORS = {
   Yellow: STATUS_COLORS.yellow,
 };
 
-// --- RAG Status Definitions ---
-export const RAG_STATUS_MAP: Record<number, Status> = {
-  0: "Light Green",
-  1: "Dark Green",
-  2: "Amber",
-  3: "Red",
+// --- Status steps (club.yaml: steps) ---
+export const STATUS_STEPS: readonly StatusStep[] = CLUB.steps;
+
+// Shown when the data needed for a status is missing.
+export const UNKNOWN_STATUS = {
+  name: "Unknown",
+  color: STATUS_COLORS.grey,
+  onColor: ON_STATUS_COLORS.grey,
+  emoji: "🤷",
+  icon: HelpOutlined,
+  description: "Data unavailable.",
+} as const;
+
+// --- Which rules apply (club.yaml: rules) ---
+export const RULES = {
+  WEATHER_TABLE: CLUB.rules.weatherTable,
+  DARKNESS: CLUB.rules.darkness,
+  FOG: CLUB.rules.fog,
+  THUNDERSTORMS: CLUB.rules.thunderstorms,
 };
 
-export const RAG_HEIGHT_MAP: Record<Status, number> = {
-  "Light Green": 1.0,
-  "Dark Green": 0.75,
-  Amber: 0.5,
-  Red: 0.25,
-  "No Paddling": 0.1,
-  Unknown: 0.1,
-};
+// --- Paddler levels (club.yaml: paddlerLevels) ---
+export const PADDLER_LEVELS: readonly PaddlerType[] = CLUB.paddlerLevels;
 
-// `color` is the status hue itself, `onColor` the label colour to put on top
-// of it - see ON_STATUS_COLORS in lib/statusColors.ts for why the pairing
-// isn't simply white throughout.
-export const RAG_STATUS_UI: Record<
-  Status,
-  {
-    color: string;
-    onColor: string;
-    emoji: string;
-    icon: React.ElementType;
-  }
-> = {
-  Unknown: {
-    color: STATUS_COLORS.grey,
-    onColor: ON_STATUS_COLORS.grey,
-    emoji: "🤷",
-    icon: HelpOutlined,
-  },
-  "Light Green": {
-    color: STATUS_COLORS.lightGreen,
-    onColor: ON_STATUS_COLORS.lightGreen,
-    emoji: "✅",
-    icon: Check,
-  },
-  "Dark Green": {
-    color: STATUS_COLORS.darkGreen,
-    onColor: ON_STATUS_COLORS.darkGreen,
-    emoji: "📈",
-    icon: TrendingUpOutlined,
-  },
-  Amber: {
-    color: WARNING_COLORS.Amber,
-    onColor: ON_STATUS_COLORS.amber,
-    emoji: "⚠️",
-    icon: WarningAmberOutlined,
-  },
-  Red: {
-    color: WARNING_COLORS.Red,
-    onColor: ON_STATUS_COLORS.red,
-    emoji: "🚨",
-    icon: CrisisAlert,
-  },
-  "No Paddling": {
-    color: STATUS_COLORS.maroon,
-    onColor: ON_STATUS_COLORS.maroon,
-    emoji: "⛔",
-    icon: DoNotDisturbOutlined,
-  },
-};
-
-// --- RAG Calculation Criteria ---
-// Adjust these thresholds based on your local safety guidelines
-// Each row is the club's conditions table: temperature band, then weather,
-// then one rating per river-level column.
-//
-// `low.rainy` is the one entry with no row in the printed table, which lists
-// only calm and windy at 5°C and below. It used to copy `low.calm`, so rain
-// raised the rating at 8°C and did nothing at 3°C - backwards, since cold rain
-// is worse than cool rain. It now matches `low.windy`, the same pairing the
-// 5-12°C band already makes between wind and rain. That is deliberately
-// stricter than the printed rules; the Conditions Key says so.
+// --- Weather table (club.yaml: weatherTable, used when RULES.WEATHER_TABLE is on) ---
+// Temperature band -> weather -> the resulting step for each river level
+// band, as step indexes into STATUS_STEPS.
 export const CRITERIA_TABLE: {
   [key: string]: { [key: string]: number[] };
-} = {
-  high: { calm: [0, 1, 2, 3], windy: [1, 2, 2, 3] },
-  moderate: { calm: [1, 2, 2, 3], windy: [2, 2, 2, 3], rainy: [2, 2, 2, 3] },
-  low: { calm: [2, 2, 3, 3], windy: [2, 3, 3, 3], rainy: [2, 3, 3, 3] },
-};
+} = CLUB.weatherTable;
 
+// Club values from club.yaml (thresholds); the rest are the app's own.
 export const THRESHOLDS = {
-  TEMP_HIGH: 13,
-  TEMP_MODERATE: 5,
-  WIND_HIGH: 15,
+  TEMP_HIGH: CLUB.thresholds.tempHigh,
+  TEMP_MODERATE: CLUB.thresholds.tempModerate,
+  WIND_HIGH: CLUB.thresholds.windHigh,
   // Gusts at or above this are mentioned in the share text and the AI
   // briefing's forecast summary (lib/forecast.ts). Never fed into the RAG
   // calculation, which only reacts to sustained wind speed.
   WIND_GUST_NOTABLE: 15,
-  VISIBILITY_POOR: 1000,
-  RIVER_LEVEL_NO_PADDLING: 5.0,
+  VISIBILITY_POOR: CLUB.thresholds.visibilityPoor,
   THUNDERSTORM_CODES: [95, 96, 97, 98, 99],
   FOG_CODES: [40, 41, 42, 43, 44, 45, 46, 47, 48, 49],
-  RIVER_LEVEL_INITIAL_RAG_1: 1.0,
-  // Above this, the concrete step landmark is submerged and PFDs are required.
-  RIVER_LEVEL_INITIAL_RAG_2: 1.48,
-  // Above this, the river is above the 10th step from the car park - no paddling for intermediates.
-  RIVER_LEVEL_INITIAL_RAG_3: 2.75,
   RIVER_LEVEL_TREND_THRESHOLD: 0.1,
   // A forecast hour counts as dark - and takes the "Dark" step - when more
   // than this fraction of it falls before sunrise or after sunset. A quarter,
   // so an hour only counts as light when at least three quarters of it is:
   // more than 15 minutes of dark in an hour makes it a dark hour.
-  DARK_HOUR_FRACTION: 0.25,
+  DARK_HOUR_FRACTION: CLUB.thresholds.darkHourFraction,
 };
+
+// --- Who can paddle (club.yaml: whoCanPaddle, whoCanPaddleExtras) ---
+export const WHO_CAN_PADDLE: Record<
+  Status,
+  PaddlingVerdict | Record<PaddlerType, PaddlingVerdict>
+> = CLUB.whoCanPaddle;
+export const WHO_CAN_PADDLE_EXTRAS: PaddlingExtraRule[] =
+  CLUB.whoCanPaddleExtras;
 
 // WMO weather interpretation codes 50–99 cover drizzle, rain, snow, showers
 // and thunderstorms. Used as the single source of truth for "is it raining?"
@@ -239,43 +166,13 @@ const RAIN_CODES = new Set(
 export const isRainy = (weatherCode: number): boolean =>
   RAIN_CODES.has(weatherCode);
 
-// --- Conditions Key Descriptions ---
-// These appear in the Settings drawer "Conditions Key" section.
-// Update them to describe your own venue's landmarks and club guidelines.
-
-export const RAG_DESCRIPTIONS: Record<Status, string> = {
-  "Light Green":
-    "Ideal conditions. Beginners need coach supervision. Improvers may paddle as a group without a coach. Intermediates may paddle solo.",
-  "Dark Green":
-    "Good conditions. Beginners and improvers need coach supervision. Intermediates may paddle with at least one other intermediate.",
-  Amber:
-    "Coach's discretion required. Beginners and improvers may only paddle at coach's discretion. Intermediates need supervision by an independent paddler or coach.",
-  Red: "Risky conditions. No paddling for beginners or improvers. Intermediates at coach's discretion only (not above 10 steps from car park). PFDs must be worn by all.",
-  "No Paddling":
-    "Do not paddle. Triggered by thunderstorms or dangerously high river level.",
-  Unknown: "Data unavailable.",
-};
-
-// Descriptions for each river level band in the conditions key.
-// Rewrite these to describe your own launch point landmarks.
-export const RIVER_LEVEL_BAND_DESCRIPTIONS = {
-  belowRag1: "Below the wooden landing stage. Good launch conditions.",
-  rag1ToRag2:
-    "Between landing stage and concrete step. Still paddleable with care.",
-  rag2ToRag3: "Above the concrete step. PFDs must be worn by all.",
-  rag3Plus:
-    "Above 10 steps from the car park. No paddling for intermediates and below.",
-  noPaddling: "Boathouse flooding. No paddling under any circumstances.",
-};
+// --- Conditions Key (club.yaml: conditionsKey) ---
+export const CONDITIONS_KEY_WEATHER = CLUB.conditionsKey;
 
 // --- UI Text and Icons ---
+// Icons for the weather contributing factors. The river level ones come from
+// STATUS_STEPS (reasonIcon).
 export const REASON_ICONS: Record<string, React.ElementType> = {
-  [`Slightly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)})`]:
-    Water,
-  [`Moderately elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)})`]:
-    Waves,
-  [`Significantly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)})`]:
-    Tsunami,
   "Moderately low temperature": Thermostat,
   "Low temperature": AcUnit,
   "High winds": Air,
@@ -288,34 +185,8 @@ export const REASON_ICONS: Record<string, React.ElementType> = {
   "Could not determine conditions": HelpOutlined,
 };
 
-// Descriptions of river levels at specific local landmarks.
-// The key is the river level in metres as read from your gauge station.
-// Build this list by visiting your venue at different water levels and
-// recording the gauge reading alongside what you observe (e.g. "water over
-// the bottom step", "launching from grass verge"). You can leave this empty
-// if you don't have location-specific observations yet.
-export const LEVEL_DESCRIPTIONS: Record<number, string> = {
-  1.0: "Able to launch from the landing stage – OK",
-  1.15: "Water over one end of the landing stage",
-  1.38: "10cm over landing stage, able to launch OK",
-  1.48: "On concrete lower deck – wet feet!",
-  1.52: "+5cm concrete lower deck, not deep enough – still wet feet!",
-  1.68: "+10cm concrete lower deck, deep enough for boat to float – dry feet!",
-  1.96: "Bollards submerged, launch with care – rudder may still ground on the step even once the boat floats",
-  2.12: "Half way up steps – have to portage around the lock at Diglis",
-  2.52: "11-12 steps below the car park visible – approaching the 10-step Red threshold",
-  2.75: "10th step wet, wet feet possible",
-  4.28: "Almost on the car park – dry feet!",
-  4.37: "5cm on the car park – not deep enough for boats, wet feet!",
-  4.49: "Water on car park, safe to park only if falling",
-  4.7: "Just in the boat house!!",
-  5.01: "Boathouse flooding – paddle with extreme care",
-  5.02: "Deep water in boathouse, boats can float out – paddle with extreme care",
-  5.18: "Grand Stand Road flooded, unsafe to access boathouse",
-  5.34: "Water over the lower boat racks – boats at risk of damage",
-  5.54: "Sabrina Bridge closed, North Parade underwater, dangerous flows",
-  5.55: "Boathouse inaccessible, dangerous flow, no paddling advised",
-};
+// --- Landmarks (club.yaml: landmarks) ---
+export const LEVEL_DESCRIPTIONS: Record<number, string> = CLUB.landmarks;
 
 export const VISIBILITY_DESCRIPTIONS: {
   [key: string]: { min: number; desc: string };
@@ -360,6 +231,10 @@ export const DATA_STALE_THRESHOLD_MS =
   CONDITIONS_REVALIDATE_SECONDS * 1000 + STALE_GRACE_MS;
 
 // --- AI Summary ---
+// Off when the site was built without GROQ_API_KEY: the Conditions Report
+// section and its setting are then left out (see next.config.ts).
+export const CONDITIONS_REPORT_ENABLED =
+  process.env.NEXT_PUBLIC_CONDITIONS_REPORT === "on";
 export const DEFAULT_AI_MODEL = "openai/gpt-oss-120b";
 // Models /api/briefing will accept from the client. Anything else falls back
 // to DEFAULT_AI_MODEL so visitors can't run arbitrary models on our API key.

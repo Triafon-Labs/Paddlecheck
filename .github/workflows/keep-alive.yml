@@ -16,11 +16,15 @@ concurrency:
 
 jobs:
   ping:
+    # A fork checks its own site once it sets the SITE_URL repository
+    # variable, and skips this job until then - otherwise every fork with
+    # Actions enabled would ping this project's site every 5 minutes.
+    if: vars.SITE_URL != '' || github.repository == 'dylanr97/Paddlecheck'
     runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ vars.SITE_URL || 'https://paddlecheck.vercel.app' }}
     steps:
       - name: Ping site and warm the conditions cache
-        env:
-          SITE_URL: ${{ vars.SITE_URL || 'https://paddlecheck.vercel.app' }}
         run: |
           for path in "/" "/api/conditions"; do
             url="${SITE_URL}${path}"
@@ -39,7 +43,6 @@ jobs:
       # notification instead.
       - name: Check upstream data sources are alive and fresh
         env:
-          SITE_URL: ${{ vars.SITE_URL || 'https://paddlecheck.vercel.app' }}
           MAX_AGE_MINUTES: "45"
         run: |
           payload=$(curl -s --max-time 20 "${SITE_URL}/api/conditions")

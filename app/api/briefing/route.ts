@@ -1,5 +1,11 @@
 import Groq from "groq-sdk";
-import { KayakConditions } from "@/types";
+import { getConditionsPayload } from "@/lib/conditions";
+import { buildKayakData } from "@/lib/buildKayakData";
+import {
+  BriefingInputs,
+  BRIEFING_UNAVAILABLE,
+  buildBriefingInputs,
+} from "@/lib/briefingInputs";
 import { degreesToCompass } from "@/lib/weather";
 import {
   londonNow,
@@ -11,6 +17,7 @@ import {
   VISIBILITY_DESCRIPTIONS,
   DEFAULT_AI_MODEL,
   ALLOWED_AI_MODELS,
+  WARNING_AREA,
 } from "@/lib/config";
 import {
   formatRiverLevel,
@@ -19,23 +26,6 @@ import {
 } from "@/lib/units";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-
-interface Outlook {
-  dayLabel: string;
-  rangesText: string;
-}
-
-interface SummaryRequest {
-  conditions: KayakConditions;
-  hourlyForecast?: string | null;
-  currentlyDark?: boolean;
-  currentTime?: string;
-  model?: string;
-  // The daylight window the summary covers: "the rest of today", or - when
-  // it's already dark - "later today" or "tomorrow".
-  period?: string | null;
-  outlook?: Outlook | null;
-}
 
 // ── Prompt ────────────────────────────────────────────────────────────────────
 
@@ -73,7 +63,7 @@ const COMPASS_WORDS: Record<string, string> = {
   NW: "north-west",
 };
 
-function buildConditionsParts(req: SummaryRequest): string {
+function buildConditionsParts(req: BriefingInputs): string {
   const {
     conditions,
     hourlyForecast,
@@ -91,7 +81,7 @@ function buildConditionsParts(req: SummaryRequest): string {
 
   const now = londonNow();
   const weatherWarnings = conditions.warnings?.length
-    ? `Met Office weather warnings for Worcestershire:\n${conditions.warnings
+    ? `Met Office weather warnings for ${WARNING_AREA}:\n${conditions.warnings
         .map((w) => {
           const status = isWarningActiveNow(w, now)
             ? "currently active"
@@ -232,9 +222,8 @@ async function* normaliseUnits(
 
 // Every visitor in the same 15-minute data window is summarising identical
 // inputs, so completed summaries are cached and replayed instead of paying
-// for a fresh model call per visitor. Keyed by a hash of the full request
-// inputs (minus the ever-changing clock time), so a manipulated payload can
-// only ever poison its own cache slot, never another visitor's.
+// for a fresh model call per visitor. Keyed by a hash of the inputs the
+// server built (minus the ever-changing clock time).
 //
 // The map lives in module scope: on serverless hosting each warm instance
 // keeps its own copy, so this is best-effort dedup rather than a guarantee -
@@ -247,17 +236,21 @@ const SUMMARY_CACHE_TTL_MS = 20 * 60 * 1000;
 const SUMMARY_CACHE_MAX_ENTRIES = 50;
 
 async function summaryCacheKey(
-  body: SummaryRequest,
+  inputs: BriefingInputs,
   model: string
 ): Promise<string> {
   // currentTime advances every minute and would defeat the cache; within one
   // data window a summary generated a few minutes ago is still the summary.
+  // lastUpdated is stamped afresh each time the server assembles the data,
+  // and nothing in the prompt reads it.
+  const { lastUpdated: _lastUpdated, ...conditions } = inputs.conditions;
+  void _lastUpdated;
   const input = JSON.stringify({
-    conditions: body.conditions,
-    hourlyForecast: body.hourlyForecast ?? null,
-    currentlyDark: body.currentlyDark ?? false,
-    period: body.period ?? null,
-    outlook: body.outlook ?? null,
+    conditions,
+    hourlyForecast: inputs.hourlyForecast,
+    currentlyDark: inputs.currentlyDark,
+    period: inputs.period,
+    outlook: inputs.outlook,
     model,
   });
   const digest = await crypto.subtle.digest(
@@ -285,20 +278,44 @@ function pruneSummaryCache() {
 
 export async function POST(request: Request) {
   if (!process.env.GROQ_API_KEY) {
-    return new Response("API key not configured", { status: 503 });
+    return new Response(BRIEFING_UNAVAILABLE.NOT_CONFIGURED, { status: 503 });
   }
 
-  const body: SummaryRequest = await request.json();
-
-  // The model name arrives from the client, so it can't be trusted as-is -
-  // anything outside the allowlist would let arbitrary visitors run whichever
-  // Groq model they like on this deployment's API key.
-  const model = ALLOWED_AI_MODELS.includes(body.model ?? DEFAULT_AI_MODEL)
-    ? (body.model ?? DEFAULT_AI_MODEL)
+  // Only the model is read from the request. Everything the prompt is built
+  // from comes from the server's own copy of the conditions, so a visitor
+  // can't put text of their choosing into it - or vary the request to miss
+  // the summary cache and run up calls on this deployment's API key.
+  // Anything but an object with a string `model` - no body, bad JSON, a bare
+  // `null` - gets the default model.
+  const body: unknown = await request.json().catch(() => null);
+  const requested =
+    typeof body === "object" &&
+    body !== null &&
+    typeof (body as { model?: unknown }).model === "string"
+      ? (body as { model: string }).model
+      : DEFAULT_AI_MODEL;
+  const model = ALLOWED_AI_MODELS.includes(requested)
+    ? requested
     : DEFAULT_AI_MODEL;
 
+  // The same cached upstream fetches /api/conditions makes, so this is
+  // normally a cache hit rather than a fresh call to every source.
+  const payload = await getConditionsPayload();
+  if (!payload.river || !payload.weather || !payload.futureWeather) {
+    return new Response(BRIEFING_UNAVAILABLE.DATA, { status: 503 });
+  }
+  const { conditions, forecastDays } = buildKayakData({
+    river: payload.river,
+    weather: payload.weather,
+    futureWeather: payload.futureWeather,
+    upstream: payload.upstream,
+    warnings: payload.warnings,
+    fetchedAt: payload.fetchedAt,
+  });
+  const inputs = buildBriefingInputs(conditions, forecastDays);
+
   pruneSummaryCache();
-  const cacheKey = await summaryCacheKey(body, model);
+  const cacheKey = await summaryCacheKey(inputs, model);
   const cached = summaryCache.get(cacheKey);
   if (cached) {
     try {
@@ -312,7 +329,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const conditionsParts = buildConditionsParts(body);
+  const conditionsParts = buildConditionsParts(inputs);
 
   const client = new Groq();
   const groqStream = await client.chat.completions.create({

@@ -3,9 +3,7 @@ import { parse, formatISO } from "date-fns";
 import { tz } from "@date-fns/tz";
 import { WeatherWarning, WarningSeverity } from "@/types";
 import { FetchLiveness, fetchCacheOptions } from "@/lib/fetchCache";
-
-const MET_OFFICE_RSS_URL =
-  "https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm";
+import { MET_OFFICE_WARNINGS_RSS_URL, WARNING_AREA } from "@/lib/config";
 
 /**
  * Parses Met Office time string "HHmm Day DD Mon" into ISO string.
@@ -47,11 +45,14 @@ const parseMetTimeToISO = (timeStr: string, baseDate: Date) => {
   }
 };
 
-/** Fetches and parses Met Office RSS warnings affecting Worcestershire. */
+/** Fetches and parses Met Office RSS warnings affecting WARNING_AREA. */
 export const fetchWeatherWarnings = async (
   liveness: FetchLiveness = {}
 ): Promise<WeatherWarning[]> => {
-  const response = await fetch(MET_OFFICE_RSS_URL, fetchCacheOptions(liveness));
+  const response = await fetch(
+    MET_OFFICE_WARNINGS_RSS_URL,
+    fetchCacheOptions(liveness)
+  );
   if (!response.ok)
     throw new Error(`Met Office RSS fetch failed: ${response.status}`);
 
@@ -69,8 +70,8 @@ export const fetchWeatherWarnings = async (
     const description = item.description?.[0] || "";
     const link = item.link?.[0] || "";
 
-    // Only include warnings that mention Worcestershire
-    if (description.toLowerCase().includes("worcestershire")) {
+    // Only include warnings that mention the configured area
+    if (description.toLowerCase().includes(WARNING_AREA.toLowerCase())) {
       const severityMatch = title.match(/^(Yellow|Amber|Red)/i);
       const rawSeverity = severityMatch ? severityMatch[0] : "Yellow";
       const severity = (rawSeverity.charAt(0).toUpperCase() +

@@ -3,22 +3,15 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { Status } from "@/types";
-import { ragStatus } from "@/lib/rag";
-import { RAG_STATUS_MAP } from "@/lib/config";
+import { statusUi, statusLabel, STEP_NAMES } from "@/lib/rag";
 import { m3Spring, spring } from "@/lib/m3-palette";
 
 interface PaddlingStatusHeroProps {
   status: Status;
 }
 
-// The RAG scale in order of severity. Read out of RAG_STATUS_MAP by index
-// rather than Object.values so the order is the calculation's own 0-3 ramp,
-// not whatever order the keys happen to be declared in, with the stop state
-// pinned on the end.
-const SCALE: Status[] = [
-  ...[0, 1, 2, 3].map((n) => RAG_STATUS_MAP[n]),
-  "No Paddling",
-];
+// The status scale in order of severity (STATUS_STEPS in lib/config.ts).
+const SCALE: Status[] = STEP_NAMES;
 
 // The single answer the page exists to give, at the size that answer deserves.
 //
@@ -36,7 +29,7 @@ const SCALE: Status[] = [
 // that would has to sit on the dark scheme's navy card, where it drops to
 // 1.0-1.2:1 against it and the panel stops reading as a shape at all.
 const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
-  const { icon: Icon, color, onColor } = ragStatus[status];
+  const { icon: Icon, color, onColor } = statusUi(status);
 
   return (
     <Box>
@@ -75,13 +68,13 @@ const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
             fontSize: { xs: "1.625rem", sm: "2rem" },
           }}
         >
-          {status}
+          {statusLabel(status)}
         </Typography>
       </Box>
 
       <Box
         role="img"
-        aria-label={`Paddling scale: ${status}, step ${
+        aria-label={`Paddling scale: ${statusLabel(status)}, step ${
           SCALE.indexOf(status) + 1
         } of ${SCALE.length}`}
         sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 1.5 }}
@@ -91,12 +84,12 @@ const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
           return (
             <Box
               key={s}
-              title={s}
+              title={statusLabel(s)}
               sx={{
                 flex: isActive ? 2.2 : 1,
                 height: isActive ? 10 : 6,
                 borderRadius: 9999,
-                backgroundColor: ragStatus[s].color,
+                backgroundColor: statusUi(s).color,
                 opacity: isActive ? 1 : 0.32,
                 // Size is spatial, so it gets the overshooting spring; the
                 // opacity change is an effect and stays critically damped.

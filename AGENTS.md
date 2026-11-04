@@ -26,7 +26,7 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 | Framework     | Next.js 16 (App Router)                                                       |
 | Library       | React 19                                                                      |
 | Language      | TypeScript 6 (strict mode)                                                    |
-| UI Library    | Material UI (MUI) 7 + Emotion                                                 |
+| UI Library    | Material UI (MUI) 9 + Emotion                                                 |
 | Charts        | Recharts 3                                                                    |
 | Date handling | date-fns 4                                                                    |
 | AI            | Groq SDK (Briefing feature)                                                   |
@@ -59,22 +59,41 @@ plugin or build step generates it.
 
 ---
 
+## Club settings (`club.yaml`)
+
+Everything club-specific – names, gauge, location, warnings area, status steps, rules,
+thresholds, weather table, paddler levels, Who Can Paddle, landmarks and Conditions Key
+text – lives in `club.yaml` at the project root. `yaml-loader` (a Turbopack rule in
+`next.config.ts`) imports it as a module; `lib/clubConfig.ts` checks it and throws one
+error listing every problem, which stops `next dev`/`next build`; `lib/config.ts`
+re-exports it under the same constant names the code uses (`CLUB_NAME`, `STATUS_STEPS`,
+`WHO_CAN_PADDLE`, `THRESHOLDS.TEMP_HIGH`, …). Never hard-code club-specific values in code –
+add a setting to `club.yaml`, `lib/clubConfig.ts` and `club.schema.json` (editor hints)
+together. Optional settings get their defaults in `DEFAULTS` (`lib/clubConfig.ts`). When helping a
+club adapt the app, start from `examples/starter.club.yaml`, run `npm run dev` to validate,
+and list anything in their rules that `club.yaml` can't express rather than guessing.
+
 ## Directory Structure
 
 ```
+club.yaml               The club's settings (see above)
+club.schema.json        JSON Schema for club.yaml – editor autocomplete and checks only
+examples/starter.club.yaml  Minimal club.yaml for a new club (river level only, CHANGE markers)
+docs/club-yaml/         Colour and icon reference images for club.yaml – redraw with
+                        `node scripts/club-yaml-reference.mjs` after changing STATUS_COLORS or ICONS
+
 app/
   api/
     conditions/         All upstream data in one payload, cached 15 min (lib/conditions.ts)
       live/             Same payload with no cache – called when the cached one is stale
-    briefing/           AI briefing generation endpoint (Groq)
-    weather/warnings/   Met Office warnings on their own – nothing in the app calls it
+    briefing/           AI briefing (Groq) – builds its own inputs server-side, reads only `model` from the request
   layout.tsx            Root layout – Roboto Flex, ThemeRegistry, data provider, Analytics, safe-area frame
   page.tsx              Home page (client component, renders all cards)
   globals.css           Global resets only; type and colour come from the theme
   manifest.ts           PWA web manifest
 
 components/
-  StatusCard.tsx         Current RAG status, river level landmarks, contributing factors, warnings, conditions report
+  StatusCard.tsx         Current RAG status with its "Updated" line, river level landmarks, contributing factors, warnings, conditions report
   PaddlingStatusHero.tsx The status panel and five-step scale strip at the top of StatusCard
   PaddlingMatrixCard.tsx Skill-level guidance table (Beginner/Improver/Intermediate/Independent)
   PaddlerLevelRow.tsx    One level's verdict as an expandable row – Who Can Paddle and the forecast hour's "You"
@@ -84,7 +103,7 @@ components/
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
   ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below, opening with the verdict for your level
-  TopNavBar.tsx          Header – share, settings, refresh, freshness line, status banners
+  TopNavBar.tsx          Header – club name (CLUB_SHORT_NAME) above APP_NAME, share, settings, refresh, stale/offline banners
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners
@@ -96,24 +115,29 @@ components/
   ServiceWorkerRegistration.tsx  Registers public/sw.js in production
 
 lib/
-  config.ts              All thresholds, station IDs, descriptions, coordinates
+  config.ts              The app's constants: the club's from club.yaml, plus data sources, caching, chart styling
+  clubConfig.ts          Reads and checks club.yaml (icon/colour names, placeholders, plain-English errors)
   conditions.ts          Builds the /api/conditions payload – every source in parallel
   fetchCache.ts          The shared 15-minute upstream cache window
   rag.ts                 RAG status calculation logic
-  river.ts               Environment Agency API calls + Bewdley forecast logic
+  river.ts               Environment Agency API calls + upstream forecast logic
   weather.ts             Open-Meteo API calls + utilities
   metOfficeWarnings.ts   Met Office warnings RSS fetch and parsing
   warnings.ts            Warning display and per-day helpers
   forecast.ts            Best-paddling-time windows and forecast summaries
   chartMotion.ts         Chart entrances in CSS (bars grow, lines/areas wipe in) instead of recharts' JS animation
-  paddlingMatrix.ts      What each paddler level may do for a status and river level (club rules)
+  paddlingMatrix.ts      Applies WHO_CAN_PADDLE + WHO_CAN_PADDLE_EXTRAS (config) for a status and river level
   usePaddlerLevel.ts     The paddler level from Settings, kept in step across components and tabs
-  hooks.ts               useKayakData hook – orchestrates all fetching and state
+  buildKayakData.ts      Pure: raw sources → current conditions + 5-day hourly forecast (client and /api/briefing)
+  briefingInputs.ts      Pure: conditions + forecast → what the AI briefing is written from (server only)
+  hooks.ts               useKayakData hook – fetching, fallbacks and state; calls buildKayakData
   KayakDataContext.tsx   React Context wrapping the hook for component tree access
-  useBriefing.ts         AI briefing request and state
+  useBriefing.ts         AI briefing request (sends only the model) and state
   useShowNightHours.ts   The "Show night hours" setting, shared by Settings and the forecast chart
   units.ts               How each metric is formatted for display
   time.ts                Europe/London time helpers and data-age formatting
+  useNowTicking.ts       Client hook: the current time, ticking each minute (kept out of time.ts so servers can import it)
+  useFreshness.ts        "10:33 · just now" and whether data is stale – StatusCard and the top bar's banners
   storageKeys.ts         Canonical localStorage key names
   useTooltipDismiss.ts   Closes a recharts tooltip on an outside press
   statusColors.ts        The status colour vocabulary
@@ -123,6 +147,7 @@ lib/
 
 types/
   index.ts               All shared TypeScript types
+  yaml.d.ts              Lets club.yaml be imported (untyped until clubConfig.ts checks it)
 
 public/                  Static assets – icons, favicon, sw.js (offline shell)
 ```
@@ -131,24 +156,24 @@ public/                  Static assets – icons, favicon, sw.js (offline shell)
 
 ## Key Files to Understand First
 
-| File             | Why                                                                                                                 |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `lib/config.ts`  | All magic numbers live here – river thresholds, station IDs, temperature/wind/visibility limits, level descriptions |
-| `lib/rag.ts`     | The core algorithm – how a river level + weather combination becomes a RAG status                                   |
-| `lib/hooks.ts`   | Entry point for all data – fetch logic, retry, error handling, state shape                                          |
-| `types/index.ts` | The full type vocabulary – read this before touching any data flow                                                  |
-| `app/page.tsx`   | The single page – component layout and data context provision                                                       |
+| File             | Why                                                                               |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `club.yaml`      | Every club-specific setting – steps, thresholds, station IDs, rules, landmarks    |
+| `lib/rag.ts`     | The core algorithm – how a river level + weather combination becomes a RAG status |
+| `lib/hooks.ts`   | Entry point for all data – fetch logic, retry, error handling, state shape        |
+| `types/index.ts` | The full type vocabulary – read this before touching any data flow                |
+| `app/page.tsx`   | The single page – component layout and data context provision                     |
 
 ---
 
 ## Data Sources
 
-| Data                             | API                                                                             | Notes                                     |
-| -------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------- |
-| River level readings             | Environment Agency Flood-Monitoring API – station `2642` (Worcester, Barbourne) | Historical readings                       |
-| Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)                  | Used for 0–~42 h forecast, 6 h travel lag |
-| Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                     | No API key required; wind see below       |
-| Weather warnings                 | Met Office warnings RSS, West Midlands region                                   | Parsed in `lib/metOfficeWarnings.ts`      |
+| Data                             | API                                                                             | Notes                                   |
+| -------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------- |
+| River level readings             | Environment Agency Flood-Monitoring API – station `2642` (Worcester, Barbourne) | Historical readings                     |
+| Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)                  | 0–~42 h forecast, 6 h lag; `null` = off |
+| Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                     | No API key required; wind see below     |
+| Weather warnings                 | Met Office warnings RSS, West Midlands region (`MET_OFFICE_WARNINGS_RSS_URL`)   | Parsed in `lib/metOfficeWarnings.ts`    |
 
 All of these are fetched server-side by `lib/conditions.ts` for `/api/conditions`; the
 browser never calls them directly.
@@ -161,7 +186,9 @@ threshold while other forecasts are over it. Open-Meteo returns only one model f
 every other weather field still comes from `best_match` alone.
 
 No environment variables are required for local development, except `GROQ_API_KEY` for
-the AI briefing, which is the one feature that won't work without it.
+the AI briefing. `next.config.ts` turns its presence at build time into
+`NEXT_PUBLIC_CONDITIONS_REPORT` (`CONDITIONS_REPORT_ENABLED` in `lib/config.ts`); without it
+the Conditions Report section and its Settings switch aren't rendered at all.
 
 ---
 
@@ -169,24 +196,42 @@ the AI briefing, which is the one feature that won't work without it.
 
 The RAG status is calculated from river level first, then modifiers are applied:
 
-**Base status by river level (metres):**
+The steps themselves – how many, their names, where each starts, colours, icons and
+descriptions – are `steps` in `club.yaml` (`STATUS_STEPS` in code). `lib/rag.ts` derives
+everything from it (`STEP_NAMES`, `TOP_STEP`, `BEST_TIME_STEPS`, `statusUi()`,
+`ragHeight()`, the river level reasons); `lib/clubConfig.ts` has already checked it and the
+weather table. Never hard-code a step name in code.
+
+**Worcester's base status by river level (metres):**
 
 - < 1.0 m → Light Green
-- 1.0–1.4 m → Dark Green
-- 1.4–2.2 m → Amber
-- 2.2–5.0 m → Red
+- 1.0–1.48 m → Dark Green
+- 1.48–2.75 m → Amber
+- 2.75–5.0 m → Red
 - ≥ 5.0 m → No Paddling
 
-**Modifiers (applied in order):**
+**Modifiers (applied in order).** Each can be switched off in `rules` (`club.yaml`) –
+`WEATHER_TABLE` covers 1–3. A switched-off factor neither changes the status nor appears
+in `reasons`.
 
-1. **Temperature** – below 5°C raises status significantly (cold water shock); 5–13°C raises status moderately and enables rain as a factor
+1. **Temperature** – at or below 5°C raises status significantly (cold water shock); 5–13°C raises status moderately and enables rain as a factor
 2. **Wind** – above 15 mph raises status at any temperature
-3. **Rain** – only a factor when temp is 5–13°C (moderate)
-4. **Darkness** – raises Green → Amber, Amber → Red. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the Weather card's Daylight tile counts down to sunset
-5. **Poor visibility** – below 1 000 m raises Green → Amber, Amber → Red
-6. **Thunderstorms** – overrides everything → No Paddling
+3. **Rain** – a factor whenever temp is below 13°C
+4. **Darkness** – raises the status one step. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the Weather card's Daylight tile counts down to sunset
+5. **Poor visibility** – below 1 000 m raises the status one step
+6. **Thunderstorms** – overrides everything → the top step (No Paddling)
+
+Weather, darkness and fog cap one step below the top step; only the river level's own
+`fromLevel` or a thunderstorm reaches it.
 
 The word "raises" means incrementing one step up the severity scale.
+
+A `Status` is a step `name` (or `"Unknown"`). Look a status up with `statusUi()` from
+`lib/rag.ts`, which falls back to Unknown for a name no longer in `STATUS_STEPS` (e.g. from an
+older cache). Verdict colours in "Who Can Paddle" are fixed green/amber/red
+(`components/StatusFace.tsx`), independent of the steps. Whether an hour
+is dark is the forecast point's own `dark` flag (`isDarkSlot`, `lib/forecast.ts`), not the
+"Dark" reason, which is absent when `RULES.DARKNESS` is off.
 
 ---
 
@@ -194,13 +239,13 @@ The word "raises" means incrementing one step up the severity scale.
 
 Two sources are combined transparently:
 
-- **Bewdley delta transfer** (primary, as far as the published forecast reaches plus the 6 h travel time – about 42 h for a 36 h feed): Upstream Bewdley readings are shifted 6 h forward and applied as a delta to the latest Barbourne reading, measured from Bewdley 6 h before that reading was taken so the forecast starts exactly on it. Bewdley's published forecast is shifted to start on its latest observation, and levels are interpolated between points. Displayed as tightly dashed lines in both graphs; the river level graph only draws the first `RIVER_GRAPH_FORECAST_HOURS` (24 h).
-- **Linear trend** (fallback, beyond Bewdley horizon): Continues Bewdley's trend over the last `BEWDLEY_TREND_HOURS` (6 h) of its series from where the Bewdley forecast ends, for at most `LINEAR_FORECAST_HOURS` (18 h). With no Bewdley data it uses a regression over the last 8 h of Barbourne readings instead – Barbourne lags Bewdley by the travel time, so on a rise its own trend is still flat when the Bewdley data runs out. Displayed as medium dashed lines.
+- **Upstream delta transfer** (primary, as far as the published forecast reaches plus the 6 h travel time – about 42 h for a 36 h feed): Upstream (Bewdley) readings are shifted 6 h forward and applied as a delta to the latest Barbourne reading, measured from the upstream gauge 6 h before that reading was taken so the forecast starts exactly on it. The upstream gauge's published forecast is shifted to start on its latest observation, and levels are interpolated between points. Displayed as tightly dashed lines in both graphs; the river level graph only draws the first `RIVER_GRAPH_FORECAST_HOURS` (24 h).
+- **Linear trend** (fallback, beyond the upstream horizon): Continues the upstream trend over the last `UPSTREAM_TREND_HOURS` (6 h) of its series from where the upstream forecast ends, for at most `LINEAR_FORECAST_HOURS` (18 h). With no upstream data it uses a regression over the last 8 h of Barbourne readings instead – Barbourne lags the upstream gauge by the travel time, so on a rise its own trend is still flat when the upstream data runs out. Displayed as medium dashed lines.
 - **Held** (everything after that): The level is held flat at the last linear estimate, so the RAG status for those hours is driven by the weather. No line is drawn for these hours, and the tooltip reads "Assumed Level" / "Source: None – level held".
 
 The dash patterns live in `FORECAST_LINE_DASH` (`lib/config.ts`).
 
-Bewdley data failure is non-fatal – the app falls back to linear regression silently.
+Upstream data failure (or `UPSTREAM_CSV_URL = null`) is non-fatal – the app falls back to linear regression silently.
 
 ---
 
@@ -230,19 +275,21 @@ Bewdley data failure is non-fatal – the app falls back to linear regression si
 
 The hook makes one request, `GET /api/conditions`, retried up to twice with backoff.
 That route builds its payload server-side in `lib/conditions.ts`: river, weather,
-future-weather, the Bewdley forecast and Met Office warnings are fetched in parallel
+future-weather, the upstream forecast and Met Office warnings are fetched in parallel
 (`Promise.all`, each promise wrapped in its own `.catch`), and the whole response is
 cached for 15 minutes (`revalidate = 900`) with `fetchedAt` stamped when it was built.
 If the request fails, or its `fetchedAt` is older than `DATA_STALE_THRESHOLD_MS`, the
 hook makes one forced call to `/api/conditions/live`, which runs the same fetch with no
-cache.
+cache. The hook then hands the sources to `buildKayakData` (`lib/buildKayakData.ts`),
+which `/api/briefing` also calls on the server so the briefing is written from the same
+picture without trusting anything the browser sends.
 
-A source that failed server-side comes back `null` (Bewdley as an empty forecast,
+A source that failed server-side comes back `null` (upstream as an empty forecast,
 warnings as `[]`), and the hook falls back to its own last-known copy of just that
 source (`paddlecheck_riverDataRaw` / `paddlecheck_weatherDataRaw` /
 `paddlecheck_futureWeatherDataRaw` in `localStorage`); if the whole request fails, all
 three fall back. So a single source blipping doesn't discard data that arrived fine
-from the others. Bewdley and warnings have no client cache. `lastUpdated` is the
+from the others. Upstream and warnings have no client cache. `lastUpdated` is the
 response's `fetchedAt`, or the previous cached conditions' timestamp when no response
 arrived at all.
 
@@ -272,7 +319,7 @@ prefixed `paddlecheck_` and omitted here.
 | Key                   | Value                                                                     |
 | --------------------- | ------------------------------------------------------------------------- |
 | `themeMode`           | `"light"` \| `"dark"` \| `"system"` (read/written by MUI)                 |
-| `paddlerLevel`        | `"Beginner"` \| `"Improver"` \| `"Intermediate"` \| `"Independent"`       |
+| `paddlerLevel`        | One of `paddlerLevels` (`club.yaml`); anything else reads as unset        |
 | `riverGraphTimeRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`                     |
 | `autoSummarise`       | `"true"` \| `"false"` – auto-generate the AI summary on load              |
 | `forecastShowNight`   | `"true"` \| `"false"` – show night hours in the forecast chart (Settings) |
@@ -281,16 +328,16 @@ prefixed `paddlecheck_` and omitted here.
 
 ## TypeScript Types (`types/index.ts`)
 
-| Type                     | Description                                                                                     |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `Status`                 | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"`               |
-| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps                      |
-| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                           |
-| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"bewdley"` \| `"linear"` \| `"held"`) |
-| `RiverReading`           | `{ dateTime: string; value: number }`                                                           |
-| `WeatherData`            | Current weather snapshot                                                                        |
-| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                                    |
-| `PaddlingMatrix`         | Skill level → status mapping with guidance text                                                 |
+| Type                     | Description                                                                                                             |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `Status`                 | A `STATUS_STEPS` name, or `"Unknown"` – Worcester: `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling"` |
+| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps                                              |
+| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                                                   |
+| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"upstream"` \| `"linear"` \| `"held"`)                        |
+| `RiverReading`           | `{ dateTime: string; value: number }`                                                                                   |
+| `WeatherData`            | Current weather snapshot                                                                                                |
+| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                                                            |
+| `PaddlingMatrix`         | One entry per `PaddlerType`, built from `WHO_CAN_PADDLE` (config) → verdict and guidance                                |
 
 ---
 
@@ -391,16 +438,19 @@ If Git hooks are not firing:
 
 ## Key Configuration Constants (`lib/config.ts`)
 
-| Constant                | Value                  | Meaning                                      |
-| ----------------------- | ---------------------- | -------------------------------------------- |
-| `RIVER_STATION_ID`      | `2642`                 | EA API station (Worcester, Barbourne)        |
-| `BEWDLEY_STATION_ID`    | `2001`                 | Upstream station for forecast                |
-| `BEWDLEY_LAG_HOURS`     | `6`                    | Travel time Bewdley → Worcester              |
-| `BEWDLEY_TREND_HOURS`   | `6`                    | Bewdley trend window for the linear fallback |
-| `LINEAR_FORECAST_HOURS` | `18`                   | Linear trend after Bewdley; level held after |
-| `RAG_THRESHOLDS`        | `[1.0, 1.4, 2.2, 5.0]` | River level breakpoints (metres)             |
-| `TEMP_HIGH`             | `13°C`                 | Above this: no temperature penalty           |
-| `TEMP_LOW`              | `5°C`                  | Below this: cold water shock risk            |
-| `WIND_THRESHOLD`        | `15` mph               | Above this: wind penalty applied             |
-| `VISIBILITY_THRESHOLD`  | `1000` m               | Below this: fog penalty applied              |
-| Coordinates             | `52.2, -2.2`           | Open-Meteo weather location                  |
+Worcester's values, set in `club.yaml` except where noted.
+
+| Constant                                       | Value                            | Meaning                                       |
+| ---------------------------------------------- | -------------------------------- | --------------------------------------------- |
+| `RIVER_STATION_ID`                             | `2642`                           | EA API station (Worcester, Barbourne)         |
+| `UPSTREAM_CSV_URL`                             | `…/station-csv/2001`             | Upstream forecast CSV (`null` disables it)    |
+| `UPSTREAM_TRAVEL_HOURS`                        | `6`                              | Travel time upstream → club gauge             |
+| `UPSTREAM_TREND_HOURS`                         | `6`                              | Upstream trend window for the linear fallback |
+| `LINEAR_FORECAST_HOURS`                        | `18`                             | Linear trend after upstream; level held after |
+| `STATUS_STEPS[].fromLevel`                     | `0, 1.0, 1.48, 2.75, 5.0`        | Where each step starts (metres)               |
+| `THRESHOLDS.TEMP_HIGH`                         | `13°C`                           | At or above: no temperature penalty           |
+| `THRESHOLDS.TEMP_MODERATE`                     | `5°C`                            | At or below: cold water shock risk            |
+| `THRESHOLDS.WIND_HIGH`                         | `15` mph                         | Above this: wind penalty applied              |
+| `THRESHOLDS.VISIBILITY_POOR`                   | `1000` m                         | Below this: fog penalty applied               |
+| `MET_OFFICE_WARNINGS_RSS_URL` / `WARNING_AREA` | `…/Region/wm` / `Worcestershire` | Warnings feed and the area filter             |
+| Coordinates                                    | `52.2, -2.2`                     | Open-Meteo weather location                   |

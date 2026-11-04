@@ -1,5 +1,21 @@
-export type Status =
-  "Unknown" | "Light Green" | "Dark Green" | "Amber" | "Red" | "No Paddling";
+import type { ElementType } from "react";
+// A status step's name from club.yaml (steps), or "Unknown".
+export type Status = string;
+
+// One step of the status scale (STATUS_STEPS in lib/config.ts).
+export interface StatusStep {
+  name: string;
+  fromLevel: number;
+  color: string;
+  onColor: string;
+  emoji: string;
+  icon: ElementType;
+  description: string;
+  riverDescription: string;
+  riverReason?: string;
+  reasonIcon?: ElementType;
+  bestTimes?: boolean;
+}
 
 export interface KayakConditions {
   riverLevel?: number;
@@ -98,16 +114,16 @@ export interface RiverDataResult {
   historicalData: ChartDataPoint[];
 }
 
-// Bewdley forecast/observation points as they travel over JSON - timestamp is
+// Upstream forecast/observation points as they travel over JSON - timestamp is
 // an ISO string on the wire, revived to a Date on the client before use.
-export interface BewdleyForecastPointDTO {
+export interface UpstreamForecastPointDTO {
   timestamp: string;
   level: number;
 }
 
-export interface BewdleyData {
-  forecasts: BewdleyForecastPointDTO[];
-  observations: BewdleyForecastPointDTO[];
+export interface UpstreamData {
+  forecasts: UpstreamForecastPointDTO[];
+  observations: UpstreamForecastPointDTO[];
   currentLevel: number | null;
 }
 
@@ -119,14 +135,14 @@ export interface ConditionsApiResponse {
   river: RiverDataResult | null;
   weather: WeatherData | null;
   futureWeather: FutureWeatherData | null;
-  bewdley: BewdleyData;
+  upstream: UpstreamData;
   warnings: WeatherWarning[];
   fetchedAt: string;
 }
 
 // "held" means no forecast covers the hour: the level is the last linear
 // estimate carried forward unchanged.
-export type ForecastSource = "bewdley" | "linear" | "held";
+export type ForecastSource = "upstream" | "linear" | "held";
 
 export interface ForecastGraphDataPoint {
   time: string;
@@ -135,6 +151,10 @@ export interface ForecastGraphDataPoint {
   value: number;
   forecastLevel: number;
   forecastSource: ForecastSource;
+  // Whether the hour counts as dark (isDarkHour), whether or not darkness
+  // raises its status (RULES.DARKNESS). Missing from forecasts cached by
+  // older versions, which only had the "Dark" reason to go on.
+  dark?: boolean;
   temperature?: number;
   windSpeed?: number;
   windGust?: number;
@@ -150,16 +170,38 @@ export interface DayForecast {
   sunset: string | null;
 }
 
-export type PaddlerType =
-  "Beginner" | "Improver" | "Intermediate" | "Independent";
+// A paddler level from club.yaml (paddlerLevels).
+export type PaddlerType = string;
 
 export type PaddlingStatusValue = "Yes" | "No" | "Discretion" | "Warning";
+
+// One cell of the Who Can Paddle table (WHO_CAN_PADDLE in lib/config.ts).
+export interface PaddlingVerdict {
+  verdict: PaddlingStatusValue;
+  details?: string[];
+}
+
+// A rule applied on top of the table (WHO_CAN_PADDLE_EXTRAS).
+export interface PaddlingExtraRule {
+  // When it applies. Every condition given must hold; none means always.
+  when?: {
+    status?: Status[];
+    notStatus?: Status[];
+    riverLevelAtLeast?: number;
+  };
+  levels: PaddlerType[];
+  // Replace the verdict outright - the only change made to a "No".
+  set?: PaddlingVerdict;
+  // Turn a "Yes" into this, e.g. "Warning".
+  yesBecomes?: PaddlingStatusValue;
+  // Add this line, or put it in place of `replacing` if that line is there.
+  addDetail?: string;
+  replacing?: string;
+}
 
 export interface PaddlingStatus {
   status: PaddlingStatusValue;
   details: string[];
 }
 
-export type PaddlingMatrix = {
-  [key in PaddlerType]?: PaddlingStatus;
-};
+export type PaddlingMatrix = Record<PaddlerType, PaddlingStatus>;

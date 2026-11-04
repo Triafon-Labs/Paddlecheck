@@ -32,9 +32,6 @@ import {
   Thermostat,
   AcUnit,
   Water,
-  Waves,
-  Tsunami,
-  Flood,
   Visibility,
   WaterDrop,
   NightsStay,
@@ -43,17 +40,21 @@ import {
 } from "@mui/icons-material";
 import { useAppTheme, ThemeMode } from "@/lib/ThemeContext";
 import { useShowNightHours } from "@/lib/useShowNightHours";
-import { PaddlerType, Status } from "@/types";
+import { PaddlerType, StatusStep } from "@/types";
 import {
-  RAG_STATUS_UI,
+  STATUS_STEPS,
+  APP_NAME,
   THRESHOLDS,
   VISIBILITY_DESCRIPTIONS,
   USEFUL_LINKS,
-  RAG_DESCRIPTIONS,
-  RIVER_LEVEL_BAND_DESCRIPTIONS,
-  CONTACT_EMAIL,
+  FEEDBACK_URL,
   CLUB_NAME,
+  RULES,
+  CONDITIONS_KEY_WEATHER,
+  CONDITIONS_REPORT_ENABLED,
 } from "@/lib/config";
+import { statusUi, TOP_STEP } from "@/lib/rag";
+import { paddlerTypes, toPaddlerLevel } from "@/lib/paddlingMatrix";
 import { formatRiverLevel } from "@/lib/units";
 import {
   STORAGE_KEYS,
@@ -68,8 +69,9 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
-const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
-  const ui = RAG_STATUS_UI[status];
+const STEPS: readonly StatusStep[] = STATUS_STEPS;
+
+const StatusRow: React.FC<{ step: StatusStep }> = ({ step: ui }) => {
   const Icon = ui.icon;
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1 }}>
@@ -89,10 +91,10 @@ const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
       </Box>
       <Box>
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {status}
+          {ui.name}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          {RAG_DESCRIPTIONS[status]}
+          {ui.description}
         </Typography>
       </Box>
     </Box>
@@ -173,6 +175,16 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({
 const DISMISS_DISTANCE_RATIO = 0.3;
 const DISMISS_VELOCITY_PX_PER_MS = 0.5;
 
+// An inline link in the About text, opened in a new tab.
+const SourceLink: React.FC<{ href: string; children: React.ReactNode }> = ({
+  href,
+  children,
+}) => (
+  <Link href={href} target="_blank" rel="noopener noreferrer" color="inherit">
+    {children}
+  </Link>
+);
+
 const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const [activeTab, setActiveTab] = useState<"settings" | "info">("settings");
   // Both tab panels stay mounted (see the grid below), so the Conditions Key
@@ -184,9 +196,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const { themeMode, setThemeMode } = useAppTheme();
   const [paddlerLevel, setPaddlerLevel] = useState<PaddlerType | "">(() =>
     typeof window !== "undefined"
-      ? ((localStorage.getItem(
-          STORAGE_KEYS.PADDLER_LEVEL
-        ) as PaddlerType | null) ?? "")
+      ? (toPaddlerLevel(localStorage.getItem(STORAGE_KEYS.PADDLER_LEVEL)) ?? "")
       : ""
   );
   const [autoSummarise, setAutoSummarise] = useState(
@@ -216,13 +226,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
     else localStorage.removeItem(STORAGE_KEYS.PADDLER_LEVEL);
     window.dispatchEvent(new Event(PADDLER_LEVEL_CHANGED_EVENT));
   };
-
-  const paddlerTypes: PaddlerType[] = [
-    "Beginner",
-    "Improver",
-    "Intermediate",
-    "Independent",
-  ];
 
   // --- Drag to dismiss ---
   //
@@ -476,28 +479,32 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               </Select>
             </FormControl>
 
-            <Divider sx={{ my: 2 }} />
+            {CONDITIONS_REPORT_ENABLED && (
+              <>
+                <Divider sx={{ my: 2 }} />
 
-            <Typography variant="h6" gutterBottom>
-              Conditions Report
-            </Typography>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={autoSummarise}
-                  onChange={handleAutoSummariseChange}
+                <Typography variant="h6" gutterBottom>
+                  Conditions Report
+                </Typography>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={autoSummarise}
+                      onChange={handleAutoSummariseChange}
+                    />
+                  }
+                  label="Show the conditions report on load"
                 />
-              }
-              label="Show the conditions report on load"
-            />
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: "block", mt: 0.5 }}
-            >
-              When off, tap &ldquo;Show Conditions Report&rdquo; inside the
-              status card to get one on demand.
-            </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block", mt: 0.5 }}
+                >
+                  When off, tap &ldquo;Show Conditions Report&rdquo; inside the
+                  status card to get one on demand.
+                </Typography>
+              </>
+            )}
 
             <Divider sx={{ my: 2 }} />
 
@@ -582,16 +589,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 >
                   Status Colours
                 </Typography>
-                {(
-                  [
-                    "Light Green",
-                    "Dark Green",
-                    "Amber",
-                    "Red",
-                    "No Paddling",
-                  ] as Status[]
-                ).map((s) => (
-                  <StatusRow key={s} status={s} />
+                {STEPS.map((step) => (
+                  <StatusRow key={step.name} step={step} />
                 ))}
 
                 <Typography
@@ -602,197 +601,211 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 >
                   River Level
                 </Typography>
-                <ThresholdRow
-                  icon={<Water fontSize="small" />}
-                  label={`Below ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)}`}
-                  description={RIVER_LEVEL_BAND_DESCRIPTIONS.belowRag1}
-                  chipLabel="Light Green"
-                  ragColor={RAG_STATUS_UI["Light Green"].color}
-                />
-                <ThresholdRow
-                  icon={<Water fontSize="small" />}
-                  label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)}–${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)}`}
-                  description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag1ToRag2}
-                  chipLabel="Dark Green"
-                  ragColor={RAG_STATUS_UI["Dark Green"].color}
-                />
-                <ThresholdRow
-                  icon={<Waves fontSize="small" />}
-                  label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)}–${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)}`}
-                  description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag2ToRag3}
-                  chipLabel="Amber"
-                  ragColor={RAG_STATUS_UI["Amber"].color}
-                />
-                <ThresholdRow
-                  icon={<Tsunami fontSize="small" />}
-                  label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)} and above`}
-                  description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag3Plus}
-                  chipLabel="Red"
-                  ragColor={RAG_STATUS_UI["Red"].color}
-                />
-                <ThresholdRow
-                  icon={<Flood fontSize="small" />}
-                  label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_NO_PADDLING)} and above`}
-                  description={RIVER_LEVEL_BAND_DESCRIPTIONS.noPaddling}
-                  chipLabel="No Paddling"
-                  ragColor={RAG_STATUS_UI["No Paddling"].color}
-                />
-
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                  sx={{ mt: 2 }}
-                >
-                  Temperature
-                </Typography>
-                <ThresholdRow
-                  icon={<Thermostat fontSize="small" />}
-                  label={`${THRESHOLDS.TEMP_HIGH}°C and above`}
-                  description="Warm. No temperature penalty applied."
-                  chipLabel="No Penalty"
-                  chipColor="success"
-                />
-                <ThresholdRow
-                  icon={<Thermostat fontSize="small" />}
-                  label={`Over ${THRESHOLDS.TEMP_MODERATE}°C, below ${THRESHOLDS.TEMP_HIGH}°C`}
-                  description="Cool. Raises the base risk rating. Rain also becomes a factor."
-                  chipLabel="Raises Rating"
-                  chipColor="warning"
-                />
-                <ThresholdRow
-                  icon={<AcUnit fontSize="small" />}
-                  label={`${THRESHOLDS.TEMP_MODERATE}°C and below`}
-                  description="Cold air, and likely cold water too - capsizing is far more dangerous with nowhere warm to recover. Significant increase in risk rating."
-                  chipLabel="Cold"
-                  chipColor="error"
-                />
-
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                  sx={{ mt: 2 }}
-                >
-                  Wind
-                </Typography>
-                <ThresholdRow
-                  icon={<Air fontSize="small" />}
-                  label={`Below ${THRESHOLDS.WIND_HIGH} mph`}
-                  description="Calm. No wind penalty applied."
-                  chipLabel="Calm"
-                  chipColor="success"
-                />
-                <ThresholdRow
-                  icon={<Air fontSize="small" />}
-                  label={`${THRESHOLDS.WIND_HIGH} mph and above`}
-                  description="Windy. Raises the risk rating at all temperatures."
-                  chipLabel="Raises Rating"
-                  chipColor="error"
-                />
-
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                  sx={{ mt: 2 }}
-                >
-                  Visibility
-                </Typography>
-                {visKeys.map((key) => {
-                  const { min, desc } = VISIBILITY_DESCRIPTIONS[key];
-                  const nextKey = visKeys[visKeys.indexOf(key) - 1];
-                  const max = nextKey
-                    ? VISIBILITY_DESCRIPTIONS[nextKey].min
-                    : null;
-                  const range = max
-                    ? `${(min / 1000).toFixed(0)}–${(max / 1000).toFixed(0)} km`
-                    : `Over ${(min / 1000).toFixed(0)} km`;
-                  const isBad = min < THRESHOLDS.VISIBILITY_POOR;
-                  const isAtLimit = min === THRESHOLDS.VISIBILITY_POOR;
-                  const chipColor: "error" | "warning" | "success" = isBad
-                    ? "error"
-                    : isAtLimit
-                      ? "warning"
-                      : "success";
+                {STEPS.map((step, i) => {
+                  const next = STEPS[i + 1];
+                  const BandIcon = step.reasonIcon ?? Water;
                   return (
                     <ThresholdRow
-                      key={key}
-                      icon={
-                        isBad ? (
-                          <Foggy fontSize="small" />
-                        ) : (
-                          <Visibility fontSize="small" />
-                        )
+                      key={step.name}
+                      icon={<BandIcon fontSize="small" />}
+                      label={
+                        i === 0
+                          ? `Below ${formatRiverLevel(next.fromLevel)}`
+                          : next
+                            ? `${formatRiverLevel(step.fromLevel)}–${formatRiverLevel(next.fromLevel)}`
+                            : `${formatRiverLevel(step.fromLevel)} and above`
                       }
-                      // The chip already names the band, so the label is just
-                      // its range - like the wind rows' "Below 15 mph".
-                      label={range}
-                      description={
-                        isBad
-                          ? "Fog conditions – raises Green to Amber, and Amber to Red."
-                          : isAtLimit
-                            ? "Poor visibility – borderline fog threshold."
-                            : "Acceptable visibility."
-                      }
-                      chipLabel={desc}
-                      chipColor={chipColor}
+                      description={step.riverDescription}
+                      chipLabel={step.name}
+                      ragColor={step.color}
                     />
                   );
                 })}
 
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                  sx={{ mt: 2 }}
-                >
-                  Other Factors
-                </Typography>
-                <ThresholdRow
-                  icon={<WaterDrop fontSize="small" />}
-                  label={`Rain below ${THRESHOLDS.TEMP_HIGH}°C`}
-                  description="Rain raises the risk rating whenever it isn't warm, by the same step as windy conditions."
-                  chipLabel="Raises Rating"
-                  chipColor="warning"
-                />
-                <ThresholdRow
-                  icon={<WaterDrop fontSize="small" />}
-                  label={`Rain at ${THRESHOLDS.TEMP_MODERATE}°C and below`}
-                  description={`The club's printed table sets out rain only for the cool band, listing just calm and windy at ${THRESHOLDS.TEMP_MODERATE}°C and below. Paddlecheck treats cold rain like cold wind rather than ignoring it, so it is stricter than the printed rules here.`}
-                  chipLabel="Stricter Than Rules"
-                  chipColor="default"
-                />
-                <ThresholdRow
-                  icon={<WaterDrop fontSize="small" />}
-                  label={`Rain at ${THRESHOLDS.TEMP_HIGH}°C+`}
-                  description="Rain doesn't count against the rating once it's this warm."
-                  chipLabel="No Change"
-                  chipColor="default"
-                />
-                <ThresholdRow
-                  icon={<NightsStay fontSize="small" />}
-                  label="Dark"
-                  // The club's rules define dark as streetlights lit; the app
-                  // can't see streetlights, so it uses sunrise and sunset.
-                  description={`Streetlights lit, in the club's rules. Paddlecheck uses sunrise and sunset in its place, and counts a forecast hour as dark when over ${60 * THRESHOLDS.DARK_HOUR_FRACTION} minutes of it is. Raises Green to Amber, and Amber to Red.`}
-                  chipLabel="Raises Rating"
-                  chipColor="warning"
-                />
-                <ThresholdRow
-                  icon={<Foggy fontSize="small" />}
-                  label="Fog"
-                  description="Raises Green to Amber, and Amber to Red."
-                  chipLabel="Raises Rating"
-                  chipColor="warning"
-                />
-                <ThresholdRow
-                  icon={<Thunderstorm fontSize="small" />}
-                  label="Thunderstorm"
-                  description="No paddling when thunder is near – overrides all other conditions."
-                  chipLabel="No Paddling"
-                  ragColor={RAG_STATUS_UI["No Paddling"].color}
-                />
+                {RULES.WEATHER_TABLE && (
+                  <>
+                    <Typography
+                      variant="subtitle2"
+                      color="text.secondary"
+                      gutterBottom
+                      sx={{ mt: 2 }}
+                    >
+                      Temperature
+                    </Typography>
+                    <ThresholdRow
+                      icon={<Thermostat fontSize="small" />}
+                      label={`${THRESHOLDS.TEMP_HIGH}°C and above`}
+                      description={CONDITIONS_KEY_WEATHER.tempWarm}
+                      chipLabel="No Penalty"
+                      chipColor="success"
+                    />
+                    <ThresholdRow
+                      icon={<Thermostat fontSize="small" />}
+                      label={`Over ${THRESHOLDS.TEMP_MODERATE}°C, below ${THRESHOLDS.TEMP_HIGH}°C`}
+                      description={CONDITIONS_KEY_WEATHER.tempCool}
+                      chipLabel="Raises Rating"
+                      chipColor="warning"
+                    />
+                    <ThresholdRow
+                      icon={<AcUnit fontSize="small" />}
+                      label={`${THRESHOLDS.TEMP_MODERATE}°C and below`}
+                      description={CONDITIONS_KEY_WEATHER.tempCold}
+                      chipLabel="Cold"
+                      chipColor="error"
+                    />
+
+                    <Typography
+                      variant="subtitle2"
+                      color="text.secondary"
+                      gutterBottom
+                      sx={{ mt: 2 }}
+                    >
+                      Wind
+                    </Typography>
+                    <ThresholdRow
+                      icon={<Air fontSize="small" />}
+                      label={`Below ${THRESHOLDS.WIND_HIGH} mph`}
+                      description={CONDITIONS_KEY_WEATHER.windCalm}
+                      chipLabel="Calm"
+                      chipColor="success"
+                    />
+                    <ThresholdRow
+                      icon={<Air fontSize="small" />}
+                      label={`${THRESHOLDS.WIND_HIGH} mph and above`}
+                      description={CONDITIONS_KEY_WEATHER.windHigh}
+                      chipLabel="Raises Rating"
+                      chipColor="error"
+                    />
+                  </>
+                )}
+                {RULES.FOG && (
+                  <>
+                    <Typography
+                      variant="subtitle2"
+                      color="text.secondary"
+                      gutterBottom
+                      sx={{ mt: 2 }}
+                    >
+                      Visibility
+                    </Typography>
+                    {visKeys.map((key) => {
+                      const { min, desc } = VISIBILITY_DESCRIPTIONS[key];
+                      const nextKey = visKeys[visKeys.indexOf(key) - 1];
+                      const max = nextKey
+                        ? VISIBILITY_DESCRIPTIONS[nextKey].min
+                        : null;
+                      const range = max
+                        ? `${(min / 1000).toFixed(0)}–${(max / 1000).toFixed(0)} km`
+                        : `Over ${(min / 1000).toFixed(0)} km`;
+                      const isBad = min < THRESHOLDS.VISIBILITY_POOR;
+                      const isAtLimit = min === THRESHOLDS.VISIBILITY_POOR;
+                      const chipColor: "error" | "warning" | "success" = isBad
+                        ? "error"
+                        : isAtLimit
+                          ? "warning"
+                          : "success";
+                      return (
+                        <ThresholdRow
+                          key={key}
+                          icon={
+                            isBad ? (
+                              <Foggy fontSize="small" />
+                            ) : (
+                              <Visibility fontSize="small" />
+                            )
+                          }
+                          // The chip already names the band, so the label is just
+                          // its range - like the wind rows' "Below 15 mph".
+                          label={range}
+                          description={
+                            isBad
+                              ? `Fog conditions. ${CONDITIONS_KEY_WEATHER.fog}`
+                              : isAtLimit
+                                ? "Poor visibility – borderline fog threshold."
+                                : "Acceptable visibility."
+                          }
+                          chipLabel={desc}
+                          chipColor={chipColor}
+                        />
+                      );
+                    })}
+                  </>
+                )}
+                {(RULES.WEATHER_TABLE ||
+                  RULES.DARKNESS ||
+                  RULES.FOG ||
+                  RULES.THUNDERSTORMS) && (
+                  <Typography
+                    variant="subtitle2"
+                    color="text.secondary"
+                    gutterBottom
+                    sx={{ mt: 2 }}
+                  >
+                    Other Factors
+                  </Typography>
+                )}
+                {RULES.WEATHER_TABLE && (
+                  <>
+                    <ThresholdRow
+                      icon={<WaterDrop fontSize="small" />}
+                      label={`Rain below ${THRESHOLDS.TEMP_HIGH}°C`}
+                      description={CONDITIONS_KEY_WEATHER.rainCool}
+                      chipLabel="Raises Rating"
+                      chipColor="warning"
+                    />
+                    {CONDITIONS_KEY_WEATHER.rainCold && (
+                      <>
+                        <ThresholdRow
+                          icon={<WaterDrop fontSize="small" />}
+                          label={`Rain at ${THRESHOLDS.TEMP_MODERATE}°C and below`}
+                          description={CONDITIONS_KEY_WEATHER.rainCold}
+                          chipLabel="Stricter Than Rules"
+                          chipColor="default"
+                        />
+                      </>
+                    )}
+                    <ThresholdRow
+                      icon={<WaterDrop fontSize="small" />}
+                      label={`Rain at ${THRESHOLDS.TEMP_HIGH}°C+`}
+                      description={CONDITIONS_KEY_WEATHER.rainWarm}
+                      chipLabel="No Change"
+                      chipColor="default"
+                    />
+                  </>
+                )}
+                {RULES.DARKNESS && (
+                  <>
+                    <ThresholdRow
+                      icon={<NightsStay fontSize="small" />}
+                      label="Dark"
+                      description={CONDITIONS_KEY_WEATHER.dark}
+                      chipLabel="Raises Rating"
+                      chipColor="warning"
+                    />
+                  </>
+                )}
+                {RULES.FOG && (
+                  <>
+                    <ThresholdRow
+                      icon={<Foggy fontSize="small" />}
+                      label="Fog"
+                      description={CONDITIONS_KEY_WEATHER.fog}
+                      chipLabel="Raises Rating"
+                      chipColor="warning"
+                    />
+                  </>
+                )}
+                {RULES.THUNDERSTORMS && (
+                  <>
+                    <ThresholdRow
+                      icon={<Thunderstorm fontSize="small" />}
+                      label="Thunderstorm"
+                      description={CONDITIONS_KEY_WEATHER.thunderstorm}
+                      chipLabel={TOP_STEP}
+                      ragColor={statusUi(TOP_STEP).color}
+                    />
+                  </>
+                )}
               </AccordionDetails>
             </Accordion>
 
@@ -808,7 +821,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 alignItems: "center",
               }}
             >
-              <Typography>Paddlecheck Version</Typography>
+              <Typography>{APP_NAME} Version</Typography>
               <Typography>
                 {process.env.NEXT_PUBLIC_APP_VERSION || "N/A"}
               </Typography>
@@ -821,9 +834,39 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               Built for {CLUB_NAME}. This is a hobby project, so there might be
               mistakes. Always check conditions yourself and talk to coaches or
               experienced paddlers before heading out.{" "}
-              <Link href={`mailto:${CONTACT_EMAIL}`} color="inherit">
+              <Link
+                href={FEEDBACK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                color="inherit"
+              >
                 Feedback welcome here!
               </Link>
+            </Typography>
+            {/* Required by the sources' licences: the Environment Agency's
+                Open Government Licence asks for this exact statement, and
+                Open-Meteo's CC BY 4.0 for a credit. */}
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 1, display: "block" }}
+            >
+              This uses Environment Agency flood and river level data from the
+              real-time data API (Beta), under the{" "}
+              <SourceLink href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">
+                Open Government Licence
+              </SourceLink>
+              . Weather data by{" "}
+              <SourceLink href="https://open-meteo.com/">Open-Meteo</SourceLink>{" "}
+              (
+              <SourceLink href="https://creativecommons.org/licenses/by/4.0/">
+                CC BY 4.0
+              </SourceLink>
+              ). Weather warnings from the{" "}
+              <SourceLink href="https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings">
+                Met Office
+              </SourceLink>
+              .
             </Typography>
           </Box>
         </Box>

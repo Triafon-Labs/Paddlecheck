@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { PaddlerType } from "@/types";
 import { STORAGE_KEYS, PADDLER_LEVEL_CHANGED_EVENT } from "./storageKeys";
+import { toPaddlerLevel } from "./paddlingMatrix";
 
 const read = () =>
-  localStorage.getItem(STORAGE_KEYS.PADDLER_LEVEL) as PaddlerType | null;
+  toPaddlerLevel(localStorage.getItem(STORAGE_KEYS.PADDLER_LEVEL));
 
 // The paddler level chosen in Settings, kept in step with changes made there
 // (the in-tab event) and in other tabs (the "storage" event, which only fires
@@ -21,7 +22,7 @@ export const usePaddlerLevel = (): PaddlerType | null | undefined => {
     const handleLevelChanged = () => setLevel(read());
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === STORAGE_KEYS.PADDLER_LEVEL) {
-        setLevel(event.newValue as PaddlerType | null);
+        setLevel(toPaddlerLevel(event.newValue));
       }
     };
     window.addEventListener(PADDLER_LEVEL_CHANGED_EVENT, handleLevelChanged);

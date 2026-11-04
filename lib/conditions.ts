@@ -1,4 +1,4 @@
-import { fetchRiverData, fetchBewdleyForecast } from "@/lib/river";
+import { fetchRiverData, fetchUpstreamForecast } from "@/lib/river";
 import { fetchWeatherData, fetchFutureWeatherData } from "@/lib/weather";
 import { fetchWeatherWarnings } from "@/lib/metOfficeWarnings";
 import { FetchLiveness } from "@/lib/fetchCache";
@@ -8,7 +8,7 @@ import {
   LONGITUDE,
   HISTORICAL_DAYS,
 } from "@/lib/config";
-import { BewdleyData, ConditionsApiResponse } from "@/types";
+import { UpstreamData, ConditionsApiResponse } from "@/types";
 
 // Shared by /api/conditions (cached, revalidate: 900) and
 // /api/conditions/live (liveness.live: true, bypasses the cache) so both
@@ -21,40 +21,44 @@ import { BewdleyData, ConditionsApiResponse } from "@/types";
 export const getConditionsPayload = async (
   liveness: FetchLiveness = {}
 ): Promise<ConditionsApiResponse> => {
-  const [river, weather, futureWeather, bewdley, warnings] = await Promise.all([
-    fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS, liveness).catch((err) => {
-      console.error("Failed to fetch river data:", err);
-      return null;
-    }),
-    fetchWeatherData(LATITUDE, LONGITUDE, liveness).catch((err) => {
-      console.error("Failed to fetch weather data:", err);
-      return null;
-    }),
-    fetchFutureWeatherData(LATITUDE, LONGITUDE, liveness).catch((err) => {
-      console.error("Failed to fetch future weather data:", err);
-      return null;
-    }),
-    fetchBewdleyForecast(liveness).catch((err) => {
-      console.error("Failed to fetch Bewdley forecast:", err);
-      return { forecasts: [], observations: [], currentLevel: null };
-    }),
-    fetchWeatherWarnings(liveness).catch((err) => {
-      console.error("Failed to fetch weather warnings:", err);
-      return [];
-    }),
-  ]);
+  const [river, weather, futureWeather, upstream, warnings] = await Promise.all(
+    [
+      fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS, liveness).catch(
+        (err) => {
+          console.error("Failed to fetch river data:", err);
+          return null;
+        }
+      ),
+      fetchWeatherData(LATITUDE, LONGITUDE, liveness).catch((err) => {
+        console.error("Failed to fetch weather data:", err);
+        return null;
+      }),
+      fetchFutureWeatherData(LATITUDE, LONGITUDE, liveness).catch((err) => {
+        console.error("Failed to fetch future weather data:", err);
+        return null;
+      }),
+      fetchUpstreamForecast(liveness).catch((err) => {
+        console.error("Failed to fetch upstream forecast:", err);
+        return { forecasts: [], observations: [], currentLevel: null };
+      }),
+      fetchWeatherWarnings(liveness).catch((err) => {
+        console.error("Failed to fetch weather warnings:", err);
+        return [];
+      }),
+    ]
+  );
 
-  // fetchBewdleyForecast returns Date objects; the wire shape (BewdleyData)
+  // fetchUpstreamForecast returns Date objects; the wire shape (UpstreamData)
   // uses ISO strings, so this is where that boundary is actually crossed
   // rather than relying on NextResponse.json's implicit serialization to
   // paper over the mismatch.
-  const bewdleyDTO: BewdleyData = {
-    currentLevel: bewdley.currentLevel,
-    forecasts: bewdley.forecasts.map((f) => ({
+  const upstreamDTO: UpstreamData = {
+    currentLevel: upstream.currentLevel,
+    forecasts: upstream.forecasts.map((f) => ({
       timestamp: f.timestamp.toISOString(),
       level: f.level,
     })),
-    observations: bewdley.observations.map((o) => ({
+    observations: upstream.observations.map((o) => ({
       timestamp: o.timestamp.toISOString(),
       level: o.level,
     })),
@@ -64,7 +68,7 @@ export const getConditionsPayload = async (
     river,
     weather,
     futureWeather,
-    bewdley: bewdleyDTO,
+    upstream: upstreamDTO,
     warnings,
     fetchedAt: new Date().toISOString(),
   };

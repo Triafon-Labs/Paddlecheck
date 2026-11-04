@@ -39,7 +39,7 @@ import {
   ForecastSource,
   WeatherWarning,
 } from "@/types";
-import { ragStatus } from "@/lib/rag";
+import { statusUi, TOP_STEP } from "@/lib/rag";
 import { FORECAST_LINE_DASH, WARNING_COLORS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
@@ -62,7 +62,7 @@ import { format } from "date-fns";
 
 const CHART_MARGIN = { top: 40, right: 15, left: 15, bottom: 5 };
 
-// The same rule as the "Dark" factor in lib/hooks.ts, worked out again from
+// The same rule as the "Dark" factor in lib/buildKayakData.ts, worked out again from
 // the times rather than read from an hour's reasons, which skip "Dark" when
 // something overrides it - a thunderstorm at 2am would otherwise count as
 // daylight.
@@ -106,12 +106,12 @@ const IconLabel = ({ viewBox, icon, time }: IconLabelProps) => {
 };
 
 // The level line for each forecast source, drawn in this order. Only
-// Bewdley's is full strength; the estimates beyond it are faded.
+// the upstream forecast is full strength; the estimates beyond it are faded.
 const FORECAST_LINES: {
   source: keyof typeof FORECAST_LINE_DASH;
   opacity: number;
 }[] = [
-  { source: "bewdley", opacity: 1 },
+  { source: "upstream", opacity: 1 },
   { source: "linear", opacity: 0.5 },
 ];
 
@@ -162,11 +162,11 @@ const BarLabel = (props: BarLabelProps) => {
 
   const elements: React.ReactNode[] = [];
 
-  if (entry.status === "No Paddling") {
+  if (entry.status === TOP_STEP) {
     // Straight from the RAG palette rather than the theme's error role: this
     // icon captions a bar the <Bar> below fills from that same palette, so
     // the two have to be the one red no matter what the theme does.
-    const { icon: Icon, color } = ragStatus[entry.status];
+    const { icon: Icon, color } = statusUi(entry.status);
     if (Icon) {
       elements.push(
         <foreignObject
@@ -221,7 +221,7 @@ const DayChart = memo(function DayChart({
   const chartData = rows.map((d, i) => {
     // An empty slot draws nothing - no bar, no level line, no label.
     if (d.ghost) {
-      return { ...d, value: null, bewdley: null, linear: null };
+      return { ...d, value: null, upstream: null, linear: null };
     }
     const scaled = d.forecastLevel / dayMaxLevel;
     // Each source's line runs on to the next hour's point, so the lines
@@ -236,13 +236,13 @@ const DayChart = memo(function DayChart({
         : null;
     return {
       ...d,
-      bewdley: inLine("bewdley"),
+      upstream: inLine("upstream"),
       linear: inLine("linear"),
     };
   });
 
   // Each source's line draws over its own stretch of the sweep, so the
-  // Bewdley and linear lines read as one line drawn left to right.
+  // Upstream and linear lines read as one line drawn left to right.
   const lineSweep = (source: keyof typeof FORECAST_LINE_DASH) => {
     const first = chartData.findIndex((d) => d[source] !== null);
     const last = chartData.findLastIndex((d) => d[source] !== null);
@@ -317,7 +317,7 @@ const DayChart = memo(function DayChart({
             {chartData.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={ragStatus[entry.status]?.color ?? ragStatus.Unknown.color}
+                fill={statusUi(entry.status).color}
                 // The picked hour is outlined - by its parent's CSS, which
                 // finds it by this class (selectionSx) - and every bar
                 // keeps its full colour so the day still reads at a glance.

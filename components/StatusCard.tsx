@@ -12,11 +12,13 @@ import {
 } from "@mui/material";
 import { KayakConditions } from "@/types";
 import PaddlingStatusHero from "./PaddlingStatusHero";
-import { ragStatus } from "@/lib/rag";
+import { STEP_NAMES } from "@/lib/rag";
 import { ContributingFactors, FactorHeading } from "./ConditionFactors";
 import { useKayakContext } from "@/lib/KayakDataContext";
-import { formatDataAge, useNowTicking } from "@/lib/time";
-import { THRESHOLDS } from "@/lib/config";
+import { formatDataAge } from "@/lib/time";
+import { useNowTicking } from "@/lib/useNowTicking";
+import { useFreshness } from "@/lib/useFreshness";
+import { THRESHOLDS, CONDITIONS_REPORT_ENABLED } from "@/lib/config";
 import { collapseMotion, springTransition } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
 import WeatherWarnings from "./WeatherWarnings";
@@ -31,12 +33,11 @@ interface StatusCardProps {
 
 // Mirrors the scale in PaddlingStatusHero so the skeleton lays out the same
 // number of placeholder segments as the real strip.
-const SCALE_SEGMENT_COUNT = (
-  Object.keys(ragStatus) as (keyof typeof ragStatus)[]
-).filter((s) => s !== "Unknown").length;
+const SCALE_SEGMENT_COUNT = STEP_NAMES.length;
 
 const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
-  const { riverGraphData } = useKayakContext();
+  const { riverGraphData, isRefreshing } = useKayakContext();
+  const { freshnessText } = useFreshness(conditions?.lastUpdated);
   // Ticks so the reading's age stays right while the page is left open.
   const now = useNowTicking();
   const dataAgeLabel = useMemo(() => {
@@ -156,14 +157,16 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               />
             </Collapse>
             <WeatherWarnings warnings={conditions.warnings} />
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary">
-                Conditions Report
-              </Typography>
-              <Box sx={{ mt: 1 }}>
-                <ConditionsBriefing conditions={conditions} />
+            {CONDITIONS_REPORT_ENABLED && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Conditions Report
+                </Typography>
+                <Box sx={{ mt: 1 }}>
+                  <ConditionsBriefing conditions={conditions} />
+                </Box>
               </Box>
-            </Box>
+            )}
           </Box>
         </Grow>
       );
@@ -178,8 +181,21 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
   return (
     <Card data-testid="status-card" sx={{ width: "100%" }}>
       <CardContent>
-        <Typography variant="h5" component="div" gutterBottom>
+        <Typography variant="h5" component="div">
           Paddling Status
+        </Typography>
+        {/* When the data was fetched. The banners above the top bar take
+            over once it's stale or an update has failed. */}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 0.25, mb: 1.5, minHeight: "1.43em" }}
+        >
+          {isRefreshing
+            ? "Updating…"
+            : freshnessText
+              ? `Updated ${freshnessText}`
+              : null}
         </Typography>
         {renderContent()}
       </CardContent>

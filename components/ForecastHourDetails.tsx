@@ -20,7 +20,7 @@ import {
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { ForecastGraphDataPoint, ForecastSource, PaddlerType } from "@/types";
-import { ragStatus } from "@/lib/rag";
+import { statusUi, statusLabel } from "@/lib/rag";
 import { getPaddlingMatrix } from "@/lib/paddlingMatrix";
 import { usePaddlerLevel } from "@/lib/usePaddlerLevel";
 import { m3Duration, m3Easing } from "@/lib/m3-palette";
@@ -36,7 +36,7 @@ import { formatTemperature, formatWindSpeed } from "@/lib/units";
 
 // Where the hour's level comes from, under its row on the scale.
 const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
-  bewdley: "From the upstream forecast",
+  upstream: "From the upstream forecast",
   linear: "From the local trend",
   held: "Held – no forecast this far ahead",
 };
@@ -220,7 +220,7 @@ export const ForecastHourHeader: React.FC<ForecastHourHeaderProps> = ({
     );
   }
 
-  const statusConfig = ragStatus[point.status] ?? ragStatus.Unknown;
+  const statusConfig = statusUi(point.status);
   const timeLabel = `${dayLabel} ${padHour(point.time)}`;
 
   return (
@@ -258,7 +258,7 @@ export const ForecastHourHeader: React.FC<ForecastHourHeaderProps> = ({
           {timeLabel}
         </Typography>
         <Chip
-          label={point.status}
+          label={statusLabel(point.status)}
           size="small"
           sx={{
             "--chip-bg": statusConfig.color,

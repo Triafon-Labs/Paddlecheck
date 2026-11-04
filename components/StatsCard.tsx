@@ -38,8 +38,8 @@ import {
   getLondonHHMM,
   hhmmOfISO,
   minutesOfISO,
-  useNowTicking,
 } from "@/lib/time";
+import { useNowTicking } from "@/lib/useNowTicking";
 import StatTile, { TileHeading, TileValue, tileSx } from "./StatTile";
 
 interface StatsCardProps {
@@ -81,7 +81,7 @@ const DaylightTile: React.FC<{
     return null;
   }
 
-  // Same comparison as the current "Dark" factor (lib/hooks.ts).
+  // Same comparison as the current "Dark" factor (lib/buildKayakData.ts).
   let summary: string;
   if (nowMinutes <= riseMinutes) {
     summary = `Sunrise in ${formatDuration(riseMinutes - nowMinutes)}`;

@@ -8,6 +8,7 @@ import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import { KayakDataProvider } from "@/lib/KayakDataContext";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
+import { APP_NAME, CLUB_NAME } from "@/lib/config";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -37,9 +38,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Paddlecheck",
+  title: `${APP_NAME} – ${CLUB_NAME}`,
   description: "Kayaking conditions dashboard",
   appleWebApp: {
+    // iOS names a home-screen app after the page title unless told
+    // otherwise, and the title carries the club name too.
+    title: APP_NAME,
     statusBarStyle: "black-translucent",
   },
 };

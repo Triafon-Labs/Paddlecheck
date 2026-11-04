@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="520" viewBox="0 0 440 520">
+  <rect width="440" height="520" rx="16" fill="#F7F9FA" stroke="#D5DDE1"/>
+  <text x="20" y="34" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="600" fill="#1F2A30">colour: …</text>
+  <rect x="20" y="48" width="400" height="56" rx="14" fill="#B71C1C"/>
+  <text x="38" y="83" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="17" font-weight="600" fill="#FFFFFF">red</text>
+  <text x="402" y="83" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="15" fill="#FFFFFF" text-anchor="end">#B71C1C</text>
+  <rect x="20" y="114" width="400" height="56" rx="14" fill="#800000"/>
+  <text x="38" y="149" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="17" font-weight="600" fill="#FFFFFF">maroon</text>
+  <text x="402" y="149" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="15" fill="#FFFFFF" text-anchor="end">#800000</text>
+  <rect x="20" y="180" width="400" height="56" rx="14" fill="#FF8F00"/>
+  <text x="38" y="215" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="17" font-weight="600" fill="#2B1700">amber</text>
+  <text x="402" y="215" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="15" fill="#2B1700" text-anchor="end">#FF8F00</text>
+  <rect x="20" y="246" width="400" height="56" rx="14" fill="#FBC02D"/>
+  <text x="38" y="281" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="17" font-weight="600" fill="#241A00">yellow</text>
+  <text x="402" y="281" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="15" fill="#241A00" text-anchor="end">#FBC02D</text>
+  <rect x="20" y="312" width="400" height="56" rx="14" fill="#008000"/>
+  <text x="38" y="347" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="17" font-weight="600" fill="#FFFFFF">darkGreen</text>
+  <text x="402" y="347" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="15" fill="#FFFFFF" text-anchor="end">#008000</text>
+  <rect x="20" y="378" width="400" height="56" rx="14" fill="#4CBB17"/>
+  <text x="38" y="413" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="17" font-weight="600" fill="#0D2600">lightGreen</text>
+  <text x="402" y="413" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="15" fill="#0D2600" text-anchor="end">#4CBB17</text>
+  <rect x="20" y="444" width="400" height="56" rx="14" fill="#9E9E9E"/>
+  <text x="38" y="479" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="17" font-weight="600" fill="#1F1F1F">grey</text>
+  <text x="402" y="479" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="15" fill="#1F1F1F" text-anchor="end">#9E9E9E</text>
+</svg>

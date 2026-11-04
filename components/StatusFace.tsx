@@ -3,7 +3,9 @@
 import React from "react";
 import { SvgIcon } from "@mui/material";
 import { PaddlingStatusValue } from "@/types";
-import { ragStatus } from "@/lib/rag";
+// Fixed verdict colours - green, amber, red - whatever a club calls its
+// status steps, so a verdict reads the same on any scale.
+import { STATUS_COLORS, ON_STATUS_COLORS } from "@/lib/statusColors";
 
 // Each paddler's status is a face on a solid disc of its RAG colour, with the
 // features in that colour's paired on-colour. The faces are the features of
@@ -82,29 +84,29 @@ export const PADDLING_STATUS_UI: Record<
   }
 > = {
   Yes: {
-    color: ragStatus["Light Green"].color,
-    onColor: ragStatus["Light Green"].onColor,
+    color: STATUS_COLORS.lightGreen,
+    onColor: ON_STATUS_COLORS.lightGreen,
     face: "grin",
     headline: "You can paddle",
     short: "Can paddle",
   },
   Warning: {
-    color: ragStatus["Amber"].color,
-    onColor: ragStatus["Amber"].onColor,
+    color: STATUS_COLORS.amber,
+    onColor: ON_STATUS_COLORS.amber,
     face: "smile",
     headline: "You can paddle, with caveats",
     short: "With caveats",
   },
   Discretion: {
-    color: ragStatus["Amber"].color,
-    onColor: ragStatus["Amber"].onColor,
+    color: STATUS_COLORS.amber,
+    onColor: ON_STATUS_COLORS.amber,
     face: "neutral",
     headline: "Coach's discretion",
     short: "Coach's discretion",
   },
   No: {
-    color: ragStatus["Red"].color,
-    onColor: ragStatus["Red"].onColor,
+    color: STATUS_COLORS.red,
+    onColor: ON_STATUS_COLORS.red,
     face: "frown",
     // Not "today": conditions change by the hour, and the same line is
     // used for forecast hours that may be days away.
@@ -114,8 +116,8 @@ export const PADDLING_STATUS_UI: Record<
 };
 
 export const UNKNOWN_PADDLING_UI = {
-  color: ragStatus["Unknown"].color,
-  onColor: ragStatus["Unknown"].onColor,
+  color: STATUS_COLORS.grey,
+  onColor: ON_STATUS_COLORS.grey,
   face: "unknown" as const,
   headline: "Conditions unavailable",
   short: "Unknown",

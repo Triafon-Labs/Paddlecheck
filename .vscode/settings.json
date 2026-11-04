@@ -3,5 +3,11 @@
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
+  },
+  "yaml.schemas": {
+    "./club.schema.json": [
+      "club.yaml",
+      "examples/*.club.yaml"
+    ]
   }
 }

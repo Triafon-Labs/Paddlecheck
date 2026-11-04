@@ -2,6 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { KayakConditions } from "@/types";
+import { BRIEFING_UNAVAILABLE } from "@/lib/briefingInputs";
+
+// Why the last request failed, when the server said.
+export type BriefingFailure =
+  (typeof BRIEFING_UNAVAILABLE)[keyof typeof BRIEFING_UNAVAILABLE] | "other";
+
+class BriefingError extends Error {
+  constructor(readonly reason: BriefingFailure) {
+    super(reason);
+  }
+}
 
 async function streamBriefing(
   model: string,
@@ -17,7 +28,14 @@ async function streamBriefing(
     signal,
   });
 
-  if (!res.ok || !res.body) throw new Error("Failed");
+  if (!res.ok || !res.body) {
+    const body = res.status === 503 ? (await res.text()).trim() : "";
+    throw new BriefingError(
+      (Object.values(BRIEFING_UNAVAILABLE) as string[]).includes(body)
+        ? (body as BriefingFailure)
+        : "other"
+    );
+  }
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
@@ -35,7 +53,7 @@ export function useBriefing(
 ) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<BriefingFailure | null>(null);
   const [triggered, setTriggered] = useState(false);
   const fetchedForRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -53,7 +71,7 @@ export function useBriefing(
 
     setText("");
     setLoading(true);
-    setFailed(false);
+    setFailed(null);
     setTriggered(true);
 
     try {
@@ -66,7 +84,7 @@ export function useBriefing(
       if (controller.signal.aborted) return;
       console.error("Briefing fetch failed:", e);
       fetchedForRef.current = null;
-      setFailed(true);
+      setFailed(e instanceof BriefingError ? e.reason : "other");
     } finally {
       if (!controller.signal.aborted) setLoading(false);
     }

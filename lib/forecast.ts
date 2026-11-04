@@ -169,7 +169,7 @@ export interface BestPaddlingTimes {
 }
 
 // Whether it's light right now: between today's sunrise and sunset, by the
-// same comparison the current status uses for its "Dark" reason (hooks.ts).
+// same comparison the current status uses for its "Dark" reason (buildKayakData.ts).
 const isLightNow = (todayForecast: DayForecast): boolean => {
   const sunriseHHMM = todayForecast.sunrise
     ? hhmmOfISO(todayForecast.sunrise)
@@ -183,7 +183,7 @@ const isLightNow = (todayForecast: DayForecast): boolean => {
 };
 
 // Today's daylight slots from the current hour on. The hour we're in is never
-// among todayForecast's hourly data (see hooks.ts), so while it's light it's
+// among todayForecast's hourly data (see buildKayakData.ts), so while it's light it's
 // stood in for by a slot carrying the live status - otherwise the last
 // daylight hour, whose successor is already dark, would read as no daylight
 // left at all and hand over to tomorrow with the sun still up.

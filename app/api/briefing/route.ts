@@ -1,7 +1,11 @@
 import Groq from "groq-sdk";
 import { getConditionsPayload } from "@/lib/conditions";
 import { buildKayakData } from "@/lib/buildKayakData";
-import { BriefingInputs, buildBriefingInputs } from "@/lib/briefingInputs";
+import {
+  BriefingInputs,
+  BRIEFING_UNAVAILABLE,
+  buildBriefingInputs,
+} from "@/lib/briefingInputs";
 import { degreesToCompass } from "@/lib/weather";
 import {
   londonNow,
@@ -274,16 +278,22 @@ function pruneSummaryCache() {
 
 export async function POST(request: Request) {
   if (!process.env.GROQ_API_KEY) {
-    return new Response("API key not configured", { status: 503 });
+    return new Response(BRIEFING_UNAVAILABLE.NOT_CONFIGURED, { status: 503 });
   }
 
   // Only the model is read from the request. Everything the prompt is built
   // from comes from the server's own copy of the conditions, so a visitor
   // can't put text of their choosing into it - or vary the request to miss
   // the summary cache and run up calls on this deployment's API key.
-  const body: { model?: unknown } = await request.json().catch(() => ({}));
+  // Anything but an object with a string `model` - no body, bad JSON, a bare
+  // `null` - gets the default model.
+  const body: unknown = await request.json().catch(() => null);
   const requested =
-    typeof body.model === "string" ? body.model : DEFAULT_AI_MODEL;
+    typeof body === "object" &&
+    body !== null &&
+    typeof (body as { model?: unknown }).model === "string"
+      ? (body as { model: string }).model
+      : DEFAULT_AI_MODEL;
   const model = ALLOWED_AI_MODELS.includes(requested)
     ? requested
     : DEFAULT_AI_MODEL;
@@ -292,7 +302,7 @@ export async function POST(request: Request) {
   // normally a cache hit rather than a fresh call to every source.
   const payload = await getConditionsPayload();
   if (!payload.river || !payload.weather || !payload.futureWeather) {
-    return new Response("Conditions data unavailable", { status: 503 });
+    return new Response(BRIEFING_UNAVAILABLE.DATA, { status: 503 });
   }
   const { conditions, forecastDays } = buildKayakData({
     river: payload.river,

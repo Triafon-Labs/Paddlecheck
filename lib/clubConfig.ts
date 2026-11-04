@@ -187,6 +187,11 @@ const num = (v: unknown, path: string): number => {
   return 0;
 };
 
+const inRange = (n: number, min: number, max: number, path: string) => {
+  if (n < min || n > max) problem(path, `must be between ${min} and ${max}`);
+  return n;
+};
+
 const bool = (v: unknown, path: string): boolean => {
   if (typeof v === "boolean") return v;
   problem(path, `expected true or false, found ${show(v)}`);
@@ -578,6 +583,27 @@ const parse = (raw: unknown): ClubConfig => {
   const paddlerLevels = strList(root.paddlerLevels, "paddlerLevels");
   if (paddlerLevels.length === 0)
     problem("paddlerLevels", "needs at least one level");
+  paddlerLevels.forEach((level, i) => {
+    if (paddlerLevels.indexOf(level) !== i)
+      problem("paddlerLevels", `"${level}" appears twice`);
+  });
+
+  // Values that parse but can't be meant.
+  const t = parsedThresholds;
+  if (t.tempModerate >= t.tempHigh)
+    problem(
+      "thresholds → tempModerate",
+      `must be lower than tempHigh (${t.tempHigh}) – otherwise no temperature is ever "moderate"`
+    );
+  if (t.darkHourFraction < 0 || t.darkHourFraction >= 1)
+    problem(
+      "thresholds → darkHourFraction",
+      `must be a fraction of an hour from 0 up to (not including) 1 – e.g. 0.25 for 15 minutes, found ${t.darkHourFraction}`
+    );
+  if (t.windHigh <= 0)
+    problem("thresholds → windHigh", "must be more than 0 mph");
+  if (t.visibilityPoor < 0)
+    problem("thresholds → visibilityPoor", "can't be negative");
 
   // {appName}, {tempHigh} and friends in the Conditions Key text.
   const fill = (text: string) =>
@@ -618,8 +644,18 @@ const parse = (raw: unknown): ClubConfig => {
         }
       ),
     },
-    latitude: num(location.latitude, "location → latitude"),
-    longitude: num(location.longitude, "location → longitude"),
+    latitude: inRange(
+      num(location.latitude, "location → latitude"),
+      -90,
+      90,
+      "location → latitude"
+    ),
+    longitude: inRange(
+      num(location.longitude, "location → longitude"),
+      -180,
+      180,
+      "location → longitude"
+    ),
     river: {
       stationId: str(river.stationId, "river → stationId"),
       forecastCsv,

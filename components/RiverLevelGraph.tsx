@@ -432,7 +432,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               connectNulls={false}
               dot={false}
             />
-            {/* forecastData only holds upstream-backed hours (lib/hooks.ts). */}
+            {/* forecastData only holds upstream-backed hours (lib/buildKayakData.ts). */}
             <Line
               isAnimationActive={false}
               type="monotone"

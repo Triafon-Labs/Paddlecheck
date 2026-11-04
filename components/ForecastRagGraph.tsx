@@ -62,7 +62,7 @@ import { format } from "date-fns";
 
 const CHART_MARGIN = { top: 40, right: 15, left: 15, bottom: 5 };
 
-// The same rule as the "Dark" factor in lib/hooks.ts, worked out again from
+// The same rule as the "Dark" factor in lib/buildKayakData.ts, worked out again from
 // the times rather than read from an hour's reasons, which skip "Dark" when
 // something overrides it - a thunderstorm at 2am would otherwise count as
 // daylight.

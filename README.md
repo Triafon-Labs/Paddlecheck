@@ -74,7 +74,7 @@ The summary needs a [Groq API key](https://console.groq.com/keys) (Groq has a fr
 GROQ_API_KEY=your-key-here
 ```
 
-Without a key the rest of the app is unaffected, but the summary panel will show an error when it's asked to generate one. The model used is `DEFAULT_AI_MODEL` in `lib/config.ts`.
+Without a key the rest of the app is unaffected, and the summary panel says reports aren't set up on this site. The model used is `DEFAULT_AI_MODEL` in `lib/config.ts`.
 
 The server builds the summary from its own copy of the conditions and only reads the model name from the browser, so visitors can't send their own text to Groq on your key. Generated summaries are cached for each 15-minute data window, so most visits don't make a Groq call at all.
 

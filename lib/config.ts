@@ -37,7 +37,7 @@ export const CLUB_SHORT_NAME = CLUB.club.shortName;
 export const FEEDBACK_URL = CLUB.club.feedbackUrl;
 export const USEFUL_LINKS = CLUB.club.usefulLinks;
 
-// --- River and Weather Service (club.yaml: location, river) ---// --- River and Weather Service ---
+// --- River and Weather Service (club.yaml: location, river) ---
 export const RIVER_STATION_ID = CLUB.river.stationId;
 export const LATITUDE = CLUB.latitude;
 export const LONGITUDE = CLUB.longitude;
@@ -119,7 +119,7 @@ export const RULES = {
 // --- Paddler levels (club.yaml: paddlerLevels) ---
 export const PADDLER_LEVELS: readonly PaddlerType[] = CLUB.paddlerLevels;
 
-// --- Weather table (used when RULES.WEATHER_TABLE is on) ---// --- Weather table (club.yaml: weatherTable) ---
+// --- Weather table (club.yaml: weatherTable, used when RULES.WEATHER_TABLE is on) ---
 // Temperature band -> weather -> the resulting step for each river level
 // band, as step indexes into STATUS_STEPS.
 export const CRITERIA_TABLE: {
@@ -154,7 +154,7 @@ export const WHO_CAN_PADDLE: Record<
 export const WHO_CAN_PADDLE_EXTRAS: PaddlingExtraRule[] =
   CLUB.whoCanPaddleExtras;
 
-// WMO weather interpretation codes 50–99// WMO weather interpretation codes 50–99 cover drizzle, rain, snow, showers
+// WMO weather interpretation codes 50–99 cover drizzle, rain, snow, showers
 // and thunderstorms. Used as the single source of truth for "is it raining?"
 // across both live conditions and the hourly forecast. Thunderstorms (95–99)
 // are excluded as they are treated separately from rain.

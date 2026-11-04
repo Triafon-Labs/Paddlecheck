@@ -9,6 +9,7 @@ import { useBriefing } from "@/lib/useBriefing";
 import { DEFAULT_AI_MODEL } from "@/lib/config";
 import { STORAGE_KEYS, SETTINGS_CHANGED_EVENT } from "@/lib/storageKeys";
 import { m3Spring, springTransition } from "@/lib/m3-palette";
+import { BRIEFING_UNAVAILABLE } from "@/lib/briefingInputs";
 
 interface Props {
   conditions: KayakConditions;
@@ -58,12 +59,26 @@ export default function ConditionsBriefing({
   // button as the untriggered state rather than hanging a "Try again?" link
   // off the end of a sentence. A stream that finished empty is a failure
   // too, or the skeleton below would hold forever.
+  // Without an API key there's nothing to retry, so it's a plain note.
+  if (failed === BRIEFING_UNAVAILABLE.NOT_CONFIGURED) {
+    return (
+      <InfoPanel>
+        <NotesIcon fontSize="small" sx={{ color: "text.secondary" }} />
+        <Typography variant="body2" color="text.secondary">
+          Conditions reports aren&apos;t set up on this site.
+        </Typography>
+      </InfoPanel>
+    );
+  }
+
   if (failed || (!loading && !text.trim())) {
     return (
       <InfoPanel onClick={trigger} ariaLabel="Retry conditions report">
         <NotesIcon fontSize="small" sx={{ color: "primary.main" }} />
         <Typography variant="body2" color="text.secondary">
-          Conditions report unavailable. Try again?
+          {failed === BRIEFING_UNAVAILABLE.DATA
+            ? "Conditions report unavailable while live data can't be fetched. Try again?"
+            : "Conditions report unavailable. Try again?"}
         </Typography>
       </InfoPanel>
     );

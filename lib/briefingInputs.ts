@@ -5,8 +5,17 @@ import {
   relativeDayLabel,
   isDarkSlot,
 } from "@/lib/forecast";
-import { getLondonHHMM, hhmmOfISO } from "@/lib/time";
+import { getLondonHHMM } from "@/lib/time";
 import { isWarningOnDay } from "@/lib/warnings";
+
+// Why /api/briefing couldn't write a summary - the response body of its 503,
+// so the panel can say something more useful than "unavailable".
+export const BRIEFING_UNAVAILABLE = {
+  // The river or weather feed failed on the server.
+  DATA: "data-unavailable",
+  // No GROQ_API_KEY - the summary isn't set up on this deployment.
+  NOT_CONFIGURED: "not-configured",
+} as const;
 
 export interface BriefingInputs {
   conditions: KayakConditions;
@@ -29,17 +38,9 @@ export function buildBriefingInputs(
 ): BriefingInputs {
   const todayForecast = forecastDays?.[0] ?? null;
   const currentTime = getLondonHHMM(now);
-  const todaySunrise = todayForecast?.sunrise
-    ? hhmmOfISO(todayForecast.sunrise)
-    : null;
-  const todaySunset = todayForecast?.sunset
-    ? hhmmOfISO(todayForecast.sunset)
-    : null;
-  // Derive dark from sunrise/sunset times rather than conditions.dark, which can be stale
-  const currentlyDark = todayForecast
-    ? (todaySunrise !== null && currentTime < todaySunrise) ||
-      (todaySunset !== null && currentTime >= todaySunset)
-    : (conditions.dark ?? false);
+  // The same answer the status used for its "Dark" reason: both are worked
+  // out on the server from the same data, at the same moment.
+  const currentlyDark = conditions.dark ?? false;
 
   // Find the target day being summarized
   let targetDay = todayForecast;

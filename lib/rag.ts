@@ -166,17 +166,16 @@ export const calculateFinalRagStatus = (
     weatherCode,
   } = conditions;
 
-  if (
-    [
-      riverLevel,
-      temperature,
-      windSpeed,
-      rain,
-      dark,
-      visibility,
-      weatherCode,
-    ].some((v) => v === undefined)
-  ) {
+  // Only the readings the club's rules use are required: with the weather
+  // table off, say, a missing wind reading mustn't make the status Unknown.
+  const needed = [
+    riverLevel,
+    ...(RULES.WEATHER_TABLE ? [temperature, windSpeed, rain] : []),
+    ...(RULES.DARKNESS ? [dark] : []),
+    ...(RULES.FOG ? [visibility, weatherCode] : []),
+    ...(RULES.THUNDERSTORMS ? [weatherCode] : []),
+  ];
+  if (needed.some((v) => v === undefined)) {
     return { status: "Unknown", reasons: ["Missing data"] };
   }
 
@@ -194,22 +193,25 @@ export const calculateFinalRagStatus = (
   }
 
   const initialRag = calculateInitialRagStatus(riverLevel!);
-  // Judged on the whole numbers the app displays, so a reading shown as
-  // "15 mph" or "5°C" always gets the status that figure implies.
-  const { tempCondition, reason: tempReason } = getTemperatureConditions(
-    whole(temperature!)
-  );
-  const { weatherCondition, reason: weatherReason } = getWeatherConditions(
-    whole(windSpeed!),
-    rain!,
-    tempCondition
-  );
 
   // With the weather table off, the river level's own step stands and
   // temperature, wind and rain aren't given as reasons.
-  const finalRag = RULES.WEATHER_TABLE
-    ? CRITERIA_TABLE[tempCondition]?.[weatherCondition]?.[initialRag]
-    : initialRag;
+  let finalRag: number | undefined = initialRag;
+  const weatherReasons: (string | undefined)[] = [];
+  if (RULES.WEATHER_TABLE) {
+    // Judged on the whole numbers the app displays, so a reading shown as
+    // "15 mph" or "5°C" always gets the status that figure implies.
+    const { tempCondition, reason: tempReason } = getTemperatureConditions(
+      whole(temperature!)
+    );
+    const { weatherCondition, reason: weatherReason } = getWeatherConditions(
+      whole(windSpeed!),
+      rain!,
+      tempCondition
+    );
+    finalRag = CRITERIA_TABLE[tempCondition]?.[weatherCondition]?.[initialRag];
+    weatherReasons.push(tempReason, weatherReason);
+  }
   if (finalRag === undefined) {
     return {
       status: "Unknown",
@@ -217,16 +219,18 @@ export const calculateFinalRagStatus = (
     };
   }
 
+  // Readings a switched-off rule doesn't need may be missing; these stand-ins
+  // are never looked at, since adjustRagForFactors checks RULES first.
   const { ragNumber, reasons: adjustmentReasons } = adjustRagForFactors(
     finalRag,
-    dark!,
-    visibility!,
-    weatherCode!
+    dark === true,
+    visibility ?? Infinity,
+    weatherCode ?? -1
   );
 
   const allReasons = [
     riverLevelReason(initialRag),
-    ...(RULES.WEATHER_TABLE ? [tempReason, weatherReason] : []),
+    ...weatherReasons,
     ...adjustmentReasons,
   ].filter(Boolean) as string[];
 

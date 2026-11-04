@@ -5,7 +5,6 @@ import { Box, Typography, Fade, Skeleton } from "@mui/material";
 import NotesIcon from "@mui/icons-material/Notes";
 import { KayakConditions } from "@/types";
 import InfoPanel from "./InfoPanel";
-import { useKayakContext } from "@/lib/KayakDataContext";
 import { useBriefing } from "@/lib/useBriefing";
 import { DEFAULT_AI_MODEL } from "@/lib/config";
 import { STORAGE_KEYS, SETTINGS_CHANGED_EVENT } from "@/lib/storageKeys";
@@ -20,7 +19,6 @@ export default function ConditionsBriefing({
   conditions,
   model = DEFAULT_AI_MODEL,
 }: Props) {
-  const { forecastDays } = useKayakContext();
   const [auto, setAuto] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -36,7 +34,6 @@ export default function ConditionsBriefing({
 
   const { text, loading, failed, triggered, trigger } = useBriefing(
     conditions,
-    forecastDays,
     auto,
     model
   );

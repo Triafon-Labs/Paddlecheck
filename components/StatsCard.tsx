@@ -38,8 +38,8 @@ import {
   getLondonHHMM,
   hhmmOfISO,
   minutesOfISO,
-  useNowTicking,
 } from "@/lib/time";
+import { useNowTicking } from "@/lib/useNowTicking";
 import StatTile, { TileHeading, TileValue, tileSx } from "./StatTile";
 
 interface StatsCardProps {

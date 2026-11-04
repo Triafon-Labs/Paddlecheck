@@ -265,7 +265,7 @@ const TopNavBar = () => {
         elevation={0}
         data-scrolled={scrolled}
       >
-        <Toolbar sx={{ justifyContent: "space-between", py: 0.75 }}>
+        <Toolbar sx={{ justifyContent: "space-between", py: 1.25 }}>
           {/* minWidth: 0 lets this half shrink past its content on a narrow
               phone. Without it the title sets a floor on the flex item's
               width and the action buttons get pushed off the right edge
@@ -275,7 +275,7 @@ const TopNavBar = () => {
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 1.5,
+              gap: 2,
               minWidth: 0,
             }}
           >
@@ -285,8 +285,8 @@ const TopNavBar = () => {
             <Image
               src="/favicon.svg"
               alt={`${APP_NAME} logo`}
-              width={40}
-              height={40}
+              width={44}
+              height={44}
               style={{ flexShrink: 0 }}
             />
             <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
@@ -294,7 +294,7 @@ const TopNavBar = () => {
                 variant="caption"
                 color="text.secondary"
                 noWrap
-                sx={{ lineHeight: 1.25, fontWeight: 600 }}
+                sx={{ lineHeight: 1.5, fontWeight: 600 }}
               >
                 {CLUB_SHORT_NAME}
               </Typography>
@@ -303,7 +303,7 @@ const TopNavBar = () => {
                 noWrap
                 // A step down from h6's 1.25rem so the three lines - club,
                 // app, freshness - sit inside the bar with room to spare.
-                sx={{ fontWeight: 600, lineHeight: 1.15, fontSize: "1.125rem" }}
+                sx={{ fontWeight: 600, lineHeight: 1.25, fontSize: "1.125rem" }}
                 color="text.primary"
               >
                 {APP_NAME}
@@ -313,7 +313,7 @@ const TopNavBar = () => {
                   variant="caption"
                   color="text.secondary"
                   noWrap
-                  sx={{ lineHeight: 1.2 }}
+                  sx={{ lineHeight: 1.5 }}
                 >
                   {isRefreshing ? "Updating…" : `Updated ${freshnessText}`}
                 </Typography>

@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
+import { APP_NAME } from "@/lib/config";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Paddlecheck",
-    short_name: "Paddlecheck",
+    name: APP_NAME,
+    short_name: APP_NAME,
     description: "A kayaking conditions dashboard",
     start_url: "/",
     display: "standalone",

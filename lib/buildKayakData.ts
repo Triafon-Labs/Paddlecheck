@@ -14,7 +14,7 @@ import {
   findLevelDescription,
   calculateInitialRagStatus,
   isRainWhileWarm,
-  RAG_STATUS_MAP,
+  STEP_NAMES,
   ragHeight,
 } from "@/lib/rag";
 import {
@@ -108,7 +108,7 @@ export const buildKayakData = (
   const initialRagNumber = calculateInitialRagStatus(
     currentConditions.riverLevel ?? 0
   );
-  const initialStatus = RAG_STATUS_MAP[initialRagNumber];
+  const initialStatus = STEP_NAMES[initialRagNumber];
   const { status, reasons } = calculateFinalRagStatus(currentConditions);
   const rainWhileWarm = isRainWhileWarm(currentConditions);
   const visibilityDescription = getVisibilityDescription(
@@ -255,7 +255,7 @@ export const buildKayakData = (
         time: `${h}:00`,
         status: forecastStatus,
         reasons: forecastReasons,
-        value: ragHeight[forecastStatus] || 0.1,
+        value: ragHeight(forecastStatus),
         forecastLevel: forecastRiverLevel,
         forecastSource,
         dark,

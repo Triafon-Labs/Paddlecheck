@@ -71,8 +71,9 @@ const reasonTile = (
     weatherDescription?: string;
   }
 ): TileText => {
-  // "Slightly elevated river level (> 1.00 m)" and its siblings.
-  const river = reason.match(/^(\w+ elevated) river level \(> (.+)\)$/);
+  // "Slightly elevated river level (> 1.00 m)" and its siblings - the
+  // wording before "river level" is each step's riverReason.
+  const river = reason.match(/^(.+) river level \(> (.+)\)$/);
   if (river) {
     return {
       label: "River level",

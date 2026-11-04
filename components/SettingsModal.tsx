@@ -32,9 +32,6 @@ import {
   Thermostat,
   AcUnit,
   Water,
-  Waves,
-  Tsunami,
-  Flood,
   Visibility,
   WaterDrop,
   NightsStay,
@@ -43,20 +40,19 @@ import {
 } from "@mui/icons-material";
 import { useAppTheme, ThemeMode } from "@/lib/ThemeContext";
 import { useShowNightHours } from "@/lib/useShowNightHours";
-import { PaddlerType, Status } from "@/types";
+import { PaddlerType, StatusStep } from "@/types";
 import {
-  RAG_STATUS_UI,
+  STATUS_STEPS,
+  APP_NAME,
   THRESHOLDS,
   VISIBILITY_DESCRIPTIONS,
   USEFUL_LINKS,
-  RAG_DESCRIPTIONS,
-  RIVER_LEVEL_BAND_DESCRIPTIONS,
   FEEDBACK_URL,
   CLUB_NAME,
   RULES,
   CONDITIONS_KEY_WEATHER,
 } from "@/lib/config";
-import { statusLabel } from "@/lib/rag";
+import { statusUi, TOP_STEP } from "@/lib/rag";
 import { paddlerTypes, toPaddlerLevel } from "@/lib/paddlingMatrix";
 import { formatRiverLevel } from "@/lib/units";
 import {
@@ -72,8 +68,9 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
-const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
-  const ui = RAG_STATUS_UI[status];
+const STEPS: readonly StatusStep[] = STATUS_STEPS;
+
+const StatusRow: React.FC<{ step: StatusStep }> = ({ step: ui }) => {
   const Icon = ui.icon;
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1 }}>
@@ -93,10 +90,10 @@ const StatusRow: React.FC<{ status: Status }> = ({ status }) => {
       </Box>
       <Box>
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {statusLabel(status)}
+          {ui.name}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          {RAG_DESCRIPTIONS[status]}
+          {ui.description}
         </Typography>
       </Box>
     </Box>
@@ -587,16 +584,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 >
                   Status Colours
                 </Typography>
-                {(
-                  [
-                    "Light Green",
-                    "Dark Green",
-                    "Amber",
-                    "Red",
-                    "No Paddling",
-                  ] as Status[]
-                ).map((s) => (
-                  <StatusRow key={s} status={s} />
+                {STEPS.map((step) => (
+                  <StatusRow key={step.name} step={step} />
                 ))}
 
                 <Typography
@@ -607,41 +596,26 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 >
                   River Level
                 </Typography>
-                <ThresholdRow
-                  icon={<Water fontSize="small" />}
-                  label={`Below ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)}`}
-                  description={RIVER_LEVEL_BAND_DESCRIPTIONS.belowRag1}
-                  chipLabel={statusLabel("Light Green")}
-                  ragColor={RAG_STATUS_UI["Light Green"].color}
-                />
-                <ThresholdRow
-                  icon={<Water fontSize="small" />}
-                  label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)}–${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)}`}
-                  description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag1ToRag2}
-                  chipLabel={statusLabel("Dark Green")}
-                  ragColor={RAG_STATUS_UI["Dark Green"].color}
-                />
-                <ThresholdRow
-                  icon={<Waves fontSize="small" />}
-                  label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)}–${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)}`}
-                  description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag2ToRag3}
-                  chipLabel={statusLabel("Amber")}
-                  ragColor={RAG_STATUS_UI["Amber"].color}
-                />
-                <ThresholdRow
-                  icon={<Tsunami fontSize="small" />}
-                  label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)}–${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_NO_PADDLING)}`}
-                  description={RIVER_LEVEL_BAND_DESCRIPTIONS.rag3Plus}
-                  chipLabel={statusLabel("Red")}
-                  ragColor={RAG_STATUS_UI["Red"].color}
-                />
-                <ThresholdRow
-                  icon={<Flood fontSize="small" />}
-                  label={`${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_NO_PADDLING)} and above`}
-                  description={RIVER_LEVEL_BAND_DESCRIPTIONS.noPaddling}
-                  chipLabel={statusLabel("No Paddling")}
-                  ragColor={RAG_STATUS_UI["No Paddling"].color}
-                />
+                {STEPS.map((step, i) => {
+                  const next = STEPS[i + 1];
+                  const BandIcon = step.reasonIcon ?? Water;
+                  return (
+                    <ThresholdRow
+                      key={step.name}
+                      icon={<BandIcon fontSize="small" />}
+                      label={
+                        i === 0
+                          ? `Below ${formatRiverLevel(next.fromLevel)}`
+                          : next
+                            ? `${formatRiverLevel(step.fromLevel)}–${formatRiverLevel(next.fromLevel)}`
+                            : `${formatRiverLevel(step.fromLevel)} and above`
+                      }
+                      description={step.riverDescription}
+                      chipLabel={step.name}
+                      ragColor={step.color}
+                    />
+                  );
+                })}
 
                 {RULES.WEATHER_TABLE && (
                   <>
@@ -822,8 +796,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                       icon={<Thunderstorm fontSize="small" />}
                       label="Thunderstorm"
                       description={CONDITIONS_KEY_WEATHER.thunderstorm}
-                      chipLabel={statusLabel("No Paddling")}
-                      ragColor={RAG_STATUS_UI["No Paddling"].color}
+                      chipLabel={TOP_STEP}
+                      ragColor={statusUi(TOP_STEP).color}
                     />
                   </>
                 )}
@@ -842,7 +816,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                 alignItems: "center",
               }}
             >
-              <Typography>Paddlecheck Version</Typography>
+              <Typography>{APP_NAME} Version</Typography>
               <Typography>
                 {process.env.NEXT_PUBLIC_APP_VERSION || "N/A"}
               </Typography>

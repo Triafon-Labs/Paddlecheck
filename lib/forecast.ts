@@ -1,6 +1,6 @@
 import { DayForecast, Status } from "@/types";
 import { THRESHOLDS } from "@/lib/config";
-import { statusLabel } from "@/lib/rag";
+import { statusLabel, BEST_TIME_STEPS } from "@/lib/rag";
 import {
   formatRiverLevel,
   formatTemperature,
@@ -9,7 +9,8 @@ import {
 } from "@/lib/units";
 import { getLondonHHMM, getLondonHour, hhmmOfISO } from "@/lib/time";
 
-const PREFERRED: Status[] = ["Light Green", "Dark Green"];
+// The steps that count as a good time to paddle, best first.
+const PREFERRED: Status[] = BEST_TIME_STEPS;
 
 const hourOf = (time: string) => parseInt(time.split(":")[0], 10);
 const fmtHour = (h: number) =>

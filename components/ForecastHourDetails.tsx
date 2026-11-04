@@ -20,7 +20,7 @@ import {
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { ForecastGraphDataPoint, ForecastSource, PaddlerType } from "@/types";
-import { ragStatus, statusLabel } from "@/lib/rag";
+import { statusUi, statusLabel } from "@/lib/rag";
 import { getPaddlingMatrix } from "@/lib/paddlingMatrix";
 import { usePaddlerLevel } from "@/lib/usePaddlerLevel";
 import { m3Duration, m3Easing } from "@/lib/m3-palette";
@@ -220,7 +220,7 @@ export const ForecastHourHeader: React.FC<ForecastHourHeaderProps> = ({
     );
   }
 
-  const statusConfig = ragStatus[point.status] ?? ragStatus.Unknown;
+  const statusConfig = statusUi(point.status);
   const timeLabel = `${dayLabel} ${padHour(point.time)}`;
 
   return (

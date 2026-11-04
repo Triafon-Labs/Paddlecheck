@@ -1,27 +1,95 @@
-import { KayakConditions, Status } from "@/types";
+import { KayakConditions, Status, StatusStep } from "@/types";
 import {
-  RAG_STATUS_MAP,
   CRITERIA_TABLE,
   LEVEL_DESCRIPTIONS,
   THRESHOLDS,
-  RAG_STATUS_UI,
   REASON_ICONS,
-  RAG_HEIGHT_MAP,
   RULES,
+  STATUS_STEPS,
+  UNKNOWN_STATUS,
 } from "./config";
 import { formatRiverLevel, whole } from "./units";
 
-export {
-  RAG_STATUS_MAP,
-  LEVEL_DESCRIPTIONS,
-  RAG_STATUS_UI as ragStatus,
-  REASON_ICONS as reasonIcons,
-  RAG_HEIGHT_MAP as ragHeight,
+export { LEVEL_DESCRIPTIONS };
+
+// --- The status scale (STATUS_STEPS in lib/config.ts) ---
+
+const STEPS: readonly StatusStep[] = STATUS_STEPS;
+
+// Every step's name, best first.
+export const STEP_NAMES = STEPS.map((step) => step.name) as Status[];
+// The last step: reached only by the river passing its fromLevel, or a
+// thunderstorm. Weather, darkness and fog stop one step short of it.
+export const TOP_STEP = STEP_NAMES[STEP_NAMES.length - 1];
+const TOP_INDEX = STEPS.length - 1;
+// The steps that count as a good time to paddle in the forecast summaries.
+export const BEST_TIME_STEPS = STEPS.filter((step) => step.bestTimes).map(
+  (step) => step.name
+) as Status[];
+// The level at which the river first counts as a contributing factor.
+export const FIRST_ELEVATED_LEVEL = STEPS[1]?.fromLevel ?? Infinity;
+
+type StatusUi = Omit<StatusStep, "fromLevel" | "riverDescription">;
+
+// How a status looks. A name that's no longer in STATUS_STEPS - e.g. one
+// cached before a step was renamed - is shown as Unknown.
+export const statusUi = (status: Status | string): StatusUi =>
+  STEPS.find((step) => step.name === status) ?? UNKNOWN_STATUS;
+
+export const statusLabel = (status: Status | string): string =>
+  statusUi(status).name;
+
+// Bar height in the forecast chart: full for the best step down to a stub for
+// the top one, evenly spaced between (1, 0.75, 0.5, 0.25, 0.1 for five).
+export const ragHeight = (status: Status): number => {
+  const i = STEP_NAMES.indexOf(status);
+  if (i === -1 || i === TOP_INDEX) return 0.1;
+  return TOP_INDEX <= 1 ? 1 : 1 - (0.75 * i) / (TOP_INDEX - 1);
 };
 
-// The name a status is shown under (RAG_STATUS_UI in lib/config.ts).
-export const statusLabel = (status: Status): string =>
-  RAG_STATUS_UI[status]?.label ?? status;
+// Contributing-factor icons: the weather ones from REASON_ICONS, and one per
+// step for its river level reason.
+export const reasonIcons: Record<string, React.ElementType> = {
+  ...REASON_ICONS,
+  ...Object.fromEntries(
+    STEPS.flatMap((step, i) => {
+      const reason = riverLevelReason(i);
+      return reason && step.reasonIcon ? [[reason, step.reasonIcon]] : [];
+    })
+  ),
+};
+
+function riverLevelReason(stepIndex: number): string | undefined {
+  const step = STEPS[stepIndex];
+  if (stepIndex === 0 || !step?.riverReason) return undefined;
+  return `${step.riverReason} river level (> ${formatRiverLevel(step.fromLevel)})`;
+}
+
+// Mistakes in STATUS_STEPS or CRITERIA_TABLE would otherwise show up as a
+// wrong or "Unknown" status on the day, so they stop the build instead.
+const checkConfig = () => {
+  if (STEPS.length < 2) throw new Error("STATUS_STEPS needs at least 2 steps");
+  STEPS.forEach((step, i) => {
+    if (i > 0 && !(step.fromLevel > STEPS[i - 1].fromLevel))
+      throw new Error(
+        `STATUS_STEPS: "${step.name}" must start at a higher fromLevel than "${STEPS[i - 1].name}"`
+      );
+  });
+  if (!RULES.WEATHER_TABLE) return;
+  for (const [band, row] of Object.entries(CRITERIA_TABLE)) {
+    for (const [weather, results] of Object.entries(row)) {
+      if (results.length !== TOP_INDEX)
+        throw new Error(
+          `CRITERIA_TABLE.${band}.${weather} has ${results.length} entries - it needs one per step before "${TOP_STEP}" (${TOP_INDEX})`
+        );
+      if (results.some((n) => !Number.isInteger(n) || n < 0 || n >= TOP_INDEX))
+        throw new Error(
+          `CRITERIA_TABLE.${band}.${weather}: every entry must be a step number from 0 to ${TOP_INDEX - 1}`
+        );
+    }
+  }
+};
+checkConfig();
 
 // --- Helper Functions for RAG Calculation ---
 
@@ -49,11 +117,14 @@ export const findLevelDescription = (level: number): string | undefined => {
     : description;
 };
 
+// The step the river level alone puts conditions on, as an index into
+// STATUS_STEPS. Never the top step - that's handled before this is asked.
 export const calculateInitialRagStatus = (level: number): number => {
-  if (level < THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1) return 0;
-  if (level < THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2) return 1;
-  if (level < THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3) return 2;
-  return 3;
+  let index = 0;
+  for (let i = 1; i < TOP_INDEX; i++) {
+    if (level >= STEPS[i].fromLevel) index = i;
+  }
+  return index;
 };
 
 const getTemperatureConditions = (
@@ -103,17 +174,7 @@ const adjustRagForFactors = (
     reasons.push("Foggy");
     ragNumber += 1;
   }
-  return { ragNumber: Math.min(ragNumber, 3), reasons };
-};
-
-const getRiverLevelReason = (initialRag: number): string | undefined => {
-  if (initialRag === 1)
-    return `Slightly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)})`;
-  if (initialRag === 2)
-    return `Moderately elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)})`;
-  if (initialRag === 3)
-    return `Significantly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)})`;
-  return undefined;
+  return { ragNumber: Math.min(ragNumber, TOP_INDEX - 1), reasons };
 };
 
 // --- Main RAG Calculation Function ---
@@ -145,9 +206,9 @@ export const calculateFinalRagStatus = (
     return { status: "Unknown", reasons: ["Missing data"] };
   }
 
-  if (riverLevel! >= THRESHOLDS.RIVER_LEVEL_NO_PADDLING) {
+  if (riverLevel! >= STEPS[TOP_INDEX].fromLevel) {
     return {
-      status: "No Paddling",
+      status: TOP_STEP,
       reasons: ["River level is dangerously high"],
     };
   }
@@ -155,7 +216,7 @@ export const calculateFinalRagStatus = (
     RULES.THUNDERSTORMS &&
     THRESHOLDS.THUNDERSTORM_CODES.includes(weatherCode!)
   ) {
-    return { status: "No Paddling", reasons: ["Thunderstorms"] };
+    return { status: TOP_STEP, reasons: ["Thunderstorms"] };
   }
 
   const initialRag = calculateInitialRagStatus(riverLevel!);
@@ -190,13 +251,13 @@ export const calculateFinalRagStatus = (
   );
 
   const allReasons = [
-    getRiverLevelReason(initialRag),
+    riverLevelReason(initialRag),
     ...(RULES.WEATHER_TABLE ? [tempReason, weatherReason] : []),
     ...adjustmentReasons,
   ].filter(Boolean) as string[];
 
   return {
-    status: RAG_STATUS_MAP[ragNumber] || "Unknown",
+    status: STEP_NAMES[ragNumber] ?? "Unknown",
     reasons: allReasons,
   };
 };

@@ -1,6 +1,23 @@
-import type { PADDLER_LEVELS } from "@/lib/config";
-export type Status =
-  "Unknown" | "Light Green" | "Dark Green" | "Amber" | "Red" | "No Paddling";
+import type { ElementType } from "react";
+import type { PADDLER_LEVELS, STATUS_STEPS } from "@/lib/config";
+
+// The status step names set in STATUS_STEPS (lib/config.ts), plus Unknown.
+export type Status = (typeof STATUS_STEPS)[number]["name"] | "Unknown";
+
+// One step of the status scale (STATUS_STEPS in lib/config.ts).
+export interface StatusStep {
+  name: string;
+  fromLevel: number;
+  color: string;
+  onColor: string;
+  emoji: string;
+  icon: ElementType;
+  description: string;
+  riverDescription: string;
+  riverReason?: string;
+  reasonIcon?: ElementType;
+  bestTimes?: boolean;
+}
 
 export interface KayakConditions {
   riverLevel?: number;

@@ -23,9 +23,9 @@ import {
   PaddlingExtraRule,
   PaddlingVerdict,
   Status,
+  StatusStep,
 } from "@/types";
 import { STATUS_COLORS, ON_STATUS_COLORS } from "./statusColors";
-import { formatRiverLevel } from "./units";
 import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
 
 // ============================================================================
@@ -38,7 +38,11 @@ import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
 // See README.md for a full adaptation guide.
 // ============================================================================
 
-// --- Club Identity ---
+// --- App and Club Identity ---
+// The app's name: the top bar, the browser tab, the share text and the name
+// it installs under on a phone. Changing it renames the app on phones that
+// have already installed it.
+export const APP_NAME = "Paddlecheck";
 // Update these to reflect your own club.
 export const CLUB_NAME = "Worcester Canoe Club";
 // Shown above "Paddlecheck" in the top bar, so it has to fit beside three
@@ -139,88 +143,114 @@ export const WARNING_COLORS = {
   Yellow: STATUS_COLORS.yellow,
 };
 
-// --- RAG Status Definitions ---
-export const RAG_STATUS_MAP: Record<number, Status> = {
-  0: "Light Green",
-  1: "Dark Green",
-  2: "Amber",
-  3: "Red",
-};
+// --- Status steps ---
+// The scale conditions are rated on, best first. Use as many steps as your
+// club's rules have. For each step:
+//   name             - shown everywhere, and used as its key in
+//                      WHO_CAN_PADDLE and CRITERIA_TABLE
+//   fromLevel        - the gauge reading (m) the step starts at. The first
+//                      step starts at 0.
+//   color / onColor  - the step's colour and the text colour on it. Keep the
+//                      pairs from lib/statusColors.ts, which are checked for
+//                      contrast (e.g. STATUS_COLORS.yellow with ON_STATUS_COLORS.yellow).
+//   emoji / icon     - used in the share text and on the status panel
+//   description      - what the step means, in the Conditions Key
+//   riverDescription - what the river looks like in this band, in the
+//                      Conditions Key
+//   riverReason      - how the level is described as a contributing factor,
+//                      e.g. "Slightly elevated" -> "Slightly elevated river
+//                      level (> 1.00 m)". Not needed on the first step.
+//   reasonIcon       - the icon beside that factor and the band
+//   bestTimes        - counts as a good time to paddle in the forecast's
+//                      "best times" (usually the first one or two steps)
+//
+// The last step is special: it's reached only by the river passing its
+// fromLevel or, with RULES.THUNDERSTORMS on, by a thunderstorm - weather,
+// darkness and fog stop one step short of it. Name it to fit both.
 
-export const RAG_HEIGHT_MAP: Record<Status, number> = {
-  "Light Green": 1.0,
-  "Dark Green": 0.75,
-  Amber: 0.5,
-  Red: 0.25,
-  "No Paddling": 0.1,
-  Unknown: 0.1,
-};
+// Landmarks Worcester's steps and rules are written around.
+const CONCRETE_STEP = 1.48;
+const TENTH_STEP = 2.75;
 
-// How each status step looks. The keys are fixed step names the code uses
-// internally - the five steps from best to worst, plus Unknown. Everything a
-// visitor sees comes from here:
-//   `label`   - the name shown for the step (rename them to your club's terms,
-//               e.g. "Low", "Moderate", "High", "Severe")
-//   `color`   - the step's colour; `onColor` the text colour on top of it.
-//               Keep the pairs from lib/statusColors.ts, which are checked for
-//               contrast (e.g. STATUS_COLORS.yellow with ON_STATUS_COLORS.yellow).
-//   `emoji` / `icon` - used in the share text and on the status panel.
-// The worst step ("No Paddling") is also what thunderstorms give if
-// RULES.THUNDERSTORMS is on, so give it a label that fits both. What each
-// paddler level may do on each step is set in lib/paddlingMatrix.ts.
-export const RAG_STATUS_UI: Record<
-  Status,
+export const STATUS_STEPS = [
   {
-    label: string;
-    color: string;
-    onColor: string;
-    emoji: string;
-    icon: React.ElementType;
-  }
-> = {
-  Unknown: {
-    label: "Unknown",
-    color: STATUS_COLORS.grey,
-    onColor: ON_STATUS_COLORS.grey,
-    emoji: "🤷",
-    icon: HelpOutlined,
-  },
-  "Light Green": {
-    label: "Light Green",
+    name: "Light Green",
+    fromLevel: 0,
     color: STATUS_COLORS.lightGreen,
     onColor: ON_STATUS_COLORS.lightGreen,
     emoji: "✅",
     icon: Check,
+    description:
+      "Ideal conditions. Beginners need coach supervision. Improvers may paddle as a group without a coach. Intermediates may paddle solo.",
+    riverDescription: "Below the wooden landing stage. Good launch conditions.",
+    bestTimes: true,
   },
-  "Dark Green": {
-    label: "Dark Green",
+  {
+    name: "Dark Green",
+    fromLevel: 1.0,
     color: STATUS_COLORS.darkGreen,
     onColor: ON_STATUS_COLORS.darkGreen,
     emoji: "📈",
     icon: TrendingUpOutlined,
+    description:
+      "Good conditions. Beginners and improvers need coach supervision. Intermediates may paddle with at least one other intermediate.",
+    riverDescription:
+      "Between landing stage and concrete step. Still paddleable with care.",
+    riverReason: "Slightly elevated",
+    reasonIcon: Water,
+    bestTimes: true,
   },
-  Amber: {
-    label: "Amber",
-    color: WARNING_COLORS.Amber,
+  {
+    name: "Amber",
+    fromLevel: CONCRETE_STEP,
+    color: STATUS_COLORS.amber,
     onColor: ON_STATUS_COLORS.amber,
     emoji: "⚠️",
     icon: WarningAmberOutlined,
+    description:
+      "Coach's discretion required. Beginners and improvers may only paddle at coach's discretion. Intermediates need supervision by an independent paddler or coach.",
+    riverDescription: "Above the concrete step. PFDs must be worn by all.",
+    riverReason: "Moderately elevated",
+    reasonIcon: Waves,
   },
-  Red: {
-    label: "Red",
-    color: WARNING_COLORS.Red,
+  {
+    name: "Red",
+    fromLevel: TENTH_STEP,
+    color: STATUS_COLORS.red,
     onColor: ON_STATUS_COLORS.red,
     emoji: "🚨",
     icon: CrisisAlert,
+    description:
+      "Risky conditions. No paddling for beginners or improvers. Intermediates at coach's discretion only (not above 10 steps from car park). PFDs must be worn by all.",
+    riverDescription:
+      "Above 10 steps from the car park. No paddling for intermediates and below.",
+    riverReason: "Significantly elevated",
+    reasonIcon: Tsunami,
   },
-  "No Paddling": {
-    label: "No Paddling",
+  {
+    name: "No Paddling",
+    fromLevel: 5.0,
     color: STATUS_COLORS.maroon,
     onColor: ON_STATUS_COLORS.maroon,
     emoji: "⛔",
     icon: DoNotDisturbOutlined,
+    description:
+      "Do not paddle. Triggered by thunderstorms or dangerously high river level.",
+    riverDescription:
+      "Boathouse flooding. No paddling under any circumstances.",
+    reasonIcon: Flood,
   },
-};
+] as const satisfies readonly StatusStep[];
+
+// Shown when the data needed for a status is missing.
+export const UNKNOWN_STATUS = {
+  name: "Unknown",
+  color: STATUS_COLORS.grey,
+  onColor: ON_STATUS_COLORS.grey,
+  emoji: "🤷",
+  icon: HelpOutlined,
+  description: "Data unavailable.",
+} as const;
 
 // --- Which rules apply ---
 // Switch off any factor your club's rules don't use.
@@ -249,10 +279,15 @@ export const PADDLER_LEVELS = [
   "Independent",
 ] as const;
 
-// --- RAG Calculation Criteria ---
-// Adjust these thresholds based on your local safety guidelines
-// Each row is the club's conditions table: temperature band, then weather,
-// then one rating per river-level column.
+// --- Weather table (used when RULES.WEATHER_TABLE is on) ---
+// The club's conditions table: a temperature band (high/moderate/low, split
+// at THRESHOLDS.TEMP_HIGH and TEMP_MODERATE), then the weather (calm, windy,
+// or rainy - rain only counts below TEMP_HIGH), then the resulting step for
+// each river level band. Steps are numbered from 0 in STATUS_STEPS order,
+// and each row has one entry per step except the last: Worcester's five
+// steps give rows of four, where [0, 1, 2, 3] means "the river level's own
+// step" and [2, 2, 2, 3] means "at least Amber". The build stops with a
+// message if a row is the wrong length.
 //
 // `low.rainy` is the one entry with no row in the printed table, which lists
 // only calm and windy at 5°C and below. It used to copy `low.calm`, so rain
@@ -277,14 +312,8 @@ export const THRESHOLDS = {
   // calculation, which only reacts to sustained wind speed.
   WIND_GUST_NOTABLE: 15,
   VISIBILITY_POOR: 1000,
-  RIVER_LEVEL_NO_PADDLING: 5.0,
   THUNDERSTORM_CODES: [95, 96, 97, 98, 99],
   FOG_CODES: [40, 41, 42, 43, 44, 45, 46, 47, 48, 49],
-  RIVER_LEVEL_INITIAL_RAG_1: 1.0,
-  // Above this, the concrete step landmark is submerged and PFDs are required.
-  RIVER_LEVEL_INITIAL_RAG_2: 1.48,
-  // Above this, the river is above the 10th step from the car park - no paddling for intermediates.
-  RIVER_LEVEL_INITIAL_RAG_3: 2.75,
   RIVER_LEVEL_TREND_THRESHOLD: 0.1,
   // A forecast hour counts as dark - and takes the "Dark" step - when more
   // than this fraction of it falls before sunrise or after sunset. A quarter,
@@ -400,7 +429,7 @@ export const WHO_CAN_PADDLE_EXTRAS: PaddlingExtraRule[] = [
     // however the status got to Red, so it's keyed to the level itself.
     when: {
       status: ["Red"],
-      riverLevelAtLeast: THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3,
+      riverLevelAtLeast: TENTH_STEP,
     },
     levels: ["Intermediate"],
     set: {
@@ -413,7 +442,7 @@ export const WHO_CAN_PADDLE_EXTRAS: PaddlingExtraRule[] = [
     // below Red (whose own lines already require one).
     when: {
       notStatus: ["Red"],
-      riverLevelAtLeast: THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2,
+      riverLevelAtLeast: CONCRETE_STEP,
     },
     levels: ["Independent", "Intermediate"],
     yesBecomes: "Warning",
@@ -442,23 +471,7 @@ const RAIN_CODES = new Set(
 export const isRainy = (weatherCode: number): boolean =>
   RAIN_CODES.has(weatherCode);
 
-// --- Conditions Key Descriptions ---
-// These appear in the Settings drawer "Conditions Key" section.
-// Update them to describe your own venue's landmarks and club guidelines.
-
-export const RAG_DESCRIPTIONS: Record<Status, string> = {
-  "Light Green":
-    "Ideal conditions. Beginners need coach supervision. Improvers may paddle as a group without a coach. Intermediates may paddle solo.",
-  "Dark Green":
-    "Good conditions. Beginners and improvers need coach supervision. Intermediates may paddle with at least one other intermediate.",
-  Amber:
-    "Coach's discretion required. Beginners and improvers may only paddle at coach's discretion. Intermediates need supervision by an independent paddler or coach.",
-  Red: "Risky conditions. No paddling for beginners or improvers. Intermediates at coach's discretion only (not above 10 steps from car park). PFDs must be worn by all.",
-  "No Paddling":
-    "Do not paddle. Triggered by thunderstorms or dangerously high river level.",
-  Unknown: "Data unavailable.",
-};
-
+// --- Conditions Key ---
 // The weather half of the conditions key. The headings and figures (e.g.
 // "Below 15 mph") come from THRESHOLDS; this is the explanation beside each.
 // Rows for a factor switched off in RULES aren't shown.
@@ -472,36 +485,20 @@ export const CONDITIONS_KEY_WEATHER = {
   rainCool:
     "Rain raises the risk rating whenever it isn't warm, by the same step as windy conditions.",
   // Shown only when set. Worcester's printed table doesn't cover cold rain.
-  rainCold: `The club's printed table sets out rain only for the cool band, listing just calm and windy at ${THRESHOLDS.TEMP_MODERATE}°C and below. Paddlecheck treats cold rain like cold wind rather than ignoring it, so it is stricter than the printed rules here.`,
+  rainCold: `The club's printed table sets out rain only for the cool band, listing just calm and windy at ${THRESHOLDS.TEMP_MODERATE}°C and below. ${APP_NAME} treats cold rain like cold wind rather than ignoring it, so it is stricter than the printed rules here.`,
   rainWarm: "Rain doesn't count against the rating once it's this warm.",
   // The club's rules define dark as streetlights lit; the app can't see
   // streetlights, so it uses sunrise and sunset.
-  dark: `Streetlights lit, in the club's rules. Paddlecheck uses sunrise and sunset in its place, and counts a forecast hour as dark when over ${60 * THRESHOLDS.DARK_HOUR_FRACTION} minutes of it is. Raises the rating one step.`,
+  dark: `Streetlights lit, in the club's rules. ${APP_NAME} uses sunrise and sunset in its place, and counts a forecast hour as dark when over ${60 * THRESHOLDS.DARK_HOUR_FRACTION} minutes of it is. Raises the rating one step.`,
   fog: "Raises the rating one step.",
   thunderstorm:
     "No paddling when thunder is near – overrides all other conditions.",
 };
 
-// Descriptions for each river level band in the conditions key.
-// Rewrite these to describe your own launch point landmarks.
-export const RIVER_LEVEL_BAND_DESCRIPTIONS = {
-  belowRag1: "Below the wooden landing stage. Good launch conditions.",
-  rag1ToRag2:
-    "Between landing stage and concrete step. Still paddleable with care.",
-  rag2ToRag3: "Above the concrete step. PFDs must be worn by all.",
-  rag3Plus:
-    "Above 10 steps from the car park. No paddling for intermediates and below.",
-  noPaddling: "Boathouse flooding. No paddling under any circumstances.",
-};
-
 // --- UI Text and Icons ---
+// Icons for the weather contributing factors. The river level ones come from
+// STATUS_STEPS (reasonIcon).
 export const REASON_ICONS: Record<string, React.ElementType> = {
-  [`Slightly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1)})`]:
-    Water,
-  [`Moderately elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_2)})`]:
-    Waves,
-  [`Significantly elevated river level (> ${formatRiverLevel(THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_3)})`]:
-    Tsunami,
   "Moderately low temperature": Thermostat,
   "Low temperature": AcUnit,
   "High winds": Air,

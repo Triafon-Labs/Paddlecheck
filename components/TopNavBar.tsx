@@ -19,11 +19,12 @@ import SettingsModal from "./SettingsModal";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { OFFLINE_NO_CACHE_ERROR } from "@/lib/hooks";
 import { degreesToCompass } from "@/lib/weather";
-import { ragStatus, statusLabel } from "@/lib/rag";
+import { statusUi, statusLabel, FIRST_ELEVATED_LEVEL } from "@/lib/rag";
 import {
   THRESHOLDS,
   DATA_STALE_THRESHOLD_MS,
   CLUB_SHORT_NAME,
+  APP_NAME,
 } from "@/lib/config";
 import {
   formatRiverLevel,
@@ -64,11 +65,11 @@ const buildShareText = (
   conditions: ReturnType<typeof useKayakContext>["conditions"],
   forecastDays: ReturnType<typeof useKayakContext>["forecastDays"]
 ): string => {
-  if (!conditions) return "Check current paddling conditions at Paddlecheck.";
+  if (!conditions) return `Check current paddling conditions at ${APP_NAME}.`;
 
   const lines: string[] = [];
 
-  const emoji = ragStatus[conditions.overallStatus]?.emoji ?? "";
+  const emoji = statusUi(conditions.overallStatus).emoji;
   lines.push(
     `🚦 *Overall Status:* ${statusLabel(conditions.overallStatus)} ${emoji}`
   );
@@ -92,7 +93,7 @@ const buildShareText = (
   if (
     conditions.launchMessage &&
     conditions.riverLevel !== undefined &&
-    conditions.riverLevel >= THRESHOLDS.RIVER_LEVEL_INITIAL_RAG_1
+    conditions.riverLevel >= FIRST_ELEVATED_LEVEL
   ) {
     lines.push("");
     lines.push(conditions.launchMessage);
@@ -202,7 +203,7 @@ const TopNavBar = () => {
     const message = `${text}\n\n${url}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Paddlecheck", text: message });
+        await navigator.share({ title: APP_NAME, text: message });
       } else {
         await navigator.clipboard.writeText(message);
         setSnackbarOpen(true);
@@ -283,7 +284,7 @@ const TopNavBar = () => {
                 is what we want here - there's nothing to resize. */}
             <Image
               src="/favicon.svg"
-              alt="Paddlecheck Logo"
+              alt={`${APP_NAME} logo`}
               width={40}
               height={40}
               style={{ flexShrink: 0 }}
@@ -305,7 +306,7 @@ const TopNavBar = () => {
                 sx={{ fontWeight: 600, lineHeight: 1.15, fontSize: "1.125rem" }}
                 color="text.primary"
               >
-                Paddlecheck
+                {APP_NAME}
               </Typography>
               {(isRefreshing || freshnessText) && (
                 <Typography

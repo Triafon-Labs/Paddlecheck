@@ -39,7 +39,7 @@ import {
   ForecastSource,
   WeatherWarning,
 } from "@/types";
-import { ragStatus } from "@/lib/rag";
+import { statusUi, TOP_STEP } from "@/lib/rag";
 import { FORECAST_LINE_DASH, WARNING_COLORS } from "@/lib/config";
 import NightsStay from "@mui/icons-material/NightsStay";
 import WbSunny from "@mui/icons-material/WbSunny";
@@ -162,11 +162,11 @@ const BarLabel = (props: BarLabelProps) => {
 
   const elements: React.ReactNode[] = [];
 
-  if (entry.status === "No Paddling") {
+  if (entry.status === TOP_STEP) {
     // Straight from the RAG palette rather than the theme's error role: this
     // icon captions a bar the <Bar> below fills from that same palette, so
     // the two have to be the one red no matter what the theme does.
-    const { icon: Icon, color } = ragStatus[entry.status];
+    const { icon: Icon, color } = statusUi(entry.status);
     if (Icon) {
       elements.push(
         <foreignObject
@@ -317,7 +317,7 @@ const DayChart = memo(function DayChart({
             {chartData.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={ragStatus[entry.status]?.color ?? ragStatus.Unknown.color}
+                fill={statusUi(entry.status).color}
                 // The picked hour is outlined - by its parent's CSS, which
                 // finds it by this class (selectionSx) - and every bar
                 // keeps its full colour so the day still reads at a glance.

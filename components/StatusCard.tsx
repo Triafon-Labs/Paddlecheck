@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { KayakConditions } from "@/types";
 import PaddlingStatusHero from "./PaddlingStatusHero";
-import { ragStatus } from "@/lib/rag";
+import { STEP_NAMES } from "@/lib/rag";
 import { ContributingFactors, FactorHeading } from "./ConditionFactors";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { formatDataAge } from "@/lib/time";
@@ -32,9 +32,7 @@ interface StatusCardProps {
 
 // Mirrors the scale in PaddlingStatusHero so the skeleton lays out the same
 // number of placeholder segments as the real strip.
-const SCALE_SEGMENT_COUNT = (
-  Object.keys(ragStatus) as (keyof typeof ragStatus)[]
-).filter((s) => s !== "Unknown").length;
+const SCALE_SEGMENT_COUNT = STEP_NAMES.length;
 
 const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
   const { riverGraphData } = useKayakContext();

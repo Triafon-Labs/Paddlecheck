@@ -20,7 +20,11 @@ import { useKayakContext } from "@/lib/KayakDataContext";
 import { OFFLINE_NO_CACHE_ERROR } from "@/lib/hooks";
 import { degreesToCompass } from "@/lib/weather";
 import { ragStatus, statusLabel } from "@/lib/rag";
-import { THRESHOLDS, DATA_STALE_THRESHOLD_MS } from "@/lib/config";
+import {
+  THRESHOLDS,
+  DATA_STALE_THRESHOLD_MS,
+  CLUB_SHORT_NAME,
+} from "@/lib/config";
 import {
   formatRiverLevel,
   formatTemperature,
@@ -260,7 +264,7 @@ const TopNavBar = () => {
         elevation={0}
         data-scrolled={scrolled}
       >
-        <Toolbar sx={{ justifyContent: "space-between" }}>
+        <Toolbar sx={{ justifyContent: "space-between", py: 0.75 }}>
           {/* minWidth: 0 lets this half shrink past its content on a narrow
               phone. Without it the title sets a floor on the flex item's
               width and the action buttons get pushed off the right edge
@@ -288,17 +292,27 @@ const TopNavBar = () => {
               <Typography
                 variant="h6"
                 noWrap
-                sx={{ fontWeight: 600, lineHeight: 1.2 }}
+                // A step down from h6's 1.25rem so the three lines - app,
+                // club, freshness - sit inside the bar with room to spare.
+                sx={{ fontWeight: 600, lineHeight: 1.15, fontSize: "1.125rem" }}
                 color="text.primary"
               >
                 Paddlecheck
+              </Typography>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                noWrap
+                sx={{ lineHeight: 1.25, fontWeight: 600 }}
+              >
+                {CLUB_SHORT_NAME}
               </Typography>
               {(isRefreshing || freshnessText) && (
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   noWrap
-                  sx={{ lineHeight: 1.2, mt: -0.2 }}
+                  sx={{ lineHeight: 1.2 }}
                 >
                   {isRefreshing ? "Updating…" : `Updated ${freshnessText}`}
                 </Typography>

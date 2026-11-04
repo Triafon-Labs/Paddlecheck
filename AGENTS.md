@@ -66,8 +66,7 @@ app/
   api/
     conditions/         All upstream data in one payload, cached 15 min (lib/conditions.ts)
       live/             Same payload with no cache – called when the cached one is stale
-    briefing/           AI briefing generation endpoint (Groq)
-    weather/warnings/   Met Office warnings on their own – nothing in the app calls it
+    briefing/           AI briefing (Groq) – builds its own inputs server-side, reads only `model` from the request
   layout.tsx            Root layout – Roboto Flex, ThemeRegistry, data provider, Analytics, safe-area frame
   page.tsx              Home page (client component, renders all cards)
   globals.css           Global resets only; type and colour come from the theme
@@ -100,7 +99,7 @@ lib/
   conditions.ts          Builds the /api/conditions payload – every source in parallel
   fetchCache.ts          The shared 15-minute upstream cache window
   rag.ts                 RAG status calculation logic
-  river.ts               Environment Agency API calls + Bewdley forecast logic
+  river.ts               Environment Agency API calls + upstream forecast logic
   weather.ts             Open-Meteo API calls + utilities
   metOfficeWarnings.ts   Met Office warnings RSS fetch and parsing
   warnings.ts            Warning display and per-day helpers
@@ -108,12 +107,15 @@ lib/
   chartMotion.ts         Chart entrances in CSS (bars grow, lines/areas wipe in) instead of recharts' JS animation
   paddlingMatrix.ts      What each paddler level may do for a status and river level (club rules)
   usePaddlerLevel.ts     The paddler level from Settings, kept in step across components and tabs
-  hooks.ts               useKayakData hook – orchestrates all fetching and state
+  buildKayakData.ts      Pure: raw sources → current conditions + 5-day hourly forecast (client and /api/briefing)
+  briefingInputs.ts      Pure: conditions + forecast → what the AI briefing is written from (server only)
+  hooks.ts               useKayakData hook – fetching, fallbacks and state; calls buildKayakData
   KayakDataContext.tsx   React Context wrapping the hook for component tree access
-  useBriefing.ts         AI briefing request and state
+  useBriefing.ts         AI briefing request (sends only the model) and state
   useShowNightHours.ts   The "Show night hours" setting, shared by Settings and the forecast chart
   units.ts               How each metric is formatted for display
   time.ts                Europe/London time helpers and data-age formatting
+  useNowTicking.ts       Client hook: the current time, ticking each minute (kept out of time.ts so servers can import it)
   storageKeys.ts         Canonical localStorage key names
   useTooltipDismiss.ts   Closes a recharts tooltip on an outside press
   statusColors.ts        The status colour vocabulary
@@ -179,7 +181,7 @@ The RAG status is calculated from river level first, then modifiers are applied:
 
 **Modifiers (applied in order):**
 
-1. **Temperature** – below 5°C raises status significantly (cold water shock); 5–13°C raises status moderately and enables rain as a factor
+1. **Temperature** – at or below 5°C raises status significantly (cold water shock); 5–13°C raises status moderately and enables rain as a factor
 2. **Wind** – above 15 mph raises status at any temperature
 3. **Rain** – only a factor when temp is 5–13°C (moderate)
 4. **Darkness** – raises Green → Amber, Amber → Red. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the Weather card's Daylight tile counts down to sunset
@@ -194,13 +196,13 @@ The word "raises" means incrementing one step up the severity scale.
 
 Two sources are combined transparently:
 
-- **Bewdley delta transfer** (primary, as far as the published forecast reaches plus the 6 h travel time – about 42 h for a 36 h feed): Upstream Bewdley readings are shifted 6 h forward and applied as a delta to the latest Barbourne reading, measured from Bewdley 6 h before that reading was taken so the forecast starts exactly on it. Bewdley's published forecast is shifted to start on its latest observation, and levels are interpolated between points. Displayed as tightly dashed lines in both graphs; the river level graph only draws the first `RIVER_GRAPH_FORECAST_HOURS` (24 h).
-- **Linear trend** (fallback, beyond Bewdley horizon): Continues Bewdley's trend over the last `BEWDLEY_TREND_HOURS` (6 h) of its series from where the Bewdley forecast ends, for at most `LINEAR_FORECAST_HOURS` (18 h). With no Bewdley data it uses a regression over the last 8 h of Barbourne readings instead – Barbourne lags Bewdley by the travel time, so on a rise its own trend is still flat when the Bewdley data runs out. Displayed as medium dashed lines.
+- **Upstream delta transfer** (primary, as far as the published forecast reaches plus the 6 h travel time – about 42 h for a 36 h feed): Upstream (Bewdley) readings are shifted 6 h forward and applied as a delta to the latest Barbourne reading, measured from the upstream gauge 6 h before that reading was taken so the forecast starts exactly on it. The upstream gauge's published forecast is shifted to start on its latest observation, and levels are interpolated between points. Displayed as tightly dashed lines in both graphs; the river level graph only draws the first `RIVER_GRAPH_FORECAST_HOURS` (24 h).
+- **Linear trend** (fallback, beyond the upstream horizon): Continues the upstream trend over the last `UPSTREAM_TREND_HOURS` (6 h) of its series from where the upstream forecast ends, for at most `LINEAR_FORECAST_HOURS` (18 h). With no upstream data it uses a regression over the last 8 h of Barbourne readings instead – Barbourne lags the upstream gauge by the travel time, so on a rise its own trend is still flat when the upstream data runs out. Displayed as medium dashed lines.
 - **Held** (everything after that): The level is held flat at the last linear estimate, so the RAG status for those hours is driven by the weather. No line is drawn for these hours, and the tooltip reads "Assumed Level" / "Source: None – level held".
 
 The dash patterns live in `FORECAST_LINE_DASH` (`lib/config.ts`).
 
-Bewdley data failure is non-fatal – the app falls back to linear regression silently.
+Upstream data failure (or `UPSTREAM_CSV_URL = null`) is non-fatal – the app falls back to linear regression silently.
 
 ---
 
@@ -230,19 +232,21 @@ Bewdley data failure is non-fatal – the app falls back to linear regression si
 
 The hook makes one request, `GET /api/conditions`, retried up to twice with backoff.
 That route builds its payload server-side in `lib/conditions.ts`: river, weather,
-future-weather, the Bewdley forecast and Met Office warnings are fetched in parallel
+future-weather, the upstream forecast and Met Office warnings are fetched in parallel
 (`Promise.all`, each promise wrapped in its own `.catch`), and the whole response is
 cached for 15 minutes (`revalidate = 900`) with `fetchedAt` stamped when it was built.
 If the request fails, or its `fetchedAt` is older than `DATA_STALE_THRESHOLD_MS`, the
 hook makes one forced call to `/api/conditions/live`, which runs the same fetch with no
-cache.
+cache. The hook then hands the sources to `buildKayakData` (`lib/buildKayakData.ts`),
+which `/api/briefing` also calls on the server so the briefing is written from the same
+picture without trusting anything the browser sends.
 
-A source that failed server-side comes back `null` (Bewdley as an empty forecast,
+A source that failed server-side comes back `null` (upstream as an empty forecast,
 warnings as `[]`), and the hook falls back to its own last-known copy of just that
 source (`paddlecheck_riverDataRaw` / `paddlecheck_weatherDataRaw` /
 `paddlecheck_futureWeatherDataRaw` in `localStorage`); if the whole request fails, all
 three fall back. So a single source blipping doesn't discard data that arrived fine
-from the others. Bewdley and warnings have no client cache. `lastUpdated` is the
+from the others. Upstream and warnings have no client cache. `lastUpdated` is the
 response's `fetchedAt`, or the previous cached conditions' timestamp when no response
 arrived at all.
 
@@ -281,16 +285,16 @@ prefixed `paddlecheck_` and omitted here.
 
 ## TypeScript Types (`types/index.ts`)
 
-| Type                     | Description                                                                                     |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `Status`                 | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"`               |
-| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps                      |
-| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                           |
-| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"bewdley"` \| `"linear"` \| `"held"`) |
-| `RiverReading`           | `{ dateTime: string; value: number }`                                                           |
-| `WeatherData`            | Current weather snapshot                                                                        |
-| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                                    |
-| `PaddlingMatrix`         | Skill level → status mapping with guidance text                                                 |
+| Type                     | Description                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `Status`                 | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"`                |
+| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps                       |
+| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                            |
+| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"upstream"` \| `"linear"` \| `"held"`) |
+| `RiverReading`           | `{ dateTime: string; value: number }`                                                            |
+| `WeatherData`            | Current weather snapshot                                                                         |
+| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                                     |
+| `PaddlingMatrix`         | Skill level → status mapping with guidance text                                                  |
 
 ---
 
@@ -391,17 +395,17 @@ If Git hooks are not firing:
 
 ## Key Configuration Constants (`lib/config.ts`)
 
-| Constant                                       | Value                            | Meaning                                      |
-| ---------------------------------------------- | -------------------------------- | -------------------------------------------- |
-| `RIVER_STATION_ID`                             | `2642`                           | EA API station (Worcester, Barbourne)        |
-| `BEWDLEY_CSV_URL`                              | `…/station-csv/2001`             | Upstream forecast CSV (`null` disables it)   |
-| `BEWDLEY_TRAVEL_HOURS`                         | `6`                              | Travel time Bewdley → Worcester              |
-| `BEWDLEY_TREND_HOURS`                          | `6`                              | Bewdley trend window for the linear fallback |
-| `LINEAR_FORECAST_HOURS`                        | `18`                             | Linear trend after Bewdley; level held after |
-| `THRESHOLDS.RIVER_LEVEL_*`                     | `1.0, 1.48, 2.75, 5.0`           | River level breakpoints (metres)             |
-| `THRESHOLDS.TEMP_HIGH`                         | `13°C`                           | At or above: no temperature penalty          |
-| `THRESHOLDS.TEMP_MODERATE`                     | `5°C`                            | At or below: cold water shock risk           |
-| `THRESHOLDS.WIND_HIGH`                         | `15` mph                         | Above this: wind penalty applied             |
-| `THRESHOLDS.VISIBILITY_POOR`                   | `1000` m                         | Below this: fog penalty applied              |
-| `MET_OFFICE_WARNINGS_RSS_URL` / `WARNING_AREA` | `…/Region/wm` / `Worcestershire` | Warnings feed and the area filter            |
-| Coordinates                                    | `52.2, -2.2`                     | Open-Meteo weather location                  |
+| Constant                                       | Value                            | Meaning                                       |
+| ---------------------------------------------- | -------------------------------- | --------------------------------------------- |
+| `RIVER_STATION_ID`                             | `2642`                           | EA API station (Worcester, Barbourne)         |
+| `UPSTREAM_CSV_URL`                             | `…/station-csv/2001`             | Upstream forecast CSV (`null` disables it)    |
+| `UPSTREAM_TRAVEL_HOURS`                        | `6`                              | Travel time upstream → club gauge             |
+| `UPSTREAM_TREND_HOURS`                         | `6`                              | Upstream trend window for the linear fallback |
+| `LINEAR_FORECAST_HOURS`                        | `18`                             | Linear trend after upstream; level held after |
+| `THRESHOLDS.RIVER_LEVEL_*`                     | `1.0, 1.48, 2.75, 5.0`           | River level breakpoints (metres)              |
+| `THRESHOLDS.TEMP_HIGH`                         | `13°C`                           | At or above: no temperature penalty           |
+| `THRESHOLDS.TEMP_MODERATE`                     | `5°C`                            | At or below: cold water shock risk            |
+| `THRESHOLDS.WIND_HIGH`                         | `15` mph                         | Above this: wind penalty applied              |
+| `THRESHOLDS.VISIBILITY_POOR`                   | `1000` m                         | Below this: fog penalty applied               |
+| `MET_OFFICE_WARNINGS_RSS_URL` / `WARNING_AREA` | `…/Region/wm` / `Worcestershire` | Warnings feed and the area filter             |
+| Coordinates                                    | `52.2, -2.2`                     | Open-Meteo weather location                   |

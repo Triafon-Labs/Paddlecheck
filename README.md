@@ -76,6 +76,8 @@ GROQ_API_KEY=your-key-here
 
 Without a key the rest of the app is unaffected, but the summary panel will show an error when it's asked to generate one. The model used is `DEFAULT_AI_MODEL` in `lib/config.ts`.
 
+The server builds the summary from its own copy of the conditions and only reads the model name from the browser, so visitors can't send their own text to Groq on your key. Generated summaries are cached for each 15-minute data window, so most visits don't make a Groq call at all.
+
 ### Commands
 
 ```bash
@@ -185,18 +187,18 @@ Weather:
 #### 7. Upstream station (optional)
 
 ```ts
-export const BEWDLEY_CSV_URL: string | null =
+export const UPSTREAM_CSV_URL: string | null =
   "https://check-for-flooding.service.gov.uk/station-csv/2001";
-export const BEWDLEY_TRAVEL_HOURS = 6;
+export const UPSTREAM_TRAVEL_HOURS = 6;
 ```
 
-An upstream gauge with an Environment Agency forecast lets the app see a rise coming before it reaches you. Its forecast is shifted forward by `BEWDLEY_TRAVEL_HOURS`, and the change it predicts is added to your own gauge's latest reading.
+An upstream gauge with an Environment Agency forecast lets the app see a rise coming before it reaches you. Its forecast is shifted forward by `UPSTREAM_TRAVEL_HOURS`, and the change it predicts is added to your own gauge's latest reading.
 
 - **Only some stations publish a forecast** – generally the larger rivers. Open `https://check-for-flooding.service.gov.uk/station-csv/<website-ID>` (the website number from step 3): a usable station's CSV has a third column marked `observed` or `forecast`. If it only has two columns there's no forecast, and the app will fall back as if there were no upstream station.
 - **Travel time** – the hours a change at the upstream gauge takes to show at yours. You can estimate it by comparing the two gauges' graphs after a rise, peak to peak.
-- **No upstream station?** Set `BEWDLEY_CSV_URL` to `null`. The forecast then continues your own gauge's trend over the last 8 hours, for up to 18 hours, and holds the level flat after that.
+- **No upstream station?** Set `UPSTREAM_CSV_URL` to `null`. The forecast then continues your own gauge's trend over the last 8 hours, for up to 18 hours, and holds the level flat after that.
 
-The names say "Bewdley" because that's Worcester's upstream gauge; they work for any station. (The CSV comes from the Check for flooding website rather than a documented API, so it could change without notice. If it does, the app falls back to the trend.)
+The CSV comes from the Check for flooding website rather than a documented API, so it could change without notice. If it does, the app falls back to the trend.
 
 #### 8. Landmarks and the conditions key
 
@@ -221,15 +223,16 @@ The four level names (Beginner, Improver, Intermediate, Independent) are used ac
 
 If you want to change behaviour rather than settings, these are the places to start:
 
-| File                        | What it does                                                      |
-| --------------------------- | ----------------------------------------------------------------- |
-| `lib/rag.ts`                | How a river level and the weather become a status                 |
-| `lib/hooks.ts`              | Fetching on the client, offline fallback, and the hourly forecast |
-| `lib/conditions.ts`         | The server-side fetch of every upstream source                    |
-| `lib/river.ts`              | River readings and the upstream forecast                          |
-| `lib/weather.ts`            | Open-Meteo requests                                               |
-| `app/api/briefing/route.ts` | The AI summary prompt                                             |
-| `types/index.ts`            | Every shared data type                                            |
+| File                        | What it does                                          |
+| --------------------------- | ----------------------------------------------------- |
+| `lib/rag.ts`                | How a river level and the weather become a status     |
+| `lib/buildKayakData.ts`     | Raw data → current conditions and the hourly forecast |
+| `lib/hooks.ts`              | Fetching on the client, and the offline fallback      |
+| `lib/conditions.ts`         | The server-side fetch of every upstream source        |
+| `lib/river.ts`              | River readings and the upstream forecast              |
+| `lib/weather.ts`            | Open-Meteo requests                                   |
+| `app/api/briefing/route.ts` | The AI summary prompt                                 |
+| `types/index.ts`            | Every shared data type                                |
 
 [`AGENTS.md`](AGENTS.md) is a fuller technical reference to the codebase – it's written for AI coding assistants, but it reads fine for people too.
 
@@ -265,11 +268,11 @@ Off Vercel, the analytics scripts simply fail to load; remove them as above if y
 
 GitHub turns Actions off in a new fork until you enable them on the **Actions** tab. Once on:
 
-| Workflow         | What it does                                                                                                                               | In your fork                                                                                                                                                                                       |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`         | Lint and build on every push and pull request                                                                                              | Keep it                                                                                                                                                                                            |
-| `auto-tag.yml`   | On every push to `main`, bumps the version, updates `CHANGELOG.md` and pushes a tag                                                        | Optional. Delete it if you don't want release commits; it needs to be able to push to `main`                                                                                                       |
-| `keep-alive.yml` | Every 5 minutes, loads the site and `/api/conditions`, and fails if any data source is down – a failed run sends you a GitHub notification | **Point it at your own site** by adding a repository variable `SITE_URL` (Settings → Secrets and variables → Actions → Variables), or delete it. Without the variable it checks the Worcester site |
+| Workflow         | What it does                                                                                                                               | In your fork                                                                                                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`         | Lint and build on every push and pull request                                                                                              | Keep it                                                                                                                                                          |
+| `auto-tag.yml`   | On every push to `main`, bumps the version, updates `CHANGELOG.md` and pushes a tag                                                        | Optional. Delete it if you don't want release commits; it needs to be able to push to `main`                                                                     |
+| `keep-alive.yml` | Every 5 minutes, loads the site and `/api/conditions`, and fails if any data source is down – a failed run sends you a GitHub notification | **Point it at your own site** by adding a repository variable `SITE_URL` (Settings → Secrets and variables → Actions → Variables). Until you do, it skips itself |
 
 `.github/dependabot.yml` opens pull requests for dependency updates. Delete it if you'd rather not get them.
 
@@ -280,7 +283,7 @@ GitHub turns Actions off in a new fork until you enable them on the **Actions** 
 
 ## Data Sources and Licences
 
-If you deploy your own copy, you're responsible for meeting each source's terms:
+The About section of the Settings drawer carries the credits the licences below ask for – keep it if you change that screen. If you deploy your own copy, you're responsible for meeting each source's terms:
 
 - **Environment Agency** data is under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/), which requires an attribution statement: _"This uses Environment Agency flood and river level data from the real-time data API (Beta)."_
 - **Open-Meteo**'s free API is for [non-commercial use](https://open-meteo.com/en/terms), with data under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) – credit Open-Meteo.

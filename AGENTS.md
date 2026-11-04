@@ -83,7 +83,7 @@ components/
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
   ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below, opening with the verdict for your level
-  TopNavBar.tsx          Header – app and club name (CLUB_SHORT_NAME) above the app name, freshness line, share, settings, refresh, status banners
+  TopNavBar.tsx          Header – APP_NAME and club name (CLUB_SHORT_NAME) above the app name, freshness line, share, settings, refresh, status banners
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners
@@ -171,7 +171,14 @@ the AI briefing, which is the one feature that won't work without it.
 
 The RAG status is calculated from river level first, then modifiers are applied:
 
-**Base status by river level (metres):**
+The steps themselves – how many, their names, where each starts, colours, icons and
+descriptions – are `STATUS_STEPS` in `lib/config.ts`. `lib/rag.ts` derives everything from
+it (`STEP_NAMES`, `TOP_STEP`, `BEST_TIME_STEPS`, `statusUi()`, `ragHeight()`, the river
+level reasons) and checks it, with `CRITERIA_TABLE`, when the module loads – a misordered
+step or a table row of the wrong length stops the build. Never hard-code a step name
+outside `lib/config.ts`.
+
+**Worcester's base status by river level (metres):**
 
 - < 1.0 m → Light Green
 - 1.0–1.48 m → Dark Green
@@ -188,12 +195,17 @@ in `reasons`.
 3. **Rain** – a factor whenever temp is below 13°C
 4. **Darkness** – raises the status one step. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the Weather card's Daylight tile counts down to sunset
 5. **Poor visibility** – below 1 000 m raises the status one step
-6. **Thunderstorms** – overrides everything → No Paddling
+6. **Thunderstorms** – overrides everything → the top step (No Paddling)
+
+Weather, darkness and fog cap one step below the top step; only the river level's own
+`fromLevel` or a thunderstorm reaches it.
 
 The word "raises" means incrementing one step up the severity scale.
 
-The `Status` values are fixed internal step names. What users see is `RAG_STATUS_UI[status].label`
-(use `statusLabel()` from `lib/rag.ts` – never render a `Status` directly). Whether an hour
+A `Status` is a step `name` (or `"Unknown"`). Look a status up with `statusUi()` from
+`lib/rag.ts`, which falls back to Unknown for a name no longer in `STATUS_STEPS` (e.g. from an
+older cache). Verdict colours in "Who Can Paddle" are fixed green/amber/red
+(`components/StatusFace.tsx`), independent of the steps. Whether an hour
 is dark is the forecast point's own `dark` flag (`isDarkSlot`, `lib/forecast.ts`), not the
 "Dark" reason, which is absent when `RULES.DARKNESS` is off.
 
@@ -292,16 +304,16 @@ prefixed `paddlecheck_` and omitted here.
 
 ## TypeScript Types (`types/index.ts`)
 
-| Type                     | Description                                                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `Status`                 | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"` – internal step names; display via `statusLabel()` |
-| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps                                                           |
-| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                                                                |
-| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"upstream"` \| `"linear"` \| `"held"`)                                     |
-| `RiverReading`           | `{ dateTime: string; value: number }`                                                                                                |
-| `WeatherData`            | Current weather snapshot                                                                                                             |
-| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                                                                         |
-| `PaddlingMatrix`         | One entry per `PaddlerType`, built from `WHO_CAN_PADDLE` (config) → verdict and guidance                                             |
+| Type                     | Description                                                                                                             |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `Status`                 | A `STATUS_STEPS` name, or `"Unknown"` – Worcester: `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling"` |
+| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps                                              |
+| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                                                   |
+| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"upstream"` \| `"linear"` \| `"held"`)                        |
+| `RiverReading`           | `{ dateTime: string; value: number }`                                                                                   |
+| `WeatherData`            | Current weather snapshot                                                                                                |
+| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                                                            |
+| `PaddlingMatrix`         | One entry per `PaddlerType`, built from `WHO_CAN_PADDLE` (config) → verdict and guidance                                |
 
 ---
 
@@ -409,7 +421,7 @@ If Git hooks are not firing:
 | `UPSTREAM_TRAVEL_HOURS`                        | `6`                              | Travel time upstream → club gauge             |
 | `UPSTREAM_TREND_HOURS`                         | `6`                              | Upstream trend window for the linear fallback |
 | `LINEAR_FORECAST_HOURS`                        | `18`                             | Linear trend after upstream; level held after |
-| `THRESHOLDS.RIVER_LEVEL_*`                     | `1.0, 1.48, 2.75, 5.0`           | River level breakpoints (metres)              |
+| `STATUS_STEPS[].fromLevel`                     | `0, 1.0, 1.48, 2.75, 5.0`        | Where each step starts (metres)               |
 | `THRESHOLDS.TEMP_HIGH`                         | `13°C`                           | At or above: no temperature penalty           |
 | `THRESHOLDS.TEMP_MODERATE`                     | `5°C`                            | At or below: cold water shock risk            |
 | `THRESHOLDS.WIND_HIGH`                         | `15` mph                         | Above this: wind penalty applied              |

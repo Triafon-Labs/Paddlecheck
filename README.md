@@ -107,7 +107,7 @@ Either way, the more of your changes you keep to `lib/config.ts`, the easier it 
 
 ### The basics: `lib/config.ts`
 
-Everything club-specific lives in **`lib/config.ts`** – a basic adaptation doesn't touch any other file. Only the app's name and icons live elsewhere (step 12).
+Everything club-specific lives in **`lib/config.ts`** – adapting the app doesn't touch any other file, except to replace the icons (step 12).
 
 #### 1. Club identity
 
@@ -161,21 +161,29 @@ export const WARNING_AREA = "Worcestershire";
 
 Pick your region's feed from the [Met Office RSS page](https://www.metoffice.gov.uk/weather/guides/rss). `WARNING_AREA` filters it to warnings whose description mentions that name – use the county (or unitary authority) as the Met Office writes it.
 
-#### 6. Status steps: names and colours
+#### 6. Status steps
 
-The app rates conditions on five steps, best to worst, plus Unknown when data is missing. Internally they're always called Light Green, Dark Green, Amber, Red and No Paddling, but what people see comes from `RAG_STATUS_UI`:
+`STATUS_STEPS` is the scale conditions are rated on, best first. Worcester has five (Light Green, Dark Green, Amber, Red, No Paddling); use as many as your club's rules have. Each step is one entry:
 
 ```ts
-"Dark Green": {
-  label: "Moderate",                   // the name shown everywhere
-  color: STATUS_COLORS.yellow,         // keep colour/onColor pairs from lib/statusColors.ts
-  onColor: ON_STATUS_COLORS.yellow,    //   – they're checked for contrast
-  emoji: "📈",                          // share text
-  icon: TrendingUpOutlined,            // status panel
+{
+  name: "Very high",                   // shown everywhere; also its key in WHO_CAN_PADDLE
+  fromLevel: 3.3,                      // gauge reading (m) the step starts at; the first starts at 0
+  color: STATUS_COLORS.red,            // keep colour/onColor pairs from lib/statusColors.ts
+  onColor: ON_STATUS_COLORS.red,       //   – they're checked for contrast
+  emoji: "🚨",                          // share text
+  icon: CrisisAlert,                   // status panel and Conditions Key
+  description: "Only paddle in groups, consult coaches…",  // Conditions Key
+  riverDescription: "Almost on the top step.",             // Conditions Key, river band
+  riverReason: "Very high",            // contributing factor: "Very high river level (> 3.30 m)"
+  reasonIcon: Tsunami,                 // icon for that factor and the band
+  bestTimes: true,                     // optional – counts as a good time to paddle in forecast summaries
 },
 ```
 
-The worst step doesn't have to mean "no paddling" – what each level may do on it is up to `WHO_CAN_PADDLE` (step 11). It's also the step thunderstorms give when that rule is on, so choose a label that fits both.
+The last step is special. Only the river passing its `fromLevel`, or a thunderstorm, can reach it; weather, darkness and fog stop one step short. It doesn't have to mean "no paddling" – what each level may do on it is up to `WHO_CAN_PADDLE` (step 11). As thunderstorms also lead there, give it a name that fits both.
+
+If the steps are out of order, `npm run build` stops with a message saying which one.
 
 #### 7. Which rules apply
 
@@ -190,18 +198,9 @@ The worst step doesn't have to mean "no paddling" – what each level may do on 
 
 With everything off, the river level alone sets the status. A switched-off factor stops being listed as a reason and disappears from the Conditions Key. The weather is still shown on the page either way.
 
-#### 8. Safety thresholds
+#### 8. Weather thresholds
 
-`THRESHOLDS` sets where the status changes. Base status by river level:
-
-| Key                         | Worcester value | Meaning                       |
-| --------------------------- | --------------- | ----------------------------- |
-| `RIVER_LEVEL_INITIAL_RAG_1` | 1.0 m           | Light Green → Dark Green      |
-| `RIVER_LEVEL_INITIAL_RAG_2` | 1.48 m          | Dark Green → Amber            |
-| `RIVER_LEVEL_INITIAL_RAG_3` | 2.75 m          | Amber → Red                   |
-| `RIVER_LEVEL_NO_PADDLING`   | 5.0 m           | At or above this, No Paddling |
-
-Weather:
+Where the river level moves between steps is each step's `fromLevel` (step 6). `THRESHOLDS` sets the weather limits:
 
 | Key               | Worcester value | Meaning                                      |
 | ----------------- | --------------- | -------------------------------------------- |
@@ -212,7 +211,7 @@ Weather:
 
 **Levels are relative to your gauge**, not depth. Each station has its own datum, so a reading of 1.0 m means something completely different on another river. Your thresholds have to come from your own observations.
 
-`CRITERIA_TABLE` is the lookup that combines them. Each row is a temperature band (`high`, `moderate`, `low`) and a weather type (`calm`, `windy`, `rainy`), holding the status for each of the four river level bands (`0` Light Green, `1` Dark Green, `2` Amber, `3` Red). For example, `moderate.windy: [2, 2, 2, 3]` means cool and windy is Amber at any level below the Red threshold. Edit the numbers to match your club's table.
+`CRITERIA_TABLE` is the lookup that combines them. Each row is a temperature band (`high`, `moderate`, `low`) and a weather type (`calm`, `windy`, `rainy`), holding the resulting step for each river level band. Steps are numbered from 0 in `STATUS_STEPS` order, and each row has one entry per step except the last – four for Worcester's five steps. For example, `moderate.windy: [2, 2, 2, 3]` means cool and windy is at least Amber at any level below Red. Edit the numbers to match your club's table. A row of the wrong length stops the build with a message saying which.
 
 The text beside each weather row of the Conditions Key is in `CONDITIONS_KEY_WEATHER`; the figures in its headings come from `THRESHOLDS` automatically. Set `rainCold` to `""` to hide that row – it explains a Worcester-specific quirk.
 
@@ -238,8 +237,7 @@ The CSV comes from the Check for flooding website rather than a documented API, 
 These are entirely specific to your venue:
 
 - **`LEVEL_DESCRIPTIONS`** – gauge readings mapped to what you see at the launch point, e.g. `1.48: "On concrete lower deck – wet feet!"`. Build it by noting the gauge reading each time you visit at a different level. It can start empty (`{}`) – the landmarks just won't show until you add some.
-- **`RAG_DESCRIPTIONS`** – what each status means for your club, shown in the Settings drawer's conditions key.
-- **`RIVER_LEVEL_BAND_DESCRIPTIONS`** – a description of each river level band, also shown in the conditions key.
+- **Each step's `description` and `riverDescription`** (step 6) – what the step means for your club, and what the river looks like in that band, shown in the Settings drawer's conditions key.
 
 #### 11. Paddler levels and who can paddle
 
@@ -278,7 +276,7 @@ A level someone saved in Settings that no longer exists is simply treated as "no
 
 #### 12. App name and icons (optional)
 
-- Name and description: `app/manifest.ts` (installed app) and `metadata` in `app/layout.tsx` (browser tab).
+- Name: `APP_NAME` in `lib/config.ts` – the top bar, browser tab, share text, and the name the app installs under. Changing it renames the app on phones that have already installed it. The browser tab also carries `CLUB_NAME`.
 - Icons: the files in `public/`. The installable icons are all rendered from `public/favicon.svg`, so replace that and regenerate the PNGs at the same sizes (a tool such as [RealFaviconGenerator](https://realfavicongenerator.net/) will do the lot).
 
 ### Going further

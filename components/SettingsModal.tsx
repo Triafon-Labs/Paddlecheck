@@ -173,6 +173,16 @@ const ThresholdRow: React.FC<ThresholdRowProps> = ({
 const DISMISS_DISTANCE_RATIO = 0.3;
 const DISMISS_VELOCITY_PX_PER_MS = 0.5;
 
+// An inline link in the About text, opened in a new tab.
+const SourceLink: React.FC<{ href: string; children: React.ReactNode }> = ({
+  href,
+  children,
+}) => (
+  <Link href={href} target="_blank" rel="noopener noreferrer" color="inherit">
+    {children}
+  </Link>
+);
+
 const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
   const [activeTab, setActiveTab] = useState<"settings" | "info">("settings");
   // Both tab panels stay mounted (see the grid below), so the Conditions Key
@@ -829,6 +839,31 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               >
                 Feedback welcome here!
               </Link>
+            </Typography>
+            {/* Required by the sources' licences: the Environment Agency's
+                Open Government Licence asks for this exact statement, and
+                Open-Meteo's CC BY 4.0 for a credit. */}
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 1, display: "block" }}
+            >
+              This uses Environment Agency flood and river level data from the
+              real-time data API (Beta), under the{" "}
+              <SourceLink href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">
+                Open Government Licence
+              </SourceLink>
+              . Weather data by{" "}
+              <SourceLink href="https://open-meteo.com/">Open-Meteo</SourceLink>{" "}
+              (
+              <SourceLink href="https://creativecommons.org/licenses/by/4.0/">
+                CC BY 4.0
+              </SourceLink>
+              ). Weather warnings from the{" "}
+              <SourceLink href="https://www.metoffice.gov.uk/weather/warnings-and-advice/uk-warnings">
+                Met Office
+              </SourceLink>
+              .
             </Typography>
           </Box>
         </Box>

@@ -59,9 +59,24 @@ plugin or build step generates it.
 
 ---
 
+## Club settings (`club.yaml`)
+
+Everything club-specific – names, gauge, location, warnings area, status steps, rules,
+thresholds, weather table, paddler levels, Who Can Paddle, landmarks and Conditions Key
+text – lives in `club.yaml` at the project root. `yaml-loader` (a Turbopack rule in
+`next.config.ts`) imports it as a module; `lib/clubConfig.ts` checks it and throws one
+error listing every problem, which stops `next dev`/`next build`; `lib/config.ts`
+re-exports it under the same constant names the code uses (`CLUB_NAME`, `STATUS_STEPS`,
+`WHO_CAN_PADDLE`, `THRESHOLDS.TEMP_HIGH`, …). Never hard-code club-specific values in code –
+add a setting to `club.yaml`, `lib/clubConfig.ts` and `club.schema.json` (editor hints)
+together.
+
 ## Directory Structure
 
 ```
+club.yaml               The club's settings (see above)
+club.schema.json        JSON Schema for club.yaml – editor autocomplete and checks only
+
 app/
   api/
     conditions/         All upstream data in one payload, cached 15 min (lib/conditions.ts)
@@ -95,7 +110,8 @@ components/
   ServiceWorkerRegistration.tsx  Registers public/sw.js in production
 
 lib/
-  config.ts              All thresholds, station IDs, descriptions, coordinates
+  config.ts              The app's constants: the club's from club.yaml, plus data sources, caching, chart styling
+  clubConfig.ts          Reads and checks club.yaml (icon/colour names, placeholders, plain-English errors)
   conditions.ts          Builds the /api/conditions payload – every source in parallel
   fetchCache.ts          The shared 15-minute upstream cache window
   rag.ts                 RAG status calculation logic
@@ -126,6 +142,7 @@ lib/
 
 types/
   index.ts               All shared TypeScript types
+  yaml.d.ts              Lets club.yaml be imported (untyped until clubConfig.ts checks it)
 
 public/                  Static assets – icons, favicon, sw.js (offline shell)
 ```
@@ -134,13 +151,13 @@ public/                  Static assets – icons, favicon, sw.js (offline shell)
 
 ## Key Files to Understand First
 
-| File             | Why                                                                                                                 |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `lib/config.ts`  | All magic numbers live here – river thresholds, station IDs, temperature/wind/visibility limits, level descriptions |
-| `lib/rag.ts`     | The core algorithm – how a river level + weather combination becomes a RAG status                                   |
-| `lib/hooks.ts`   | Entry point for all data – fetch logic, retry, error handling, state shape                                          |
-| `types/index.ts` | The full type vocabulary – read this before touching any data flow                                                  |
-| `app/page.tsx`   | The single page – component layout and data context provision                                                       |
+| File             | Why                                                                               |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `club.yaml`      | Every club-specific setting – steps, thresholds, station IDs, rules, landmarks    |
+| `lib/rag.ts`     | The core algorithm – how a river level + weather combination becomes a RAG status |
+| `lib/hooks.ts`   | Entry point for all data – fetch logic, retry, error handling, state shape        |
+| `types/index.ts` | The full type vocabulary – read this before touching any data flow                |
+| `app/page.tsx`   | The single page – component layout and data context provision                     |
 
 ---
 
@@ -173,11 +190,10 @@ the AI briefing, which is the one feature that won't work without it.
 The RAG status is calculated from river level first, then modifiers are applied:
 
 The steps themselves – how many, their names, where each starts, colours, icons and
-descriptions – are `STATUS_STEPS` in `lib/config.ts`. `lib/rag.ts` derives everything from
-it (`STEP_NAMES`, `TOP_STEP`, `BEST_TIME_STEPS`, `statusUi()`, `ragHeight()`, the river
-level reasons) and checks it, with `CRITERIA_TABLE`, when the module loads – a misordered
-step or a table row of the wrong length stops the build. Never hard-code a step name
-outside `lib/config.ts`.
+descriptions – are `steps` in `club.yaml` (`STATUS_STEPS` in code). `lib/rag.ts` derives
+everything from it (`STEP_NAMES`, `TOP_STEP`, `BEST_TIME_STEPS`, `statusUi()`,
+`ragHeight()`, the river level reasons); `lib/clubConfig.ts` has already checked it and the
+weather table. Never hard-code a step name in code.
 
 **Worcester's base status by river level (metres):**
 
@@ -187,7 +203,7 @@ outside `lib/config.ts`.
 - 2.75–5.0 m → Red
 - ≥ 5.0 m → No Paddling
 
-**Modifiers (applied in order).** Each can be switched off in `RULES` (`lib/config.ts`) –
+**Modifiers (applied in order).** Each can be switched off in `rules` (`club.yaml`) –
 `WEATHER_TABLE` covers 1–3. A switched-off factor neither changes the status nor appears
 in `reasons`.
 
@@ -296,7 +312,7 @@ prefixed `paddlecheck_` and omitted here.
 | Key                   | Value                                                                     |
 | --------------------- | ------------------------------------------------------------------------- |
 | `themeMode`           | `"light"` \| `"dark"` \| `"system"` (read/written by MUI)                 |
-| `paddlerLevel`        | One of `PADDLER_LEVELS` (`lib/config.ts`); anything else reads as unset   |
+| `paddlerLevel`        | One of `paddlerLevels` (`club.yaml`); anything else reads as unset        |
 | `riverGraphTimeRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`                     |
 | `autoSummarise`       | `"true"` \| `"false"` – auto-generate the AI summary on load              |
 | `forecastShowNight`   | `"true"` \| `"false"` – show night hours in the forecast chart (Settings) |
@@ -414,6 +430,8 @@ If Git hooks are not firing:
 ---
 
 ## Key Configuration Constants (`lib/config.ts`)
+
+Worcester's values, set in `club.yaml` except where noted.
 
 | Constant                                       | Value                            | Meaning                                       |
 | ---------------------------------------------- | -------------------------------- | --------------------------------------------- |

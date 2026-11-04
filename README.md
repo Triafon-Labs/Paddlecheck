@@ -103,196 +103,90 @@ The service worker only registers in a production build, so use `npm run build &
 - **Fork on GitHub** if you want your own hosted copy. This is the simplest route, and it lets you pull in later improvements from this repository (GitHub's "Sync fork" button).
 - **Clone and push to a new repository** if you'd rather your copy had no visible link back to this one. You can still pull updates by adding this repository as a second remote.
 
-Either way, the more of your changes you keep to `lib/config.ts`, the easier it is to take updates later without merge conflicts.
+Either way, if your changes stay in `club.yaml` (and `public/` for icons), taking updates later is painless: they'll almost never touch the same files.
 
-### The basics: `lib/config.ts`
+### Your settings: `club.yaml`
 
-Everything club-specific lives in **`lib/config.ts`** – adapting the app doesn't touch any other file, except to replace the icons (step 12).
+Everything about your club is in **`club.yaml`** at the top of the project – no other file needs to change, except to swap the icons. Every setting has a comment above it explaining what it does, so the file itself is the main guide. This section covers the parts that need more than a comment.
 
-#### 1. Club identity
+YAML is a plain-text settings format. The things that trip people up:
 
-```ts
-export const CLUB_NAME = "Worcester Canoe Club";
-export const CLUB_SHORT_NAME = "Worcester Canoe Club";
-export const FEEDBACK_URL = "https://github.com/your-name/your-repo/issues";
+- **Indentation is meaningful.** Use spaces, two per level, never tabs, and keep items in the same section lined up.
+- **Quote text that contains `: ` or ` #`**, or starts with a symbol (`*`, `&`, `!`, `[`, `{`, `>`, `|`, `%`, `@` or a quote mark).
+- **Quote `"Yes"` and `"No"`** in verdicts.
+
+**Checking your changes.** `npm run dev` and `npm run build` check `club.yaml` first and stop with a message naming any problem:
+
+```text
+club.yaml has 2 problems:
+  • steps → "Amber" → colour: "orange" isn't one of: red, maroon, amber, yellow, darkGreen, lightGreen, grey
+  • whoCanPaddle → "Amber": "Improver" is missing – give one verdict for everyone, or one for every level
 ```
 
-`CLUB_SHORT_NAME` sits above "Paddlecheck" in the top bar, so people can tell your copy from another club's. Keep it to about 20 characters, or it's cut short on smaller phones – "Worcester CC" rather than "Worcester and District Canoe Club". The full `CLUB_NAME` is shown in the About section of the Settings drawer, and `FEEDBACK_URL` is where its "Feedback welcome" link goes – your fork's GitHub issues, a form, or a `mailto:` link. Whatever you put here is public to anyone using the app.
+An indentation slip gives the line and column instead. With `npm run dev` running, changes show up in the browser as soon as you save.
 
-#### 2. Useful links
+**Editor help (optional).** In [VS Code](https://code.visualstudio.com/) with the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml), `club.yaml` gets suggestions as you type and mistakes underlined. The first line of the file links it to `club.schema.json`, which describes every setting.
 
-```ts
-export const USEFUL_LINKS = [ ... ];
-```
-
-Links shown in the Settings drawer. Replace them with your own gauge pages, club website and so on.
-
-#### 3. River gauge station
-
-```ts
-export const RIVER_STATION_ID = "2642"; // replace with your station ID
-```
+#### River gauge (`river.stationId`)
 
 To find your station:
 
-1. Search the [station list](https://environment.data.gov.uk/flood-monitoring/id/stations?parameter=level) – add `&riverName=<river>`, `&town=<town>` or `&search=<name>` to the URL to narrow it down. Or use `&lat=<lat>&long=<long>&dist=10` to find stations within 10 km of your club.
+1. Search the [station list](https://environment.data.gov.uk/flood-monitoring/id/stations?parameter=level) – add `&riverName=<river>`, `&town=<town>` or `&search=<name>` to the URL to narrow it down, or `&lat=<lat>&long=<long>&dist=10` for stations within 10 km of your club.
 2. Copy the station's `stationReference` (or the last part of its `@id` URL).
 
-**There are two ID schemes, and they're easy to mix up.** The flood-monitoring API (used here) and the public [Check for flooding](https://check-for-flooding.service.gov.uk/) website number stations differently. Worcester Barbourne is `2642` in the API but `2092` on the website – the website's number is the `RLOIid` field in the API's station record. `RIVER_STATION_ID` needs the API number; `USEFUL_LINKS` and the upstream CSV (step 9) use the website's.
+**There are two ID schemes, and they're easy to mix up.** The flood-monitoring API (used here) and the public [Check for flooding](https://check-for-flooding.service.gov.uk/) website number stations differently. Worcester Barbourne is `2642` in the API but `2092` on the website – the website's number is the `RLOIid` field in the API's station record. `stationId` needs the API number; `usefulLinks` and `forecastCsv` use the website's.
 
-You can check you have the right one by opening `https://environment.data.gov.uk/flood-monitoring/id/stations/<ID>/readings?_sorted&_limit=5` – you should see recent level readings.
+Check you have the right one by opening `https://environment.data.gov.uk/flood-monitoring/id/stations/<ID>/readings?_sorted&_limit=5` – you should see recent level readings.
 
-#### 4. Location
+#### Level forecast (`river.forecastCsv`, `river.travelHours`)
 
-```ts
-export const LATITUDE = 52.2;
-export const LONGITUDE = -2.2;
-```
+A gauge with an Environment Agency forecast lets the app see a rise coming. Its forecast is shifted forward by `travelHours`, and the change it predicts is added to your own gauge's latest reading.
 
-Your launch point, used for weather, sunrise and sunset. Two decimal places is plenty.
-
-#### 5. Weather warnings
-
-```ts
-export const MET_OFFICE_WARNINGS_RSS_URL =
-  "https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm";
-export const WARNING_AREA = "Worcestershire";
-```
-
-Pick your region's feed from the [Met Office RSS page](https://www.metoffice.gov.uk/weather/guides/rss). `WARNING_AREA` filters it to warnings whose description mentions that name – use the county (or unitary authority) as the Met Office writes it.
-
-#### 6. Status steps
-
-`STATUS_STEPS` is the scale conditions are rated on, best first. Worcester has five (Light Green, Dark Green, Amber, Red, No Paddling); use as many as your club's rules have. Each step is one entry:
-
-```ts
-{
-  name: "Very high",                   // shown everywhere; also its key in WHO_CAN_PADDLE
-  fromLevel: 3.3,                      // gauge reading (m) the step starts at; the first starts at 0
-  color: STATUS_COLORS.red,            // keep colour/onColor pairs from lib/statusColors.ts
-  onColor: ON_STATUS_COLORS.red,       //   – they're checked for contrast
-  emoji: "🚨",                          // share text
-  icon: CrisisAlert,                   // status panel and Conditions Key
-  description: "Only paddle in groups, consult coaches…",  // Conditions Key
-  riverDescription: "Almost on the top step.",             // Conditions Key, river band
-  riverReason: "Very high",            // contributing factor: "Very high river level (> 3.30 m)"
-  reasonIcon: Tsunami,                 // icon for that factor and the band
-  bestTimes: true,                     // optional – counts as a good time to paddle in forecast summaries
-},
-```
-
-The last step is special. Only the river passing its `fromLevel`, or a thunderstorm, can reach it; weather, darkness and fog stop one step short. It doesn't have to mean "no paddling" – what each level may do on it is up to `WHO_CAN_PADDLE` (step 11). As thunderstorms also lead there, give it a name that fits both.
-
-If the steps are out of order, `npm run build` stops with a message saying which one.
-
-#### 7. Which rules apply
-
-`RULES` switches whole factors on or off:
-
-| Key             | Worcester | When on                                                         |
-| --------------- | --------- | --------------------------------------------------------------- |
-| `WEATHER_TABLE` | `true`    | Temperature, wind and rain adjust the status (`CRITERIA_TABLE`) |
-| `DARKNESS`      | `true`    | Darkness raises the status one step                             |
-| `FOG`           | `true`    | Fog or poor visibility raises the status one step               |
-| `THUNDERSTORMS` | `true`    | Thunderstorms jump straight to the worst step                   |
-
-With everything off, the river level alone sets the status. A switched-off factor stops being listed as a reason and disappears from the Conditions Key. The weather is still shown on the page either way.
-
-#### 8. Weather thresholds
-
-Where the river level moves between steps is each step's `fromLevel` (step 6). `THRESHOLDS` sets the weather limits:
-
-| Key               | Worcester value | Meaning                                      |
-| ----------------- | --------------- | -------------------------------------------- |
-| `TEMP_HIGH`       | 13 °C           | At or above this, temperature isn't a factor |
-| `TEMP_MODERATE`   | 5 °C            | Above this is "cool"; at or below is "cold"  |
-| `WIND_HIGH`       | 15 mph          | Sustained wind above this counts as windy    |
-| `VISIBILITY_POOR` | 1000 m          | Below this, fog raises the status a step     |
-
-**Levels are relative to your gauge**, not depth. Each station has its own datum, so a reading of 1.0 m means something completely different on another river. Your thresholds have to come from your own observations.
-
-`CRITERIA_TABLE` is the lookup that combines them. Each row is a temperature band (`high`, `moderate`, `low`) and a weather type (`calm`, `windy`, `rainy`), holding the resulting step for each river level band. Steps are numbered from 0 in `STATUS_STEPS` order, and each row has one entry per step except the last – four for Worcester's five steps. For example, `moderate.windy: [2, 2, 2, 3]` means cool and windy is at least Amber at any level below Red. Edit the numbers to match your club's table. A row of the wrong length stops the build with a message saying which.
-
-The text beside each weather row of the Conditions Key is in `CONDITIONS_KEY_WEATHER`; the figures in its headings come from `THRESHOLDS` automatically. Set `rainCold` to `""` to hide that row – it explains a Worcester-specific quirk.
-
-#### 9. Upstream station (optional)
-
-```ts
-export const UPSTREAM_CSV_URL: string | null =
-  "https://check-for-flooding.service.gov.uk/station-csv/2001";
-export const UPSTREAM_TRAVEL_HOURS = 6;
-```
-
-An upstream gauge with an Environment Agency forecast lets the app see a rise coming before it reaches you. Its forecast is shifted forward by `UPSTREAM_TRAVEL_HOURS`, and the change it predicts is added to your own gauge's latest reading.
-
-- **Only some stations publish a forecast** – generally the larger rivers. Open `https://check-for-flooding.service.gov.uk/station-csv/<website-ID>` (the website number from step 3): a usable station's CSV has a third column marked `observed` or `forecast`. If it only has two columns there's no forecast, and the app will fall back as if there were no upstream station.
-- **Travel time** – the hours a change at the upstream gauge takes to show at yours. You can estimate it by comparing the two gauges' graphs after a rise, peak to peak.
-- **Your own gauge has a forecast?** Use its CSV with `UPSTREAM_TRAVEL_HOURS = 0`. The app then follows your gauge's own EA forecast, which beats estimating from a station upstream.
-- **No upstream station?** Set `UPSTREAM_CSV_URL` to `null`. The forecast then continues your own gauge's trend over the last 8 hours, for up to 18 hours, and holds the level flat after that.
+- **Only some stations publish a forecast** – generally the larger rivers. Open `https://check-for-flooding.service.gov.uk/station-csv/<website-ID>`: a usable station's CSV has a third column marked `observed` or `forecast`. With only two columns there's no forecast, and the app carries on as if there were no forecast gauge.
+- **Your own gauge has a forecast?** Use its CSV with `travelHours: 0`. The app then follows your gauge's own forecast, which beats estimating from upstream.
+- **An upstream gauge instead?** `travelHours` is how long a change there takes to show at yours. Estimate it by comparing the two gauges' graphs after a rise, peak to peak.
+- **Neither?** Use `forecastCsv: null`. The forecast continues your gauge's trend over the last 8 hours, for up to 18 hours, then holds the level flat.
 
 The CSV comes from the Check for flooding website rather than a documented API, so it could change without notice. If it does, the app falls back to the trend.
 
-#### 10. Landmarks and the conditions key
+#### Status steps (`steps`)
 
-These are entirely specific to your venue:
+The scale conditions are rated on, best first – Worcester has five, use as many as your rules have. **Levels are relative to your gauge**, not depth: each station has its own datum, so `fromLevel` values have to come from your own observations.
 
-- **`LEVEL_DESCRIPTIONS`** – gauge readings mapped to what you see at the launch point, e.g. `1.48: "On concrete lower deck – wet feet!"`. Build it by noting the gauge reading each time you visit at a different level. It can start empty (`{}`) – the landmarks just won't show until you add some.
-- **Each step's `description` and `riverDescription`** (step 6) – what the step means for your club, and what the river looks like in that band, shown in the Settings drawer's conditions key.
+The last step is special. Only the river passing its `fromLevel`, or a thunderstorm, can reach it; weather, darkness and fog stop one step short. It doesn't have to mean "no paddling" – what each level may do on it is up to `whoCanPaddle` – but as thunderstorms also lead there, give it a name that fits both.
 
-#### 11. Paddler levels and who can paddle
+#### Weather (`rules`, `thresholds`, `weatherTable`)
 
-`PADDLER_LEVELS` in `lib/config.ts` lists the levels offered in Settings and shown under "Who Can Paddle", least experienced first. Use as many as your club has, under your own names:
+`rules` switches each factor on or off; with all four off, the river level alone sets the status. When `weatherTable` is on, each row of the table gives the resulting step for each river level band, with steps numbered from 0 in `steps` order – so there's one entry per step except the last. For Worcester, `moderate: windy: [2, 2, 2, 3]` means cool and windy is at least Amber.
 
-```ts
-export const PADDLER_LEVELS = ["Junior", "Beginner", "Experienced"] as const;
-```
+#### Who can paddle (`paddlerLevels`, `whoCanPaddle`, `whoCanPaddleExtras`)
 
-`WHO_CAN_PADDLE` says what each level may do on each step. A step gives either one verdict for everyone, or one per level (then every level must be listed – the build points at any that's missing):
+`whoCanPaddle` gives each step either one verdict for everyone or one per paddler level. `whoCanPaddleExtras` covers what a table can't – rules that depend on the river level rather than the step, or that add the same line to several levels. Worcester's three show the patterns: no intermediates above the 10th step even when the weather made it Red, PFDs above the concrete step, and luminous bibs.
 
-```ts
-Amber: {
-  Junior:      { verdict: "Discretion", details: ["Buoyancy aid compulsory"] },
-  Beginner:    { verdict: "Discretion", details: ["Buoyancy aid compulsory"] },
-  Experienced: { verdict: "Warning",    details: ["Strong current – take considerable care"] },
-},
-"No Paddling": { verdict: "No", details: ["Paddle on the canal instead"] },
-```
+#### Landmarks (`landmarks`)
 
-A verdict is `"Yes"` (shown as "Can paddle"), `"Warning"` ("With caveats"), `"Discretion"` ("Coach's discretion") or `"No"` ("Cannot paddle"), and `details` are the lines under it.
+What the river looks like at particular gauge readings, shown either side of the current level. Build it up by noting the gauge reading each time you visit at a different level; it can start empty (`landmarks: {}`).
 
-`WHO_CAN_PADDLE_EXTRAS` holds rules the table can't express on its own, applied in order. Each can depend on the status and the river level, and can replace a verdict, turn "Yes" into another verdict, or add a line:
+#### Icons (optional)
 
-```ts
-{
-  when: { status: ["Dark Green"], riverLevelAtLeast: 2.2 },
-  levels: ["Junior", "Beginner", "Experienced"],
-  addDetail: "More care required",
-},
-```
-
-Worcester uses three: no intermediates above the 10th step even when the weather is what made it Red, PFDs once the river is above the concrete step, and luminous bibs. Leave the list empty if your table says everything.
-
-A level someone saved in Settings that no longer exists is simply treated as "no preference".
-
-#### 12. App name and icons (optional)
-
-- Name: `APP_NAME` in `lib/config.ts` – the top bar, browser tab, share text, and the name the app installs under. Changing it renames the app on phones that have already installed it. The browser tab also carries `CLUB_NAME`.
-- Icons: the files in `public/`. The installable icons are all rendered from `public/favicon.svg`, so replace that and regenerate the PNGs at the same sizes (a tool such as [RealFaviconGenerator](https://realfavicongenerator.net/) will do the lot).
+The logo and app icons are the files in `public/`. The installable icons are all rendered from `public/favicon.svg`, so replace that and regenerate the PNGs at the same sizes ([RealFaviconGenerator](https://realfavicongenerator.net/) does the lot).
 
 ### Going further
 
 If you want to change behaviour rather than settings, these are the places to start:
 
-| File                        | What it does                                          |
-| --------------------------- | ----------------------------------------------------- |
-| `lib/rag.ts`                | How a river level and the weather become a status     |
-| `lib/buildKayakData.ts`     | Raw data → current conditions and the hourly forecast |
-| `lib/hooks.ts`              | Fetching on the client, and the offline fallback      |
-| `lib/conditions.ts`         | The server-side fetch of every upstream source        |
-| `lib/river.ts`              | River readings and the upstream forecast              |
-| `lib/weather.ts`            | Open-Meteo requests                                   |
-| `app/api/briefing/route.ts` | The AI summary prompt                                 |
-| `types/index.ts`            | Every shared data type                                |
+| File                        | What it does                                             |
+| --------------------------- | -------------------------------------------------------- |
+| `lib/clubConfig.ts`         | Reads and checks `club.yaml`                             |
+| `lib/config.ts`             | The app's own settings, plus the club's from `club.yaml` |
+| `lib/rag.ts`                | How a river level and the weather become a status        |
+| `lib/buildKayakData.ts`     | Raw data → current conditions and the hourly forecast    |
+| `lib/hooks.ts`              | Fetching on the client, and the offline fallback         |
+| `lib/conditions.ts`         | The server-side fetch of every upstream source           |
+| `lib/river.ts`              | River readings and the upstream forecast                 |
+| `lib/weather.ts`            | Open-Meteo requests                                      |
+| `app/api/briefing/route.ts` | The AI summary prompt                                    |
+| `types/index.ts`            | Every shared data type                                   |
 
 [`AGENTS.md`](AGENTS.md) is a fuller technical reference to the codebase – it's written for AI coding assistants, but it reads fine for people too.
 

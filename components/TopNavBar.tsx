@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -20,19 +20,14 @@ import { useKayakContext } from "@/lib/KayakDataContext";
 import { OFFLINE_NO_CACHE_ERROR } from "@/lib/hooks";
 import { degreesToCompass } from "@/lib/weather";
 import { statusUi, statusLabel, FIRST_ELEVATED_LEVEL } from "@/lib/rag";
-import {
-  THRESHOLDS,
-  DATA_STALE_THRESHOLD_MS,
-  CLUB_SHORT_NAME,
-  APP_NAME,
-} from "@/lib/config";
+import { THRESHOLDS, CLUB_SHORT_NAME, APP_NAME } from "@/lib/config";
 import {
   formatRiverLevel,
   formatTemperature,
   formatWindSpeed,
 } from "@/lib/units";
 import { buildBestConditionsLine } from "@/lib/forecast";
-import { getRelativeTimeString, getLondonHHMM } from "@/lib/time";
+import { useFreshness } from "@/lib/useFreshness";
 import { collapseMotion } from "@/lib/m3-palette";
 
 // Filled with the saturated accent rather than the tonal container pair.
@@ -137,11 +132,6 @@ const buildShareText = (
   return lines.join("\n");
 };
 
-const isDataStale = (lastUpdated: string | undefined): boolean => {
-  if (!lastUpdated) return false;
-  return Date.now() - new Date(lastUpdated).getTime() > DATA_STALE_THRESHOLD_MS;
-};
-
 const TopNavBar = () => {
   const scrolled = useScrollTrigger({ disableHysteresis: true, threshold: 8 });
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -158,41 +148,7 @@ const TopNavBar = () => {
 
   const isOfflineError = error === OFFLINE_NO_CACHE_ERROR;
 
-  // Initialize state dynamically based on the current context value on render
-  const [relativeLastUpdated, setRelativeLastUpdated] = useState<string>(() =>
-    getRelativeTimeString(conditions?.lastUpdated)
-  );
-  const [isStale, setIsStale] = useState<boolean>(() =>
-    isDataStale(conditions?.lastUpdated)
-  );
-
-  useEffect(() => {
-    const dateStr = conditions?.lastUpdated;
-
-    // Breaking synchronous context execution using queueMicrotask blocks cascading render lint rules
-    queueMicrotask(() => {
-      setRelativeLastUpdated(getRelativeTimeString(dateStr));
-      setIsStale(isDataStale(dateStr));
-    });
-
-    const interval = setInterval(() => {
-      setRelativeLastUpdated(getRelativeTimeString(dateStr));
-      setIsStale(isDataStale(dateStr));
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [conditions?.lastUpdated]);
-
-  // "Updated just now" alone reads as if this instant triggered a live fetch,
-  // when it may just be a fast cache hit on data fetched slightly earlier -
-  // pairing it with the clock time it was actually fetched keeps that honest.
-  const lastUpdatedClockTime = conditions?.lastUpdated
-    ? getLondonHHMM(new Date(conditions.lastUpdated))
-    : null;
-  const freshnessText =
-    lastUpdatedClockTime && relativeLastUpdated
-      ? `${lastUpdatedClockTime} · ${relativeLastUpdated}`
-      : relativeLastUpdated;
+  const { freshnessText, isStale } = useFreshness(conditions?.lastUpdated);
 
   const handleShare = async () => {
     const text = buildShareText(conditions, forecastDays);
@@ -301,23 +257,12 @@ const TopNavBar = () => {
               <Typography
                 variant="h6"
                 noWrap
-                // A step down from h6's 1.25rem so the three lines - club,
-                // app, freshness - sit inside the bar with room to spare.
+                // A step down from h6's 1.25rem, under the club name.
                 sx={{ fontWeight: 600, lineHeight: 1.25, fontSize: "1.125rem" }}
                 color="text.primary"
               >
                 {APP_NAME}
               </Typography>
-              {(isRefreshing || freshnessText) && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  noWrap
-                  sx={{ lineHeight: 1.5 }}
-                >
-                  {isRefreshing ? "Updating…" : `Updated ${freshnessText}`}
-                </Typography>
-              )}
             </Box>
           </Box>
           <Box sx={{ display: "flex", flexShrink: 0 }}>

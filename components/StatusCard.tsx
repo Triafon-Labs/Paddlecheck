@@ -17,6 +17,7 @@ import { ContributingFactors, FactorHeading } from "./ConditionFactors";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { formatDataAge } from "@/lib/time";
 import { useNowTicking } from "@/lib/useNowTicking";
+import { useFreshness } from "@/lib/useFreshness";
 import { THRESHOLDS } from "@/lib/config";
 import { collapseMotion, springTransition } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
@@ -35,7 +36,8 @@ interface StatusCardProps {
 const SCALE_SEGMENT_COUNT = STEP_NAMES.length;
 
 const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
-  const { riverGraphData } = useKayakContext();
+  const { riverGraphData, isRefreshing } = useKayakContext();
+  const { freshnessText } = useFreshness(conditions?.lastUpdated);
   // Ticks so the reading's age stays right while the page is left open.
   const now = useNowTicking();
   const dataAgeLabel = useMemo(() => {
@@ -177,8 +179,21 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
   return (
     <Card data-testid="status-card" sx={{ width: "100%" }}>
       <CardContent>
-        <Typography variant="h5" component="div" gutterBottom>
+        <Typography variant="h5" component="div">
           Paddling Status
+        </Typography>
+        {/* When the data was fetched. The banners above the top bar take
+            over once it's stale or an update has failed. */}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 0.25, mb: 1.5, minHeight: "1.43em" }}
+        >
+          {isRefreshing
+            ? "Updating…"
+            : freshnessText
+              ? `Updated ${freshnessText}`
+              : null}
         </Typography>
         {renderContent()}
       </CardContent>

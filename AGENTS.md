@@ -73,7 +73,7 @@ app/
   manifest.ts           PWA web manifest
 
 components/
-  StatusCard.tsx         Current RAG status, river level landmarks, contributing factors, warnings, conditions report
+  StatusCard.tsx         Current RAG status with its "Updated" line, river level landmarks, contributing factors, warnings, conditions report
   PaddlingStatusHero.tsx The status panel and five-step scale strip at the top of StatusCard
   PaddlingMatrixCard.tsx Skill-level guidance table (Beginner/Improver/Intermediate/Independent)
   PaddlerLevelRow.tsx    One level's verdict as an expandable row – Who Can Paddle and the forecast hour's "You"
@@ -83,7 +83,7 @@ components/
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
   ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below, opening with the verdict for your level
-  TopNavBar.tsx          Header – APP_NAME and club name (CLUB_SHORT_NAME) above the app name, freshness line, share, settings, refresh, status banners
+  TopNavBar.tsx          Header – club name (CLUB_SHORT_NAME) above APP_NAME, share, settings, refresh, stale/offline banners
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners
@@ -116,6 +116,7 @@ lib/
   units.ts               How each metric is formatted for display
   time.ts                Europe/London time helpers and data-age formatting
   useNowTicking.ts       Client hook: the current time, ticking each minute (kept out of time.ts so servers can import it)
+  useFreshness.ts        "10:33 · just now" and whether data is stale – StatusCard and the top bar's banners
   storageKeys.ts         Canonical localStorage key names
   useTooltipDismiss.ts   Closes a recharts tooltip on an outside press
   statusColors.ts        The status colour vocabulary

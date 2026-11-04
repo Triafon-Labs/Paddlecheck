@@ -65,32 +65,6 @@ function riverLevelReason(stepIndex: number): string | undefined {
   return `${step.riverReason} river level (> ${formatRiverLevel(step.fromLevel)})`;
 }
 
-// Mistakes in STATUS_STEPS or CRITERIA_TABLE would otherwise show up as a
-// wrong or "Unknown" status on the day, so they stop the build instead.
-const checkConfig = () => {
-  if (STEPS.length < 2) throw new Error("STATUS_STEPS needs at least 2 steps");
-  STEPS.forEach((step, i) => {
-    if (i > 0 && !(step.fromLevel > STEPS[i - 1].fromLevel))
-      throw new Error(
-        `STATUS_STEPS: "${step.name}" must start at a higher fromLevel than "${STEPS[i - 1].name}"`
-      );
-  });
-  if (!RULES.WEATHER_TABLE) return;
-  for (const [band, row] of Object.entries(CRITERIA_TABLE)) {
-    for (const [weather, results] of Object.entries(row)) {
-      if (results.length !== TOP_INDEX)
-        throw new Error(
-          `CRITERIA_TABLE.${band}.${weather} has ${results.length} entries - it needs one per step before "${TOP_STEP}" (${TOP_INDEX})`
-        );
-      if (results.some((n) => !Number.isInteger(n) || n < 0 || n >= TOP_INDEX))
-        throw new Error(
-          `CRITERIA_TABLE.${band}.${weather}: every entry must be a step number from 0 to ${TOP_INDEX - 1}`
-        );
-    }
-  }
-};
-checkConfig();
-
 // --- Helper Functions for RAG Calculation ---
 
 export const findLevelDescription = (level: number): string | undefined => {

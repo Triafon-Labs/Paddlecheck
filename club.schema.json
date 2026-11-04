@@ -1,0 +1,339 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Paddlecheck club settings (club.yaml)",
+  "description": "Everything about a club that Paddlecheck needs. Checked in full by lib/clubConfig.ts when the app builds; this schema is for editor hints.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "app",
+    "club",
+    "location",
+    "river",
+    "warnings",
+    "rules",
+    "thresholds",
+    "steps",
+    "paddlerLevels",
+    "whoCanPaddle",
+    "conditionsKey"
+  ],
+  "definitions": {
+    "colour": {
+      "enum": [
+        "lightGreen",
+        "darkGreen",
+        "yellow",
+        "amber",
+        "red",
+        "maroon",
+        "grey"
+      ],
+      "description": "A colour from lib/statusColors.ts, each paired with a text colour that's checked for contrast."
+    },
+    "icon": {
+      "enum": [
+        "check",
+        "trendingUp",
+        "warning",
+        "alert",
+        "stop",
+        "help",
+        "water",
+        "waves",
+        "tsunami",
+        "flood"
+      ]
+    },
+    "verdictValue": {
+      "enum": ["Yes", "Warning", "Discretion", "No"],
+      "description": "Yes = Can paddle, Warning = With caveats, Discretion = Coach's discretion, No = Cannot paddle. Quote \"Yes\" and \"No\"."
+    },
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verdict"],
+      "properties": {
+        "verdict": { "$ref": "#/definitions/verdictValue" },
+        "details": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Lines shown under the verdict."
+        }
+      }
+    },
+    "weatherRow": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "description": "The resulting step (numbered from 0) for each river level band – one entry per step except the last."
+    },
+    "text": { "type": "string", "minLength": 1 }
+  },
+  "properties": {
+    "app": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/text",
+          "description": "Top bar, browser tab, share text and installed app name."
+        }
+      }
+    },
+    "club": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "shortName", "feedbackUrl"],
+      "properties": {
+        "name": { "$ref": "#/definitions/text" },
+        "shortName": {
+          "$ref": "#/definitions/text",
+          "description": "Shown above the app name in the top bar – about 20 characters fit on a phone."
+        },
+        "feedbackUrl": {
+          "$ref": "#/definitions/text",
+          "description": "Where \"Feedback welcome\" in Settings goes: an issue tracker, a form, or a mailto: link."
+        },
+        "usefulLinks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "url"],
+            "properties": {
+              "name": { "$ref": "#/definitions/text" },
+              "url": { "$ref": "#/definitions/text" }
+            }
+          }
+        }
+      }
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+        "longitude": { "type": "number", "minimum": -180, "maximum": 180 }
+      }
+    },
+    "river": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stationId", "forecastCsv"],
+      "properties": {
+        "stationId": {
+          "type": ["string", "number"],
+          "description": "The gauge's Environment Agency flood-monitoring API ID – not the Check for flooding website number."
+        },
+        "forecastCsv": {
+          "type": ["string", "null"],
+          "description": "A Check for flooding station CSV with an EA forecast, or null for none."
+        },
+        "travelHours": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Hours a change at the forecast gauge takes to reach yours (0 if it's your own gauge)."
+        }
+      }
+    },
+    "warnings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["feed", "area"],
+      "properties": {
+        "feed": {
+          "$ref": "#/definitions/text",
+          "description": "Your Met Office region's warnings RSS feed."
+        },
+        "area": {
+          "$ref": "#/definitions/text",
+          "description": "The area name a warning must mention to be shown, e.g. a county."
+        }
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["weatherTable", "darkness", "fog", "thunderstorms"],
+      "properties": {
+        "weatherTable": { "type": "boolean" },
+        "darkness": { "type": "boolean" },
+        "fog": { "type": "boolean" },
+        "thunderstorms": { "type": "boolean" }
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tempHigh",
+        "tempModerate",
+        "windHigh",
+        "visibilityPoor",
+        "darkHourFraction"
+      ],
+      "properties": {
+        "tempHigh": { "type": "number", "description": "°C" },
+        "tempModerate": { "type": "number", "description": "°C" },
+        "windHigh": { "type": "number", "description": "mph" },
+        "visibilityPoor": { "type": "number", "description": "metres" },
+        "darkHourFraction": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "fromLevel",
+          "colour",
+          "icon",
+          "emoji",
+          "description",
+          "riverDescription"
+        ],
+        "properties": {
+          "name": { "$ref": "#/definitions/text" },
+          "fromLevel": {
+            "type": "number",
+            "description": "Gauge reading (m) the step starts at; the first step is 0."
+          },
+          "colour": { "$ref": "#/definitions/colour" },
+          "icon": { "$ref": "#/definitions/icon" },
+          "emoji": { "$ref": "#/definitions/text" },
+          "description": { "$ref": "#/definitions/text" },
+          "riverDescription": { "$ref": "#/definitions/text" },
+          "riverReason": {
+            "$ref": "#/definitions/text",
+            "description": "e.g. \"Slightly elevated\" → \"Slightly elevated river level (> 1.00 m)\". Needed on every step except the first and last."
+          },
+          "reasonIcon": { "$ref": "#/definitions/icon" },
+          "bestTimes": { "type": "boolean" }
+        }
+      }
+    },
+    "weatherTable": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "high": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["calm", "windy"],
+          "properties": {
+            "calm": { "$ref": "#/definitions/weatherRow" },
+            "windy": { "$ref": "#/definitions/weatherRow" }
+          }
+        },
+        "moderate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["calm", "windy", "rainy"],
+          "properties": {
+            "calm": { "$ref": "#/definitions/weatherRow" },
+            "windy": { "$ref": "#/definitions/weatherRow" },
+            "rainy": { "$ref": "#/definitions/weatherRow" }
+          }
+        },
+        "low": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["calm", "windy", "rainy"],
+          "properties": {
+            "calm": { "$ref": "#/definitions/weatherRow" },
+            "windy": { "$ref": "#/definitions/weatherRow" },
+            "rainy": { "$ref": "#/definitions/weatherRow" }
+          }
+        }
+      }
+    },
+    "paddlerLevels": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/text" }
+    },
+    "whoCanPaddle": {
+      "type": "object",
+      "description": "One entry per step name (plus optional Unknown): a verdict for everyone, or one per paddler level.",
+      "additionalProperties": {
+        "oneOf": [
+          { "$ref": "#/definitions/verdict" },
+          {
+            "type": "object",
+            "not": { "required": ["verdict"] },
+            "additionalProperties": { "$ref": "#/definitions/verdict" }
+          }
+        ]
+      }
+    },
+    "whoCanPaddleExtras": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["levels"],
+        "properties": {
+          "when": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "status": { "type": "array", "items": { "type": "string" } },
+              "notStatus": { "type": "array", "items": { "type": "string" } },
+              "riverLevelAtLeast": { "type": "number" }
+            }
+          },
+          "levels": { "type": "array", "items": { "type": "string" } },
+          "set": { "$ref": "#/definitions/verdict" },
+          "yesBecomes": { "$ref": "#/definitions/verdictValue" },
+          "addDetail": { "$ref": "#/definitions/text" },
+          "replacing": { "$ref": "#/definitions/text" }
+        }
+      }
+    },
+    "landmarks": {
+      "type": "object",
+      "description": "Gauge reading (m) → what the river looks like there.",
+      "patternProperties": {
+        "^[0-9]+(\\.[0-9]+)?$": { "$ref": "#/definitions/text" }
+      },
+      "additionalProperties": false
+    },
+    "conditionsKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tempWarm",
+        "tempCool",
+        "tempCold",
+        "windCalm",
+        "windHigh",
+        "rainCool",
+        "rainCold",
+        "rainWarm",
+        "dark",
+        "fog",
+        "thunderstorm"
+      ],
+      "properties": {
+        "tempWarm": { "type": "string" },
+        "tempCool": { "type": "string" },
+        "tempCold": { "type": "string" },
+        "windCalm": { "type": "string" },
+        "windHigh": { "type": "string" },
+        "rainCool": { "type": "string" },
+        "rainCold": {
+          "type": "string",
+          "description": "Leave empty (\"\") to hide this row."
+        },
+        "rainWarm": { "type": "string" },
+        "dark": { "type": "string" },
+        "fog": { "type": "string" },
+        "thunderstorm": { "type": "string" }
+      }
+    }
+  }
+}

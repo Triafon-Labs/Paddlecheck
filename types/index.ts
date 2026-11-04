@@ -1,8 +1,6 @@
 import type { ElementType } from "react";
-import type { PADDLER_LEVELS, STATUS_STEPS } from "@/lib/config";
-
-// The status step names set in STATUS_STEPS (lib/config.ts), plus Unknown.
-export type Status = (typeof STATUS_STEPS)[number]["name"] | "Unknown";
+// A status step's name from club.yaml (steps), or "Unknown".
+export type Status = string;
 
 // One step of the status scale (STATUS_STEPS in lib/config.ts).
 export interface StatusStep {
@@ -172,8 +170,8 @@ export interface DayForecast {
   sunset: string | null;
 }
 
-// The paddler levels, as set in PADDLER_LEVELS (lib/config.ts).
-export type PaddlerType = (typeof PADDLER_LEVELS)[number];
+// A paddler level from club.yaml (paddlerLevels).
+export type PaddlerType = string;
 
 export type PaddlingStatusValue = "Yes" | "No" | "Discretion" | "Warning";
 

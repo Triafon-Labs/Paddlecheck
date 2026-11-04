@@ -198,7 +198,7 @@ function remainingDaylightSlots(
     reasons: currentReasons,
     value: 0,
     forecastLevel: 0,
-    forecastSource: "bewdley",
+    forecastSource: "upstream",
   };
   return [
     nowSlot,

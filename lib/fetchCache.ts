@@ -1,4 +1,4 @@
-// Kept in one place so every upstream fetch (river, weather, Bewdley,
+// Kept in one place so every upstream fetch (river, weather, upstream,
 // warnings) agrees on the same cache window - a mismatched value on any one
 // of them would silently drag /api/conditions' effective cache interval down
 // to the shortest one in use.

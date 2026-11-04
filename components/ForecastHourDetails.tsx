@@ -36,7 +36,7 @@ import { formatTemperature, formatWindSpeed } from "@/lib/units";
 
 // Where the hour's level comes from, under its row on the scale.
 const FORECAST_SOURCE_LABELS: Record<ForecastSource, string> = {
-  bewdley: "From the upstream forecast",
+  upstream: "From the upstream forecast",
   linear: "From the local trend",
   held: "Held – no forecast this far ahead",
 };

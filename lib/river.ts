@@ -3,41 +3,41 @@ import {
   API_ENDPOINTS,
   RIVER_STATION_ID,
   TIME_PERIODS,
-  BEWDLEY_CSV_URL,
-  BEWDLEY_TRAVEL_HOURS,
-  BEWDLEY_TREND_HOURS,
+  UPSTREAM_CSV_URL,
+  UPSTREAM_TRAVEL_HOURS,
+  UPSTREAM_TREND_HOURS,
 } from "@/lib/config";
 import { FetchLiveness, fetchCacheOptions } from "@/lib/fetchCache";
 
-export interface BewdleyForecastPoint {
+export interface UpstreamForecastPoint {
   timestamp: Date;
   level: number;
 }
 
 /**
- * Fetches the upstream Bewdley river level forecast and observations.
+ * Fetches the upstream river level forecast and observations.
  * The whole published forecast is kept – its length varies (24–36 h has been
- * seen), so the feed decides how far ahead the Bewdley-based forecast reaches.
+ * seen), so the feed decides how far ahead the upstream-based forecast reaches.
  */
-export const fetchBewdleyForecast = async (
+export const fetchUpstreamForecast = async (
   liveness: FetchLiveness = {}
 ): Promise<{
-  forecasts: BewdleyForecastPoint[];
-  observations: BewdleyForecastPoint[];
+  forecasts: UpstreamForecastPoint[];
+  observations: UpstreamForecastPoint[];
   currentLevel: number | null;
 }> => {
   // No upstream station configured: an empty forecast, which the client
   // treats the same as a failed fetch and falls back to the linear trend.
-  if (!BEWDLEY_CSV_URL)
+  if (!UPSTREAM_CSV_URL)
     return { forecasts: [], observations: [], currentLevel: null };
-  const response = await fetch(BEWDLEY_CSV_URL, fetchCacheOptions(liveness));
+  const response = await fetch(UPSTREAM_CSV_URL, fetchCacheOptions(liveness));
   if (!response.ok)
-    throw new Error(`Bewdley CSV fetch failed: ${response.status}`);
+    throw new Error(`Upstream CSV fetch failed: ${response.status}`);
   const text = await response.text();
   const lines = text.trim().split("\n");
 
-  const forecasts: BewdleyForecastPoint[] = [];
-  const observations: BewdleyForecastPoint[] = [];
+  const forecasts: UpstreamForecastPoint[] = [];
+  const observations: UpstreamForecastPoint[] = [];
 
   // Skip header row (index 0)
   for (let i = 1; i < lines.length; i++) {
@@ -63,7 +63,7 @@ export const fetchBewdleyForecast = async (
   }
 
   // Current level = latest observed reading
-  const latestObserved = observations.reduce<BewdleyForecastPoint | null>(
+  const latestObserved = observations.reduce<UpstreamForecastPoint | null>(
     (latest, pt) => (!latest || pt.timestamp > latest.timestamp ? pt : latest),
     null
   );
@@ -75,64 +75,58 @@ export const fetchBewdleyForecast = async (
   };
 };
 
-// Apply a delta-transfer from Bewdley's data to forecast Worcester's level.
-// Worcester's latest reading already reflects what Bewdley was doing 6 hours
+// Apply a delta-transfer from the upstream gauge's data to forecast the club gauge's level.
+// The club gauge's latest reading already reflects what the upstream gauge was doing 6 hours
 // before it was taken, so that is the baseline – anchored to the reading's own
 // timestamp, not "now", so the forecast starts exactly on the last reading
-// instead of jumping by however much Bewdley moved while the feed lagged.
-// delta = bewdley(targetWorcesterTime - 6h) – bewdley(worcesterReadingTime - 6h)
-// worcesterForecasted = worcesterCurrentLevel + delta
-export const getBewdleyBasedWorcesterLevel = (
-  worcesterCurrentLevel: number,
-  bewdleyForecasts: BewdleyForecastPoint[],
-  bewdleyObservations: BewdleyForecastPoint[],
-  targetWorcesterTime: Date,
-  worcesterReadingTime: Date
+// instead of jumping by however much the upstream gauge moved while the feed lagged.
+// delta = upstream(targetClubTime - 6h) – upstream(clubReadingTime - 6h)
+// clubForecasted = clubCurrentLevel + delta
+export const getUpstreamBasedClubLevel = (
+  clubCurrentLevel: number,
+  upstreamForecasts: UpstreamForecastPoint[],
+  upstreamObservations: UpstreamForecastPoint[],
+  targetClubTime: Date,
+  clubReadingTime: Date
 ): number | null => {
-  const series = buildBewdleySeries(bewdleyObservations, bewdleyForecasts);
-  const lagMs = BEWDLEY_TRAVEL_HOURS * TIME_PERIODS.ONE_HOUR;
+  const series = buildUpstreamSeries(upstreamObservations, upstreamForecasts);
+  const lagMs = UPSTREAM_TRAVEL_HOURS * TIME_PERIODS.ONE_HOUR;
 
-  const baseline = interpolateLevel(
-    series,
-    worcesterReadingTime.getTime() - lagMs
-  );
-  const target = interpolateLevel(
-    series,
-    targetWorcesterTime.getTime() - lagMs
-  );
+  const baseline = interpolateLevel(series, clubReadingTime.getTime() - lagMs);
+  const target = interpolateLevel(series, targetClubTime.getTime() - lagMs);
   if (baseline === null || target === null) return null;
 
-  return Math.max(0, worcesterCurrentLevel + (target - baseline));
+  return Math.max(0, clubCurrentLevel + (target - baseline));
 };
 
-// Bewdley's trend (m/h) over the last BEWDLEY_TREND_HOURS of its series, so
-// the linear fallback carries on where the Bewdley forecast ends rather than
-// from Worcester's own recent readings – on a rise those lag Bewdley by the
-// travel time and are still flat when the Bewdley data runs out.
-export const getBewdleyEndSlope = (
-  bewdleyForecasts: BewdleyForecastPoint[],
-  bewdleyObservations: BewdleyForecastPoint[]
+// The upstream gauge's trend (m/h) over the last UPSTREAM_TREND_HOURS of its series, so
+// the linear fallback carries on where the upstream forecast ends rather than
+// from the club gauge's own recent readings – on a rise those lag the upstream gauge by the
+// travel time and are still flat when the upstream data runs out.
+export const getUpstreamEndSlope = (
+  upstreamForecasts: UpstreamForecastPoint[],
+  upstreamObservations: UpstreamForecastPoint[]
 ): number | null => {
-  const series = buildBewdleySeries(bewdleyObservations, bewdleyForecasts);
+  const series = buildUpstreamSeries(upstreamObservations, upstreamForecasts);
   const end = series[series.length - 1];
   if (!end) return null;
   const endMs = end.timestamp.getTime();
   const start = interpolateLevel(
     series,
-    endMs - BEWDLEY_TREND_HOURS * TIME_PERIODS.ONE_HOUR
+    endMs - UPSTREAM_TREND_HOURS * TIME_PERIODS.ONE_HOUR
   );
   if (start === null) return null;
-  return (end.level - start) / BEWDLEY_TREND_HOURS;
+  return (end.level - start) / UPSTREAM_TREND_HOURS;
 };
 
-// One time-ordered Bewdley series: observations up to the latest one, then the
+// One time-ordered upstream series: observations up to the latest one, then the
 // published forecast after it. The forecast was issued some time ago and rarely
 // starts on the latest observation, so it is shifted to start there – otherwise
-// the gap between the two shows up as a step in Worcester's forecast.
-const buildBewdleySeries = (
-  observations: BewdleyForecastPoint[],
-  forecasts: BewdleyForecastPoint[]
-): BewdleyForecastPoint[] => {
+// the gap between the two shows up as a step in the club gauge's forecast.
+const buildUpstreamSeries = (
+  observations: UpstreamForecastPoint[],
+  forecasts: UpstreamForecastPoint[]
+): UpstreamForecastPoint[] => {
   const observed = [...observations].sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
@@ -154,10 +148,10 @@ const buildBewdleySeries = (
 };
 
 // Linearly interpolates a time-ordered series at `ms`. Null outside the series,
-// or across a gap wider than BEWDLEY_MAX_GAP_MS (missing data, not a trend).
-const BEWDLEY_MAX_GAP_MS = 3 * TIME_PERIODS.ONE_HOUR;
+// or across a gap wider than UPSTREAM_MAX_GAP_MS (missing data, not a trend).
+const UPSTREAM_MAX_GAP_MS = 3 * TIME_PERIODS.ONE_HOUR;
 const interpolateLevel = (
-  series: BewdleyForecastPoint[],
+  series: UpstreamForecastPoint[],
   ms: number
 ): number | null => {
   for (let i = 0; i < series.length; i++) {
@@ -168,7 +162,7 @@ const interpolateLevel = (
     if (i === 0) return null;
     const a = series[i - 1];
     const aMs = a.timestamp.getTime();
-    if (bMs - aMs > BEWDLEY_MAX_GAP_MS) return null;
+    if (bMs - aMs > UPSTREAM_MAX_GAP_MS) return null;
     return a.level + ((b.level - a.level) * (ms - aMs)) / (bMs - aMs);
   }
   return null;

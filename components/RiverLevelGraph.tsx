@@ -45,7 +45,8 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import { ChartDataPoint } from "@/types";
-import { useNowTicking, formatDataAge } from "@/lib/time";
+import { formatDataAge } from "@/lib/time";
+import { useNowTicking } from "@/lib/useNowTicking";
 import { FORECAST_LINE_DASH, TIME_PERIODS } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
@@ -431,13 +432,13 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               connectNulls={false}
               dot={false}
             />
-            {/* forecastData only holds Bewdley-backed hours (lib/hooks.ts). */}
+            {/* forecastData only holds upstream-backed hours (lib/hooks.ts). */}
             <Line
               isAnimationActive={false}
               type="monotone"
               dataKey="forecasted"
               stroke={theme.palette.primary.main}
-              strokeDasharray={FORECAST_LINE_DASH.bewdley}
+              strokeDasharray={FORECAST_LINE_DASH.upstream}
               strokeOpacity={0.7}
               dot={false}
               connectNulls={false}

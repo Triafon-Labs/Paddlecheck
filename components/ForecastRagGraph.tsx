@@ -106,12 +106,12 @@ const IconLabel = ({ viewBox, icon, time }: IconLabelProps) => {
 };
 
 // The level line for each forecast source, drawn in this order. Only
-// Bewdley's is full strength; the estimates beyond it are faded.
+// the upstream forecast is full strength; the estimates beyond it are faded.
 const FORECAST_LINES: {
   source: keyof typeof FORECAST_LINE_DASH;
   opacity: number;
 }[] = [
-  { source: "bewdley", opacity: 1 },
+  { source: "upstream", opacity: 1 },
   { source: "linear", opacity: 0.5 },
 ];
 
@@ -221,7 +221,7 @@ const DayChart = memo(function DayChart({
   const chartData = rows.map((d, i) => {
     // An empty slot draws nothing - no bar, no level line, no label.
     if (d.ghost) {
-      return { ...d, value: null, bewdley: null, linear: null };
+      return { ...d, value: null, upstream: null, linear: null };
     }
     const scaled = d.forecastLevel / dayMaxLevel;
     // Each source's line runs on to the next hour's point, so the lines
@@ -236,13 +236,13 @@ const DayChart = memo(function DayChart({
         : null;
     return {
       ...d,
-      bewdley: inLine("bewdley"),
+      upstream: inLine("upstream"),
       linear: inLine("linear"),
     };
   });
 
   // Each source's line draws over its own stretch of the sweep, so the
-  // Bewdley and linear lines read as one line drawn left to right.
+  // Upstream and linear lines read as one line drawn left to right.
   const lineSweep = (source: keyof typeof FORECAST_LINE_DASH) => {
     const first = chartData.findIndex((d) => d[source] !== null);
     const last = chartData.findLastIndex((d) => d[source] !== null);

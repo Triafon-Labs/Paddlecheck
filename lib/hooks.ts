@@ -7,43 +7,28 @@ import {
   FutureWeatherData,
   RiverDataResult,
   ConditionsApiResponse,
-  ForecastSource,
 } from "@/types";
-import {
-  calculateFinalRagStatus,
-  findLevelDescription,
-  calculateInitialRagStatus,
-  isRainWhileWarm,
-  RAG_STATUS_MAP,
-  ragHeight,
-} from "@/lib/rag";
-import {
-  forecastRiverLevel,
-  getBewdleyBasedWorcesterLevel,
-  getBewdleyEndSlope,
-} from "@/lib/river";
-import { getVisibilityDescription, getWeatherDescription } from "@/lib/weather";
-import {
-  isRainy,
-  TIME_PERIODS,
-  DATA_STALE_THRESHOLD_MS,
-  LINEAR_FORECAST_HOURS,
-  RIVER_GRAPH_FORECAST_HOURS,
-} from "@/lib/config";
-import {
-  getLondonHHMM,
-  getLondonHour,
-  hhmmOfISO,
-  isDarkHour,
-} from "@/lib/time";
+import { DATA_STALE_THRESHOLD_MS } from "@/lib/config";
+import { buildKayakData } from "@/lib/buildKayakData";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
-
-const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 // Exported so the UI (offline banner, error alert) can recognise this exact
 // failure mode instead of string-matching a copy of the message.
 export const OFFLINE_NO_CACHE_ERROR =
   "Offline – no cached data (reconnect and refresh)";
+
+// Forecasts cached before the upstream gauge's source was renamed still say
+// "bewdley"; without this, an offline open would show those hours with no
+// source label or line until the next successful fetch replaced them.
+const migrateForecastSource = (days: DayForecast[]): DayForecast[] =>
+  days.map((day) => ({
+    ...day,
+    graphData: day.graphData.map((pt) =>
+      (pt.forecastSource as string) === "bewdley"
+        ? { ...pt, forecastSource: "upstream" }
+        : pt
+    ),
+  }));
 
 const withRetry = async <T>(
   fn: () => Promise<T>,
@@ -157,9 +142,9 @@ export const useKayakData = () => {
         }
       );
       if (hasCachedConditions) hasConditionsRef.current = true;
-      const hasCachedForecast = loadCached(
+      const hasCachedForecast = loadCached<DayForecast[]>(
         STORAGE_KEYS.FORECAST_DAYS,
-        setForecastDays
+        (days) => setForecastDays(migrateForecastSource(days))
       );
       loadCached(STORAGE_KEYS.FORECAST_DATA, setForecastData);
       loadCached(STORAGE_KEYS.RIVER_GRAPH_DATA, setRiverGraphData);
@@ -213,7 +198,7 @@ export const useKayakData = () => {
         }
       };
 
-      // The server fetches and caches river, weather, future-weather, Bewdley
+      // The server fetches and caches river, weather, future-weather, upstream
       // and warnings data every 15 minutes (see /api/conditions), so this is
       // normally a fast cache hit rather than a live call to three external
       // APIs. If the request to our own API fails outright, each source
@@ -264,21 +249,10 @@ export const useKayakData = () => {
       const futureWeatherData =
         apiResponse?.futureWeather ??
         readRawCache<FutureWeatherData>(STORAGE_KEYS.FUTURE_WEATHER_DATA_RAW);
-      const bewdleyRaw = apiResponse?.bewdley ?? {
+      const upstream = apiResponse?.upstream ?? {
         forecasts: [],
         observations: [],
         currentLevel: null,
-      };
-      const bewdleyData = {
-        currentLevel: bewdleyRaw.currentLevel,
-        forecasts: bewdleyRaw.forecasts.map((f) => ({
-          timestamp: new Date(f.timestamp),
-          level: f.level,
-        })),
-        observations: bewdleyRaw.observations.map((o) => ({
-          timestamp: new Date(o.timestamp),
-          level: o.level,
-        })),
       };
       const warningsData = apiResponse?.warnings ?? [];
       // Reflects when the data was actually fetched from upstream (so a
@@ -303,220 +277,23 @@ export const useKayakData = () => {
       setRiverChange8h(riverData.change8h);
       setRiverChange5d(riverData.change5d);
 
-      const todaySunrise = futureWeatherData.daily.sunrise[0] ?? null;
-      const todaySunset = futureWeatherData.daily.sunset[0] ?? null;
-      const currentTimeHHMM = getLondonHHMM();
-      const sunriseHHMM = todaySunrise ? hhmmOfISO(todaySunrise) : null;
-      const sunsetHHMM = todaySunset ? hhmmOfISO(todaySunset) : null;
-      const currentDark =
-        sunriseHHMM !== null && sunsetHHMM !== null
-          ? currentTimeHHMM <= sunriseHHMM || currentTimeHHMM >= sunsetHHMM
-          : false;
-
-      const currentConditions: Partial<KayakConditions> = {
-        riverLevel:
-          riverData.latestLevel === null ? undefined : riverData.latestLevel,
-        temperature: weatherData.temperature,
-        apparentTemperature: weatherData.apparentTemperature,
-        windSpeed: weatherData.windSpeed,
-        windGust: weatherData.windGust,
-        windDirection: weatherData.windDirection,
-        rain: weatherData.rain,
-        dark: currentDark,
-        visibility: weatherData.visibility,
-        weatherCode: weatherData.weatherCode,
-      };
-
-      const initialRagNumber = calculateInitialRagStatus(
-        currentConditions.riverLevel ?? 0
-      );
-      const initialStatus = RAG_STATUS_MAP[initialRagNumber];
-      const { status, reasons } = calculateFinalRagStatus(currentConditions);
-      const rainWhileWarm = isRainWhileWarm(currentConditions);
-      const visibilityDescription = getVisibilityDescription(
-        currentConditions.visibility ?? 0
-      );
-      const weatherDescription = getWeatherDescription(
-        currentConditions.weatherCode ?? 0
-      );
-
-      conditionsObj = {
-        ...currentConditions,
-        initialStatus,
-        overallStatus: status,
-        reasons: reasons,
-        rainWhileWarm,
+      const {
+        conditions: built,
+        forecastDays: days,
+        forecastPoints,
+      } = buildKayakData({
+        river: riverData,
+        weather: weatherData,
+        futureWeather: futureWeatherData,
+        upstream,
         warnings: warningsData,
-        levelChange: {
-          value: riverData.change8h ?? 0,
-          period: "8h",
-        },
-        launchMessage: findLevelDescription(riverData.latestLevel ?? 0),
-        lastUpdated: fetchedAt,
-        visibilityDescription,
-        weatherDescription,
-      };
+        fetchedAt,
+      });
+      conditionsObj = built;
       setConditions(conditionsObj);
       setLoading(false);
       hasConditionsRef.current = true;
       lastFetchedAtRef.current = new Date(fetchedAt).getTime();
-
-      // Build 5-day forecast (today + 4 days ahead)
-      const currentHour = getLondonHour();
-      const now = new Date();
-      const days: DayForecast[] = [];
-      const forecastPoints: ChartDataPoint[] = [];
-
-      // Worcester's own linear trend (m/h), for when there's no Bewdley data
-      // at all. Once a Bewdley forecast has run out, the fallback continues
-      // Bewdley's final trend instead (getBewdleyEndSlope).
-      const worcesterSlopePerHour =
-        forecastRiverLevel(
-          riverData.latestLevel ?? 0,
-          riverData.historicalData,
-          1
-        ) - (riverData.latestLevel ?? 0);
-      const bewdleySlopePerHour = getBewdleyEndSlope(
-        bewdleyData.forecasts,
-        bewdleyData.observations
-      );
-
-      // Tracks the last Bewdley-based forecast level and the hoursAhead at
-      // which the Bewdley data ran out, so linear regression is anchored there.
-      // The Bewdley delta is measured from the moment Worcester's latest
-      // reading was taken, so the forecast picks up exactly where it ends.
-      const latestReading =
-        riverData.historicalData[riverData.historicalData.length - 1];
-      const latestReadingTime = latestReading
-        ? new Date(latestReading.dateTime)
-        : now;
-
-      let lastBewdleyForecast: number | null = null;
-      let transitionHoursAhead: number | null = null;
-
-      for (let d = 0; d < 5; d++) {
-        const dayStartIndex = d * 24;
-        const sunrise = futureWeatherData.daily.sunrise[d] ?? null;
-        const sunset = futureWeatherData.daily.sunset[d] ?? null;
-
-        // Skip the hour we're already in - it's a mix of past and future by
-        // the time it's shown, so the forecast starts from the next full hour.
-        const hourStart = d === 0 ? currentHour + 1 : 0;
-        const graphData = [];
-
-        for (let h = hourStart; h < 24; h++) {
-          const index = dayStartIndex + h;
-          if (index >= futureWeatherData.hourly.time.length) break;
-
-          // Hours ahead from now for river level forecast
-          const hoursAhead = d * 24 + h - currentHour;
-          const targetWorcesterTime = new Date(
-            now.getTime() + hoursAhead * TIME_PERIODS.ONE_HOUR
-          );
-
-          const bewdleyLevel =
-            bewdleyData.currentLevel !== null
-              ? getBewdleyBasedWorcesterLevel(
-                  riverData.latestLevel ?? 0,
-                  bewdleyData.forecasts,
-                  bewdleyData.observations,
-                  targetWorcesterTime,
-                  latestReadingTime
-                )
-              : null;
-
-          let forecastSource: ForecastSource;
-          let forecastRiverLevel: number;
-          if (bewdleyLevel !== null) {
-            forecastSource = "bewdley";
-            forecastRiverLevel = bewdleyLevel;
-            lastBewdleyForecast = bewdleyLevel;
-            transitionHoursAhead = hoursAhead;
-          } else {
-            // Anchor the trend to the last Bewdley-forecasted level so there's
-            // no jump at the transition point, and continue Bewdley's own
-            // trend from there when there is one. The trend only runs for
-            // LINEAR_FORECAST_HOURS; after that the level is held where the
-            // trend left it rather than extrapolated for days.
-            const baseLevel =
-              lastBewdleyForecast ?? (riverData.latestLevel || 0);
-            const baseHours = transitionHoursAhead ?? 0;
-            const linearHours = Math.min(
-              hoursAhead - baseHours,
-              LINEAR_FORECAST_HOURS
-            );
-            forecastSource =
-              hoursAhead - baseHours > LINEAR_FORECAST_HOURS
-                ? "held"
-                : "linear";
-            const slopePerHour =
-              lastBewdleyForecast !== null && bewdleySlopePerHour !== null
-                ? bewdleySlopePerHour
-                : worcesterSlopePerHour;
-            forecastRiverLevel = Math.max(
-              0,
-              baseLevel + slopePerHour * linearHours
-            );
-          }
-
-          // The hour containing sunrise or sunset is dark if more than
-          // DARK_HOUR_FRACTION of it is (isDarkHour, lib/time.ts). Either way
-          // formatWindow
-          // (lib/forecast.ts) trims a window's displayed start/end to the
-          // precise sunrise/sunset time using the neighbouring dark-only hour.
-          const dark = isDarkHour(h, sunrise, sunset);
-
-          const forecastConditions: Partial<KayakConditions> = {
-            riverLevel: forecastRiverLevel,
-            temperature: futureWeatherData.hourly.temperature_2m[index],
-            windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
-            windGust: futureWeatherData.hourly.wind_gusts_10m[index],
-            rain: isRainy(futureWeatherData.hourly.weather_code[index]),
-            dark,
-            visibility: futureWeatherData.hourly.visibility[index],
-            weatherCode: futureWeatherData.hourly.weather_code[index],
-          };
-
-          const { status: forecastStatus, reasons: forecastReasons } =
-            calculateFinalRagStatus(forecastConditions);
-          const forecastRainWhileWarm = isRainWhileWarm(forecastConditions);
-
-          graphData.push({
-            time: `${h}:00`,
-            status: forecastStatus,
-            reasons: forecastReasons,
-            value: ragHeight[forecastStatus] || 0.1,
-            forecastLevel: forecastRiverLevel,
-            forecastSource,
-            temperature: futureWeatherData.hourly.temperature_2m[index],
-            windSpeed: futureWeatherData.hourly.wind_speed_10m[index],
-            windGust: futureWeatherData.hourly.wind_gusts_10m[index],
-            rainWhileWarm: forecastRainWhileWarm,
-            weatherDescription: getWeatherDescription(
-              futureWeatherData.hourly.weather_code[index]
-            ),
-          });
-
-          // Only include Bewdley-backed points in the river level graph forecast
-          if (
-            forecastSource === "bewdley" &&
-            hoursAhead <= RIVER_GRAPH_FORECAST_HOURS
-          ) {
-            forecastPoints.push({
-              dateTime: futureWeatherData.hourly.time[index],
-              level: forecastRiverLevel,
-            });
-          }
-        }
-
-        const dayDateStr =
-          futureWeatherData.hourly.time[dayStartIndex].split("T")[0];
-        // Use noon to avoid timezone offset issues when parsing date-only strings
-        const dateObj = new Date(`${dayDateStr}T12:00:00`);
-        const label = d === 0 ? "Today" : DAY_NAMES[dateObj.getDay()];
-
-        days.push({ date: dayDateStr, label, graphData, sunrise, sunset });
-      }
 
       setForecastDays(days);
       setForecastData(forecastPoints);

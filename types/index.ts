@@ -98,16 +98,16 @@ export interface RiverDataResult {
   historicalData: ChartDataPoint[];
 }
 
-// Bewdley forecast/observation points as they travel over JSON - timestamp is
+// Upstream forecast/observation points as they travel over JSON - timestamp is
 // an ISO string on the wire, revived to a Date on the client before use.
-export interface BewdleyForecastPointDTO {
+export interface UpstreamForecastPointDTO {
   timestamp: string;
   level: number;
 }
 
-export interface BewdleyData {
-  forecasts: BewdleyForecastPointDTO[];
-  observations: BewdleyForecastPointDTO[];
+export interface UpstreamData {
+  forecasts: UpstreamForecastPointDTO[];
+  observations: UpstreamForecastPointDTO[];
   currentLevel: number | null;
 }
 
@@ -119,14 +119,14 @@ export interface ConditionsApiResponse {
   river: RiverDataResult | null;
   weather: WeatherData | null;
   futureWeather: FutureWeatherData | null;
-  bewdley: BewdleyData;
+  upstream: UpstreamData;
   warnings: WeatherWarning[];
   fetchedAt: string;
 }
 
 // "held" means no forecast covers the hour: the level is the last linear
 // estimate carried forward unchanged.
-export type ForecastSource = "bewdley" | "linear" | "held";
+export type ForecastSource = "upstream" | "linear" | "held";
 
 export interface ForecastGraphDataPoint {
   time: string;

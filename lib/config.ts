@@ -68,38 +68,38 @@ export const HISTORICAL_DAYS = 5;
 
 // Upstream station forecast – used to improve near-future level forecasts.
 // The app fetches CSV data from an upstream gauge and shifts it forward by
-// BEWDLEY_TRAVEL_HOURS to estimate when a flood wave will arrive.
+// UPSTREAM_TRAVEL_HOURS to estimate when a flood wave will arrive.
 // CSV URLs follow the pattern: https://check-for-flooding.service.gov.uk/station-csv/<station-id>
 // Only stations with an EA forecast publish the three-column CSV
 // (timestamp, height, observed/forecast) this needs - see README.md.
 // Set to null if you don't have a useful upstream station: the forecast then
 // continues your own gauge's recent trend instead.
-export const BEWDLEY_CSV_URL: string | null =
+export const UPSTREAM_CSV_URL: string | null =
   "https://check-for-flooding.service.gov.uk/station-csv/2001";
-export const BEWDLEY_TRAVEL_HOURS = 6;
+export const UPSTREAM_TRAVEL_HOURS = 6;
 
-// How many hours at the end of the Bewdley series set the trend that the
-// linear fallback continues once the Bewdley forecast runs out.
-export const BEWDLEY_TREND_HOURS = 6;
+// How many hours at the end of the upstream series set the trend that the
+// linear fallback continues once the upstream forecast runs out.
+export const UPSTREAM_TREND_HOURS = 6;
 
-// How long the linear trend is extrapolated once the Bewdley forecast
+// How long the linear trend is extrapolated once the upstream forecast
 // runs out. Past this the level is held flat at the last estimate – a straight
 // line carried on for days invents floods and droughts the river never sees.
 export const LINEAR_FORECAST_HOURS = 18;
 
 // How far ahead the river level graph's forecast view is drawn. Shorter than
-// the Bewdley forecast on purpose: a round day keeps the view tidy, and the
-// paddling forecast still uses the full Bewdley window.
+// the upstream forecast on purpose: a round day keeps the view tidy, and the
+// paddling forecast still uses the full upstream window.
 export const RIVER_GRAPH_FORECAST_HOURS = 24;
 
 // Dash pattern for each forecast source's level line, shared by the river
-// level graph and the forecast chart: Bewdley tight, the linear trend wider.
+// level graph and the forecast chart: upstream tight, the linear trend wider.
 // Held hours get no line (see ForecastRagGraph).
 export const FORECAST_LINE_DASH: Record<
   Exclude<ForecastSource, "held">,
   string
 > = {
-  bewdley: "2 3",
+  upstream: "2 3",
   linear: "6 4",
 };
 

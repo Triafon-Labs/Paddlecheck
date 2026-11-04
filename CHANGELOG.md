@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.45.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.44.2...paddlecheck-v1.45.0) (2026-11-04)
+
+### Features
+
+* credit the data sources in the About section ([fce5142](https://github.com/dylanr97/Paddlecheck/commit/fce5142c1cc769c41bc257c0970498995561b851))
+* leave the Conditions Report out when there's no API key ([e6f9190](https://github.com/dylanr97/Paddlecheck/commit/e6f9190c5ec464cff39e9149261227db3f76fd3a))
+* make club.yaml simpler to start from ([e5b9b6f](https://github.com/dylanr97/Paddlecheck/commit/e5b9b6fe7db37a8acb11b03202d41dec232e43b5))
+* make status names, rules and paddler levels configurable ([573d139](https://github.com/dylanr97/Paddlecheck/commit/573d139437348200a3d442b9c465a159677677bf))
+* make the status steps and app name configurable ([6ef3c4e](https://github.com/dylanr97/Paddlecheck/commit/6ef3c4e31f4f1f7828cfc5558f625b91e7ce2faf))
+* move the club's settings into club.yaml ([c9fac2a](https://github.com/dylanr97/Paddlecheck/commit/c9fac2aeff3408a9fe5f09880a9edcc77b7f6318))
+* move the Who Can Paddle rules into config ([3b1eb07](https://github.com/dylanr97/Paddlecheck/commit/3b1eb076a18cbf9bfe3aafe5c4c0ee277210a03c))
+* send feedback to GitHub issues instead of email ([2e861dd](https://github.com/dylanr97/Paddlecheck/commit/2e861dd68a499f8bc6680e67231758e6bfc9a4bd))
+* show the club's name in the top bar ([ec18f7f](https://github.com/dylanr97/Paddlecheck/commit/ec18f7fc735cf5f011c1e952080b918d020429b3))
+
+### Bug Fixes
+
+* address review findings on the club config and AI briefing ([7c3e541](https://github.com/dylanr97/Paddlecheck/commit/7c3e5419e19b796ad04da3b4f8081190e3a982c7))
+* build the AI briefing from server-side data ([8eddde5](https://github.com/dylanr97/Paddlecheck/commit/8eddde5b05f4ea6b6753acd275f6bdc46e58e6b5))
+
+### Code Refactoring
+
+* name the gauges upstream and club, and build forecasts in a pure function ([1bb3799](https://github.com/dylanr97/Paddlecheck/commit/1bb379972349616ae6bd9d05279ceaf61c946c32))
+
+### Documentation
+
+* cover the upstream/club names, briefing, credits and keep-alive ([7f3e154](https://github.com/dylanr97/Paddlecheck/commit/7f3e154df8f073e14a01d187a6750ce9fd9912b2))
+* document CLUB_SHORT_NAME and the Who Can Paddle config ([3aed6c7](https://github.com/dylanr97/Paddlecheck/commit/3aed6c7236edce3b0a1c7be108ebd541750af5e4))
+* document status labels, RULES and PADDLER_LEVELS ([ee004d0](https://github.com/dylanr97/Paddlecheck/commit/ee004d0a64ae0d43602b7cfb333ef4a3fda3620a))
+* document STATUS_STEPS and APP_NAME ([fa9c1ec](https://github.com/dylanr97/Paddlecheck/commit/fa9c1ec05e851d043c5edc4cdedecfce3442e105))
+* rewrite README for clubs adapting Paddlecheck ([bec8488](https://github.com/dylanr97/Paddlecheck/commit/bec8488de4a4f8dda3d68f3e14730a7152b81ef3))
+* rewrite the adaptation guide around club.yaml ([2d127c4](https://github.com/dylanr97/Paddlecheck/commit/2d127c47b4c6cb7bd84627918c251a35e5e572b6))
+* show club.yaml's colours and icons ([a032ca1](https://github.com/dylanr97/Paddlecheck/commit/a032ca10ec230cbfdf67894e94276060d501a848))
+
 ## [1.44.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.44.1...paddlecheck-v1.44.2) (2026-10-27)
 
 ### Bug Fixes

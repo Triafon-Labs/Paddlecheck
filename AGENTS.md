@@ -83,7 +83,7 @@ components/
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
   ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below, opening with the verdict for your level
-  TopNavBar.tsx          Header – share, settings, refresh, freshness line, status banners
+  TopNavBar.tsx          Header – app and club name (CLUB_SHORT_NAME), freshness line, share, settings, refresh, status banners
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners
@@ -105,7 +105,7 @@ lib/
   warnings.ts            Warning display and per-day helpers
   forecast.ts            Best-paddling-time windows and forecast summaries
   chartMotion.ts         Chart entrances in CSS (bars grow, lines/areas wipe in) instead of recharts' JS animation
-  paddlingMatrix.ts      What each paddler level may do for a status and river level (club rules)
+  paddlingMatrix.ts      Applies WHO_CAN_PADDLE + WHO_CAN_PADDLE_EXTRAS (config) for a status and river level
   usePaddlerLevel.ts     The paddler level from Settings, kept in step across components and tabs
   buildKayakData.ts      Pure: raw sources → current conditions + 5-day hourly forecast (client and /api/briefing)
   briefingInputs.ts      Pure: conditions + forecast → what the AI briefing is written from (server only)
@@ -301,7 +301,7 @@ prefixed `paddlecheck_` and omitted here.
 | `RiverReading`           | `{ dateTime: string; value: number }`                                                                                                |
 | `WeatherData`            | Current weather snapshot                                                                                                             |
 | `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                                                                         |
-| `PaddlingMatrix`         | One entry per `PaddlerType` (from `PADDLER_LEVELS`) → verdict with guidance text                                                     |
+| `PaddlingMatrix`         | One entry per `PaddlerType`, built from `WHO_CAN_PADDLE` (config) → verdict and guidance                                             |
 
 ---
 

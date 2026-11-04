@@ -103,20 +103,21 @@ The service worker only registers in a production build, so use `npm run build &
 - **Fork on GitHub** if you want your own hosted copy. This is the simplest route, and it lets you pull in later improvements from this repository (GitHub's "Sync fork" button).
 - **Clone and push to a new repository** if you'd rather your copy had no visible link back to this one. You can still pull updates by adding this repository as a second remote.
 
-Either way, the more of your changes you keep to `lib/config.ts` and `lib/paddlingMatrix.ts`, the easier it is to take updates later without merge conflicts.
+Either way, the more of your changes you keep to `lib/config.ts`, the easier it is to take updates later without merge conflicts.
 
 ### The basics: `lib/config.ts`
 
-Almost everything club-specific lives in **`lib/config.ts`**. The only other file you must change is `lib/paddlingMatrix.ts` (step 11).
+Everything club-specific lives in **`lib/config.ts`** – a basic adaptation doesn't touch any other file. Only the app's name and icons live elsewhere (step 12).
 
 #### 1. Club identity
 
 ```ts
 export const CLUB_NAME = "Worcester Canoe Club";
+export const CLUB_SHORT_NAME = "Worcester Canoe Club";
 export const FEEDBACK_URL = "https://github.com/your-name/your-repo/issues";
 ```
 
-The club name is shown in the About section of the Settings drawer, and `FEEDBACK_URL` is where its "Feedback welcome" link goes – your fork's GitHub issues, a form, or a `mailto:` link. Whatever you put here is public to anyone using the app.
+`CLUB_SHORT_NAME` sits under "Paddlecheck" in the top bar, so people can tell your copy from another club's. Keep it to about 20 characters, or it's cut short on smaller phones – "Worcester CC" rather than "Worcester and District Canoe Club". The full `CLUB_NAME` is shown in the About section of the Settings drawer, and `FEEDBACK_URL` is where its "Feedback welcome" link goes – your fork's GitHub issues, a form, or a `mailto:` link. Whatever you put here is public to anyone using the app.
 
 #### 2. Useful links
 
@@ -174,7 +175,7 @@ The app rates conditions on five steps, best to worst, plus Unknown when data is
 },
 ```
 
-The worst step doesn't have to mean "no paddling" – what each level may do on it is up to `lib/paddlingMatrix.ts` (step 11). It's also the step thunderstorms give when that rule is on, so choose a label that fits both.
+The worst step doesn't have to mean "no paddling" – what each level may do on it is up to `WHO_CAN_PADDLE` (step 11). It's also the step thunderstorms give when that rule is on, so choose a label that fits both.
 
 #### 7. Which rules apply
 
@@ -248,7 +249,30 @@ These are entirely specific to your venue:
 export const PADDLER_LEVELS = ["Junior", "Beginner", "Experienced"] as const;
 ```
 
-What each level may do on each step is in **`lib/paddlingMatrix.ts`** – supervision, buoyancy aids, where to paddle ("Stay between Sabrina Bridge and the Slip"), and so on. It's plain text in a `switch` on the status, ending in one entry per level. Rewrite it to match your club's rules; this is the one file outside `config.ts` that every club will need to change. If the levels there don't match `PADDLER_LEVELS`, `npm run build` (or your editor) points at the line.
+`WHO_CAN_PADDLE` says what each level may do on each step. A step gives either one verdict for everyone, or one per level (then every level must be listed – the build points at any that's missing):
+
+```ts
+Amber: {
+  Junior:      { verdict: "Discretion", details: ["Buoyancy aid compulsory"] },
+  Beginner:    { verdict: "Discretion", details: ["Buoyancy aid compulsory"] },
+  Experienced: { verdict: "Warning",    details: ["Strong current – take considerable care"] },
+},
+"No Paddling": { verdict: "No", details: ["Paddle on the canal instead"] },
+```
+
+A verdict is `"Yes"` (shown as "Can paddle"), `"Warning"` ("With caveats"), `"Discretion"` ("Coach's discretion") or `"No"` ("Cannot paddle"), and `details` are the lines under it.
+
+`WHO_CAN_PADDLE_EXTRAS` holds rules the table can't express on its own, applied in order. Each can depend on the status and the river level, and can replace a verdict, turn "Yes" into another verdict, or add a line:
+
+```ts
+{
+  when: { status: ["Dark Green"], riverLevelAtLeast: 2.2 },
+  levels: ["Junior", "Beginner", "Experienced"],
+  addDetail: "More care required",
+},
+```
+
+Worcester uses three: no intermediates above the 10th step even when the weather is what made it Red, PFDs once the river is above the concrete step, and luminous bibs. Leave the list empty if your table says everything.
 
 A level someone saved in Settings that no longer exists is simply treated as "no preference".
 

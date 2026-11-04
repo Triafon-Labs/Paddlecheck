@@ -179,16 +179,23 @@ The RAG status is calculated from river level first, then modifiers are applied:
 - 2.75–5.0 m → Red
 - ≥ 5.0 m → No Paddling
 
-**Modifiers (applied in order):**
+**Modifiers (applied in order).** Each can be switched off in `RULES` (`lib/config.ts`) –
+`WEATHER_TABLE` covers 1–3. A switched-off factor neither changes the status nor appears
+in `reasons`.
 
 1. **Temperature** – at or below 5°C raises status significantly (cold water shock); 5–13°C raises status moderately and enables rain as a factor
 2. **Wind** – above 15 mph raises status at any temperature
-3. **Rain** – only a factor when temp is 5–13°C (moderate)
-4. **Darkness** – raises Green → Amber, Amber → Red. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the Weather card's Daylight tile counts down to sunset
-5. **Poor visibility** – below 1 000 m raises Green → Amber, Amber → Red
+3. **Rain** – a factor whenever temp is below 13°C
+4. **Darkness** – raises the status one step. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the Weather card's Daylight tile counts down to sunset
+5. **Poor visibility** – below 1 000 m raises the status one step
 6. **Thunderstorms** – overrides everything → No Paddling
 
 The word "raises" means incrementing one step up the severity scale.
+
+The `Status` values are fixed internal step names. What users see is `RAG_STATUS_UI[status].label`
+(use `statusLabel()` from `lib/rag.ts` – never render a `Status` directly). Whether an hour
+is dark is the forecast point's own `dark` flag (`isDarkSlot`, `lib/forecast.ts`), not the
+"Dark" reason, which is absent when `RULES.DARKNESS` is off.
 
 ---
 
@@ -276,7 +283,7 @@ prefixed `paddlecheck_` and omitted here.
 | Key                   | Value                                                                     |
 | --------------------- | ------------------------------------------------------------------------- |
 | `themeMode`           | `"light"` \| `"dark"` \| `"system"` (read/written by MUI)                 |
-| `paddlerLevel`        | `"Beginner"` \| `"Improver"` \| `"Intermediate"` \| `"Independent"`       |
+| `paddlerLevel`        | One of `PADDLER_LEVELS` (`lib/config.ts`); anything else reads as unset   |
 | `riverGraphTimeRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`                     |
 | `autoSummarise`       | `"true"` \| `"false"` – auto-generate the AI summary on load              |
 | `forecastShowNight`   | `"true"` \| `"false"` – show night hours in the forecast chart (Settings) |
@@ -285,16 +292,16 @@ prefixed `paddlecheck_` and omitted here.
 
 ## TypeScript Types (`types/index.ts`)
 
-| Type                     | Description                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `Status`                 | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"`                |
-| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps                       |
-| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                            |
-| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"upstream"` \| `"linear"` \| `"held"`) |
-| `RiverReading`           | `{ dateTime: string; value: number }`                                                            |
-| `WeatherData`            | Current weather snapshot                                                                         |
-| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                                     |
-| `PaddlingMatrix`         | Skill level → status mapping with guidance text                                                  |
+| Type                     | Description                                                                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `Status`                 | `"Light Green" \| "Dark Green" \| "Amber" \| "Red" \| "No Paddling" \| "Unknown"` – internal step names; display via `statusLabel()` |
+| `KayakConditions`        | Full snapshot – status, river level, weather readings, reasons, timestamps                                                           |
+| `DayForecast`            | 24-hour bucket with hourly `ForecastGraphDataPoint[]`                                                                                |
+| `ForecastGraphDataPoint` | Single hourly forecast – status, level, reasons, source (`"upstream"` \| `"linear"` \| `"held"`)                                     |
+| `RiverReading`           | `{ dateTime: string; value: number }`                                                                                                |
+| `WeatherData`            | Current weather snapshot                                                                                                             |
+| `FutureWeatherData`      | 5-day hourly forecast + daily sunrise/sunset                                                                                         |
+| `PaddlingMatrix`         | One entry per `PaddlerType` (from `PADDLER_LEVELS`) → verdict with guidance text                                                     |
 
 ---
 

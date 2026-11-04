@@ -96,7 +96,7 @@ The service worker only registers in a production build, so use `npm run build &
 - **England only, as it stands.** River levels come from the Environment Agency, which covers England. Wales (Natural Resources Wales), Scotland (SEPA) and Northern Ireland have separate services with different APIs, so a club there would need to rewrite `fetchRiverData` in `lib/river.ts`. The weather and Met Office warnings cover the whole UK; Open-Meteo works worldwide.
 - **You need a level gauge** near your launch point. Check that it reports a level in metres (some stations only report flow) and that it updates regularly – most report every 15 minutes.
 - **UK time is assumed.** Times are handled in `Europe/London` throughout (`lib/time.ts`, `lib/warnings.ts`, `lib/weather.ts`).
-- **The rules are Worcester's.** The thresholds, the weather table and the "who can paddle" guidance all encode Worcester Canoe Club's rules. Don't deploy for your club until you've replaced them with your own, agreed by whoever is responsible for safety in your club.
+- **The rules are Worcester's.** The thresholds, the weather table, which factors count and the "who can paddle" guidance all encode Worcester Canoe Club's rules. Don't deploy for your club until you've replaced them with your own, agreed by whoever is responsible for safety in your club.
 
 ### Fork or clone?
 
@@ -107,7 +107,7 @@ Either way, the more of your changes you keep to `lib/config.ts` and `lib/paddli
 
 ### The basics: `lib/config.ts`
 
-Almost everything club-specific lives in **`lib/config.ts`**. The only other file you must change is `lib/paddlingMatrix.ts` (step 9).
+Almost everything club-specific lives in **`lib/config.ts`**. The only other file you must change is `lib/paddlingMatrix.ts` (step 11).
 
 #### 1. Club identity
 
@@ -137,7 +137,7 @@ To find your station:
 1. Search the [station list](https://environment.data.gov.uk/flood-monitoring/id/stations?parameter=level) – add `&riverName=<river>`, `&town=<town>` or `&search=<name>` to the URL to narrow it down. Or use `&lat=<lat>&long=<long>&dist=10` to find stations within 10 km of your club.
 2. Copy the station's `stationReference` (or the last part of its `@id` URL).
 
-**There are two ID schemes, and they're easy to mix up.** The flood-monitoring API (used here) and the public [Check for flooding](https://check-for-flooding.service.gov.uk/) website number stations differently. Worcester Barbourne is `2642` in the API but `2092` on the website – the website's number is the `RLOIid` field in the API's station record. `RIVER_STATION_ID` needs the API number; `USEFUL_LINKS` and the upstream CSV (step 7) use the website's.
+**There are two ID schemes, and they're easy to mix up.** The flood-monitoring API (used here) and the public [Check for flooding](https://check-for-flooding.service.gov.uk/) website number stations differently. Worcester Barbourne is `2642` in the API but `2092` on the website – the website's number is the `RLOIid` field in the API's station record. `RIVER_STATION_ID` needs the API number; `USEFUL_LINKS` and the upstream CSV (step 9) use the website's.
 
 You can check you have the right one by opening `https://environment.data.gov.uk/flood-monitoring/id/stations/<ID>/readings?_sorted&_limit=5` – you should see recent level readings.
 
@@ -160,7 +160,36 @@ export const WARNING_AREA = "Worcestershire";
 
 Pick your region's feed from the [Met Office RSS page](https://www.metoffice.gov.uk/weather/guides/rss). `WARNING_AREA` filters it to warnings whose description mentions that name – use the county (or unitary authority) as the Met Office writes it.
 
-#### 6. Safety thresholds
+#### 6. Status steps: names and colours
+
+The app rates conditions on five steps, best to worst, plus Unknown when data is missing. Internally they're always called Light Green, Dark Green, Amber, Red and No Paddling, but what people see comes from `RAG_STATUS_UI`:
+
+```ts
+"Dark Green": {
+  label: "Moderate",                   // the name shown everywhere
+  color: STATUS_COLORS.yellow,         // keep colour/onColor pairs from lib/statusColors.ts
+  onColor: ON_STATUS_COLORS.yellow,    //   – they're checked for contrast
+  emoji: "📈",                          // share text
+  icon: TrendingUpOutlined,            // status panel
+},
+```
+
+The worst step doesn't have to mean "no paddling" – what each level may do on it is up to `lib/paddlingMatrix.ts` (step 11). It's also the step thunderstorms give when that rule is on, so choose a label that fits both.
+
+#### 7. Which rules apply
+
+`RULES` switches whole factors on or off:
+
+| Key             | Worcester | When on                                                         |
+| --------------- | --------- | --------------------------------------------------------------- |
+| `WEATHER_TABLE` | `true`    | Temperature, wind and rain adjust the status (`CRITERIA_TABLE`) |
+| `DARKNESS`      | `true`    | Darkness raises the status one step                             |
+| `FOG`           | `true`    | Fog or poor visibility raises the status one step               |
+| `THUNDERSTORMS` | `true`    | Thunderstorms jump straight to the worst step                   |
+
+With everything off, the river level alone sets the status. A switched-off factor stops being listed as a reason and disappears from the Conditions Key. The weather is still shown on the page either way.
+
+#### 8. Safety thresholds
 
 `THRESHOLDS` sets where the status changes. Base status by river level:
 
@@ -184,7 +213,9 @@ Weather:
 
 `CRITERIA_TABLE` is the lookup that combines them. Each row is a temperature band (`high`, `moderate`, `low`) and a weather type (`calm`, `windy`, `rainy`), holding the status for each of the four river level bands (`0` Light Green, `1` Dark Green, `2` Amber, `3` Red). For example, `moderate.windy: [2, 2, 2, 3]` means cool and windy is Amber at any level below the Red threshold. Edit the numbers to match your club's table.
 
-#### 7. Upstream station (optional)
+The text beside each weather row of the Conditions Key is in `CONDITIONS_KEY_WEATHER`; the figures in its headings come from `THRESHOLDS` automatically. Set `rainCold` to `""` to hide that row – it explains a Worcester-specific quirk.
+
+#### 9. Upstream station (optional)
 
 ```ts
 export const UPSTREAM_CSV_URL: string | null =
@@ -196,11 +227,12 @@ An upstream gauge with an Environment Agency forecast lets the app see a rise co
 
 - **Only some stations publish a forecast** – generally the larger rivers. Open `https://check-for-flooding.service.gov.uk/station-csv/<website-ID>` (the website number from step 3): a usable station's CSV has a third column marked `observed` or `forecast`. If it only has two columns there's no forecast, and the app will fall back as if there were no upstream station.
 - **Travel time** – the hours a change at the upstream gauge takes to show at yours. You can estimate it by comparing the two gauges' graphs after a rise, peak to peak.
+- **Your own gauge has a forecast?** Use its CSV with `UPSTREAM_TRAVEL_HOURS = 0`. The app then follows your gauge's own EA forecast, which beats estimating from a station upstream.
 - **No upstream station?** Set `UPSTREAM_CSV_URL` to `null`. The forecast then continues your own gauge's trend over the last 8 hours, for up to 18 hours, and holds the level flat after that.
 
 The CSV comes from the Check for flooding website rather than a documented API, so it could change without notice. If it does, the app falls back to the trend.
 
-#### 8. Landmarks and the conditions key
+#### 10. Landmarks and the conditions key
 
 These are entirely specific to your venue:
 
@@ -208,13 +240,19 @@ These are entirely specific to your venue:
 - **`RAG_DESCRIPTIONS`** – what each status means for your club, shown in the Settings drawer's conditions key.
 - **`RIVER_LEVEL_BAND_DESCRIPTIONS`** – a description of each river level band, also shown in the conditions key.
 
-#### 9. Who can paddle: `lib/paddlingMatrix.ts`
+#### 11. Paddler levels and who can paddle
 
-This file holds the guidance for each paddler level under each status – supervision, PFDs, where to paddle ("Stay between Sabrina Bridge and the Slip"), and so on. It's plain text in a `switch` on the status, so rewrite the details to match your club's rules.
+`PADDLER_LEVELS` in `lib/config.ts` lists the levels offered in Settings and shown under "Who Can Paddle", least experienced first. Use as many as your club has, under your own names:
 
-The four level names (Beginner, Improver, Intermediate, Independent) are used across the app. Renaming them, or adding a fifth, means changing the `PaddlerType` type in `types/index.ts` and following the TypeScript errors; it isn't a config change.
+```ts
+export const PADDLER_LEVELS = ["Junior", "Beginner", "Experienced"] as const;
+```
 
-#### 10. App name and icons (optional)
+What each level may do on each step is in **`lib/paddlingMatrix.ts`** – supervision, buoyancy aids, where to paddle ("Stay between Sabrina Bridge and the Slip"), and so on. It's plain text in a `switch` on the status, ending in one entry per level. Rewrite it to match your club's rules; this is the one file outside `config.ts` that every club will need to change. If the levels there don't match `PADDLER_LEVELS`, `npm run build` (or your editor) points at the line.
+
+A level someone saved in Settings that no longer exists is simply treated as "no preference".
+
+#### 12. App name and icons (optional)
 
 - Name and description: `app/manifest.ts` (installed app) and `metadata` in `app/layout.tsx` (browser tab).
 - Icons: the files in `public/`. The installable icons are all rendered from `public/favicon.svg`, so replace that and regenerate the PNGs at the same sizes (a tool such as [RealFaviconGenerator](https://realfavicongenerator.net/) will do the lot).

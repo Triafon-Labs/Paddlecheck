@@ -109,6 +109,8 @@ Either way, if your changes stay in `club.yaml` (and `public/` for icons), takin
 
 Everything about your club is in **`club.yaml`** at the top of the project – no other file needs to change, except to swap the icons. Every setting has a comment above it explaining what it does, so the file itself is the main guide. This section covers the parts that need more than a comment.
 
+**Where to start.** The `club.yaml` in this repository is Worcester Canoe Club's, which uses nearly every setting – the hardest example there is. For a new club, copy **`examples/starter.club.yaml`** over it instead: about 100 lines that rate conditions on the river level alone, with every line you need to change marked `CHANGE`. Add more from Worcester's file as you need it. Settings marked _(optional)_ can be left out; the comment says what happens then.
+
 YAML is a plain-text settings format. The things that trip people up:
 
 - **Indentation is meaningful.** Use spaces, two per level, never tabs, and keep items in the same section lined up.
@@ -125,7 +127,15 @@ club.yaml has 2 problems:
 
 An indentation slip gives the line and column instead. With `npm run dev` running, changes show up in the browser as soon as you save.
 
-**Editor help (optional).** In [VS Code](https://code.visualstudio.com/) with the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml), `club.yaml` gets suggestions as you type and mistakes underlined. The first line of the file links it to `club.schema.json`, which describes every setting.
+**Editor help (optional).** In [VS Code](https://code.visualstudio.com/) with the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml), `club.yaml` gets suggestions as you type and mistakes underlined, from `club.schema.json` (the project's VS Code settings link the two).
+
+#### Using an AI assistant
+
+Turning your club's written rules into `club.yaml` is a good job for an AI coding assistant – Claude Code, GitHub Copilot, Cursor or similar – working in your copy of the project. [`AGENTS.md`](AGENTS.md) explains the project to it, and the checks above tell it exactly what to fix. Something like:
+
+> Here are our club's paddling rules: _[paste them, or attach the document]_. Our river gauge is _[name, or the station ID]_ and our launch point is _[place or coordinates]_. Start from `examples/starter.club.yaml` and fill in `club.yaml` for our club, following the comments in Worcester's file and README.md. Run `npm run dev` and fix anything it reports. Then list anything in our rules you couldn't express, and any choices you made that we should check.
+
+Then read through what it wrote before anyone relies on it, particularly the steps' `fromLevel` values and `whoCanPaddle`. An assistant can turn rules into settings; it can't know that your rules are right, or where your landing stage floods.
 
 #### River gauge (`river.stationId`)
 
@@ -165,7 +175,7 @@ Adding a colour or icon is a code change: `lib/statusColors.ts` or `ICONS` in `l
 
 #### Weather (`rules`, `thresholds`, `weatherTable`)
 
-`rules` switches each factor on or off; with all four off, the river level alone sets the status. When `weatherTable` is on, each row of the table gives the resulting step for each river level band, with steps numbered from 0 in `steps` order – so there's one entry per step except the last. For Worcester, `moderate: windy: [2, 2, 2, 3]` means cool and windy is at least Amber.
+`rules` switches each factor on or off; with all four off, the river level alone sets the status. When `weatherTable` is on, each row names the step that results in each river level band, in step order without the last step. For Worcester the columns are Light Green, Dark Green, Amber and Red, so `windy: [Amber, Amber, Amber, Red]` in the `moderate` band means cool and windy is at least Amber. A row that repeats the step names unchanged, like `[Light Green, Dark Green, Amber, Red]`, means the weather makes no difference.
 
 #### Who can paddle (`paddlerLevels`, `whoCanPaddle`, `whoCanPaddleExtras`)
 

@@ -5,17 +5,13 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "app",
     "club",
     "location",
     "river",
     "warnings",
-    "rules",
-    "thresholds",
     "steps",
     "paddlerLevels",
-    "whoCanPaddle",
-    "conditionsKey"
+    "whoCanPaddle"
   ],
   "definitions": {
     "colour": {
@@ -53,39 +49,60 @@
       "additionalProperties": false,
       "required": ["verdict"],
       "properties": {
-        "verdict": { "$ref": "#/definitions/verdictValue" },
+        "verdict": {
+          "$ref": "#/definitions/verdictValue"
+        },
         "details": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "description": "Lines shown under the verdict."
         }
       }
     },
     "weatherRow": {
       "type": "array",
-      "items": { "type": "integer", "minimum": 0 },
-      "description": "The resulting step (numbered from 0) for each river level band – one entry per step except the last."
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "integer",
+            "minimum": 0
+          }
+        ]
+      },
+      "description": "One step name per river level band, in step order without the last step – e.g. [Light Green, Dark Green, Amber, Red]."
     },
-    "text": { "type": "string", "minLength": 1 }
+    "text": {
+      "type": "string",
+      "minLength": 1
+    }
   },
   "properties": {
     "app": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name"],
+      "required": [],
       "properties": {
         "name": {
           "$ref": "#/definitions/text",
           "description": "Top bar, browser tab, share text and installed app name."
         }
-      }
+      },
+      "description": "(optional) The app's name is Paddlecheck if left out."
     },
     "club": {
       "type": "object",
       "additionalProperties": false,
       "required": ["name", "shortName", "feedbackUrl"],
       "properties": {
-        "name": { "$ref": "#/definitions/text" },
+        "name": {
+          "$ref": "#/definitions/text"
+        },
         "shortName": {
           "$ref": "#/definitions/text",
           "description": "Shown above the app name in the top bar – about 20 characters fit on a phone."
@@ -101,8 +118,12 @@
             "additionalProperties": false,
             "required": ["name", "url"],
             "properties": {
-              "name": { "$ref": "#/definitions/text" },
-              "url": { "$ref": "#/definitions/text" }
+              "name": {
+                "$ref": "#/definitions/text"
+              },
+              "url": {
+                "$ref": "#/definitions/text"
+              }
             }
           }
         }
@@ -113,14 +134,22 @@
       "additionalProperties": false,
       "required": ["latitude", "longitude"],
       "properties": {
-        "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
-        "longitude": { "type": "number", "minimum": -180, "maximum": 180 }
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        }
       }
     },
     "river": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["stationId", "forecastCsv"],
+      "required": ["stationId"],
       "properties": {
         "stationId": {
           "type": ["string", "number"],
@@ -128,7 +157,7 @@
         },
         "forecastCsv": {
           "type": ["string", "null"],
-          "description": "A Check for flooding station CSV with an EA forecast, or null for none."
+          "description": "A Check for flooding station CSV with an EA forecast, or null for none. Leaving it out is the same as null."
         },
         "travelHours": {
           "type": "number",
@@ -155,31 +184,51 @@
     "rules": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["weatherTable", "darkness", "fog", "thunderstorms"],
+      "required": [],
       "properties": {
-        "weatherTable": { "type": "boolean" },
-        "darkness": { "type": "boolean" },
-        "fog": { "type": "boolean" },
-        "thunderstorms": { "type": "boolean" }
-      }
+        "weatherTable": {
+          "type": "boolean"
+        },
+        "darkness": {
+          "type": "boolean"
+        },
+        "fog": {
+          "type": "boolean"
+        },
+        "thunderstorms": {
+          "type": "boolean"
+        }
+      },
+      "description": "(optional) Each factor is on if left out."
     },
     "thresholds": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "tempHigh",
-        "tempModerate",
-        "windHigh",
-        "visibilityPoor",
-        "darkHourFraction"
-      ],
+      "required": [],
       "properties": {
-        "tempHigh": { "type": "number", "description": "°C" },
-        "tempModerate": { "type": "number", "description": "°C" },
-        "windHigh": { "type": "number", "description": "mph" },
-        "visibilityPoor": { "type": "number", "description": "metres" },
-        "darkHourFraction": { "type": "number", "minimum": 0, "maximum": 1 }
-      }
+        "tempHigh": {
+          "type": "number",
+          "description": "°C"
+        },
+        "tempModerate": {
+          "type": "number",
+          "description": "°C"
+        },
+        "windHigh": {
+          "type": "number",
+          "description": "mph"
+        },
+        "visibilityPoor": {
+          "type": "number",
+          "description": "metres"
+        },
+        "darkHourFraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "description": "(optional) Defaults: tempHigh 13, tempModerate 5, windHigh 15, visibilityPoor 1000, darkHourFraction 0.25."
     },
     "steps": {
       "type": "array",
@@ -187,32 +236,40 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "name",
-          "fromLevel",
-          "colour",
-          "icon",
-          "emoji",
-          "description",
-          "riverDescription"
-        ],
+        "required": ["name", "fromLevel", "colour", "icon", "description"],
         "properties": {
-          "name": { "$ref": "#/definitions/text" },
+          "name": {
+            "$ref": "#/definitions/text"
+          },
           "fromLevel": {
             "type": "number",
             "description": "Gauge reading (m) the step starts at; the first step is 0."
           },
-          "colour": { "$ref": "#/definitions/colour" },
-          "icon": { "$ref": "#/definitions/icon" },
-          "emoji": { "$ref": "#/definitions/text" },
-          "description": { "$ref": "#/definitions/text" },
-          "riverDescription": { "$ref": "#/definitions/text" },
+          "colour": {
+            "$ref": "#/definitions/colour"
+          },
+          "icon": {
+            "$ref": "#/definitions/icon"
+          },
+          "emoji": {
+            "$ref": "#/definitions/text"
+          },
+          "description": {
+            "$ref": "#/definitions/text"
+          },
+          "riverDescription": {
+            "$ref": "#/definitions/text"
+          },
           "riverReason": {
             "$ref": "#/definitions/text",
             "description": "e.g. \"Slightly elevated\" → \"Slightly elevated river level (> 1.00 m)\". Needed on every step except the first and last."
           },
-          "reasonIcon": { "$ref": "#/definitions/icon" },
-          "bestTimes": { "type": "boolean" }
+          "reasonIcon": {
+            "$ref": "#/definitions/icon"
+          },
+          "bestTimes": {
+            "type": "boolean"
+          }
         }
       }
     },
@@ -225,8 +282,12 @@
           "additionalProperties": false,
           "required": ["calm", "windy"],
           "properties": {
-            "calm": { "$ref": "#/definitions/weatherRow" },
-            "windy": { "$ref": "#/definitions/weatherRow" }
+            "calm": {
+              "$ref": "#/definitions/weatherRow"
+            },
+            "windy": {
+              "$ref": "#/definitions/weatherRow"
+            }
           }
         },
         "moderate": {
@@ -234,9 +295,15 @@
           "additionalProperties": false,
           "required": ["calm", "windy", "rainy"],
           "properties": {
-            "calm": { "$ref": "#/definitions/weatherRow" },
-            "windy": { "$ref": "#/definitions/weatherRow" },
-            "rainy": { "$ref": "#/definitions/weatherRow" }
+            "calm": {
+              "$ref": "#/definitions/weatherRow"
+            },
+            "windy": {
+              "$ref": "#/definitions/weatherRow"
+            },
+            "rainy": {
+              "$ref": "#/definitions/weatherRow"
+            }
           }
         },
         "low": {
@@ -244,9 +311,15 @@
           "additionalProperties": false,
           "required": ["calm", "windy", "rainy"],
           "properties": {
-            "calm": { "$ref": "#/definitions/weatherRow" },
-            "windy": { "$ref": "#/definitions/weatherRow" },
-            "rainy": { "$ref": "#/definitions/weatherRow" }
+            "calm": {
+              "$ref": "#/definitions/weatherRow"
+            },
+            "windy": {
+              "$ref": "#/definitions/weatherRow"
+            },
+            "rainy": {
+              "$ref": "#/definitions/weatherRow"
+            }
           }
         }
       }
@@ -254,18 +327,26 @@
     "paddlerLevels": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/definitions/text" }
+      "items": {
+        "$ref": "#/definitions/text"
+      }
     },
     "whoCanPaddle": {
       "type": "object",
-      "description": "One entry per step name (plus optional Unknown): a verdict for everyone, or one per paddler level.",
+      "description": "One entry per step name: a verdict for everyone, or one per paddler level. An optional Unknown entry covers missing data.",
       "additionalProperties": {
         "oneOf": [
-          { "$ref": "#/definitions/verdict" },
+          {
+            "$ref": "#/definitions/verdict"
+          },
           {
             "type": "object",
-            "not": { "required": ["verdict"] },
-            "additionalProperties": { "$ref": "#/definitions/verdict" }
+            "not": {
+              "required": ["verdict"]
+            },
+            "additionalProperties": {
+              "$ref": "#/definitions/verdict"
+            }
           }
         ]
       }
@@ -281,16 +362,41 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "status": { "type": "array", "items": { "type": "string" } },
-              "notStatus": { "type": "array", "items": { "type": "string" } },
-              "riverLevelAtLeast": { "type": "number" }
+              "status": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "notStatus": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "riverLevelAtLeast": {
+                "type": "number"
+              }
             }
           },
-          "levels": { "type": "array", "items": { "type": "string" } },
-          "set": { "$ref": "#/definitions/verdict" },
-          "yesBecomes": { "$ref": "#/definitions/verdictValue" },
-          "addDetail": { "$ref": "#/definitions/text" },
-          "replacing": { "$ref": "#/definitions/text" }
+          "levels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "set": {
+            "$ref": "#/definitions/verdict"
+          },
+          "yesBecomes": {
+            "$ref": "#/definitions/verdictValue"
+          },
+          "addDetail": {
+            "$ref": "#/definitions/text"
+          },
+          "replacing": {
+            "$ref": "#/definitions/text"
+          }
         }
       }
     },
@@ -298,42 +404,53 @@
       "type": "object",
       "description": "Gauge reading (m) → what the river looks like there.",
       "patternProperties": {
-        "^[0-9]+(\\.[0-9]+)?$": { "$ref": "#/definitions/text" }
+        "^[0-9]+(\\.[0-9]+)?$": {
+          "$ref": "#/definitions/text"
+        }
       },
       "additionalProperties": false
     },
     "conditionsKey": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "tempWarm",
-        "tempCool",
-        "tempCold",
-        "windCalm",
-        "windHigh",
-        "rainCool",
-        "rainCold",
-        "rainWarm",
-        "dark",
-        "fog",
-        "thunderstorm"
-      ],
+      "required": [],
       "properties": {
-        "tempWarm": { "type": "string" },
-        "tempCool": { "type": "string" },
-        "tempCold": { "type": "string" },
-        "windCalm": { "type": "string" },
-        "windHigh": { "type": "string" },
-        "rainCool": { "type": "string" },
+        "tempWarm": {
+          "type": "string"
+        },
+        "tempCool": {
+          "type": "string"
+        },
+        "tempCold": {
+          "type": "string"
+        },
+        "windCalm": {
+          "type": "string"
+        },
+        "windHigh": {
+          "type": "string"
+        },
+        "rainCool": {
+          "type": "string"
+        },
         "rainCold": {
           "type": "string",
           "description": "Leave empty (\"\") to hide this row."
         },
-        "rainWarm": { "type": "string" },
-        "dark": { "type": "string" },
-        "fog": { "type": "string" },
-        "thunderstorm": { "type": "string" }
-      }
+        "rainWarm": {
+          "type": "string"
+        },
+        "dark": {
+          "type": "string"
+        },
+        "fog": {
+          "type": "string"
+        },
+        "thunderstorm": {
+          "type": "string"
+        }
+      },
+      "description": "(optional) Override the standard wording of any weather row in the Conditions Key."
     }
   }
 }

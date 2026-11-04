@@ -69,13 +69,16 @@ error listing every problem, which stops `next dev`/`next build`; `lib/config.ts
 re-exports it under the same constant names the code uses (`CLUB_NAME`, `STATUS_STEPS`,
 `WHO_CAN_PADDLE`, `THRESHOLDS.TEMP_HIGH`, …). Never hard-code club-specific values in code –
 add a setting to `club.yaml`, `lib/clubConfig.ts` and `club.schema.json` (editor hints)
-together.
+together. Optional settings get their defaults in `DEFAULTS` (`lib/clubConfig.ts`). When helping a
+club adapt the app, start from `examples/starter.club.yaml`, run `npm run dev` to validate,
+and list anything in their rules that `club.yaml` can't express rather than guessing.
 
 ## Directory Structure
 
 ```
 club.yaml               The club's settings (see above)
 club.schema.json        JSON Schema for club.yaml – editor autocomplete and checks only
+examples/starter.club.yaml  Minimal club.yaml for a new club (river level only, CHANGE markers)
 docs/club-yaml/         Colour and icon reference images for club.yaml – redraw with
                         `node scripts/club-yaml-reference.mjs` after changing STATUS_COLORS or ICONS
 

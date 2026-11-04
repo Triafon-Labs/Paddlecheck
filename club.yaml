@@ -11,11 +11,15 @@
 #   - Write "No" and "Yes" verdicts in quotes – unquoted, older YAML tools
 #     read them as true/false.
 #
+# Settings marked (optional) can be left out; the comment says what happens
+# then. Starting a new club? examples/starter.club.yaml is a shorter file to
+# begin from.
+#
 # If something here is wrong, `npm run dev` and `npm run build` stop with a
 # message naming the setting. In VS Code, the YAML extension (Red Hat) checks
 # this file and suggests settings as you type.
 
-app:
+app: # (optional – the name is Paddlecheck if left out)
   # The app's name: top bar, browser tab, share text, and the name it installs
   # under on a phone. Changing it renames the app on phones that already have it.
   name: Paddlecheck
@@ -28,7 +32,7 @@ club:
   # Where "Feedback welcome" in Settings goes: an issue tracker, a form, or a
   # mailto: link. Public to anyone using the app.
   feedbackUrl: https://github.com/dylanr97/Paddlecheck/issues
-  # The "Useful Links" section in Settings.
+  # The "Useful Links" section in Settings. (optional)
   usefulLinks:
     - name: River Severn level at Worcester (Barbourne)
       url: https://check-for-flooding.service.gov.uk/station/2092
@@ -58,21 +62,22 @@ warnings:
   feed: https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm
   area: Worcestershire
 
-# Switch off any factor your club's rules don't use.
+# Switch off any factor your club's rules don't use. (optional – each one is
+# on if left out)
 rules:
   weatherTable: true # temperature, wind and rain adjust the status (weatherTable below)
   darkness: true # darkness raises the status one step
   fog: true # fog or poor visibility raises the status one step
   thunderstorms: true # a thunderstorm jumps straight to the last step
 
+# (optional – each one is the value shown here if left out)
 thresholds:
   tempHigh: 13 # °C – at or above this, temperature isn't a factor
   tempModerate: 5 # °C – above this is "cool", at or below is "cold"
   windHigh: 15 # mph – sustained wind above this counts as windy
   visibilityPoor: 1000 # metres – below this counts as fog
-  # A forecast hour counts as dark when more than this fraction of it is
-  # before sunrise or after sunset (0.25 = over 15 minutes).
-  darkHourFraction: 0.25
+  # Also darkHourFraction: a forecast hour counts as dark when more than this
+  # fraction of it is before sunrise or after sunset (0.25 = over 15 minutes).
 
 # The scale conditions are rated on, best first – as many steps as your rules
 # have. The last step is reached only by the river passing its fromLevel or,
@@ -89,14 +94,17 @@ thresholds:
 #   icon             check, trendingUp, warning, alert, stop, help, water,
 #                    waves, tsunami or flood (Material icons).
 #                    See them: docs/club-yaml/icons.svg
-#   emoji            used in the share text
+#   emoji            (optional) used in the share text
 #   description      what the step means for your club (Conditions Key)
-#   riverDescription what the river looks like in this band (Conditions Key)
+#   riverDescription (optional) what the river looks like in this band
+#                    (Conditions Key)
 #   riverReason      how the level reads as a contributing factor, e.g.
 #                    "Slightly elevated" -> "Slightly elevated river level
 #                    (> 1.00 m)". Not needed on the first step.
-#   reasonIcon       icon for that factor and the band (same list as icon)
-#   bestTimes        true if it's a good time to paddle in forecast summaries
+#   reasonIcon       (optional) icon for that factor and the band – same list
+#                    as icon; water if left out
+#   bestTimes        (optional) true if it's a good time to paddle in forecast
+#                    summaries
 steps:
   - name: Light Green
     fromLevel: 0
@@ -150,25 +158,28 @@ steps:
 # Used when rules.weatherTable is on: the club's conditions table. For each
 # temperature band (high: at or above tempHigh, moderate: above tempModerate,
 # low: the rest) and weather (calm, windy, or rainy – rain only counts below
-# tempHigh), the step that results in each river level band. Steps are
-# numbered from 0 in the order above, and each row has one entry per step
-# except the last: [0, 1, 2, 3] means "the river level's own step",
-# [2, 2, 2, 3] means "at least step 2 (Amber)".
+# tempHigh), the step that results in each river level band.
+#
+# Each row lists one step per river level band, in the same order as the
+# steps above but without the last one. So for Worcester, the four columns
+# are what happens when the river alone says Light Green, Dark Green, Amber
+# and Red; a row that repeats those names unchanged means the weather makes
+# no difference.
 weatherTable:
   high:
-    calm: [0, 1, 2, 3]
-    windy: [1, 2, 2, 3]
+    calm: [Light Green, Dark Green, Amber, Red]
+    windy: [Dark Green, Amber, Amber, Red]
   moderate:
-    calm: [1, 2, 2, 3]
-    windy: [2, 2, 2, 3]
-    rainy: [2, 2, 2, 3]
+    calm: [Dark Green, Amber, Amber, Red]
+    windy: [Amber, Amber, Amber, Red]
+    rainy: [Amber, Amber, Amber, Red]
   # The printed table only lists calm and windy at 5°C and below. Cold rain is
   # treated like cold wind here – stricter than the printed rules, and the
   # Conditions Key says so (conditionsKey.rainCold).
   low:
-    calm: [2, 2, 3, 3]
-    windy: [2, 3, 3, 3]
-    rainy: [2, 3, 3, 3]
+    calm: [Amber, Amber, Red, Red]
+    windy: [Amber, Red, Red, Red]
+    rainy: [Amber, Red, Red, Red]
 
 # The levels offered in Settings and shown under "Who Can Paddle", least
 # experienced first. Use as many as your club has.
@@ -182,7 +193,8 @@ paddlerLevels:
 # "Warning" (With caveats), "Discretion" (Coach's discretion) or "No"
 # (Cannot paddle); details are the lines shown under it. A step gives one
 # verdict for everyone, or one per level – then every level must be listed.
-# "Unknown" (when conditions can't be checked) is optional.
+# You can also add an "Unknown" entry for when conditions can't be checked;
+# without one, every level gets "No" and "Ask a coach before paddling".
 whoCanPaddle:
   Light Green:
     Beginner:
@@ -272,13 +284,7 @@ whoCanPaddle:
     details:
       - Applies to every level, independents included
 
-  Unknown:
-    verdict: "No"
-    details:
-      - Conditions could not be checked
-      - Ask a coach before paddling
-
-# Rules applied on top of whoCanPaddle, in order – for anything that depends
+# (optional) Rules applied on top of whoCanPaddle, in order – for anything that depends
 # on the river level rather than the step, or adds the same line to several
 # levels. Each has:
 #   when    (optional) status: [steps], notStatus: [steps], riverLevelAtLeast: metres
@@ -287,7 +293,7 @@ whoCanPaddle:
 #     set         replace the verdict outright – the only change made to a "No"
 #     yesBecomes  turn a "Yes" into this verdict
 #     addDetail   add this line – in place of `replacing`, if that line is there
-# Leave it as [] if whoCanPaddle says everything.
+# Most clubs won't need any: leave this out if whoCanPaddle says everything.
 whoCanPaddleExtras:
   # "No paddling for intermediates above 10 steps from the car park" holds
   # however the status got to Red, so it's keyed to the level itself.
@@ -319,7 +325,7 @@ whoCanPaddleExtras:
 
 # What the river looks like at particular gauge readings, shown either side
 # of the current level. Build it up by noting the gauge reading each time you
-# visit at a different level; it can start empty: {}
+# visit at a different level. (optional – leave it out until you have some)
 landmarks:
   1.0: Able to launch from the landing stage – OK
   1.15: Water over one end of the landing stage
@@ -342,23 +348,16 @@ landmarks:
   5.54: Sabrina Bridge closed, North Parade underwater, dangerous flows
   5.55: Boathouse inaccessible, dangerous flow, no paddling advised
 
-# The text beside each weather row of the Conditions Key; the figures in the
-# row headings come from thresholds. These can include {appName},
-# {tempHigh}, {tempModerate}, {windHigh} and {darkMinutes}, which are filled
-# in for you. Rows for a factor switched off in rules aren't shown; leave
-# rainCold empty ("") to hide that row.
+# (optional) The text beside each weather row of the Conditions Key, for
+# any row you want to word differently. Rows for a factor switched off in
+# rules aren't shown. The other rows are tempWarm, tempCool, tempCold,
+# windCalm, windHigh, rainCool, rainWarm, fog and thunderstorm – see
+# lib/clubConfig.ts for their standard wording. Text can include {appName},
+# {tempHigh}, {tempModerate}, {windHigh} and {darkMinutes}.
 conditionsKey:
-  tempWarm: Warm. No temperature penalty applied.
-  tempCool: Cool. Raises the base risk rating. Rain also becomes a factor.
-  tempCold: Cold air, and likely cold water too - capsizing is far more dangerous with nowhere warm to recover. Significant increase in risk rating.
-  windCalm: Calm. No wind penalty applied.
-  windHigh: Windy. Raises the risk rating at all temperatures.
-  rainCool: Rain raises the risk rating whenever it isn't warm, by the same step as windy conditions.
-  # Worcester's printed table doesn't cover cold rain.
+  # An extra row only Worcester needs: its printed table doesn't cover cold
+  # rain. Leave rainCold out and the row isn't shown.
   rainCold: The club's printed table sets out rain only for the cool band, listing just calm and windy at {tempModerate}°C and below. {appName} treats cold rain like cold wind rather than ignoring it, so it is stricter than the printed rules here.
-  rainWarm: Rain doesn't count against the rating once it's this warm.
   # The club's rules define dark as streetlights lit; the app can't see
   # streetlights, so it uses sunrise and sunset.
   dark: Streetlights lit, in the club's rules. {appName} uses sunrise and sunset in its place, and counts a forecast hour as dark when over {darkMinutes} minutes of it is. Raises the rating one step.
-  fog: Raises the rating one step.
-  thunderstorm: No paddling when thunder is near – overrides all other conditions.

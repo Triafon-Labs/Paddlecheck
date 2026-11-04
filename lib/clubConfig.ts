@@ -95,6 +95,36 @@ export interface ClubConfig {
   };
 }
 
+// What an optional setting is when club.yaml leaves it out.
+const DEFAULTS = {
+  appName: "Paddlecheck",
+  rules: { weatherTable: true, darkness: true, fog: true, thunderstorms: true },
+  thresholds: {
+    tempHigh: 13,
+    tempModerate: 5,
+    windHigh: 15,
+    visibilityPoor: 1000,
+    darkHourFraction: 0.25,
+  },
+  conditionsKey: {
+    tempWarm: "Warm. No temperature penalty applied.",
+    tempCool: "Cool. Raises the base risk rating. Rain also becomes a factor.",
+    tempCold:
+      "Cold air, and likely cold water too - capsizing is far more dangerous with nowhere warm to recover. Significant increase in risk rating.",
+    windCalm: "Calm. No wind penalty applied.",
+    windHigh: "Windy. Raises the risk rating at all temperatures.",
+    rainCool:
+      "Rain raises the risk rating whenever it isn't warm, by the same step as windy conditions.",
+    // An extra row explaining how the club treats cold rain; hidden when empty.
+    rainCold: "",
+    rainWarm: "Rain doesn't count against the rating once it's this warm.",
+    dark: "Counts a forecast hour as dark when over {darkMinutes} minutes of it is before sunrise or after sunset. Raises the rating one step.",
+    fog: "Raises the rating one step.",
+    thunderstorm:
+      "No paddling when thunder is near – overrides all other conditions.",
+  },
+};
+
 const DEFAULT_UNKNOWN_VERDICT: PaddlingVerdict = {
   verdict: "No",
   details: ["Conditions could not be checked", "Ask a coach before paddling"],
@@ -126,6 +156,10 @@ const obj = (v: unknown, path: string): Obj => {
   } else problem(path, `expected a section of settings, found ${show(v)}`);
   return {};
 };
+
+// A section that may be left out altogether.
+const optionalObj = (v: unknown, path: string): Obj =>
+  v === undefined ? {} : obj(v, path);
 
 // Flags settings this file doesn't know - usually a typo, such as "color"
 // for "colour", which would otherwise be silently ignored.
@@ -228,16 +262,20 @@ const parseSteps = (v: unknown): StatusStep[] => {
       fromLevel: num(o.fromLevel, `${at} → fromLevel`),
       color: STATUS_COLORS[colour],
       onColor: ON_STATUS_COLORS[colour],
-      emoji: str(o.emoji, `${at} → emoji`),
+      emoji: o.emoji === undefined ? "" : str(o.emoji, `${at} → emoji`),
       icon: ICONS[iconName],
       description: str(o.description, `${at} → description`),
-      riverDescription: str(o.riverDescription, `${at} → riverDescription`),
+      riverDescription:
+        o.riverDescription === undefined
+          ? ""
+          : str(o.riverDescription, `${at} → riverDescription`),
     };
     if (o.riverReason !== undefined)
       step.riverReason = str(o.riverReason, `${at} → riverReason`);
     if (o.reasonIcon !== undefined)
       step.reasonIcon =
         ICONS[oneOf(o.reasonIcon, Object.keys(ICONS), `${at} → reasonIcon`)];
+    else if (step.riverReason) step.reasonIcon = ICONS.water;
     if (o.bestTimes !== undefined)
       step.bestTimes = bool(o.bestTimes, `${at} → bestTimes`);
     return step;
@@ -273,16 +311,27 @@ const parseWeatherTable = (
   enabled: boolean
 ): Record<string, Record<string, number[]>> => {
   if (!enabled && v === undefined) return {};
+  if (v === undefined) {
+    problem(
+      "weatherTable",
+      "missing – add it, or set rules → weatherTable: false"
+    );
+    return {};
+  }
   const table = obj(v, "weatherTable");
   const out: Record<string, Record<string, number[]>> = {};
-  const columns = steps.length - 1;
+  // Every step but the last can be a result: the weather never reaches it.
+  const bandSteps = steps.slice(0, -1).map((s) => s.name);
+  const lastStep = steps[steps.length - 1]?.name;
   const bands: Record<string, string[]> = {
     high: ["calm", "windy"],
     moderate: ["calm", "windy", "rainy"],
     low: ["calm", "windy", "rainy"],
   };
+  known(table, Object.keys(bands), "weatherTable");
   for (const [band, weathers] of Object.entries(bands)) {
     const row = obj(table[band], `weatherTable → ${band}`);
+    known(row, weathers, `weatherTable → ${band}`);
     out[band] = {};
     for (const weather of weathers) {
       const at = `weatherTable → ${band} → ${weather}`;
@@ -290,18 +339,31 @@ const parseWeatherTable = (
         problem(at, "missing");
         continue;
       }
-      const results = list(row[weather], at).map((n, i) =>
-        num(n, `${at}[${i + 1}]`)
-      );
-      if (results.length !== columns)
+      // Each entry names a step, or gives its number counting from 0.
+      const results = list(row[weather], at).map((entry, i) => {
+        if (typeof entry === "number" && Number.isInteger(entry)) {
+          if (entry >= 0 && entry < bandSteps.length) return entry;
+          problem(
+            `${at}[${i + 1}]`,
+            `step number ${entry} doesn't exist – use a step name instead`
+          );
+          return 0;
+        }
+        const name = str(entry, `${at}[${i + 1}]`);
+        const index = bandSteps.indexOf(name);
+        if (index !== -1) return index;
         problem(
-          at,
-          `has ${results.length} entries – it needs one per step except the last (${columns})`
+          `${at}[${i + 1}]`,
+          name === lastStep
+            ? `"${name}" can't be used here – only the river level or a thunderstorm reaches the last step`
+            : `"${name}" isn't a step. Use one of: ${bandSteps.join(", ")}`
         );
-      if (results.some((n) => !Number.isInteger(n) || n < 0 || n >= columns))
+        return 0;
+      });
+      if (results.length !== bandSteps.length)
         problem(
           at,
-          `every entry must be a step number from 0 to ${columns - 1}`
+          `has ${results.length} entries – it needs one for each river level band, in order: ${bandSteps.join(", ")}`
         );
       out[band][weather] = results;
     }
@@ -425,14 +487,14 @@ const parseLandmarks = (v: unknown): Record<number, string> => {
 
 const parse = (raw: unknown): ClubConfig => {
   const root = obj(raw, "club.yaml");
-  const app = obj(root.app, "app");
+  const app = optionalObj(root.app, "app");
   const club = obj(root.club, "club");
   const location = obj(root.location, "location");
   const river = obj(root.river, "river");
   const warnings = obj(root.warnings, "warnings");
-  const rules = obj(root.rules, "rules");
-  const thresholds = obj(root.thresholds, "thresholds");
-  const key = obj(root.conditionsKey, "conditionsKey");
+  const rules = optionalObj(root.rules, "rules");
+  const thresholds = optionalObj(root.thresholds, "thresholds");
+  const key = optionalObj(root.conditionsKey, "conditionsKey");
   known(
     root,
     [
@@ -488,25 +550,28 @@ const parse = (raw: unknown): ClubConfig => {
     "conditionsKey"
   );
 
-  const appName = str(app.name, "app → name");
+  const appName =
+    app.name === undefined ? DEFAULTS.appName : str(app.name, "app → name");
+  const rule = (name: keyof typeof DEFAULTS.rules) =>
+    rules[name] === undefined
+      ? DEFAULTS.rules[name]
+      : bool(rules[name], `rules → ${name}`);
   const parsedRules = {
-    weatherTable: bool(rules.weatherTable, "rules → weatherTable"),
-    darkness: bool(rules.darkness, "rules → darkness"),
-    fog: bool(rules.fog, "rules → fog"),
-    thunderstorms: bool(rules.thunderstorms, "rules → thunderstorms"),
+    weatherTable: rule("weatherTable"),
+    darkness: rule("darkness"),
+    fog: rule("fog"),
+    thunderstorms: rule("thunderstorms"),
   };
+  const threshold = (name: keyof typeof DEFAULTS.thresholds) =>
+    thresholds[name] === undefined
+      ? DEFAULTS.thresholds[name]
+      : num(thresholds[name], `thresholds → ${name}`);
   const parsedThresholds = {
-    tempHigh: num(thresholds.tempHigh, "thresholds → tempHigh"),
-    tempModerate: num(thresholds.tempModerate, "thresholds → tempModerate"),
-    windHigh: num(thresholds.windHigh, "thresholds → windHigh"),
-    visibilityPoor: num(
-      thresholds.visibilityPoor,
-      "thresholds → visibilityPoor"
-    ),
-    darkHourFraction: num(
-      thresholds.darkHourFraction,
-      "thresholds → darkHourFraction"
-    ),
+    tempHigh: threshold("tempHigh"),
+    tempModerate: threshold("tempModerate"),
+    windHigh: threshold("windHigh"),
+    visibilityPoor: threshold("visibilityPoor"),
+    darkHourFraction: threshold("darkHourFraction"),
   };
   const steps = parseSteps(root.steps);
   const stepNames = steps.map((s) => s.name);
@@ -525,11 +590,15 @@ const parse = (raw: unknown): ClubConfig => {
         "{darkMinutes}",
         String(60 * parsedThresholds.darkHourFraction)
       );
-  const keyText = (name: string, allowEmpty = false) =>
-    fill(str(key[name], `conditionsKey → ${name}`, allowEmpty));
+  const keyText = (name: keyof typeof DEFAULTS.conditionsKey) =>
+    fill(
+      key[name] === undefined
+        ? DEFAULTS.conditionsKey[name]
+        : str(key[name], `conditionsKey → ${name}`, name === "rainCold")
+    );
 
   const forecastCsv =
-    river.forecastCsv === null
+    river.forecastCsv === null || river.forecastCsv === undefined
       ? null
       : str(river.forecastCsv, "river → forecastCsv");
 
@@ -590,7 +659,7 @@ const parse = (raw: unknown): ClubConfig => {
       windCalm: keyText("windCalm"),
       windHigh: keyText("windHigh"),
       rainCool: keyText("rainCool"),
-      rainCold: keyText("rainCold", true),
+      rainCold: keyText("rainCold"),
       rainWarm: keyText("rainWarm"),
       dark: keyText("dark"),
       fog: keyText("fog"),

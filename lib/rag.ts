@@ -20,12 +20,15 @@ export {
 
 // --- Helper Functions for RAG Calculation ---
 
-export const findLevelDescription = (level: number): string => {
-  if (level <= 1.0) return LEVEL_DESCRIPTIONS[1.0];
-
+export const findLevelDescription = (level: number): string | undefined => {
   const allLevels = Object.keys(LEVEL_DESCRIPTIONS)
     .map(parseFloat)
     .sort((a, b) => a - b);
+
+  // No landmarks recorded yet (a fresh adaptation): nothing to say.
+  if (allLevels.length === 0) return undefined;
+  // At or below the lowest landmark, that landmark applies as-is.
+  if (level <= allLevels[0]) return LEVEL_DESCRIPTIONS[allLevels[0]];
 
   const nextLevelUp = allLevels.find((key) => key >= level);
 

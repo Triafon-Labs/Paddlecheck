@@ -68,8 +68,11 @@ export const HISTORICAL_DAYS = 5;
 // The app fetches CSV data from an upstream gauge and shifts it forward by
 // BEWDLEY_TRAVEL_HOURS to estimate when a flood wave will arrive.
 // CSV URLs follow the pattern: https://check-for-flooding.service.gov.uk/station-csv/<station-id>
-// Set both to null / 0 if you don't have a useful upstream station.
-export const BEWDLEY_CSV_URL =
+// Only stations with an EA forecast publish the three-column CSV
+// (timestamp, height, observed/forecast) this needs - see README.md.
+// Set to null if you don't have a useful upstream station: the forecast then
+// continues your own gauge's recent trend instead.
+export const BEWDLEY_CSV_URL: string | null =
   "https://check-for-flooding.service.gov.uk/station-csv/2001";
 export const BEWDLEY_TRAVEL_HOURS = 6;
 
@@ -108,6 +111,14 @@ export const API_ENDPOINTS = {
 // models and the highest value is used. A model that fails or returns nothing
 // is ignored, leaving best_match on its own.
 export const EXTRA_WIND_MODELS = ["ukmo_seamless", "ecmwf_ifs025"];
+
+// --- Met Office Weather Warnings ---
+// The regional RSS feed, and the area name a warning's description must
+// mention to be shown. Feed URLs for every region are listed at
+// https://www.metoffice.gov.uk/weather/guides/rss
+export const MET_OFFICE_WARNINGS_RSS_URL =
+  "https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm";
+export const WARNING_AREA = "Worcestershire";
 
 // --- Weather Warning Colors ---
 export const WARNING_COLORS = {

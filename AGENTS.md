@@ -26,7 +26,7 @@ Paddlecheck is a Progressive Web App (PWA) for the Worcester Canoe Club that pro
 | Framework     | Next.js 16 (App Router)                                                       |
 | Library       | React 19                                                                      |
 | Language      | TypeScript 6 (strict mode)                                                    |
-| UI Library    | Material UI (MUI) 7 + Emotion                                                 |
+| UI Library    | Material UI (MUI) 9 + Emotion                                                 |
 | Charts        | Recharts 3                                                                    |
 | Date handling | date-fns 4                                                                    |
 | AI            | Groq SDK (Briefing feature)                                                   |
@@ -143,12 +143,12 @@ public/                  Static assets – icons, favicon, sw.js (offline shell)
 
 ## Data Sources
 
-| Data                             | API                                                                             | Notes                                     |
-| -------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------- |
-| River level readings             | Environment Agency Flood-Monitoring API – station `2642` (Worcester, Barbourne) | Historical readings                       |
-| Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)                  | Used for 0–~42 h forecast, 6 h travel lag |
-| Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                     | No API key required; wind see below       |
-| Weather warnings                 | Met Office warnings RSS, West Midlands region                                   | Parsed in `lib/metOfficeWarnings.ts`      |
+| Data                             | API                                                                             | Notes                                   |
+| -------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------- |
+| River level readings             | Environment Agency Flood-Monitoring API – station `2642` (Worcester, Barbourne) | Historical readings                     |
+| Upstream forecast                | `check-for-flooding.service.gov.uk/station-csv/2001` (Bewdley)                  | 0–~42 h forecast, 6 h lag; `null` = off |
+| Weather (current + 5-day hourly) | Open-Meteo `api.open-meteo.com/v1/forecast`                                     | No API key required; wind see below     |
+| Weather warnings                 | Met Office warnings RSS, West Midlands region (`MET_OFFICE_WARNINGS_RSS_URL`)   | Parsed in `lib/metOfficeWarnings.ts`    |
 
 All of these are fetched server-side by `lib/conditions.ts` for `/api/conditions`; the
 browser never calls them directly.
@@ -172,9 +172,9 @@ The RAG status is calculated from river level first, then modifiers are applied:
 **Base status by river level (metres):**
 
 - < 1.0 m → Light Green
-- 1.0–1.4 m → Dark Green
-- 1.4–2.2 m → Amber
-- 2.2–5.0 m → Red
+- 1.0–1.48 m → Dark Green
+- 1.48–2.75 m → Amber
+- 2.75–5.0 m → Red
 - ≥ 5.0 m → No Paddling
 
 **Modifiers (applied in order):**
@@ -391,16 +391,17 @@ If Git hooks are not firing:
 
 ## Key Configuration Constants (`lib/config.ts`)
 
-| Constant                | Value                  | Meaning                                      |
-| ----------------------- | ---------------------- | -------------------------------------------- |
-| `RIVER_STATION_ID`      | `2642`                 | EA API station (Worcester, Barbourne)        |
-| `BEWDLEY_STATION_ID`    | `2001`                 | Upstream station for forecast                |
-| `BEWDLEY_LAG_HOURS`     | `6`                    | Travel time Bewdley → Worcester              |
-| `BEWDLEY_TREND_HOURS`   | `6`                    | Bewdley trend window for the linear fallback |
-| `LINEAR_FORECAST_HOURS` | `18`                   | Linear trend after Bewdley; level held after |
-| `RAG_THRESHOLDS`        | `[1.0, 1.4, 2.2, 5.0]` | River level breakpoints (metres)             |
-| `TEMP_HIGH`             | `13°C`                 | Above this: no temperature penalty           |
-| `TEMP_LOW`              | `5°C`                  | Below this: cold water shock risk            |
-| `WIND_THRESHOLD`        | `15` mph               | Above this: wind penalty applied             |
-| `VISIBILITY_THRESHOLD`  | `1000` m               | Below this: fog penalty applied              |
-| Coordinates             | `52.2, -2.2`           | Open-Meteo weather location                  |
+| Constant                                       | Value                            | Meaning                                      |
+| ---------------------------------------------- | -------------------------------- | -------------------------------------------- |
+| `RIVER_STATION_ID`                             | `2642`                           | EA API station (Worcester, Barbourne)        |
+| `BEWDLEY_CSV_URL`                              | `…/station-csv/2001`             | Upstream forecast CSV (`null` disables it)   |
+| `BEWDLEY_TRAVEL_HOURS`                         | `6`                              | Travel time Bewdley → Worcester              |
+| `BEWDLEY_TREND_HOURS`                          | `6`                              | Bewdley trend window for the linear fallback |
+| `LINEAR_FORECAST_HOURS`                        | `18`                             | Linear trend after Bewdley; level held after |
+| `THRESHOLDS.RIVER_LEVEL_*`                     | `1.0, 1.48, 2.75, 5.0`           | River level breakpoints (metres)             |
+| `THRESHOLDS.TEMP_HIGH`                         | `13°C`                           | At or above: no temperature penalty          |
+| `THRESHOLDS.TEMP_MODERATE`                     | `5°C`                            | At or below: cold water shock risk           |
+| `THRESHOLDS.WIND_HIGH`                         | `15` mph                         | Above this: wind penalty applied             |
+| `THRESHOLDS.VISIBILITY_POOR`                   | `1000` m                         | Below this: fog penalty applied              |
+| `MET_OFFICE_WARNINGS_RSS_URL` / `WARNING_AREA` | `…/Region/wm` / `Worcestershire` | Warnings feed and the area filter            |
+| Coordinates                                    | `52.2, -2.2`                     | Open-Meteo weather location                  |

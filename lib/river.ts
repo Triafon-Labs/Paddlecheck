@@ -26,6 +26,10 @@ export const fetchBewdleyForecast = async (
   observations: BewdleyForecastPoint[];
   currentLevel: number | null;
 }> => {
+  // No upstream station configured: an empty forecast, which the client
+  // treats the same as a failed fetch and falls back to the linear trend.
+  if (!BEWDLEY_CSV_URL)
+    return { forecasts: [], observations: [], currentLevel: null };
   const response = await fetch(BEWDLEY_CSV_URL, fetchCacheOptions(liveness));
   if (!response.ok)
     throw new Error(`Bewdley CSV fetch failed: ${response.status}`);

@@ -11,6 +11,7 @@ import {
   VISIBILITY_DESCRIPTIONS,
   DEFAULT_AI_MODEL,
   ALLOWED_AI_MODELS,
+  WARNING_AREA,
 } from "@/lib/config";
 import {
   formatRiverLevel,
@@ -91,7 +92,7 @@ function buildConditionsParts(req: SummaryRequest): string {
 
   const now = londonNow();
   const weatherWarnings = conditions.warnings?.length
-    ? `Met Office weather warnings for Worcestershire:\n${conditions.warnings
+    ? `Met Office weather warnings for ${WARNING_AREA}:\n${conditions.warnings
         .map((w) => {
           const status = isWarningActiveNow(w, now)
             ? "currently active"

@@ -81,9 +81,14 @@ thresholds:
 #
 #   name             shown everywhere, and used as the step's key below
 #   fromLevel        gauge reading (m) the step starts at; the first is 0
-#   colour           lightGreen, darkGreen, yellow, amber, red, maroon or grey
-#   icon             check, trendingUp, warning, alert, waves, stop, water,
-#                    tsunami, flood or help
+#   colour           one of the app's fixed colours, each paired with a
+#                    text colour that's checked for contrast:
+#                      lightGreen #4CBB17   darkGreen #008000   yellow #FBC02D
+#                      amber #FF8F00   red #B71C1C   maroon #800000   grey #9E9E9E
+#                    See them: docs/club-yaml/colours.svg
+#   icon             check, trendingUp, warning, alert, stop, help, water,
+#                    waves, tsunami or flood (Material icons).
+#                    See them: docs/club-yaml/icons.svg
 #   emoji            used in the share text
 #   description      what the step means for your club (Conditions Key)
 #   riverDescription what the river looks like in this band (Conditions Key)

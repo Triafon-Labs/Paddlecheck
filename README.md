@@ -155,6 +155,14 @@ The scale conditions are rated on, best first – Worcester has five, use as man
 
 The last step is special. Only the river passing its `fromLevel`, or a thunderstorm, can reach it; weather, darkness and fog stop one step short. It doesn't have to mean "no paddling" – what each level may do on it is up to `whoCanPaddle` – but as thunderstorms also lead there, give it a name that fits both.
 
+#### Colours and icons (`colour`, `icon`, `reasonIcon`)
+
+Each step picks a colour and icons by name from fixed lists. The colours are paired with a text colour that's been checked for contrast, which is why they can't be any hex value.
+
+<img src="docs/club-yaml/colours.svg" alt="The colours: red, maroon, amber, yellow, darkGreen, lightGreen and grey" width="330"> <img src="docs/club-yaml/icons.svg" alt="The icons: check, trendingUp, warning, alert, stop, help, water, waves, tsunami and flood" width="430">
+
+Adding a colour or icon is a code change: `lib/statusColors.ts` or `ICONS` in `lib/clubConfig.ts`, then `node scripts/club-yaml-reference.mjs` to redraw these images.
+
 #### Weather (`rules`, `thresholds`, `weatherTable`)
 
 `rules` switches each factor on or off; with all four off, the river level alone sets the status. When `weatherTable` is on, each row of the table gives the resulting step for each river level band, with steps numbered from 0 in `steps` order – so there's one entry per step except the last. For Worcester, `moderate: windy: [2, 2, 2, 3]` means cool and windy is at least Amber.

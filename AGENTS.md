@@ -76,6 +76,8 @@ together.
 ```
 club.yaml               The club's settings (see above)
 club.schema.json        JSON Schema for club.yaml – editor autocomplete and checks only
+docs/club-yaml/         Colour and icon reference images for club.yaml – redraw with
+                        `node scripts/club-yaml-reference.mjs` after changing STATUS_COLORS or ICONS
 
 app/
   api/

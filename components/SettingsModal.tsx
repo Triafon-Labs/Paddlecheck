@@ -51,7 +51,7 @@ import {
   USEFUL_LINKS,
   RAG_DESCRIPTIONS,
   RIVER_LEVEL_BAND_DESCRIPTIONS,
-  CONTACT_EMAIL,
+  FEEDBACK_URL,
   CLUB_NAME,
 } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
@@ -821,7 +821,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               Built for {CLUB_NAME}. This is a hobby project, so there might be
               mistakes. Always check conditions yourself and talk to coaches or
               experienced paddlers before heading out.{" "}
-              <Link href={`mailto:${CONTACT_EMAIL}`} color="inherit">
+              <Link
+                href={FEEDBACK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                color="inherit"
+              >
                 Feedback welcome here!
               </Link>
             </Typography>

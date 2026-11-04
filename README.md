@@ -111,10 +111,10 @@ Almost everything club-specific lives in **`lib/config.ts`**. The only other fil
 
 ```ts
 export const CLUB_NAME = "Worcester Canoe Club";
-export const CONTACT_EMAIL = "you@example.com";
+export const FEEDBACK_URL = "https://github.com/your-name/your-repo/issues";
 ```
 
-Shown in the About section of the Settings drawer. The email is public to anyone using the app, so consider a club address rather than a personal one.
+The club name is shown in the About section of the Settings drawer, and `FEEDBACK_URL` is where its "Feedback welcome" link goes – your fork's GitHub issues, a form, or a `mailto:` link. Whatever you put here is public to anyone using the app.
 
 #### 2. Useful links
 

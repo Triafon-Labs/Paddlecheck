@@ -35,7 +35,9 @@ import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
 // --- Club Identity ---
 // Update these to reflect your own club.
 export const CLUB_NAME = "Worcester Canoe Club";
-export const CONTACT_EMAIL = "REDACTED";
+// Where the "Feedback welcome" link in the Settings drawer goes. Any URL
+// works - an issue tracker, a form, or a mailto: link.
+export const FEEDBACK_URL = "https://github.com/dylanr97/Paddlecheck/issues";
 
 // --- Club Information & Links ---
 // Links displayed in the "Useful Links" section of the settings drawer.

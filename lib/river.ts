@@ -7,11 +7,10 @@ import {
   UPSTREAM_TRAVEL_HOURS,
   UPSTREAM_TREND_HOURS,
 } from "@/lib/config";
-import {
-  CONDITIONS_REVALIDATE_SECONDS,
-  FetchLiveness,
-  fetchCacheOptions,
-} from "@/lib/fetchCache";
+import { FetchLiveness, fetchCacheOptions } from "@/lib/fetchCache";
+
+// EA gauges log a reading every 15 minutes.
+const READINGS_PER_DAY = 96;
 
 export interface UpstreamForecastPoint {
   timestamp: Date;
@@ -178,15 +177,15 @@ export const fetchRiverData = async (
   liveness: FetchLiveness = {}
 ) => {
   const since = Date.now() - days * TIME_PERIODS.TWENTY_FOUR_HOURS;
-  // The fetch cache matches on the URL, so a `since` stamped to the
-  // millisecond made every request unique: river data was never cached, every
-  // call went to the EA afresh, and a blip there had no earlier copy to fall
-  // back on. Rounding down to the cache window keeps the URL stable for the
-  // whole window; the extra readings it asks for are dropped below.
-  const windowMs = CONDITIONS_REVALIDATE_SECONDS * 1000;
-  const sinceDate = new Date(Math.floor(since / windowMs) * windowMs);
+  // The fetch cache matches on the URL, and when a revalidation fails it keeps
+  // serving the last good response for that URL. A `since=` timestamp made
+  // the URL different every time, so river data was never cached and an EA
+  // outage left nothing to fall back on. Asking for the latest N readings
+  // keeps the URL the same for good; readings older than `days` are dropped
+  // below. N allows for twice the 15-minute readings a gauge normally logs.
+  const limit = days * READINGS_PER_DAY * 2;
   const response = await fetch(
-    `${API_ENDPOINTS.RIVER}/${stationId}/readings?since=${sinceDate.toISOString()}`,
+    `${API_ENDPOINTS.RIVER}/${stationId}/readings?_sorted&_limit=${limit}`,
     fetchCacheOptions(liveness)
   );
   if (!response.ok)

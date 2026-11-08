@@ -9,6 +9,9 @@ import {
 } from "@/lib/config";
 import { FetchLiveness, fetchCacheOptions } from "@/lib/fetchCache";
 
+// EA gauges log a reading every 15 minutes.
+const READINGS_PER_DAY = 96;
+
 export interface UpstreamForecastPoint {
   timestamp: Date;
   level: number;
@@ -173,20 +176,27 @@ export const fetchRiverData = async (
   days: number = 1,
   liveness: FetchLiveness = {}
 ) => {
-  const sinceDate = new Date(
-    new Date().getTime() - days * TIME_PERIODS.TWENTY_FOUR_HOURS
-  ).toISOString();
+  const since = Date.now() - days * TIME_PERIODS.TWENTY_FOUR_HOURS;
+  // The fetch cache matches on the URL, and when a revalidation fails it keeps
+  // serving the last good response for that URL. A `since=` timestamp made
+  // the URL different every time, so river data was never cached and an EA
+  // outage left nothing to fall back on. Asking for the latest N readings
+  // keeps the URL the same for good; readings older than `days` are dropped
+  // below. N allows for twice the 15-minute readings a gauge normally logs.
+  const limit = days * READINGS_PER_DAY * 2;
   const response = await fetch(
-    `${API_ENDPOINTS.RIVER}/${stationId}/readings?since=${sinceDate}`,
+    `${API_ENDPOINTS.RIVER}/${stationId}/readings?_sorted&_limit=${limit}`,
     fetchCacheOptions(liveness)
   );
   if (!response.ok)
     throw new Error(`River API fetch failed: ${response.status}`);
   const result: ApiResponse = await response.json();
-  const sortedItems = result.items.sort(
-    (a: RiverReading, b: RiverReading) =>
-      new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
-  );
+  const sortedItems = result.items
+    .filter((item: RiverReading) => new Date(item.dateTime).getTime() >= since)
+    .sort(
+      (a: RiverReading, b: RiverReading) =>
+        new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+    );
 
   const formattedData: ChartDataPoint[] = sortedItems.map(
     (item: RiverReading) => ({

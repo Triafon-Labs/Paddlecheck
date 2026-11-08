@@ -300,7 +300,19 @@ export async function POST(request: Request) {
 
   // The same cached upstream fetches /api/conditions makes, so this is
   // normally a cache hit rather than a fresh call to every source.
-  const payload = await getConditionsPayload();
+  // If a source failed, try once more past the cache, as the client does with
+  // /api/conditions/live - otherwise one blip leaves the report unavailable
+  // while the rest of the page shows the client's own fallback copy.
+  let payload = await getConditionsPayload();
+  if (!payload.river || !payload.weather || !payload.futureWeather) {
+    const live = await getConditionsPayload({ live: true });
+    payload = {
+      ...live,
+      river: live.river ?? payload.river,
+      weather: live.weather ?? payload.weather,
+      futureWeather: live.futureWeather ?? payload.futureWeather,
+    };
+  }
   if (!payload.river || !payload.weather || !payload.futureWeather) {
     return new Response(BRIEFING_UNAVAILABLE.DATA, { status: 503 });
   }

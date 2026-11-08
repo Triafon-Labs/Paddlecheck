@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.45.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.45.0...paddlecheck-v1.45.1) (2026-11-08)
+
+### Bug Fixes
+
+* keep the conditions report working when a source blips ([3b3f62f](https://github.com/dylanr97/Paddlecheck/commit/3b3f62fea4b66a2f3ccb1c78a95f76fc8d8a4164))
+* keep the last good river readings through an EA outage ([27530f3](https://github.com/dylanr97/Paddlecheck/commit/27530f375ce969d154b171687c112f6ae32c4789))
+
 ## [1.45.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.44.2...paddlecheck-v1.45.0) (2026-11-04)
 
 ### Features

@@ -7,7 +7,11 @@ import {
   UPSTREAM_TRAVEL_HOURS,
   UPSTREAM_TREND_HOURS,
 } from "@/lib/config";
-import { FetchLiveness, fetchCacheOptions } from "@/lib/fetchCache";
+import {
+  CONDITIONS_REVALIDATE_SECONDS,
+  FetchLiveness,
+  fetchCacheOptions,
+} from "@/lib/fetchCache";
 
 export interface UpstreamForecastPoint {
   timestamp: Date;
@@ -173,20 +177,27 @@ export const fetchRiverData = async (
   days: number = 1,
   liveness: FetchLiveness = {}
 ) => {
-  const sinceDate = new Date(
-    new Date().getTime() - days * TIME_PERIODS.TWENTY_FOUR_HOURS
-  ).toISOString();
+  const since = Date.now() - days * TIME_PERIODS.TWENTY_FOUR_HOURS;
+  // The fetch cache matches on the URL, so a `since` stamped to the
+  // millisecond made every request unique: river data was never cached, every
+  // call went to the EA afresh, and a blip there had no earlier copy to fall
+  // back on. Rounding down to the cache window keeps the URL stable for the
+  // whole window; the extra readings it asks for are dropped below.
+  const windowMs = CONDITIONS_REVALIDATE_SECONDS * 1000;
+  const sinceDate = new Date(Math.floor(since / windowMs) * windowMs);
   const response = await fetch(
-    `${API_ENDPOINTS.RIVER}/${stationId}/readings?since=${sinceDate}`,
+    `${API_ENDPOINTS.RIVER}/${stationId}/readings?since=${sinceDate.toISOString()}`,
     fetchCacheOptions(liveness)
   );
   if (!response.ok)
     throw new Error(`River API fetch failed: ${response.status}`);
   const result: ApiResponse = await response.json();
-  const sortedItems = result.items.sort(
-    (a: RiverReading, b: RiverReading) =>
-      new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
-  );
+  const sortedItems = result.items
+    .filter((item: RiverReading) => new Date(item.dateTime).getTime() >= since)
+    .sort(
+      (a: RiverReading, b: RiverReading) =>
+        new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+    );
 
   const formattedData: ChartDataPoint[] = sortedItems.map(
     (item: RiverReading) => ({

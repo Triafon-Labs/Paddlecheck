@@ -124,7 +124,8 @@ There are two to start with:
 2. Create a file called `.env.local` in the project root containing `CLUB=riverside` (it isn't committed – it's for your computer only).
 3. Run `npm run dev` and work through every line marked `CHANGE`. The example rates conditions on the river level alone; add more from Worcester's file as you need it. Settings marked _(optional)_ can be left out; the comment says what happens then.
 4. When you deploy, set `CLUB=riverside` on your host too – see [Hosting](#hosting).
-5. Add your club's name to the `club:` list in `.github/workflows/ci.yml`, so CI checks your file on every push (see [GitHub Actions in a Fork](#github-actions-in-a-fork)).
+
+CI checks every file in `clubs/` on each push, yours included, with nothing to set up beyond turning Actions on (see [GitHub Actions in a Fork](#github-actions-in-a-fork)).
 
 You can delete `clubs/wcc.yaml` from your copy, but keeping it costs nothing, leaves a full example to hand, and avoids a conflict if it changes here later.
 
@@ -146,7 +147,7 @@ Where to set it:
 
 - **On your computer:** `CLUB=riverside` in `.env.local` in the project root. For a one-off, `CLUB=wcc npm run dev` overrides it.
 - **On Vercel:** Project Settings → Environment Variables. Other hosts have an equivalent setting – see [Hosting](#hosting).
-- **In CI:** `.github/workflows/ci.yml` sets it for each file in its `club:` list.
+- **In CI:** `.github/workflows/ci.yml` builds once for each file in `clubs/`, setting `CLUB` itself.
 
 YAML is a plain-text settings format. The things that trip people up:
 
@@ -282,11 +283,13 @@ GitHub turns Actions off in a new fork until you enable them on the **Actions** 
 
 | Workflow         | What it does                                                                                                                               | In your fork                                                                                                                                                     |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`         | Lint, and build each club file in its `club:` list, on every push and pull request                                                         | Keep it, and add your club to the `club:` list. You can remove `wcc` from the list if you've deleted its file                                                    |
-| `auto-tag.yml`   | On every push to `main`, bumps the version, updates `CHANGELOG.md` and pushes a tag                                                        | Optional. Delete it if you don't want release commits; it needs to be able to push to `main`                                                                     |
+| `ci.yml`         | Lint, and build every club file in `clubs/`, on every push and pull request                                                                | Keep it. It finds your club file by itself – nothing to edit                                                                                                     |
+| `auto-tag.yml`   | On every push to `main`, bumps the version, updates `CHANGELOG.md` and pushes a tag                                                        | Skips itself – it only runs in this repository. Leave it alone: your version and changelog then follow this repository's, so syncing never conflicts on them     |
 | `keep-alive.yml` | Every 5 minutes, loads the site and `/api/conditions`, and fails if any data source is down – a failed run sends you a GitHub notification | **Point it at your own site** by adding a repository variable `SITE_URL` (Settings → Secrets and variables → Actions → Variables). Until you do, it skips itself |
 
-`.github/dependabot.yml` opens pull requests for dependency updates. Delete it if you'd rather not get them.
+`.github/dependabot.yml` opens pull requests for dependency updates here. GitHub leaves it [switched off in forks](https://github.blog/changelog/2022-11-07-dependabot-pull-requests-off-by-default-for-forks/), and it's best left that way: your updates arrive when you sync with this repository, and Dependabot's own changes to `package-lock.json` would conflict with them.
+
+The pattern throughout: change your own club file and `public/` icons, and leave everything else to come from this repository. Anything else you change is a file that can conflict when you sync.
 
 ## Development Notes
 

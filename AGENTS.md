@@ -84,7 +84,7 @@ re-exports it under the same constant names the code uses (`CLUB_NAME`, `STATUS_
 `WHO_CAN_PADDLE`, `THRESHOLDS.TEMP_HIGH`, …). Never hard-code club-specific values in code –
 add a setting to the club files, `lib/clubConfig.ts` and `club.schema.json` (editor hints)
 together. Optional settings get their defaults in `DEFAULTS` (`lib/clubConfig.ts`). CI builds
-every file in `clubs/` (the matrix in `ci.yml` – add a new club file there too). When helping a
+every file in `clubs/` (`ci.yml` lists the folder itself, so a new club file needs no CI change). When helping a
 club adapt the app, copy `clubs/example.yaml` to `clubs/<club>.yaml`, run
 `CLUB=<club> npm run dev` to validate, and list anything in their rules that the club file
 can't express rather than guessing.
@@ -384,7 +384,9 @@ rejecting commits whose first line isn't a valid Conventional Commit
 
 ## CI Pipeline
 
-- **ci.yml** – runs `lint`, and `build` once per club file (`CLUB` matrix), on every push/PR to `main` (Node 22)
+- **ci.yml** – a `clubs` job lists `clubs/*.yaml`; `build` runs once per file (matrix, `CLUB` set
+  from it) and lints in the first of them, on every push/PR to `main` (Node 22). Never hard-code
+  the club list – forks rely on their own file being picked up without editing this workflow
 - **auto-tag.yml** – on every push to `main` (i.e. right after a PR merges), runs
   `commit-and-tag-version` to bump `package.json`'s version, update `CHANGELOG.md`,
   commit both directly to `main`, and push a `paddlecheck-vX.Y.Z` tag. No release PR,
@@ -392,7 +394,9 @@ rejecting commits whose first line isn't a valid Conventional Commit
   `commitlint.config.js`) – `feat:` commits get a minor bump, `fix:`/`perf:`/etc.
   get a patch bump with a changelog entry, and a `BREAKING CHANGE:` footer bumps
   major. The job skips itself when the triggering commit is its own
-  `chore(release): ...` commit, to avoid a loop.
+  `chore(release): ...` commit, to avoid a loop, and everywhere except
+  `dylanr97/Paddlecheck` – a fork's own release commits would rewrite `CHANGELOG.md` and
+  `package.json` and conflict on every sync.
 
 Both workflows install through `.github/actions/npm-install` rather than calling
 `npm ci` directly. See below for why.

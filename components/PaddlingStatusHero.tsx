@@ -39,7 +39,7 @@ const PaddlingStatusHero: React.FC<PaddlingStatusHeroProps> = ({ status }) => {
           alignItems: "center",
           gap: { xs: 1.75, sm: 2.5 },
           p: { xs: 2, sm: 3 },
-          borderRadius: "28px",
+          borderRadius: "16px",
           backgroundColor: color,
           color: onColor,
           transition: spring("background-color", m3Spring.effectsDefault),

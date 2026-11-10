@@ -56,7 +56,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
               variant="rounded"
               height={120}
               animation="wave"
-              sx={{ borderRadius: "28px" }}
+              sx={{ borderRadius: "16px" }}
             />
             <Box sx={{ display: "flex", gap: 0.75, mt: 1.5 }}>
               {Array.from({ length: SCALE_SEGMENT_COUNT }).map((_, i) => (

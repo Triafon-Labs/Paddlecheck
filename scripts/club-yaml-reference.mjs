@@ -1,4 +1,4 @@
-// Draws the colour and icon reference images for club.yaml
+// Draws the colour and icon reference images for the club files
 // (docs/club-yaml/colours.svg and icons.svg) from the lists the app itself
 // uses: STATUS_COLORS / ON_STATUS_COLORS in lib/statusColors.ts and ICONS in
 // lib/clubConfig.ts. Run it after changing either list:

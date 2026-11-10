@@ -24,20 +24,21 @@ import { CONDITIONS_REVALIDATE_SECONDS } from "./fetchCache";
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
-// Everything specific to a club lives in club.yaml at the project root, read
+// Everything specific to a club lives in clubs/<CLUB>.yaml (chosen in
+// next.config.ts; clubs/example.yaml when CLUB isn't set), read
 // and checked by lib/clubConfig.ts. This file turns it into the constants the
 // app uses, alongside the app's own settings (data sources, caching, chart
 // styling) that a club shouldn't need to touch. See README.md.
 // ============================================================================
 
-// --- App and Club Identity (club.yaml: app, club) ---
+// --- App and Club Identity (clubs/*.yaml: app, club) ---
 export const APP_NAME = CLUB.appName;
 export const CLUB_NAME = CLUB.club.name;
 export const CLUB_SHORT_NAME = CLUB.club.shortName;
 export const FEEDBACK_URL = CLUB.club.feedbackUrl;
 export const USEFUL_LINKS = CLUB.club.usefulLinks;
 
-// --- River and Weather Service (club.yaml: location, river) ---
+// --- River and Weather Service (clubs/*.yaml: location, river) ---
 export const RIVER_STATION_ID = CLUB.river.stationId;
 export const LATITUDE = CLUB.latitude;
 export const LONGITUDE = CLUB.longitude;
@@ -84,7 +85,7 @@ export const API_ENDPOINTS = {
 // is ignored, leaving best_match on its own.
 export const EXTRA_WIND_MODELS = ["ukmo_seamless", "ecmwf_ifs025"];
 
-// --- Met Office Weather Warnings (club.yaml: warnings) ---
+// --- Met Office Weather Warnings (clubs/*.yaml: warnings) ---
 export const MET_OFFICE_WARNINGS_RSS_URL = CLUB.warnings.feed;
 export const WARNING_AREA = CLUB.warnings.area;
 
@@ -95,7 +96,7 @@ export const WARNING_COLORS = {
   Yellow: STATUS_COLORS.yellow,
 };
 
-// --- Status steps (club.yaml: steps) ---
+// --- Status steps (clubs/*.yaml: steps) ---
 export const STATUS_STEPS: readonly StatusStep[] = CLUB.steps;
 
 // Shown when the data needed for a status is missing.
@@ -108,7 +109,7 @@ export const UNKNOWN_STATUS = {
   description: "Data unavailable.",
 } as const;
 
-// --- Which rules apply (club.yaml: rules) ---
+// --- Which rules apply (clubs/*.yaml: rules) ---
 export const RULES = {
   WEATHER_TABLE: CLUB.rules.weatherTable,
   DARKNESS: CLUB.rules.darkness,
@@ -116,17 +117,17 @@ export const RULES = {
   THUNDERSTORMS: CLUB.rules.thunderstorms,
 };
 
-// --- Paddler levels (club.yaml: paddlerLevels) ---
+// --- Paddler levels (clubs/*.yaml: paddlerLevels) ---
 export const PADDLER_LEVELS: readonly PaddlerType[] = CLUB.paddlerLevels;
 
-// --- Weather table (club.yaml: weatherTable, used when RULES.WEATHER_TABLE is on) ---
+// --- Weather table (clubs/*.yaml: weatherTable, used when RULES.WEATHER_TABLE is on) ---
 // Temperature band -> weather -> the resulting step for each river level
 // band, as step indexes into STATUS_STEPS.
 export const CRITERIA_TABLE: {
   [key: string]: { [key: string]: number[] };
 } = CLUB.weatherTable;
 
-// Club values from club.yaml (thresholds); the rest are the app's own.
+// Club values from clubs/*.yaml (thresholds); the rest are the app's own.
 export const THRESHOLDS = {
   TEMP_HIGH: CLUB.thresholds.tempHigh,
   TEMP_MODERATE: CLUB.thresholds.tempModerate,
@@ -146,7 +147,7 @@ export const THRESHOLDS = {
   DARK_HOUR_FRACTION: CLUB.thresholds.darkHourFraction,
 };
 
-// --- Who can paddle (club.yaml: whoCanPaddle, whoCanPaddleExtras) ---
+// --- Who can paddle (clubs/*.yaml: whoCanPaddle, whoCanPaddleExtras) ---
 export const WHO_CAN_PADDLE: Record<
   Status,
   PaddlingVerdict | Record<PaddlerType, PaddlingVerdict>
@@ -166,7 +167,7 @@ const RAIN_CODES = new Set(
 export const isRainy = (weatherCode: number): boolean =>
   RAIN_CODES.has(weatherCode);
 
-// --- Conditions Key (club.yaml: conditionsKey) ---
+// --- Conditions Key (clubs/*.yaml: conditionsKey) ---
 export const CONDITIONS_KEY_WEATHER = CLUB.conditionsKey;
 
 // --- UI Text and Icons ---
@@ -185,7 +186,7 @@ export const REASON_ICONS: Record<string, React.ElementType> = {
   "Could not determine conditions": HelpOutlined,
 };
 
-// --- Landmarks (club.yaml: landmarks) ---
+// --- Landmarks (clubs/*.yaml: landmarks) ---
 export const LEVEL_DESCRIPTIONS: Record<number, string> = CLUB.landmarks;
 
 export const VISIBILITY_DESCRIPTIONS: {

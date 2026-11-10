@@ -15,8 +15,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  # Lists the club files in clubs/, so every one is built below without a
+  # list to keep up to date - a fork's own file is picked up automatically,
+  # and this workflow never needs editing (or conflicts on a fork's sync).
+  clubs:
     runs-on: ubuntu-latest
+    outputs:
+      clubs: ${{ steps.list.outputs.clubs }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: list
+        run: |
+          clubs=$(ls clubs/*.yaml | xargs -n1 basename | sed 's/\.yaml$//' | jq -Rnc '[inputs]')
+          echo "Club files: $clubs"
+          echo "clubs=$clubs" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: clubs
+    runs-on: ubuntu-latest
+    # Build every club file, so a change that breaks one is caught here
+    # rather than on that club's next deployment.
+    strategy:
+      fail-fast: false
+      matrix:
+        club: ${{ fromJSON(needs.clubs.outputs.clubs) }}
+    env:
+      CLUB: ${{ matrix.club }}
 
     steps:
       - uses: actions/checkout@v7
@@ -35,6 +59,8 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/npm-install
       - name: Lint
+        # Once is enough: lint doesn't depend on the club.
+        if: strategy.job-index == 0
         run: npm run lint
       - name: Build
         run: npm run build

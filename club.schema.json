@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Paddlecheck club settings (club.yaml)",
+  "title": "Paddlecheck club settings (clubs/*.yaml)",
   "description": "Everything about a club that Paddlecheck needs. Checked in full by lib/clubConfig.ts when the app builds; this schema is for editor hints.",
   "type": "object",
   "additionalProperties": false,

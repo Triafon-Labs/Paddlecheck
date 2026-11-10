@@ -66,6 +66,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser. Everything except the AI summary works with no further setup.
 
+With nothing else set, that runs the starter settings in `clubs/example.yaml` and says so in the terminal. To run Worcester's, create a file called `.env.local` in the project root containing `CLUB=wcc` and restart `npm run dev`. `npm run build` won't run until `CLUB` is set – see [Choosing which club file the app uses](#choosing-which-club-file-the-app-uses-club).
+
 ### AI summary (optional)
 
 The summary needs a [Groq API key](https://console.groq.com/keys) (Groq has a free tier). Create a file called `.env.local` in the project root:
@@ -82,8 +84,8 @@ The server builds the summary from its own copy of the conditions and only reads
 
 ```bash
 npm run dev     # Development server at http://localhost:3000
-npm run build   # Production build
-npm start       # Serve the production build
+npm run build   # Production build – needs CLUB set (see below)
+npm start       # Serve the production build (with the club it was built with)
 npm run lint    # ESLint
 ```
 
@@ -103,13 +105,49 @@ The service worker only registers in a production build, so use `npm run build &
 - **Fork on GitHub** if you want your own hosted copy. This is the simplest route, and it lets you pull in later improvements from this repository (GitHub's "Sync fork" button).
 - **Clone and push to a new repository** if you'd rather your copy had no visible link back to this one. You can still pull updates by adding this repository as a second remote.
 
-Either way, if your changes stay in `club.yaml` (and `public/` for icons), taking updates later is painless: they'll almost never touch the same files.
+Either way, keep your settings in a file of your own in `clubs/` (and your icons in `public/`) rather than editing Worcester's. Updates from this repository change `clubs/wcc.yaml` and `clubs/example.yaml`, never your file, so taking them later doesn't give you merge conflicts.
 
-### Your settings: `club.yaml`
+### Your settings: `clubs/<your-club>.yaml`
 
-Everything about your club is in **`club.yaml`** at the top of the project – no other file needs to change, except to swap the icons. Every setting has a comment above it explaining what it does, so the file itself is the main guide. This section covers the parts that need more than a comment.
+Everything about a club is in one file in the **`clubs/`** folder – no other file needs to change, except to swap the icons. Every setting has a comment above it explaining what it does, so the file itself is the main guide. This section covers the parts that need more than a comment.
 
-**Where to start.** The `club.yaml` in this repository is Worcester Canoe Club's, which uses nearly every setting – the hardest example there is. For a new club, copy **`examples/starter.club.yaml`** over it instead: about 100 lines that rate conditions on the river level alone, with every line you need to change marked `CHANGE`. Add more from Worcester's file as you need it. Settings marked _(optional)_ can be left out; the comment says what happens then.
+There are two to start with:
+
+| File                 | What it is                                                                                     |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| `clubs/example.yaml` | A starting point for a new club: about 100 lines, every one you need to change marked `CHANGE` |
+| `clubs/wcc.yaml`     | Worcester Canoe Club's settings, which use nearly every setting – the hardest example there is |
+
+**Setting up your club:**
+
+1. Copy `clubs/example.yaml` to a new file named after your club, e.g. `clubs/riverside.yaml`. Use lower case letters, numbers and hyphens.
+2. Create a file called `.env.local` in the project root containing `CLUB=riverside` (it isn't committed – it's for your computer only).
+3. Run `npm run dev` and work through every line marked `CHANGE`. The example rates conditions on the river level alone; add more from Worcester's file as you need it. Settings marked _(optional)_ can be left out; the comment says what happens then.
+4. When you deploy, set `CLUB=riverside` on your host too – see [Hosting](#hosting).
+
+CI checks every file in `clubs/` on each push, yours included, with nothing to set up beyond turning Actions on (see [GitHub Actions in a Fork](#github-actions-in-a-fork)).
+
+You can delete `clubs/wcc.yaml` from your copy, but keeping it costs nothing, leaves a full example to hand, and avoids a conflict if it changes here later.
+
+#### Choosing which club file the app uses (`CLUB`)
+
+The `CLUB` environment variable names the file in `clubs/`, without `.yaml`: `CLUB=riverside` uses `clubs/riverside.yaml`. It's read when `npm run dev` or `npm run build` starts, so restart after changing it.
+
+| Command                     | `CLUB` set                      | `CLUB` not set                                                             |
+| --------------------------- | ------------------------------- | -------------------------------------------------------------------------- |
+| `npm run dev`               | Uses `clubs/<CLUB>.yaml`        | Uses `clubs/example.yaml`, with a notice in the terminal                   |
+| `npm run build` / deploying | Builds with `clubs/<CLUB>.yaml` | **Stops with an error** – nothing is built, and a live site stays as it is |
+| `npm start`                 | Ignored                         | Ignored                                                                    |
+
+`npm start` serves whatever was last built, so the club is the one `CLUB` named at build time. To switch clubs, rebuild.
+
+A build never falls back to the example because a site built from it would show a real-looking paddling status from made-up rules. If `CLUB` names a file that doesn't exist, both commands stop and list the files there are.
+
+Where to set it:
+
+- **On your computer:** `CLUB=riverside` in `.env.local` in the project root. For a one-off, `CLUB=wcc npm run dev` overrides it.
+- **On Vercel:** Project Settings → Environment Variables. Other hosts have an equivalent setting – see [Hosting](#hosting).
+- **In CI:** `.github/workflows/ci.yml` builds once for each file in `clubs/`, setting `CLUB` itself.
 
 YAML is a plain-text settings format. The things that trip people up:
 
@@ -117,23 +155,23 @@ YAML is a plain-text settings format. The things that trip people up:
 - **Quote text that contains `: ` or ` #`**, or starts with a symbol (`*`, `&`, `!`, `[`, `{`, `>`, `|`, `%`, `@` or a quote mark).
 - **Quote `"Yes"` and `"No"`** in verdicts.
 
-**Checking your changes.** `npm run dev` and `npm run build` check `club.yaml` first and stop with a message naming any problem:
+**Checking your changes.** `npm run dev` and `npm run build` check the chosen club file first and stop with a message naming any problem:
 
 ```text
-club.yaml has 2 problems:
+clubs/yourclub.yaml has 2 problems:
   • steps → "Amber" → colour: "orange" isn't one of: red, maroon, amber, yellow, darkGreen, lightGreen, grey
   • whoCanPaddle → "Amber": "Improver" is missing – give one verdict for everyone, or one for every level
 ```
 
-An indentation slip gives the line and column instead. With `npm run dev` running, changes show up in the browser as soon as you save.
+An indentation slip gives the line and column instead, and an empty file says just that. With `npm run dev` running, changes show up in the browser as soon as you save.
 
-**Editor help (optional).** In [VS Code](https://code.visualstudio.com/) with the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml), `club.yaml` gets suggestions as you type and mistakes underlined, from `club.schema.json` (the project's VS Code settings link the two).
+**Editor help (optional).** In [VS Code](https://code.visualstudio.com/) with the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml), every file in `clubs/` gets suggestions as you type and mistakes underlined, from `club.schema.json` (the project's VS Code settings link the two).
 
 #### Using an AI assistant
 
-Turning your club's written rules into `club.yaml` is a good job for an AI coding assistant – Claude Code, GitHub Copilot, Cursor or similar – working in your copy of the project. [`AGENTS.md`](AGENTS.md) explains the project to it, and the checks above tell it exactly what to fix. Something like:
+Turning your club's written rules into a club file is a good job for an AI coding assistant – Claude Code, GitHub Copilot, Cursor or similar – working in your copy of the project. [`AGENTS.md`](AGENTS.md) explains the project to it, and the checks above tell it exactly what to fix. Something like:
 
-> Here are our club's paddling rules: _[paste them, or attach the document]_. Our river gauge is _[name, or the station ID]_ and our launch point is _[place or coordinates]_. Start from `examples/starter.club.yaml` and fill in `club.yaml` for our club, following the comments in Worcester's file and README.md. Run `npm run dev` and fix anything it reports. Then list anything in our rules you couldn't express, and any choices you made that we should check.
+> Here are our club's paddling rules: _[paste them, or attach the document]_. Our river gauge is _[name, or the station ID]_ and our launch point is _[place or coordinates]_. Copy `clubs/example.yaml` to `clubs/ourclub.yaml` and fill it in for our club, following the comments in `clubs/wcc.yaml` and README.md. Set `CLUB=ourclub` in `.env.local`, run `npm run dev` and fix anything it reports. Then list anything in our rules you couldn't express, and any choices you made that we should check.
 
 Then read through what it wrote before anyone relies on it, particularly the steps' `fromLevel` values and `whoCanPaddle`. An assistant can turn rules into settings; it can't know that your rules are right, or where your landing stage floods.
 
@@ -193,18 +231,18 @@ The logo and app icons are the files in `public/`. The installable icons are all
 
 If you want to change behaviour rather than settings, these are the places to start:
 
-| File                        | What it does                                             |
-| --------------------------- | -------------------------------------------------------- |
-| `lib/clubConfig.ts`         | Reads and checks `club.yaml`                             |
-| `lib/config.ts`             | The app's own settings, plus the club's from `club.yaml` |
-| `lib/rag.ts`                | How a river level and the weather become a status        |
-| `lib/buildKayakData.ts`     | Raw data → current conditions and the hourly forecast    |
-| `lib/hooks.ts`              | Fetching on the client, and the offline fallback         |
-| `lib/conditions.ts`         | The server-side fetch of every upstream source           |
-| `lib/river.ts`              | River readings and the upstream forecast                 |
-| `lib/weather.ts`            | Open-Meteo requests                                      |
-| `app/api/briefing/route.ts` | The AI summary prompt                                    |
-| `types/index.ts`            | Every shared data type                                   |
+| File                        | What it does                                          |
+| --------------------------- | ----------------------------------------------------- |
+| `lib/clubConfig.ts`         | Reads and checks the chosen `clubs/*.yaml`            |
+| `lib/config.ts`             | The app's own settings, plus the club's from its file |
+| `lib/rag.ts`                | How a river level and the weather become a status     |
+| `lib/buildKayakData.ts`     | Raw data → current conditions and the hourly forecast |
+| `lib/hooks.ts`              | Fetching on the client, and the offline fallback      |
+| `lib/conditions.ts`         | The server-side fetch of every upstream source        |
+| `lib/river.ts`              | River readings and the upstream forecast              |
+| `lib/weather.ts`            | Open-Meteo requests                                   |
+| `app/api/briefing/route.ts` | The AI summary prompt                                 |
+| `types/index.ts`            | Every shared data type                                |
 
 [`AGENTS.md`](AGENTS.md) is a fuller technical reference to the codebase – it's written for AI coding assistants, but it reads fine for people too.
 
@@ -214,11 +252,12 @@ The app is a standard Next.js app, but it needs a server (the API routes fetch a
 
 ### Vercel (recommended)
 
-[Vercel](https://vercel.com) is what this project uses, and needs no configuration:
+[Vercel](https://vercel.com) is what this project uses:
 
 1. Sign in to Vercel with GitHub and **Add New → Project**, then import your repository.
-2. If you want the AI summary, add `GROQ_API_KEY` under **Environment Variables**. Adding it later? Redeploy afterwards (**Deployments → ⋯ → Redeploy**) – the summary only appears in a build made with the key.
-3. Deploy. Every push to `main` redeploys, and pull requests get preview deployments.
+2. Under **Environment Variables**, add `CLUB` set to your club file's name (`yourclub` for `clubs/yourclub.yaml`). Tick Production and Preview. Without it the build stops with an error saying so.
+3. If you want the AI summary, add `GROQ_API_KEY` under **Environment Variables**. Adding it later? Redeploy afterwards (**Deployments → ⋯ → Redeploy**) – the summary only appears in a build made with the key.
+4. Deploy. Every push to `main` redeploys, and pull requests get preview deployments.
 
 You'll get a `<project>.vercel.app` address, and can add your own domain under the project's **Domains** settings. Vercel's free Hobby plan is meant for personal, non-commercial use; check [their terms](https://vercel.com/docs/limits/fair-use-guidelines) cover a club site, or use the Pro plan.
 
@@ -230,6 +269,7 @@ Any host that runs Node 22 works – for example [Netlify](https://www.netlify.c
 
 ```bash
 npm ci
+export CLUB=riverside               # your file in clubs/ – the build stops without it
 export GROQ_API_KEY=your-key-here   # optional – for the AI summary
 npm run build                       # needs the key, to include the summary
 npm start                           # serves on port 3000; also needs the key
@@ -243,11 +283,13 @@ GitHub turns Actions off in a new fork until you enable them on the **Actions** 
 
 | Workflow         | What it does                                                                                                                               | In your fork                                                                                                                                                     |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`         | Lint and build on every push and pull request                                                                                              | Keep it                                                                                                                                                          |
-| `auto-tag.yml`   | On every push to `main`, bumps the version, updates `CHANGELOG.md` and pushes a tag                                                        | Optional. Delete it if you don't want release commits; it needs to be able to push to `main`                                                                     |
+| `ci.yml`         | Lint, and build every club file in `clubs/`, on every push and pull request                                                                | Keep it. It finds your club file by itself – nothing to edit                                                                                                     |
+| `auto-tag.yml`   | On every push to `main`, bumps the version, updates `CHANGELOG.md` and pushes a tag                                                        | Skips itself – it only runs in this repository. Leave it alone: your version and changelog then follow this repository's, so syncing never conflicts on them     |
 | `keep-alive.yml` | Every 5 minutes, loads the site and `/api/conditions`, and fails if any data source is down – a failed run sends you a GitHub notification | **Point it at your own site** by adding a repository variable `SITE_URL` (Settings → Secrets and variables → Actions → Variables). Until you do, it skips itself |
 
-`.github/dependabot.yml` opens pull requests for dependency updates. Delete it if you'd rather not get them.
+`.github/dependabot.yml` opens pull requests for dependency updates here. GitHub leaves it [switched off in forks](https://github.blog/changelog/2022-11-07-dependabot-pull-requests-off-by-default-for-forks/), and it's best left that way: your updates arrive when you sync with this repository, and Dependabot's own changes to `package-lock.json` would conflict with them.
+
+The pattern throughout: change your own club file and `public/` icons, and leave everything else to come from this repository. Anything else you change is a file that can conflict when you sync.
 
 ## Development Notes
 

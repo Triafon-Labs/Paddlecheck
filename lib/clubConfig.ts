@@ -11,7 +11,7 @@ import {
   Flood,
 } from "@mui/icons-material";
 import type { ElementType } from "react";
-import rawClub from "@/club.yaml";
+import rawClub from "@club-config";
 import { STATUS_COLORS, ON_STATUS_COLORS } from "./statusColors";
 import type {
   PaddlingExtraRule,
@@ -20,12 +20,13 @@ import type {
   StatusStep,
 } from "@/types";
 
-// Reads club.yaml - every club-specific setting - checks it, and turns it
+// Reads the club's settings file - clubs/<CLUB>.yaml, chosen in
+// next.config.ts - checks it, and turns it
 // into the shapes lib/config.ts exports. A mistake stops `npm run dev` and
 // `npm run build` with a message naming the setting, rather than showing a
 // wrong status on the day.
 
-// The icon names club.yaml may use.
+// The icon names a club file may use.
 export const ICONS: Record<string, ElementType> = {
   check: Check,
   trendingUp: TrendingUpOutlined,
@@ -95,7 +96,7 @@ export interface ClubConfig {
   };
 }
 
-// What an optional setting is when club.yaml leaves it out.
+// What an optional setting is when the club file leaves it out.
 const DEFAULTS = {
   appName: "Paddlecheck",
   rules: { weatherTable: true, darkness: true, fog: true, thunderstorms: true },
@@ -136,6 +137,10 @@ type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
+// The file being checked (clubs/<CLUB>.yaml, named in next.config.ts), used
+// in messages and as the path of the file's top level.
+const FILE = process.env.NEXT_PUBLIC_CLUB_FILE ?? "The club's settings file";
+
 const problems: string[] = [];
 // A section that's missing altogether is reported once, not once for every
 // setting inside it.
@@ -167,7 +172,7 @@ const known = (o: Obj, keys: string[], path: string) => {
   for (const key of Object.keys(o)) {
     if (!keys.includes(key))
       problem(
-        path === "club.yaml" ? key : `${path} → ${key}`,
+        path === FILE ? key : `${path} → ${key}`,
         `isn't a setting here. Expected: ${keys.join(", ")}`
       );
   }
@@ -491,7 +496,7 @@ const parseLandmarks = (v: unknown): Record<number, string> => {
 };
 
 const parse = (raw: unknown): ClubConfig => {
-  const root = obj(raw, "club.yaml");
+  const root = obj(raw, FILE);
   const app = optionalObj(root.app, "app");
   const club = obj(root.club, "club");
   const location = obj(root.location, "location");
@@ -518,7 +523,7 @@ const parse = (raw: unknown): ClubConfig => {
       "landmarks",
       "conditionsKey",
     ],
-    "club.yaml"
+    FILE
   );
   known(app, ["name"], "app");
   known(club, ["name", "shortName", "feedbackUrl", "usefulLinks"], "club");
@@ -704,14 +709,24 @@ const parse = (raw: unknown): ClubConfig => {
   };
 };
 
-// Exported for checking a club.yaml other than the one built in.
+// Exported for checking a club file other than the one built in.
 export const parseClubConfig = (raw: unknown): ClubConfig => {
   problems.length = 0;
   missingSections.length = 0;
+  // A file that isn't a set of settings at all (empty, or plain text) is
+  // one problem, not one for every section it lacks.
+  if (!isObj(raw)) {
+    throw new Error(
+      `${FILE} has a problem:\n  • ` +
+        (raw == null
+          ? "the file is empty"
+          : `expected settings such as "club:" and "river:", found ${show(raw)}`)
+    );
+  }
   const config = parse(raw);
   if (problems.length > 0) {
     throw new Error(
-      `club.yaml has ${problems.length === 1 ? "a problem" : `${problems.length} problems`}:\n` +
+      `${FILE} has ${problems.length === 1 ? "a problem" : `${problems.length} problems`}:\n` +
         problems.map((p) => `  • ${p}`).join("\n")
     );
   }

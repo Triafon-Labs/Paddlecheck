@@ -30,7 +30,7 @@ import {
 // ── Prompt ────────────────────────────────────────────────────────────────────
 
 const BRIEFING_PROMPT = `\
-You are writing a short summary of river and weather conditions for members of a canoe club, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay mild throughout the day.").
+You are writing a short summary of river and weather conditions for members of a canoe club, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay dry throughout the day.").
 
 Write up to three short, natural sentences summarising conditions across the period the data names ("Period to summarise"): the rest of today, or, if it's currently dark, the next daylight window - later today or tomorrow.
 
@@ -42,11 +42,13 @@ When referring to wind direction, use natural British English phrasing (e.g. "a 
 
 Quote figures exactly as the data writes them - "22°C", "0.33 m", "12 mph" - spacing included: no space before °C, a space before m and mph. Never soften a figure into a vague band: "mid-30s", "the high teens", "around 30-odd degrees" are all wrong, and a band with a unit attached ("mid-30s°C") doubly so. A figure not worth stating precisely is better left out than blurred.
 
+Describe temperature and wind by the club's thresholds rather than everyday weather-app norms - paddlers end up wet, so cold matters more on the water than on land. Below ${formatTemperature(THRESHOLDS.TEMP_HIGH)} is cool, never "mild" or "warm"; at or below ${formatTemperature(THRESHOLDS.TEMP_MODERATE)} is cold, with a risk of cold water shock. Sustained wind above ${formatWindSpeed(THRESHOLDS.WIND_HIGH)} is strong for paddling - call it windy, not a breeze.
+
 Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising. Each warning is labelled "(currently active)" or "(upcoming - not yet in force)" - trust that label rather than working out timing from the dates yourself, and if it's upcoming, make that clear rather than implying it applies right now. Every warning supplied falls in the period you're summarising, so time it against that period - "an amber heat warning comes into force tomorrow morning", never by weekday ("from Thursday morning"), which sounds like a different day again.
 
 Don't pass verdicts on whether or where to paddle ("a great day for a paddle") - the app's status rating covers that.
 
-Write only the summary - no headings, labels, or quote marks. Use British English (mild, favourable, metres) and a friendly, accessible tone for members ranging from beginners to experienced paddlers.`;
+Write only the summary - no headings, labels, or quote marks. Use British English (favourable, metres, colour) and a friendly, accessible tone for members ranging from beginners to experienced paddlers.`;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

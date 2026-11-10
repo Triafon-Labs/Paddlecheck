@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.0.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.45.5...paddlecheck-v2.0.0) (2026-11-10)
+
+### ⚠ BREAKING CHANGES
+
+* the root club.yaml is gone. Deployments must set CLUB
+  (CLUB=worcester for Worcester Canoe Club) or they build from the example.
+
+### Features
+
+* choose the club settings file with the CLUB environment variable ([2d1aab0](https://github.com/dylanr97/Paddlecheck/commit/2d1aab01718c4902ae94d650b7ea7158c670f530))
+* require CLUB for production builds ([4e8bc33](https://github.com/dylanr97/Paddlecheck/commit/4e8bc33ad20604ba3529f86bc9c728eb7640ac31))
+
+### Bug Fixes
+
+* don't check CLUB or print the dev notice under next start ([9fb52d0](https://github.com/dylanr97/Paddlecheck/commit/9fb52d02afc81fabb01a0ffc2372995eedf37a7d))
+* name the club file in top-level problems, and report an empty file once ([da07322](https://github.com/dylanr97/Paddlecheck/commit/da07322c27e7a0ffd90931a6ffcf494769e61848))
+
+### Code Refactoring
+
+* rename Worcester's club file to clubs/wcc.yaml ([1cde9be](https://github.com/dylanr97/Paddlecheck/commit/1cde9be3e85992f9f3f1e6c5b0389c876141b973))
+
+### Documentation
+
+* cover npm start and empty club files in README and AGENTS.md ([20cba80](https://github.com/dylanr97/Paddlecheck/commit/20cba80ce210e3f9847040caaa0a258b95e76b82))
+
 ## [1.45.5](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.45.4...paddlecheck-v1.45.5) (2026-11-10)
 
 ## [1.45.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.45.3...paddlecheck-v1.45.4) (2026-11-10)

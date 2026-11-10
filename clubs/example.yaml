@@ -1,10 +1,13 @@
 # yaml-language-server: $schema=../club.schema.json
 #
 # A starting point for a new club: the fewest settings that make a working
-# app. It's the file the app uses when CLUB isn't set. Copy it to
-# clubs/<your-club>.yaml, build with CLUB=<your-club>, then work through
-# every line marked CHANGE. Run `npm run dev` as you go: if anything
-# is wrong it tells you which setting.
+# app. Don't edit this file for your club: copy it to clubs/<your-club>.yaml,
+# put CLUB=<your-club> in .env.local, then work through every line marked
+# CHANGE. Run `npm run dev` as you go: if anything is wrong it tells you
+# which setting. ("Adapting for Your Club" in README.md has the steps.)
+#
+# `npm run dev` uses this file when CLUB isn't set; `npm run build` never
+# does – it stops until CLUB is set.
 #
 # It rates conditions on the river level alone, plus darkness, fog and
 # thunderstorms. When you're ready for more – weather rules, more steps,

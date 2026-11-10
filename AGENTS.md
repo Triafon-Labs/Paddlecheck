@@ -66,9 +66,14 @@ thresholds, weather table, paddler levels, Who Can Paddle, landmarks and Conditi
 text – lives in one file in `clubs/`. The `CLUB` environment variable picks it
 (`CLUB=worcester` → `clubs/worcester.yaml`), read by `next.config.ts` when `next dev` or
 `next build` starts – from the shell, `.env.local`, or the host's settings (Vercel:
-Project Settings → Environment Variables). Unset, it is `example` (`clubs/example.yaml`, the
-starter for a new club). A `CLUB` with no matching file throws, listing the files there are.
-The production site is built with `CLUB=worcester`.
+Project Settings → Environment Variables). Unset, `next dev` uses `clubs/example.yaml` (the
+starter for a new club) and prints a notice once, but `next build` throws: a deployment
+must name its club, because a site built from the example would show a real-looking status
+from made-up rules. Don't add a build-time fallback. A `CLUB` with no matching file throws
+in both, listing the files there are. The production site is built with `CLUB=worcester`
+(Vercel env var), and local Worcester work needs `CLUB=worcester` in `.env.local`. Forks add
+their own `clubs/<club>.yaml` rather than editing `worcester.yaml` or `example.yaml`, so
+syncing with this repo never conflicts on settings.
 
 `next.config.ts` aliases `@club-config` to the chosen file (`turbopack.resolveAlias`) and
 `yaml-loader` (a Turbopack rule) imports it as a module; `lib/clubConfig.ts` checks it and
@@ -195,8 +200,8 @@ threshold while other forecasts are over it. Open-Meteo returns only one model f
 `current`, so each extra model is its own request. A failed extra model is ignored;
 every other weather field still comes from `best_match` alone.
 
-No environment variables are required for local development, except `GROQ_API_KEY` for
-the AI briefing. `next.config.ts` turns its presence at build time into
+`npm run dev` needs no environment variables (it falls back to `clubs/example.yaml`);
+`npm run build` needs `CLUB`, and the AI briefing needs `GROQ_API_KEY`. `next.config.ts` turns its presence at build time into
 `NEXT_PUBLIC_CONDITIONS_REPORT` (`CONDITIONS_REPORT_ENABLED` in `lib/config.ts`); without it
 the Conditions Report section and its Settings switch aren't rendered at all.
 
@@ -363,7 +368,7 @@ prefixed `paddlecheck_` and omitted here.
 ```bash
 npm install       # Install dependencies
 npm run dev       # Start dev server at http://localhost:3000
-npm run build     # Production build
+npm run build     # Production build (needs CLUB, e.g. CLUB=worcester npm run build)
 npm run lint      # ESLint check
 ```
 
@@ -448,7 +453,7 @@ If Git hooks are not firing:
 - No database
 - No authentication
 - No automated tests (Jest/Vitest/Playwright)
-- No environment variables required for core functionality
+- No environment variables required to run `npm run dev` (`npm run build` needs `CLUB`)
 - No multi-location support (hardcoded to Worcester)
 
 ---

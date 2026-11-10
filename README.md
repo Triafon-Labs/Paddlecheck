@@ -66,7 +66,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser. Everything except the AI summary works with no further setup.
 
-That runs the starter settings in `clubs/example.yaml`. To run Worcester's instead, start it with `CLUB=worcester npm run dev`, or put `CLUB=worcester` in `.env.local` (see [Choosing which file the app uses](#your-settings-clubsyour-clubyaml)).
+With nothing else set, that runs the starter settings in `clubs/example.yaml` and says so in the terminal. To run Worcester's, create a file called `.env.local` in the project root containing `CLUB=worcester` and restart `npm run dev`. `npm run build` won't run until `CLUB` is set – see [Choosing which club file the app uses](#choosing-which-club-file-the-app-uses-club).
 
 ### AI summary (optional)
 
@@ -84,7 +84,7 @@ The server builds the summary from its own copy of the conditions and only reads
 
 ```bash
 npm run dev     # Development server at http://localhost:3000
-npm run build   # Production build
+npm run build   # Production build – needs CLUB set (see below)
 npm start       # Serve the production build
 npm run lint    # ESLint
 ```
@@ -105,7 +105,7 @@ The service worker only registers in a production build, so use `npm run build &
 - **Fork on GitHub** if you want your own hosted copy. This is the simplest route, and it lets you pull in later improvements from this repository (GitHub's "Sync fork" button).
 - **Clone and push to a new repository** if you'd rather your copy had no visible link back to this one. You can still pull updates by adding this repository as a second remote.
 
-Either way, if your changes stay in your own file in `clubs/` (and `public/` for icons), taking updates later is painless: they'll almost never touch the same files.
+Either way, keep your settings in a file of your own in `clubs/` (and your icons in `public/`) rather than editing Worcester's. Updates from this repository change `clubs/worcester.yaml` and `clubs/example.yaml`, never your file, so taking them later doesn't give you merge conflicts.
 
 ### Your settings: `clubs/<your-club>.yaml`
 
@@ -113,19 +113,37 @@ Everything about a club is in one file in the **`clubs/`** folder – no other f
 
 There are two to start with:
 
-| File                   | What it is                                                                                                        |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `clubs/example.yaml`   | A starting point for a new club – used when `CLUB` isn't set                                                      |
-| `clubs/worcester.yaml` | Worcester Canoe Club's settings, which use nearly every setting – the hardest example there is (`CLUB=worcester`) |
+| File                   | What it is                                                                                     |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
+| `clubs/example.yaml`   | A starting point for a new club: about 100 lines, every one you need to change marked `CHANGE` |
+| `clubs/worcester.yaml` | Worcester Canoe Club's settings, which use nearly every setting – the hardest example there is |
 
-**Choosing which file the app uses.** The `CLUB` environment variable names the file, without `.yaml`, and is read when the app is built or `npm run dev` starts. Without it the app uses `clubs/example.yaml`. To set it:
+**Setting up your club:**
 
-- **On your computer:** put `CLUB=yourclub` in a file called `.env.local` at the top of the project (it isn't committed), or run `CLUB=yourclub npm run dev`. Restart `npm run dev` after changing it.
-- **On Vercel:** Project Settings → Environment Variables → add `CLUB` with your club's name, then redeploy. Other hosts have an equivalent setting.
+1. Copy `clubs/example.yaml` to a new file named after your club, e.g. `clubs/riverside.yaml`. Use lower case letters, numbers and hyphens.
+2. Create a file called `.env.local` in the project root containing `CLUB=riverside` (it isn't committed – it's for your computer only).
+3. Run `npm run dev` and work through every line marked `CHANGE`. The example rates conditions on the river level alone; add more from Worcester's file as you need it. Settings marked _(optional)_ can be left out; the comment says what happens then.
+4. When you deploy, set `CLUB=riverside` on your host too – see [Hosting](#hosting).
+5. Add your club's name to the `club:` list in `.github/workflows/ci.yml`, so CI checks your file on every push (see [GitHub Actions in a Fork](#github-actions-in-a-fork)).
 
-A `CLUB` with no matching file stops the build and lists the files there are.
+You can delete `clubs/worcester.yaml` from your copy, but keeping it costs nothing, leaves a full example to hand, and avoids a conflict if it changes here later.
 
-**Where to start.** For a new club, copy **`clubs/example.yaml`** to `clubs/yourclub.yaml` and set `CLUB=yourclub`: about 100 lines that rate conditions on the river level alone, with every line you need to change marked `CHANGE`. Add more from Worcester's file as you need it. Settings marked _(optional)_ can be left out; the comment says what happens then. You can delete `clubs/worcester.yaml` from your copy, but keeping it costs nothing and leaves a full example to hand.
+#### Choosing which club file the app uses (`CLUB`)
+
+The `CLUB` environment variable names the file in `clubs/`, without `.yaml`: `CLUB=riverside` uses `clubs/riverside.yaml`. It's read when `npm run dev` or `npm run build` starts, so restart after changing it.
+
+| Command                     | `CLUB` set                      | `CLUB` not set                                                             |
+| --------------------------- | ------------------------------- | -------------------------------------------------------------------------- |
+| `npm run dev`               | Uses `clubs/<CLUB>.yaml`        | Uses `clubs/example.yaml`, with a notice in the terminal                   |
+| `npm run build` / deploying | Builds with `clubs/<CLUB>.yaml` | **Stops with an error** – nothing is built, and a live site stays as it is |
+
+A build never falls back to the example because a site built from it would show a real-looking paddling status from made-up rules. If `CLUB` names a file that doesn't exist, both commands stop and list the files there are.
+
+Where to set it:
+
+- **On your computer:** `CLUB=riverside` in `.env.local` in the project root. For a one-off, `CLUB=worcester npm run dev` overrides it.
+- **On Vercel:** Project Settings → Environment Variables. Other hosts have an equivalent setting – see [Hosting](#hosting).
+- **In CI:** `.github/workflows/ci.yml` sets it for each file in its `club:` list.
 
 YAML is a plain-text settings format. The things that trip people up:
 
@@ -233,7 +251,7 @@ The app is a standard Next.js app, but it needs a server (the API routes fetch a
 [Vercel](https://vercel.com) is what this project uses:
 
 1. Sign in to Vercel with GitHub and **Add New → Project**, then import your repository.
-2. Under **Environment Variables**, add `CLUB` set to your club file's name (`yourclub` for `clubs/yourclub.yaml`). Without it the site is built from `clubs/example.yaml`.
+2. Under **Environment Variables**, add `CLUB` set to your club file's name (`yourclub` for `clubs/yourclub.yaml`). Tick Production and Preview. Without it the build stops with an error saying so.
 3. If you want the AI summary, add `GROQ_API_KEY` under **Environment Variables**. Adding it later? Redeploy afterwards (**Deployments → ⋯ → Redeploy**) – the summary only appears in a build made with the key.
 4. Deploy. Every push to `main` redeploys, and pull requests get preview deployments.
 
@@ -247,6 +265,7 @@ Any host that runs Node 22 works – for example [Netlify](https://www.netlify.c
 
 ```bash
 npm ci
+export CLUB=riverside               # your file in clubs/ – the build stops without it
 export GROQ_API_KEY=your-key-here   # optional – for the AI summary
 npm run build                       # needs the key, to include the summary
 npm start                           # serves on port 3000; also needs the key
@@ -260,7 +279,7 @@ GitHub turns Actions off in a new fork until you enable them on the **Actions** 
 
 | Workflow         | What it does                                                                                                                               | In your fork                                                                                                                                                     |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`         | Lint and build on every push and pull request                                                                                              | Keep it                                                                                                                                                          |
+| `ci.yml`         | Lint, and build each club file in its `club:` list, on every push and pull request                                                         | Keep it, and add your club to the `club:` list. You can remove `worcester` from the list if you've deleted its file                                              |
 | `auto-tag.yml`   | On every push to `main`, bumps the version, updates `CHANGELOG.md` and pushes a tag                                                        | Optional. Delete it if you don't want release commits; it needs to be able to push to `main`                                                                     |
 | `keep-alive.yml` | Every 5 minutes, loads the site and `/api/conditions`, and fails if any data source is down – a failed run sends you a GitHub notification | **Point it at your own site** by adding a repository variable `SITE_URL` (Settings → Secrets and variables → Actions → Variables). Until you do, it skips itself |
 

@@ -18,6 +18,7 @@ import {
   DEFAULT_AI_MODEL,
   ALLOWED_AI_MODELS,
   WARNING_AREA,
+  STATUS_STEPS,
 } from "@/lib/config";
 import {
   formatRiverLevel,
@@ -28,6 +29,19 @@ import {
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 // ── Prompt ────────────────────────────────────────────────────────────────────
+
+// The club's own words for each river level band (riverReason in club.yaml),
+// so the model doesn't judge "high" by how big the number sounds. The first
+// step has no riverReason and the top one is only ever the worst.
+const RIVER_BANDS = STATUS_STEPS.map((step, i) => {
+  if (i === 0)
+    return `below ${formatRiverLevel(STATUS_STEPS[1]?.fromLevel ?? 0)} is normal`;
+  const words =
+    i === STATUS_STEPS.length - 1
+      ? "dangerously high"
+      : (step.riverReason ?? "elevated").toLowerCase();
+  return `from ${formatRiverLevel(step.fromLevel)} ${words}`;
+}).join("; ");
 
 const BRIEFING_PROMPT = `\
 You are writing a short summary of river and weather conditions for members of a canoe club, in the style of a weather app's AI summary (e.g. "Pleasant, partly cloudy morning, and it will stay dry throughout the day.").
@@ -42,7 +56,7 @@ When referring to wind direction, use natural British English phrasing (e.g. "a 
 
 Quote figures exactly as the data writes them - "22°C", "0.33 m", "12 mph" - spacing included: no space before °C, a space before m and mph. Never soften a figure into a vague band: "mid-30s", "the high teens", "around 30-odd degrees" are all wrong, and a band with a unit attached ("mid-30s°C") doubly so. A figure not worth stating precisely is better left out than blurred.
 
-Describe temperature and wind by the club's thresholds rather than everyday weather-app norms - paddlers end up wet, so cold matters more on the water than on land. Below ${formatTemperature(THRESHOLDS.TEMP_HIGH)} is cool, never "mild" or "warm"; at or below ${formatTemperature(THRESHOLDS.TEMP_MODERATE)} is cold, with a risk of cold water shock. Sustained wind above ${formatWindSpeed(THRESHOLDS.WIND_HIGH)} is strong for paddling - call it windy, not a breeze.
+Describe temperature and wind by the club's thresholds rather than everyday weather-app norms - paddlers end up wet, so cold matters more on the water than on land. Below ${formatTemperature(THRESHOLDS.TEMP_HIGH)} is cool, never "mild" or "warm"; at or below ${formatTemperature(THRESHOLDS.TEMP_MODERATE)} is cold, with a risk of cold water shock. Sustained wind above ${formatWindSpeed(THRESHOLDS.WIND_HIGH)} is strong for paddling - call it windy, not a breeze. Describe the river level by the club's gauge, not by how big the number sounds: ${RIVER_BANDS}.
 
 Only mention a weather warning if it's one of the official Met Office warnings supplied in the data and it's active or upcoming in the period you're summarising. Each warning is labelled "(currently active)" or "(upcoming - not yet in force)" - trust that label rather than working out timing from the dates yourself, and if it's upcoming, make that clear rather than implying it applies right now. Every warning supplied falls in the period you're summarising, so time it against that period - "an amber heat warning comes into force tomorrow morning", never by weekday ("from Thursday morning"), which sounds like a different day again.
 

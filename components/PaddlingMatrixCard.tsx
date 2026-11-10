@@ -97,7 +97,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
           display: "flex",
           borderRadius: "16px",
           overflow: "hidden",
-          backgroundColor: "surfaces.containerHighest",
+          backgroundColor: "surfaces.containerHigh",
         }}
       >
         {/* The status colour arrives as an accent rather than as a fill. A

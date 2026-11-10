@@ -79,7 +79,7 @@ const WeatherWarnings: React.FC<Props> = ({ warnings }) => {
                 display: "flex",
                 borderRadius: "16px",
                 overflow: "hidden",
-                backgroundColor: "surfaces.containerHighest",
+                backgroundColor: "surfaces.containerHigh",
               }}
             >
               <Box

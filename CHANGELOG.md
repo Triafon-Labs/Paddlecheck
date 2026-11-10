@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.45.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.45.1...paddlecheck-v1.45.2) (2026-11-10)
+
+### Bug Fixes
+
+* stop the stale-data banner coming back after a refresh that worked ([dd46b54](https://github.com/dylanr97/Paddlecheck/commit/dd46b5429cab7d201de7ea563db3af1f1228c10d))
+
 ## [1.45.1](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.45.0...paddlecheck-v1.45.1) (2026-11-08)
 
 ### Bug Fixes

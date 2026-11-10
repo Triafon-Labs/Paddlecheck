@@ -71,7 +71,7 @@ const PaddlerLevelRow: React.FC<PaddlerLevelRowProps> = ({
     <Box
       sx={{
         backgroundColor: "surfaces.containerHigh",
-        borderRadius: compact ? 1 : 1.5,
+        borderRadius: "16px",
         overflow: "hidden",
       }}
     >

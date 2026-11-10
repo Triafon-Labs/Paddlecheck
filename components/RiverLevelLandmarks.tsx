@@ -62,7 +62,7 @@ export const CompactReadingRow: React.FC<{
       px: 1.5,
       py: 0.5,
       backgroundColor: "surfaces.containerHigh",
-      borderRadius: 1,
+      borderRadius: "16px",
     }}
   >
     <Box
@@ -155,7 +155,7 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
             px: 1.5,
             ...(row.isReading && {
               backgroundColor: "surfaces.containerHigh",
-              borderRadius: 1,
+              borderRadius: "16px",
             }),
           }}
         >
@@ -319,7 +319,6 @@ export const RiverLevelLandmarksSkeleton: React.FC = () => (
       // The reading row with its "Gauge read …" line beneath.
       height={64}
       animation="wave"
-      sx={{ borderRadius: 1 }}
     />
     <LandmarkRowSkeleton />
   </Box>

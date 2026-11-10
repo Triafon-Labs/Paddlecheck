@@ -137,6 +137,10 @@ type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
+// The file being checked (clubs/<CLUB>.yaml, named in next.config.ts), used
+// in messages and as the path of the file's top level.
+const FILE = process.env.NEXT_PUBLIC_CLUB_FILE ?? "The club's settings file";
+
 const problems: string[] = [];
 // A section that's missing altogether is reported once, not once for every
 // setting inside it.
@@ -168,7 +172,7 @@ const known = (o: Obj, keys: string[], path: string) => {
   for (const key of Object.keys(o)) {
     if (!keys.includes(key))
       problem(
-        path === "club.yaml" ? key : `${path} → ${key}`,
+        path === FILE ? key : `${path} → ${key}`,
         `isn't a setting here. Expected: ${keys.join(", ")}`
       );
   }
@@ -492,7 +496,7 @@ const parseLandmarks = (v: unknown): Record<number, string> => {
 };
 
 const parse = (raw: unknown): ClubConfig => {
-  const root = obj(raw, "club.yaml");
+  const root = obj(raw, FILE);
   const app = optionalObj(root.app, "app");
   const club = obj(root.club, "club");
   const location = obj(root.location, "location");
@@ -519,7 +523,7 @@ const parse = (raw: unknown): ClubConfig => {
       "landmarks",
       "conditionsKey",
     ],
-    "club.yaml"
+    FILE
   );
   known(app, ["name"], "app");
   known(club, ["name", "shortName", "feedbackUrl", "usefulLinks"], "club");
@@ -709,10 +713,20 @@ const parse = (raw: unknown): ClubConfig => {
 export const parseClubConfig = (raw: unknown): ClubConfig => {
   problems.length = 0;
   missingSections.length = 0;
+  // A file that isn't a set of settings at all (empty, or plain text) is
+  // one problem, not one for every section it lacks.
+  if (!isObj(raw)) {
+    throw new Error(
+      `${FILE} has a problem:\n  • ` +
+        (raw == null
+          ? "the file is empty"
+          : `expected settings such as "club:" and "river:", found ${show(raw)}`)
+    );
+  }
   const config = parse(raw);
   if (problems.length > 0) {
     throw new Error(
-      `${process.env.NEXT_PUBLIC_CLUB_FILE ?? "The club's settings file"} has ${problems.length === 1 ? "a problem" : `${problems.length} problems`}:\n` +
+      `${FILE} has ${problems.length === 1 ? "a problem" : `${problems.length} problems`}:\n` +
         problems.map((p) => `  • ${p}`).join("\n")
     );
   }

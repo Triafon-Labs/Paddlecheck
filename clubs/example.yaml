@@ -1,11 +1,14 @@
+# yaml-language-server: $schema=../club.schema.json
+#
 # A starting point for a new club: the fewest settings that make a working
-# app. Copy it over the club.yaml at the top of the project, then work
-# through every line marked CHANGE. Run `npm run dev` as you go: if anything
+# app. It's the file the app uses when CLUB isn't set. Copy it to
+# clubs/<your-club>.yaml, build with CLUB=<your-club>, then work through
+# every line marked CHANGE. Run `npm run dev` as you go: if anything
 # is wrong it tells you which setting.
 #
 # It rates conditions on the river level alone, plus darkness, fog and
 # thunderstorms. When you're ready for more – weather rules, more steps,
-# rules that depend on the level – the main club.yaml (Worcester Canoe
+# rules that depend on the level – clubs/worcester.yaml (Worcester Canoe
 # Club's) shows every setting, and README.md explains them.
 #
 # YAML basics: indent with spaces (two per level), never tabs; # starts a

@@ -1,7 +1,8 @@
-# yaml-language-server: $schema=./club.schema.json
+# yaml-language-server: $schema=../club.schema.json
 #
-# Everything about your club that Paddlecheck needs. This is the only file you
-# have to change to adapt the app – see "Adapting for Your Club" in README.md.
+# Worcester Canoe Club's settings – used when the app is built with
+# CLUB=worcester. Everything about a club that Paddlecheck needs is in a file
+# like this one in clubs/ – see "Adapting for Your Club" in README.md.
 #
 # A few YAML basics:
 #   - Indentation matters: use spaces (two per level), never tabs.
@@ -12,7 +13,7 @@
 #     read them as true/false.
 #
 # Settings marked (optional) can be left out; the comment says what happens
-# then. Starting a new club? examples/starter.club.yaml is a shorter file to
+# then. Starting a new club? clubs/example.yaml is a shorter file to
 # begin from.
 #
 # If something here is wrong, `npm run dev` and `npm run build` stop with a

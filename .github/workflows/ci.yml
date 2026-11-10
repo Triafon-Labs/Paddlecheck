@@ -17,6 +17,14 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Build every club file in clubs/, so a change that breaks one is caught
+    # here rather than on that club's next deployment.
+    strategy:
+      fail-fast: false
+      matrix:
+        club: [example, worcester]
+    env:
+      CLUB: ${{ matrix.club }}
 
     steps:
       - uses: actions/checkout@v7
@@ -35,6 +43,7 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/npm-install
       - name: Lint
+        if: matrix.club == 'example'
         run: npm run lint
       - name: Build
         run: npm run build

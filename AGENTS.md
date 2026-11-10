@@ -59,27 +59,37 @@ plugin or build step generates it.
 
 ---
 
-## Club settings (`club.yaml`)
+## Club settings (`clubs/*.yaml`)
 
 Everything club-specific – names, gauge, location, warnings area, status steps, rules,
 thresholds, weather table, paddler levels, Who Can Paddle, landmarks and Conditions Key
-text – lives in `club.yaml` at the project root. `yaml-loader` (a Turbopack rule in
-`next.config.ts`) imports it as a module; `lib/clubConfig.ts` checks it and throws one
-error listing every problem, which stops `next dev`/`next build`; `lib/config.ts`
+text – lives in one file in `clubs/`. The `CLUB` environment variable picks it
+(`CLUB=worcester` → `clubs/worcester.yaml`), read by `next.config.ts` when `next dev` or
+`next build` starts – from the shell, `.env.local`, or the host's settings (Vercel:
+Project Settings → Environment Variables). Unset, it is `example` (`clubs/example.yaml`, the
+starter for a new club). A `CLUB` with no matching file throws, listing the files there are.
+The production site is built with `CLUB=worcester`.
+
+`next.config.ts` aliases `@club-config` to the chosen file (`turbopack.resolveAlias`) and
+`yaml-loader` (a Turbopack rule) imports it as a module; `lib/clubConfig.ts` checks it and
+throws one error listing every problem, which stops `next dev`/`next build`; `lib/config.ts`
 re-exports it under the same constant names the code uses (`CLUB_NAME`, `STATUS_STEPS`,
 `WHO_CAN_PADDLE`, `THRESHOLDS.TEMP_HIGH`, …). Never hard-code club-specific values in code –
-add a setting to `club.yaml`, `lib/clubConfig.ts` and `club.schema.json` (editor hints)
-together. Optional settings get their defaults in `DEFAULTS` (`lib/clubConfig.ts`). When helping a
-club adapt the app, start from `examples/starter.club.yaml`, run `npm run dev` to validate,
-and list anything in their rules that `club.yaml` can't express rather than guessing.
+add a setting to the club files, `lib/clubConfig.ts` and `club.schema.json` (editor hints)
+together. Optional settings get their defaults in `DEFAULTS` (`lib/clubConfig.ts`). CI builds
+every file in `clubs/` (the matrix in `ci.yml` – add a new club file there too). When helping a
+club adapt the app, copy `clubs/example.yaml` to `clubs/<club>.yaml`, run
+`CLUB=<club> npm run dev` to validate, and list anything in their rules that the club file
+can't express rather than guessing.
 
 ## Directory Structure
 
 ```
-club.yaml               The club's settings (see above)
-club.schema.json        JSON Schema for club.yaml – editor autocomplete and checks only
-examples/starter.club.yaml  Minimal club.yaml for a new club (river level only, CHANGE markers)
-docs/club-yaml/         Colour and icon reference images for club.yaml – redraw with
+clubs/                  One settings file per club, picked by CLUB (see above)
+  example.yaml          Minimal starter for a new club, used when CLUB is unset (river level only, CHANGE markers)
+  worcester.yaml        Worcester Canoe Club – nearly every setting (CLUB=worcester)
+club.schema.json        JSON Schema for the club files – editor autocomplete and checks only
+docs/club-yaml/         Colour and icon reference images for the club files – redraw with
                         `node scripts/club-yaml-reference.mjs` after changing STATUS_COLORS or ICONS
 
 app/
@@ -115,8 +125,8 @@ components/
   ServiceWorkerRegistration.tsx  Registers public/sw.js in production
 
 lib/
-  config.ts              The app's constants: the club's from club.yaml, plus data sources, caching, chart styling
-  clubConfig.ts          Reads and checks club.yaml (icon/colour names, placeholders, plain-English errors)
+  config.ts              The app's constants: the club's from clubs/<CLUB>.yaml, plus data sources, caching, chart styling
+  clubConfig.ts          Reads and checks the club file (icon/colour names, placeholders, plain-English errors)
   conditions.ts          Builds the /api/conditions payload – every source in parallel
   fetchCache.ts          The shared 15-minute upstream cache window
   rag.ts                 RAG status calculation logic
@@ -147,7 +157,7 @@ lib/
 
 types/
   index.ts               All shared TypeScript types
-  yaml.d.ts              Lets club.yaml be imported (untyped until clubConfig.ts checks it)
+  yaml.d.ts              Lets the club file be imported as @club-config (untyped until clubConfig.ts checks it)
 
 public/                  Static assets – icons, favicon, sw.js (offline shell)
 ```
@@ -158,7 +168,7 @@ public/                  Static assets – icons, favicon, sw.js (offline shell)
 
 | File             | Why                                                                               |
 | ---------------- | --------------------------------------------------------------------------------- |
-| `club.yaml`      | Every club-specific setting – steps, thresholds, station IDs, rules, landmarks    |
+| `clubs/*.yaml`   | Every club-specific setting – steps, thresholds, station IDs, rules, landmarks    |
 | `lib/rag.ts`     | The core algorithm – how a river level + weather combination becomes a RAG status |
 | `lib/hooks.ts`   | Entry point for all data – fetch logic, retry, error handling, state shape        |
 | `types/index.ts` | The full type vocabulary – read this before touching any data flow                |
@@ -197,7 +207,7 @@ the Conditions Report section and its Settings switch aren't rendered at all.
 The RAG status is calculated from river level first, then modifiers are applied:
 
 The steps themselves – how many, their names, where each starts, colours, icons and
-descriptions – are `steps` in `club.yaml` (`STATUS_STEPS` in code). `lib/rag.ts` derives
+descriptions – are `steps` in the club file (`STATUS_STEPS` in code). `lib/rag.ts` derives
 everything from it (`STEP_NAMES`, `TOP_STEP`, `BEST_TIME_STEPS`, `statusUi()`,
 `ragHeight()`, the river level reasons); `lib/clubConfig.ts` has already checked it and the
 weather table. Never hard-code a step name in code.
@@ -210,7 +220,7 @@ weather table. Never hard-code a step name in code.
 - 2.75–5.0 m → Red
 - ≥ 5.0 m → No Paddling
 
-**Modifiers (applied in order).** Each can be switched off in `rules` (`club.yaml`) –
+**Modifiers (applied in order).** Each can be switched off in `rules` (club file) –
 `WEATHER_TABLE` covers 1–3. A switched-off factor neither changes the status nor appears
 in `reasons`.
 
@@ -326,7 +336,7 @@ prefixed `paddlecheck_` and omitted here.
 | Key                   | Value                                                                     |
 | --------------------- | ------------------------------------------------------------------------- |
 | `themeMode`           | `"light"` \| `"dark"` \| `"system"` (read/written by MUI)                 |
-| `paddlerLevel`        | One of `paddlerLevels` (`club.yaml`); anything else reads as unset        |
+| `paddlerLevel`        | One of `paddlerLevels` (club file); anything else reads as unset          |
 | `riverGraphTimeRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`                     |
 | `autoSummarise`       | `"true"` \| `"false"` – auto-generate the AI summary on load              |
 | `forecastShowNight`   | `"true"` \| `"false"` – show night hours in the forecast chart (Settings) |
@@ -366,7 +376,7 @@ rejecting commits whose first line isn't a valid Conventional Commit
 
 ## CI Pipeline
 
-- **ci.yml** – runs `lint` then `build` on every push/PR to `main` (Node 22)
+- **ci.yml** – runs `lint`, and `build` once per club file (`CLUB` matrix), on every push/PR to `main` (Node 22)
 - **auto-tag.yml** – on every push to `main` (i.e. right after a PR merges), runs
   `commit-and-tag-version` to bump `package.json`'s version, update `CHANGELOG.md`,
   commit both directly to `main`, and push a `paddlecheck-vX.Y.Z` tag. No release PR,
@@ -445,7 +455,7 @@ If Git hooks are not firing:
 
 ## Key Configuration Constants (`lib/config.ts`)
 
-Worcester's values, set in `club.yaml` except where noted.
+Worcester's values, set in `clubs/worcester.yaml` except where noted.
 
 | Constant                                       | Value                            | Meaning                                       |
 | ---------------------------------------------- | -------------------------------- | --------------------------------------------- |

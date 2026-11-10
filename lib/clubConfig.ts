@@ -11,7 +11,7 @@ import {
   Flood,
 } from "@mui/icons-material";
 import type { ElementType } from "react";
-import rawClub from "@/club.yaml";
+import rawClub from "@club-config";
 import { STATUS_COLORS, ON_STATUS_COLORS } from "./statusColors";
 import type {
   PaddlingExtraRule,
@@ -20,12 +20,13 @@ import type {
   StatusStep,
 } from "@/types";
 
-// Reads club.yaml - every club-specific setting - checks it, and turns it
+// Reads the club's settings file - clubs/<CLUB>.yaml, chosen in
+// next.config.ts - checks it, and turns it
 // into the shapes lib/config.ts exports. A mistake stops `npm run dev` and
 // `npm run build` with a message naming the setting, rather than showing a
 // wrong status on the day.
 
-// The icon names club.yaml may use.
+// The icon names a club file may use.
 export const ICONS: Record<string, ElementType> = {
   check: Check,
   trendingUp: TrendingUpOutlined,
@@ -95,7 +96,7 @@ export interface ClubConfig {
   };
 }
 
-// What an optional setting is when club.yaml leaves it out.
+// What an optional setting is when the club file leaves it out.
 const DEFAULTS = {
   appName: "Paddlecheck",
   rules: { weatherTable: true, darkness: true, fog: true, thunderstorms: true },
@@ -704,14 +705,14 @@ const parse = (raw: unknown): ClubConfig => {
   };
 };
 
-// Exported for checking a club.yaml other than the one built in.
+// Exported for checking a club file other than the one built in.
 export const parseClubConfig = (raw: unknown): ClubConfig => {
   problems.length = 0;
   missingSections.length = 0;
   const config = parse(raw);
   if (problems.length > 0) {
     throw new Error(
-      `club.yaml has ${problems.length === 1 ? "a problem" : `${problems.length} problems`}:\n` +
+      `${process.env.NEXT_PUBLIC_CLUB_FILE ?? "The club's settings file"} has ${problems.length === 1 ? "a problem" : `${problems.length} problems`}:\n` +
         problems.map((p) => `  • ${p}`).join("\n")
     );
   }

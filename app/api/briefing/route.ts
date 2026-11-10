@@ -30,7 +30,7 @@ import {
 
 // ── Prompt ────────────────────────────────────────────────────────────────────
 
-// The club's own words for each river level band (riverReason in club.yaml),
+// The club's own words for each river level band (riverReason in clubs/*.yaml),
 // so the model doesn't judge "high" by how big the number sounds. The first
 // step has no riverReason and the top one is only ever the worst.
 const RIVER_BANDS = STATUS_STEPS.map((step, i) => {

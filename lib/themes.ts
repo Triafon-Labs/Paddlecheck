@@ -679,10 +679,17 @@ const components: ThemeOptions["components"] = {
         perScheme(theme, (m3) => ({ borderColor: m3.outline })),
     },
   },
+  // A rounded skeleton always stands in for a panel, tile or card, so it
+  // takes their 16px corners rather than MUI's default of the 12px shape.
+  MuiSkeleton: {
+    styleOverrides: {
+      rounded: { borderRadius: 16 },
+    },
+  },
   MuiAlert: {
     styleOverrides: {
       root: ({ theme }) => [
-        { borderRadius: 12 },
+        { borderRadius: 16 },
         // M3 uses the tonal container pair for inline status surfaces, where
         // MUI's default reaches for a tinted background plus a saturated
         // `main` text colour - a Material 2 recipe that leaves dark mode with

@@ -52,12 +52,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
       return (
         <>
           <Box sx={{ mt: 2 }}>
-            <Skeleton
-              variant="rounded"
-              height={120}
-              animation="wave"
-              sx={{ borderRadius: "16px" }}
-            />
+            <Skeleton variant="rounded" height={120} animation="wave" />
             <Box sx={{ display: "flex", gap: 0.75, mt: 1.5 }}>
               {Array.from({ length: SCALE_SEGMENT_COUNT }).map((_, i) => (
                 <Skeleton

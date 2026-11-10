@@ -171,7 +171,7 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                 variant="rounded"
                 height={150}
                 animation="wave"
-                sx={{ borderRadius: "16px", mb: 2 }}
+                sx={{ mb: 2 }}
               />
             )}
             <Skeleton
@@ -192,7 +192,6 @@ const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
                   variant="rounded"
                   height={selectedLevel ? 40 : 96}
                   animation="wave"
-                  sx={{ borderRadius: 1.5 }}
                 />
               ))}
             </Stack>

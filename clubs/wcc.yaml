@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=../club.schema.json
 #
-# Worcester Canoe Club's settings – used when CLUB=worcester (set on the
+# Worcester Canoe Club's settings – used when CLUB=wcc (set on the
 # live site's Vercel project). Setting up another club? Don't edit this
 # file: copy clubs/example.yaml to a file of your own. Everything about a club that Paddlecheck needs is in a file
 # like this one in clubs/ – see "Adapting for Your Club" in README.md.

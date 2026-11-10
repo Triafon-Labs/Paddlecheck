@@ -64,15 +64,15 @@ plugin or build step generates it.
 Everything club-specific – names, gauge, location, warnings area, status steps, rules,
 thresholds, weather table, paddler levels, Who Can Paddle, landmarks and Conditions Key
 text – lives in one file in `clubs/`. The `CLUB` environment variable picks it
-(`CLUB=worcester` → `clubs/worcester.yaml`), read by `next.config.ts` when `next dev` or
+(`CLUB=wcc` → `clubs/wcc.yaml`), read by `next.config.ts` when `next dev` or
 `next build` starts – from the shell, `.env.local`, or the host's settings (Vercel:
 Project Settings → Environment Variables). Unset, `next dev` uses `clubs/example.yaml` (the
 starter for a new club) and prints a notice once, but `next build` throws: a deployment
 must name its club, because a site built from the example would show a real-looking status
 from made-up rules. Don't add a build-time fallback. A `CLUB` with no matching file throws
-in both, listing the files there are. The production site is built with `CLUB=worcester`
-(Vercel env var), and local Worcester work needs `CLUB=worcester` in `.env.local`. Forks add
-their own `clubs/<club>.yaml` rather than editing `worcester.yaml` or `example.yaml`, so
+in both, listing the files there are. The production site is built with `CLUB=wcc`
+(Vercel env var), and local Worcester work needs `CLUB=wcc` in `.env.local`. Forks add
+their own `clubs/<club>.yaml` rather than editing `wcc.yaml` or `example.yaml`, so
 syncing with this repo never conflicts on settings.
 
 `next.config.ts` aliases `@club-config` to the chosen file (`turbopack.resolveAlias`) and
@@ -92,7 +92,7 @@ can't express rather than guessing.
 ```
 clubs/                  One settings file per club, picked by CLUB (see above)
   example.yaml          Minimal starter for a new club, used when CLUB is unset (river level only, CHANGE markers)
-  worcester.yaml        Worcester Canoe Club – nearly every setting (CLUB=worcester)
+  wcc.yaml              Worcester Canoe Club – nearly every setting (CLUB=wcc)
 club.schema.json        JSON Schema for the club files – editor autocomplete and checks only
 docs/club-yaml/         Colour and icon reference images for the club files – redraw with
                         `node scripts/club-yaml-reference.mjs` after changing STATUS_COLORS or ICONS
@@ -368,7 +368,7 @@ prefixed `paddlecheck_` and omitted here.
 ```bash
 npm install       # Install dependencies
 npm run dev       # Start dev server at http://localhost:3000
-npm run build     # Production build (needs CLUB, e.g. CLUB=worcester npm run build)
+npm run build     # Production build (needs CLUB, e.g. CLUB=wcc npm run build)
 npm run lint      # ESLint check
 ```
 
@@ -460,7 +460,7 @@ If Git hooks are not firing:
 
 ## Key Configuration Constants (`lib/config.ts`)
 
-Worcester's values, set in `clubs/worcester.yaml` except where noted.
+Worcester's values, set in `clubs/wcc.yaml` except where noted.
 
 | Constant                                       | Value                            | Meaning                                       |
 | ---------------------------------------------- | -------------------------------- | --------------------------------------------- |

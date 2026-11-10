@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        club: [example, worcester]
+        club: [example, wcc]
     env:
       CLUB: ${{ matrix.club }}
 

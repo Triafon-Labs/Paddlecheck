@@ -66,7 +66,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser. Everything except the AI summary works with no further setup.
 
-With nothing else set, that runs the starter settings in `clubs/example.yaml` and says so in the terminal. To run Worcester's, create a file called `.env.local` in the project root containing `CLUB=worcester` and restart `npm run dev`. `npm run build` won't run until `CLUB` is set – see [Choosing which club file the app uses](#choosing-which-club-file-the-app-uses-club).
+With nothing else set, that runs the starter settings in `clubs/example.yaml` and says so in the terminal. To run Worcester's, create a file called `.env.local` in the project root containing `CLUB=wcc` and restart `npm run dev`. `npm run build` won't run until `CLUB` is set – see [Choosing which club file the app uses](#choosing-which-club-file-the-app-uses-club).
 
 ### AI summary (optional)
 
@@ -105,7 +105,7 @@ The service worker only registers in a production build, so use `npm run build &
 - **Fork on GitHub** if you want your own hosted copy. This is the simplest route, and it lets you pull in later improvements from this repository (GitHub's "Sync fork" button).
 - **Clone and push to a new repository** if you'd rather your copy had no visible link back to this one. You can still pull updates by adding this repository as a second remote.
 
-Either way, keep your settings in a file of your own in `clubs/` (and your icons in `public/`) rather than editing Worcester's. Updates from this repository change `clubs/worcester.yaml` and `clubs/example.yaml`, never your file, so taking them later doesn't give you merge conflicts.
+Either way, keep your settings in a file of your own in `clubs/` (and your icons in `public/`) rather than editing Worcester's. Updates from this repository change `clubs/wcc.yaml` and `clubs/example.yaml`, never your file, so taking them later doesn't give you merge conflicts.
 
 ### Your settings: `clubs/<your-club>.yaml`
 
@@ -113,10 +113,10 @@ Everything about a club is in one file in the **`clubs/`** folder – no other f
 
 There are two to start with:
 
-| File                   | What it is                                                                                     |
-| ---------------------- | ---------------------------------------------------------------------------------------------- |
-| `clubs/example.yaml`   | A starting point for a new club: about 100 lines, every one you need to change marked `CHANGE` |
-| `clubs/worcester.yaml` | Worcester Canoe Club's settings, which use nearly every setting – the hardest example there is |
+| File                 | What it is                                                                                     |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| `clubs/example.yaml` | A starting point for a new club: about 100 lines, every one you need to change marked `CHANGE` |
+| `clubs/wcc.yaml`     | Worcester Canoe Club's settings, which use nearly every setting – the hardest example there is |
 
 **Setting up your club:**
 
@@ -126,7 +126,7 @@ There are two to start with:
 4. When you deploy, set `CLUB=riverside` on your host too – see [Hosting](#hosting).
 5. Add your club's name to the `club:` list in `.github/workflows/ci.yml`, so CI checks your file on every push (see [GitHub Actions in a Fork](#github-actions-in-a-fork)).
 
-You can delete `clubs/worcester.yaml` from your copy, but keeping it costs nothing, leaves a full example to hand, and avoids a conflict if it changes here later.
+You can delete `clubs/wcc.yaml` from your copy, but keeping it costs nothing, leaves a full example to hand, and avoids a conflict if it changes here later.
 
 #### Choosing which club file the app uses (`CLUB`)
 
@@ -141,7 +141,7 @@ A build never falls back to the example because a site built from it would show 
 
 Where to set it:
 
-- **On your computer:** `CLUB=riverside` in `.env.local` in the project root. For a one-off, `CLUB=worcester npm run dev` overrides it.
+- **On your computer:** `CLUB=riverside` in `.env.local` in the project root. For a one-off, `CLUB=wcc npm run dev` overrides it.
 - **On Vercel:** Project Settings → Environment Variables. Other hosts have an equivalent setting – see [Hosting](#hosting).
 - **In CI:** `.github/workflows/ci.yml` sets it for each file in its `club:` list.
 
@@ -167,7 +167,7 @@ An indentation slip gives the line and column instead. With `npm run dev` runnin
 
 Turning your club's written rules into a club file is a good job for an AI coding assistant – Claude Code, GitHub Copilot, Cursor or similar – working in your copy of the project. [`AGENTS.md`](AGENTS.md) explains the project to it, and the checks above tell it exactly what to fix. Something like:
 
-> Here are our club's paddling rules: _[paste them, or attach the document]_. Our river gauge is _[name, or the station ID]_ and our launch point is _[place or coordinates]_. Copy `clubs/example.yaml` to `clubs/ourclub.yaml` and fill it in for our club, following the comments in `clubs/worcester.yaml` and README.md. Set `CLUB=ourclub` in `.env.local`, run `npm run dev` and fix anything it reports. Then list anything in our rules you couldn't express, and any choices you made that we should check.
+> Here are our club's paddling rules: _[paste them, or attach the document]_. Our river gauge is _[name, or the station ID]_ and our launch point is _[place or coordinates]_. Copy `clubs/example.yaml` to `clubs/ourclub.yaml` and fill it in for our club, following the comments in `clubs/wcc.yaml` and README.md. Set `CLUB=ourclub` in `.env.local`, run `npm run dev` and fix anything it reports. Then list anything in our rules you couldn't express, and any choices you made that we should check.
 
 Then read through what it wrote before anyone relies on it, particularly the steps' `fromLevel` values and `whoCanPaddle`. An assistant can turn rules into settings; it can't know that your rules are right, or where your landing stage floods.
 
@@ -279,7 +279,7 @@ GitHub turns Actions off in a new fork until you enable them on the **Actions** 
 
 | Workflow         | What it does                                                                                                                               | In your fork                                                                                                                                                     |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`         | Lint, and build each club file in its `club:` list, on every push and pull request                                                         | Keep it, and add your club to the `club:` list. You can remove `worcester` from the list if you've deleted its file                                              |
+| `ci.yml`         | Lint, and build each club file in its `club:` list, on every push and pull request                                                         | Keep it, and add your club to the `club:` list. You can remove `wcc` from the list if you've deleted its file                                                    |
 | `auto-tag.yml`   | On every push to `main`, bumps the version, updates `CHANGELOG.md` and pushes a tag                                                        | Optional. Delete it if you don't want release commits; it needs to be able to push to `main`                                                                     |
 | `keep-alive.yml` | Every 5 minutes, loads the site and `/api/conditions`, and fails if any data source is down – a failed run sends you a GitHub notification | **Point it at your own site** by adding a repository variable `SITE_URL` (Settings → Secrets and variables → Actions → Variables). Until you do, it skips itself |
 

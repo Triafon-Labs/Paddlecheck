@@ -278,7 +278,8 @@ That route builds its payload server-side in `lib/conditions.ts`: river, weather
 future-weather, the upstream forecast and Met Office warnings are fetched in parallel
 (`Promise.all`, each promise wrapped in its own `.catch`), and the whole response is
 cached for 15 minutes (`revalidate = 900`) with `fetchedAt` stamped when it was built.
-If the request fails, or its `fetchedAt` is older than `DATA_STALE_THRESHOLD_MS`, the
+If the request fails, or its `fetchedAt` is older than `LIVE_REFETCH_AFTER_MS` (the
+15-minute cache window – an entry that old is one the cache has already expired), the
 hook makes one forced call to `/api/conditions/live`, which runs the same fetch with no
 cache. The hook then hands the sources to `buildKayakData` (`lib/buildKayakData.ts`),
 which `/api/briefing` also calls on the server so the briefing is written from the same
@@ -301,11 +302,17 @@ fetch that can succeed to wait on, so the cache displays immediately and the "Of
 showing cached data" banner (`TopNavBar`) communicates that it isn't live, instead of
 spinning forever.
 
-There is no background poll. Past `DATA_STALE_THRESHOLD_MS`, the banner above the app
-bar distinguishes a failed update from data that has simply aged: "Live update failed"
-only when `lastFetchStale` says the last fetch itself couldn't get anything newer, and
-"Showing data from … – refresh for the latest" when the page has just been left open
-since a successful fetch.
+There is no background poll. Past `DATA_STALE_THRESHOLD_MS` (two cache windows, 30
+minutes), the banner above the app bar distinguishes a failed update from data that has
+simply aged: "Live update failed" only when `lastFetchStale` says the last fetch itself
+couldn't get anything inside the cache window, and "Showing data from … – refresh for the
+latest" when the page has just been left open since a successful fetch. Keep the banner
+threshold well above `LIVE_REFETCH_AFTER_MS`: a successful refresh can return data up to
+one window old, so a banner set just above the window comes back a minute or two after a
+refresh that worked. Returning to the app (tab shown, signal back, back/forward restore)
+refetches past `LIVE_REFETCH_AFTER_MS`, before the banner is due. `useFreshness` works
+out staleness during render from a ticking clock rather than holding it in state, so the
+render where a refresh lands never pairs the new data with the old "stale" flag.
 
 `KayakDataContext.tsx` wraps this hook in React Context so all components can access it without prop drilling.
 

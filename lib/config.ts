@@ -209,26 +209,33 @@ export const TIME_PERIODS = {
 };
 
 // --- Data Freshness ---
-// /api/conditions is cached for CONDITIONS_REVALIDATE_SECONDS, and once that
-// window is up the cache hands the *expired* entry to whoever arrives first
-// and regenerates behind them (stale-while-revalidate). So a payload older
-// than the window is proof the cache turned over on this very request: the
-// data on screen is last cycle's, and the fresh copy only lands for whoever
-// asks next. That threshold therefore has to sit just above the window - a
-// value set to some multiple of it (this was 30 minutes against a 15-minute
-// window) leaves a band where data is stale by the server's own contract yet
-// the client accepts it as fresh, so the live re-fetch never fires and the
-// "whoever asks next" that finally gets the regenerated data is the user
-// tapping refresh by hand.
+// Two thresholds, deliberately different, because they answer different
+// questions.
 //
-// The grace on top absorbs regeneration latency and device clock skew, since
-// fetchedAt is stamped by the server clock and compared against the phone's.
-const STALE_GRACE_MS = 2 * 60 * 1000;
-// Data older than this forces a live re-fetch (see /api/conditions/live)
-// rather than waiting on background revalidation, and - if that re-fetch
-// can't get through either - is flagged as stale in the UI.
-export const DATA_STALE_THRESHOLD_MS =
-  CONDITIONS_REVALIDATE_SECONDS * 1000 + STALE_GRACE_MS;
+// LIVE_REFETCH_AFTER_MS - is this payload worth keeping? /api/conditions is
+// cached for CONDITIONS_REVALIDATE_SECONDS, and once that window is up the
+// cache hands the *expired* entry to whoever arrives first and regenerates
+// behind them (stale-while-revalidate). A payload older than the window is
+// therefore proof the cache turned over on this very request, so the client
+// throws it away and makes a live fetch instead (/api/conditions/live). Set
+// any higher and there is a band where the client accepts an entry the
+// server itself has already expired.
+//
+// DATA_STALE_THRESHOLD_MS - is the data on screen old enough to warn about?
+// A successful refresh can legitimately return anything up to one window old
+// (a cache hit late in its life), so a warning set just above the window
+// can come back a minute or two after a refresh that worked - and, while the
+// cache keeps serving entries in that band, after the next refresh too. That
+// is the "takes several refreshes to clear" behaviour. Two windows means a
+// successful refresh always keeps the banner away for at least one whole
+// window, so the banner only ever means a refresh failed or the page has
+// been left open.
+//
+// fetchedAt is stamped by the server's clock and compared against the
+// phone's, so neither threshold can be exact; the gap between them also
+// absorbs clock skew.
+export const LIVE_REFETCH_AFTER_MS = CONDITIONS_REVALIDATE_SECONDS * 1000;
+export const DATA_STALE_THRESHOLD_MS = 2 * CONDITIONS_REVALIDATE_SECONDS * 1000;
 
 // --- AI Summary ---
 // Off when the site was built without GROQ_API_KEY: the Conditions Report

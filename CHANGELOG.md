@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.45.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.45.2...paddlecheck-v1.45.3) (2026-11-10)
+
+### Bug Fixes
+
+* hide forecast warnings while the forecast is loading ([#417](https://github.com/dylanr97/Paddlecheck/issues/417)) ([7ddbbc3](https://github.com/dylanr97/Paddlecheck/commit/7ddbbc3dc0bb0c468e7d5d27888f0e86ee65f980))
+
 ## [1.45.2](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.45.1...paddlecheck-v1.45.2) (2026-11-10)
 
 ### Bug Fixes

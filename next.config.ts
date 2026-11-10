@@ -1,7 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { NextConfig } from "next";
-import { PHASE_PRODUCTION_BUILD } from "next/constants";
+import {
+  PHASE_DEVELOPMENT_SERVER,
+  PHASE_PRODUCTION_BUILD,
+} from "next/constants";
 
 // Which club's settings the app uses: clubs/<CLUB>.yaml, chosen by the CLUB
 // environment variable (see "Choosing which file the app uses" in README.md).
@@ -27,6 +30,12 @@ const availableClubs = () =>
 
 const chooseClub = (phase: string): string => {
   const club = (process.env.CLUB ?? "").trim();
+  // Only dev and build read the club file. `next start` serves a finished
+  // build, whose club was fixed when it was built, so CLUB doesn't matter
+  // there and nothing is checked or printed.
+  if (phase !== PHASE_DEVELOPMENT_SERVER && phase !== PHASE_PRODUCTION_BUILD) {
+    return club || FALLBACK_CLUB;
+  }
   if (!club) {
     if (phase === PHASE_PRODUCTION_BUILD) {
       throw new Error(

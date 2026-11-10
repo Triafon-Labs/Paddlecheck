@@ -8,7 +8,7 @@ import {
   RiverDataResult,
   ConditionsApiResponse,
 } from "@/types";
-import { DATA_STALE_THRESHOLD_MS } from "@/lib/config";
+import { LIVE_REFETCH_AFTER_MS } from "@/lib/config";
 import { buildKayakData } from "@/lib/buildKayakData";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 
@@ -67,8 +67,8 @@ export const useKayakData = () => {
   // True for the full duration of any fetch attempt - initial, background,
   // or manual refresh - mirrored by loading/forecastLoading below.
   const [isRefreshing, setIsRefreshing] = useState(false);
-  // Whether the data on screen was already past DATA_STALE_THRESHOLD_MS when
-  // the last fetch finished - i.e. a refresh was tried and couldn't get
+  // Whether the last fetch finished without anything inside the cache window
+  // (LIVE_REFETCH_AFTER_MS) - i.e. a refresh was tried and couldn't get
   // anything newer, through the conditions API, the forced live fetch or the
   // caches. Data that only goes stale later, because nothing has fetched
   // since (there is no background poll), leaves this false. The nav bar
@@ -221,7 +221,7 @@ export const useKayakData = () => {
       const isStale =
         !apiResponse ||
         Date.now() - new Date(apiResponse.fetchedAt).getTime() >
-          DATA_STALE_THRESHOLD_MS;
+          LIVE_REFETCH_AFTER_MS;
       if (isStale) {
         // no-store because this route exists purely to sidestep caches: it
         // sets no cache-control of its own, and a browser that heuristically
@@ -370,7 +370,7 @@ export const useKayakData = () => {
       fetchInFlightRef.current = false;
       setLastFetchStale(
         lastFetchedAtRef.current > 0 &&
-          Date.now() - lastFetchedAtRef.current > DATA_STALE_THRESHOLD_MS
+          Date.now() - lastFetchedAtRef.current > LIVE_REFETCH_AFTER_MS
       );
       setLoading(false);
       setForecastLoading(false);
@@ -384,14 +384,15 @@ export const useKayakData = () => {
   }, [fetchData]);
 
   // Self-heal long-lived tabs: a phone re-opening the app (or regaining
-  // signal) with data past the stale threshold refetches immediately instead
-  // of showing the stale banner until someone taps refresh manually.
+  // signal) with data older than the cache window refetches immediately -
+  // well before the stale banner is due, so coming back to the app doesn't
+  // show the banner and then make you tap refresh to clear it.
   useEffect(() => {
     const refetchIfStale = () => {
       if (document.visibilityState !== "visible") return;
       if (!navigator.onLine) return;
       const isStale =
-        Date.now() - lastFetchedAtRef.current > DATA_STALE_THRESHOLD_MS;
+        Date.now() - lastFetchedAtRef.current > LIVE_REFETCH_AFTER_MS;
       if (isStale) fetchData();
     };
     // A page restored from the back/forward cache never remounts, so the

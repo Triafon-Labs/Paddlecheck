@@ -22,11 +22,12 @@ export const formatDataAge = (latestTs: number, now: Date): string => {
 
 // Helper function to format a relative time string.
 export const getRelativeTimeString = (
-  date: string | Date | undefined
+  date: string | Date | undefined,
+  now: Date = new Date()
 ): string => {
   if (!date) return "";
   const dateObj = typeof date === "string" ? new Date(date) : date;
-  const diffMs = Date.now() - dateObj.getTime();
+  const diffMs = now.getTime() - dateObj.getTime();
   const diffMins = Math.floor(diffMs / 60000);
 
   if (diffMins < 1) return "just now";

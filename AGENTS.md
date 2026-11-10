@@ -70,14 +70,16 @@ Project Settings → Environment Variables). Unset, `next dev` uses `clubs/examp
 starter for a new club) and prints a notice once, but `next build` throws: a deployment
 must name its club, because a site built from the example would show a real-looking status
 from made-up rules. Don't add a build-time fallback. A `CLUB` with no matching file throws
-in both, listing the files there are. The production site is built with `CLUB=wcc`
+in both, listing the files there are. `next start` ignores `CLUB` entirely – it serves a
+finished build, whose club was fixed at build time – so it neither checks nor prints anything. The production site is built with `CLUB=wcc`
 (Vercel env var), and local Worcester work needs `CLUB=wcc` in `.env.local`. Forks add
 their own `clubs/<club>.yaml` rather than editing `wcc.yaml` or `example.yaml`, so
 syncing with this repo never conflicts on settings.
 
 `next.config.ts` aliases `@club-config` to the chosen file (`turbopack.resolveAlias`) and
 `yaml-loader` (a Turbopack rule) imports it as a module; `lib/clubConfig.ts` checks it and
-throws one error listing every problem, which stops `next dev`/`next build`; `lib/config.ts`
+throws one error listing every problem, labelled with the file's path (`NEXT_PUBLIC_CLUB_FILE`),
+which stops `next dev`/`next build` – an empty or plain-text file is a single problem; `lib/config.ts`
 re-exports it under the same constant names the code uses (`CLUB_NAME`, `STATUS_STEPS`,
 `WHO_CAN_PADDLE`, `THRESHOLDS.TEMP_HIGH`, …). Never hard-code club-specific values in code –
 add a setting to the club files, `lib/clubConfig.ts` and `club.schema.json` (editor hints)
@@ -201,7 +203,8 @@ threshold while other forecasts are over it. Open-Meteo returns only one model f
 every other weather field still comes from `best_match` alone.
 
 `npm run dev` needs no environment variables (it falls back to `clubs/example.yaml`);
-`npm run build` needs `CLUB`, and the AI briefing needs `GROQ_API_KEY`. `next.config.ts` turns its presence at build time into
+`npm run build` needs `CLUB`, and the AI briefing needs `GROQ_API_KEY`. `next.config.ts` turns
+the key's presence at build time into
 `NEXT_PUBLIC_CONDITIONS_REPORT` (`CONDITIONS_REPORT_ENABLED` in `lib/config.ts`); without it
 the Conditions Report section and its Settings switch aren't rendered at all.
 

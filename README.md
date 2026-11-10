@@ -85,7 +85,7 @@ The server builds the summary from its own copy of the conditions and only reads
 ```bash
 npm run dev     # Development server at http://localhost:3000
 npm run build   # Production build – needs CLUB set (see below)
-npm start       # Serve the production build
+npm start       # Serve the production build (with the club it was built with)
 npm run lint    # ESLint
 ```
 
@@ -136,6 +136,9 @@ The `CLUB` environment variable names the file in `clubs/`, without `.yaml`: `CL
 | --------------------------- | ------------------------------- | -------------------------------------------------------------------------- |
 | `npm run dev`               | Uses `clubs/<CLUB>.yaml`        | Uses `clubs/example.yaml`, with a notice in the terminal                   |
 | `npm run build` / deploying | Builds with `clubs/<CLUB>.yaml` | **Stops with an error** – nothing is built, and a live site stays as it is |
+| `npm start`                 | Ignored                         | Ignored                                                                    |
+
+`npm start` serves whatever was last built, so the club is the one `CLUB` named at build time. To switch clubs, rebuild.
 
 A build never falls back to the example because a site built from it would show a real-looking paddling status from made-up rules. If `CLUB` names a file that doesn't exist, both commands stop and list the files there are.
 
@@ -159,7 +162,7 @@ clubs/yourclub.yaml has 2 problems:
   • whoCanPaddle → "Amber": "Improver" is missing – give one verdict for everyone, or one for every level
 ```
 
-An indentation slip gives the line and column instead. With `npm run dev` running, changes show up in the browser as soon as you save.
+An indentation slip gives the line and column instead, and an empty file says just that. With `npm run dev` running, changes show up in the browser as soon as you save.
 
 **Editor help (optional).** In [VS Code](https://code.visualstudio.com/) with the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml), every file in `clubs/` gets suggestions as you type and mistakes underlined, from `club.schema.json` (the project's VS Code settings link the two).
 

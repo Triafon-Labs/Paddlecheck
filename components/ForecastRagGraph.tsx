@@ -672,9 +672,11 @@ const ForecastRagGraph: React.FC<ForecastRagGraphProps> = ({
             )
           )}
 
-          {/* Daily warnings display – moved above chart */}
+          {/* Daily warnings display – moved above chart. Hidden while
+              loading, like everything else on the card, so a refresh
+              never pairs the previous fetch's warnings with skeletons. */}
           <Collapse
-            in={dailyWarnings.length > 0}
+            in={!loading && dailyWarnings.length > 0}
             unmountOnExit
             {...collapseMotion}
           >

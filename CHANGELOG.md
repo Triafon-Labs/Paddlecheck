@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.45.4](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.45.3...paddlecheck-v1.45.4) (2026-11-10)
+
+### Bug Fixes
+
+* describe temperature and wind by the club's thresholds in the AI briefing ([a8fe3d4](https://github.com/dylanr97/Paddlecheck/commit/a8fe3d4e215a12044b22d3b1b52bfa71259da8b2))
+* describe the river level by the club's bands in the AI briefing ([31beb79](https://github.com/dylanr97/Paddlecheck/commit/31beb7957adddc94f177b6fe366300cdbf7c2536))
+* keep thresholds out of the AI briefing's wording ([0948ada](https://github.com/dylanr97/Paddlecheck/commit/0948adabe4a7b4c3b6d2eff7ce70eb6c8a5ab648))
+
 ## [1.45.3](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.45.2...paddlecheck-v1.45.3) (2026-11-10)
 
 ### Bug Fixes

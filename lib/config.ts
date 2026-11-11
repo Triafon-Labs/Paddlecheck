@@ -41,8 +41,7 @@ export const USEFUL_LINKS = CLUB.club.usefulLinks;
 // Shown in the first-run pop-up (DisclaimerDialog) and in Settings → About.
 // Bump DISCLAIMER_VERSION when the wording changes materially, so everyone
 // who accepted the old text is asked again.
-export const DISCLAIMER =
-  "This is a hobby project and is for guidance only. River level and weather data can be delayed, missing or wrong. Always check conditions yourself and follow the advice of coaches or experienced paddlers before heading out.";
+export const DISCLAIMER = `${APP_NAME} combines live river levels, weather forecasts and the club's paddling guidance to give you a quick read on conditions. It's a guide, not a guarantee – data can occasionally be delayed or inaccurate, so always check the river yourself and follow the advice of coaches or experienced paddlers before heading out.`;
 export const DISCLAIMER_VERSION = "1";
 
 // --- River and Weather Service (clubs/*.yaml: location, river) ---

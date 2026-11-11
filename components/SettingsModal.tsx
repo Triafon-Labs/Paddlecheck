@@ -49,6 +49,7 @@ import {
   USEFUL_LINKS,
   FEEDBACK_URL,
   CLUB_NAME,
+  DISCLAIMER,
   RULES,
   CONDITIONS_KEY_WEATHER,
   CONDITIONS_REPORT_ENABLED,
@@ -831,9 +832,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               color="text.secondary"
               sx={{ mt: 2, display: "block" }}
             >
-              Built for {CLUB_NAME}. This is a hobby project, so there might be
-              mistakes. Always check conditions yourself and talk to coaches or
-              experienced paddlers before heading out.{" "}
+              {DISCLAIMER}
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 1, display: "block" }}
+            >
+              Built for {CLUB_NAME}.{" "}
               <Link
                 href={FEEDBACK_URL}
                 target="_blank"

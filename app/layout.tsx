@@ -3,12 +3,13 @@ import "./globals.css";
 import localFont from "next/font/local";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import TopNavBar from "@/components/TopNavBar";
+import DisclaimerDialog from "@/components/DisclaimerDialog";
 import { Box } from "@mui/material";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import { KayakDataProvider } from "@/lib/KayakDataContext";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
-import { STORAGE_KEYS } from "@/lib/storageKeys";
-import { APP_NAME, CLUB_NAME } from "@/lib/config";
+import { STORAGE_KEYS, DISCLAIMER_PENDING_ATTR } from "@/lib/storageKeys";
+import { APP_NAME, CLUB_NAME, DISCLAIMER_VERSION } from "@/lib/config";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -67,6 +68,15 @@ export default function RootLayout({
           defaultMode="system"
           modeStorageKey={STORAGE_KEYS.THEME_MODE}
         />
+        {/* Marks a first-time visitor before the body paints, so globals.css
+            can blur the app until DisclaimerDialog opens over it after
+            hydration. Without this the conditions would be readable for a
+            moment first. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem(${JSON.stringify(STORAGE_KEYS.DISCLAIMER_ACCEPTED)})!==${JSON.stringify(DISCLAIMER_VERSION)})document.documentElement.setAttribute(${JSON.stringify(DISCLAIMER_PENDING_ATTR)},"")}catch(e){document.documentElement.setAttribute(${JSON.stringify(DISCLAIMER_PENDING_ATTR)},"")}`,
+          }}
+        />
         <link rel="icon" href="/favicon.ico" />
         {/* Browsers that support SVG favicons prefer it and stay sharp at any
             density; the .ico and PNG cover the rest. */}
@@ -96,6 +106,7 @@ export default function RootLayout({
                 both what the AppBar inherits and what themeColor declares, so
                 they read as part of the page. */}
             <Box
+              className="app-frame"
               sx={{
                 display: "flex",
                 flexDirection: "column",
@@ -130,6 +141,7 @@ export default function RootLayout({
                 {children}
               </Box>
             </Box>
+            <DisclaimerDialog />
           </KayakDataProvider>
         </ThemeRegistry>
         <Analytics />

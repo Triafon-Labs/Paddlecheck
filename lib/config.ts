@@ -38,6 +38,13 @@ export const CLUB_SHORT_NAME = CLUB.club.shortName;
 export const FEEDBACK_URL = CLUB.club.feedbackUrl;
 export const USEFUL_LINKS = CLUB.club.usefulLinks;
 
+// Shown in the first-run pop-up (DisclaimerDialog) and in Settings → About.
+// Bump DISCLAIMER_VERSION when the wording changes materially, so everyone
+// who accepted the old text is asked again.
+export const DISCLAIMER =
+  "This is an unofficial guide, so there might be mistakes or delays in the data. Always check conditions yourself and talk to coaches or experienced paddlers before heading out.";
+export const DISCLAIMER_VERSION = "1";
+
 // --- River and Weather Service (clubs/*.yaml: location, river) ---
 export const RIVER_STATION_ID = CLUB.river.stationId;
 export const LATITUDE = CLUB.latitude;

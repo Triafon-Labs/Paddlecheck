@@ -53,7 +53,7 @@ const compactSize = factorSizes(true);
 
 // The reader's level, and whether their verdict's details are open. Open
 // state is shared by every hour, so stepping through the day with it open
-// shows how the caveats change.
+// shows how the conditions change.
 interface YouProps {
   level: PaddlerType;
   open: boolean;
@@ -68,8 +68,8 @@ interface YouProps {
 // What the hour's status means for the reader's own level, from the same
 // rules as Who Can Paddle. The RAG chip in the header is the club's rating;
 // this answers "can I go?" without scrolling back up to the table. Tapping
-// the chip lists the rules behind it, for when "with caveats" isn't enough
-// to remember what the caveats are.
+// the chip lists the rules behind it, for when "with conditions" isn't enough
+// to remember what the conditions are.
 const YourVerdict: React.FC<{
   point: ForecastGraphDataPoint;
   you: YouProps;

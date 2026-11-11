@@ -124,6 +124,7 @@ components/
   SettingsModal.tsx      Preferences drawer – theme, paddler level, links, conditions key
   ConditionsBriefing.tsx AI-generated conditions summary (Groq)
   WeatherWarnings.tsx    Met Office weather warning banners
+  DisclaimerDialog.tsx   First-run disclaimer pop-up that must be accepted before using the app (DISCLAIMER, lib/config.ts)
   InfoPanel.tsx          Shared tonal "icon + text" panel, optionally a button
   StatTile.tsx           Labelled-figure tile (icon + label, value, detail) – weather, factors, river changes
   ConditionFactors.tsx   "Contributing Factors" section, shared by StatusCard and the forecast panel
@@ -348,6 +349,7 @@ prefixed `paddlecheck_` and omitted here.
 | `riverGraphTimeRange` | `"1h"` \| `"8h"` \| `"24h"` \| `"5d"` \| `"forecast"`                     |
 | `autoSummarise`       | `"true"` \| `"false"` – auto-generate the AI summary on load              |
 | `forecastShowNight`   | `"true"` \| `"false"` – show night hours in the forecast chart (Settings) |
+| `disclaimerAccepted`  | The `DISCLAIMER_VERSION` last accepted in the first-run pop-up            |
 
 ---
 

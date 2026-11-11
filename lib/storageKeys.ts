@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
   PADDLER_LEVEL: "paddlerLevel",
   RIVER_GRAPH_TIME_RANGE: "riverGraphTimeRange",
   FORECAST_SHOW_NIGHT: "forecastShowNight",
+  DISCLAIMER_ACCEPTED: "disclaimerAccepted",
   CONDITIONS: "paddlecheck_conditions",
   FORECAST_DAYS: "paddlecheck_forecastDays",
   FORECAST_DATA: "paddlecheck_forecastData",
@@ -23,3 +24,8 @@ export const SETTINGS_CHANGED_EVENT = "paddlecheck:settings-changed";
 
 // Fired in this tab when the paddler level changes in Settings.
 export const PADDLER_LEVEL_CHANGED_EVENT = "paddlecheck:paddler-level-changed";
+
+// Set on <html> by the inline script in app/layout.tsx before the page paints
+// when the disclaimer hasn't been accepted, so globals.css can blur the app
+// until DisclaimerDialog opens over it. Must match the selector there.
+export const DISCLAIMER_PENDING_ATTR = "data-disclaimer-pending";

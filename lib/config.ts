@@ -41,7 +41,8 @@ export const USEFUL_LINKS = CLUB.club.usefulLinks;
 // Shown in the first-run pop-up (DisclaimerDialog) and in Settings → About.
 // Bump DISCLAIMER_VERSION when the wording changes materially, so everyone
 // who accepted the old text is asked again.
-export const DISCLAIMER = `${APP_NAME} gives you a quick picture of conditions now and over the next few days. It's an unofficial guide – data can be delayed or inaccurate, and coaches make the final call on paddling.`;
+export const DISCLAIMER =
+  "This is an unofficial guide, so there might be mistakes or delays in the data. Always check conditions yourself and talk to coaches or experienced paddlers before heading out.";
 export const DISCLAIMER_VERSION = "1";
 
 // --- River and Weather Service (clubs/*.yaml: location, river) ---

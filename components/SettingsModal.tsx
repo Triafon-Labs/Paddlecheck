@@ -832,7 +832,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               color="text.secondary"
               sx={{ mt: 2, display: "block" }}
             >
-              Built for {CLUB_NAME}. {DISCLAIMER}{" "}
+              {DISCLAIMER}
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 1, display: "block" }}
+            >
+              Built for {CLUB_NAME}.{" "}
               <Link
                 href={FEEDBACK_URL}
                 target="_blank"

@@ -83,9 +83,15 @@ export default function DisclaimerDialog() {
             backdropFilter: "blur(8px)",
           },
         },
+        // M3's dialog corners, rather than the theme's default 12px shape.
+        paper: { sx: { borderRadius: "28px" } },
       }}
     >
-      <DialogTitle id="disclaimer-title">Before you use {APP_NAME}</DialogTitle>
+      {/* M3 dialogs title in Headline Small - h5 here, the card titles'
+          style - rather than DialogTitle's default Title Large (h6). */}
+      <DialogTitle id="disclaimer-title" variant="h5">
+        Before you use {APP_NAME}
+      </DialogTitle>
       <DialogContent>
         <DialogContentText id="disclaimer-text">{DISCLAIMER}</DialogContentText>
       </DialogContent>

@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
   PADDLER_LEVEL: "paddlerLevel",
   RIVER_GRAPH_TIME_RANGE: "riverGraphTimeRange",
   FORECAST_SHOW_NIGHT: "forecastShowNight",
+  DISCLAIMER_ACCEPTED: "disclaimerAccepted",
   CONDITIONS: "paddlecheck_conditions",
   FORECAST_DAYS: "paddlecheck_forecastDays",
   FORECAST_DATA: "paddlecheck_forecastData",

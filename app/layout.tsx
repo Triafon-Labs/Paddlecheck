@@ -3,6 +3,7 @@ import "./globals.css";
 import localFont from "next/font/local";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import TopNavBar from "@/components/TopNavBar";
+import DisclaimerBanner from "@/components/DisclaimerBanner";
 import { Box } from "@mui/material";
 import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import { KayakDataProvider } from "@/lib/KayakDataContext";
@@ -129,6 +130,7 @@ export default function RootLayout({
               >
                 {children}
               </Box>
+              <DisclaimerBanner />
             </Box>
           </KayakDataProvider>
         </ThemeRegistry>

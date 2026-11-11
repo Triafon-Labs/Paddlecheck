@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.1.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v2.0.0...paddlecheck-v2.1.0) (2026-11-11)
+
+### Features
+
+* ask new users to accept a disclaimer on first use ([1f36973](https://github.com/dylanr97/Paddlecheck/commit/1f36973a02f1f81d1d60d213f23f7122a1f86f2b))
+* make the first-run disclaimer a pop-up that must be accepted ([c6b6218](https://github.com/dylanr97/Paddlecheck/commit/c6b6218105965323e544f30b6cea9f9c793fe0a4))
+
+### Bug Fixes
+
+* keep the disclaimer close to the original Settings wording ([6b8aa09](https://github.com/dylanr97/Paddlecheck/commit/6b8aa09e56351fb5bb22c3fa170b261cc5e34a06))
+* put the disclaimer first in Settings, with credit and feedback below ([eb06514](https://github.com/dylanr97/Paddlecheck/commit/eb06514fb0213515cf1006d2b415738e68434c90))
+* reword the disclaimer to lead with what the app does ([0489b03](https://github.com/dylanr97/Paddlecheck/commit/0489b03eb22d4c441d9360508aeb6429113ddc47))
+* say "with conditions" rather than "with caveats" in Who Can Paddle ([461a0dd](https://github.com/dylanr97/Paddlecheck/commit/461a0dd4c1ddfe319fa8c69b632c0f451b27c476))
+* say the disclaimer's guide is unofficial and coaches make the call ([4c2bd29](https://github.com/dylanr97/Paddlecheck/commit/4c2bd29055a5642933528b96adb4c16cc56bb927))
+* shorten the disclaimer ([45ef89a](https://github.com/dylanr97/Paddlecheck/commit/45ef89a93e56a9b55d07ce8e7b8733c1a2af5cfd))
+* stop the disclaimer button pulsing when the pop-up opens ([747bfcc](https://github.com/dylanr97/Paddlecheck/commit/747bfcc3c2ae188773647420c80823b8de912699))
+
 ## [2.0.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v1.45.5...paddlecheck-v2.0.0) (2026-11-10)
 
 ### ⚠ BREAKING CHANGES

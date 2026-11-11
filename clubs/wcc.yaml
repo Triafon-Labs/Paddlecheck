@@ -192,7 +192,7 @@ paddlerLevels:
   - Independent
 
 # What each level may do on each step. A verdict is "Yes" (Can paddle),
-# "Warning" (With caveats), "Discretion" (Coach's discretion) or "No"
+# "Warning" (With conditions), "Discretion" (Coach's discretion) or "No"
 # (Cannot paddle); details are the lines shown under it. A step gives one
 # verdict for everyone, or one per level – then every level must be listed.
 # You can also add an "Unknown" entry for when conditions can't be checked;

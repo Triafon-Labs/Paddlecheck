@@ -94,8 +94,8 @@ export const PADDLING_STATUS_UI: Record<
     color: STATUS_COLORS.amber,
     onColor: ON_STATUS_COLORS.amber,
     face: "smile",
-    headline: "You can paddle, with caveats",
-    short: "With caveats",
+    headline: "You can paddle, with conditions",
+    short: "With conditions",
   },
   Discretion: {
     color: STATUS_COLORS.amber,

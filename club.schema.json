@@ -42,7 +42,7 @@
     },
     "verdictValue": {
       "enum": ["Yes", "Warning", "Discretion", "No"],
-      "description": "Yes = Can paddle, Warning = With caveats, Discretion = Coach's discretion, No = Cannot paddle. Quote \"Yes\" and \"No\"."
+      "description": "Yes = Can paddle, Warning = With conditions, Discretion = Coach's discretion, No = Cannot paddle. Quote \"Yes\" and \"No\"."
     },
     "verdict": {
       "type": "object",

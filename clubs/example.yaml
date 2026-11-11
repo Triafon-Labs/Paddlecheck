@@ -85,7 +85,7 @@ paddlerLevels:
   - Experienced
 
 # CHANGE – what each level may do on each step. A verdict is "Yes",
-# "Warning" (can paddle, with caveats), "Discretion" (coach's discretion) or
+# "Warning" (can paddle, with conditions), "Discretion" (coach's discretion) or
 # "No"; details are the lines shown under it. A step gives one verdict for
 # everyone, or one for every level.
 whoCanPaddle:

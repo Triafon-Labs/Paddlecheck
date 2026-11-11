@@ -93,7 +93,12 @@ export default function DisclaimerDialog() {
         Before you use {APP_NAME}
       </DialogTitle>
       <DialogContent>
-        <DialogContentText id="disclaimer-text">{DISCLAIMER}</DialogContentText>
+        {/* The main text colour, as the cards use for their body text, rather
+            than DialogContentText's secondary grey: this is the message
+            everyone has to read, not supporting detail. */}
+        <DialogContentText id="disclaimer-text" color="text.primary">
+          {DISCLAIMER}
+        </DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button variant="contained" onClick={accept}>

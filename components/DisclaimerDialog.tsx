@@ -90,7 +90,7 @@ export default function DisclaimerDialog() {
         <DialogContentText id="disclaimer-text">{DISCLAIMER}</DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button variant="contained" onClick={accept} autoFocus>
+        <Button variant="contained" onClick={accept}>
           I understand
         </Button>
       </DialogActions>

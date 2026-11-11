@@ -38,7 +38,7 @@ export const CLUB_SHORT_NAME = CLUB.club.shortName;
 export const FEEDBACK_URL = CLUB.club.feedbackUrl;
 export const USEFUL_LINKS = CLUB.club.usefulLinks;
 
-// Shown in the first-run banner (DisclaimerBanner) and in Settings → About.
+// Shown in the first-run pop-up (DisclaimerDialog) and in Settings → About.
 // Bump DISCLAIMER_VERSION when the wording changes materially, so everyone
 // who accepted the old text is asked again.
 export const DISCLAIMER =

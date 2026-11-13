@@ -33,7 +33,7 @@ club:
   shortName: Worcester Canoe Club
   # Where "Feedback welcome" in Settings goes: an issue tracker, a form, or a
   # mailto: link. Public to anyone using the app.
-  feedbackUrl: https://github.com/dylanr97/Paddlecheck/issues
+  feedbackUrl: https://github.com/Triafon-Labs/Paddlecheck/issues
   # The "Useful Links" section in Settings. (optional)
   usefulLinks:
     - name: River Severn level at Worcester (Barbourne)

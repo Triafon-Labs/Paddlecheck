@@ -58,7 +58,7 @@ There's no database, no login, and no automated test suite.
 ### Installation
 
 ```bash
-git clone https://github.com/dylanr97/Paddlecheck.git
+git clone https://github.com/Triafon-Labs/Paddlecheck.git
 cd Paddlecheck
 npm install
 npm run dev

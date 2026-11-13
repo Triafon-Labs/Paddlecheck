@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.2.3](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.2.2...paddlecheck-v2.2.3) (2026-11-13)
+
+### Bug Fixes
+
+* label an unraised river level "Normal" in Contributing Factors ([#3](https://github.com/Triafon-Labs/Paddlecheck/issues/3)) ([4d26d9e](https://github.com/Triafon-Labs/Paddlecheck/commit/4d26d9e2f0b7ea2676e09ad5359d2dc9d168ce7e))
+
 ## [2.2.2](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.2.1...paddlecheck-v2.2.2) (2026-11-13)
 
 ## [2.2.1](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.2.0...paddlecheck-v2.2.1) (2026-11-13)

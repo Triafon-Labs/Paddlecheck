@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.2.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v2.1.0...paddlecheck-v2.2.0) (2026-11-13)
+
+### Features
+
+* explain what each factor did to the status, and align Who Can Paddle with the v3.0 rules ([#423](https://github.com/dylanr97/Paddlecheck/issues/423)) ([646e8c5](https://github.com/dylanr97/Paddlecheck/commit/646e8c54faae1eca26ff24d6afd7c1f3fa1000fc))
+
 ## [2.1.0](https://github.com/dylanr97/Paddlecheck/compare/paddlecheck-v2.0.0...paddlecheck-v2.1.0) (2026-11-11)
 
 ### Features

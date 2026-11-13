@@ -456,7 +456,11 @@ const parseExtras = (
     };
     if (o.when !== undefined) {
       const w = obj(o.when, `${at} → when`);
-      known(w, ["status", "notStatus", "riverLevelAtLeast"], `${at} → when`);
+      known(
+        w,
+        ["status", "notStatus", "riverLevelAtLeast", "dark"],
+        `${at} → when`
+      );
       rule.when = {};
       if (w.status !== undefined)
         rule.when.status = stepList(w.status, `${at} → when → status`);
@@ -467,6 +471,8 @@ const parseExtras = (
           w.riverLevelAtLeast,
           `${at} → when → riverLevelAtLeast`
         );
+      if (w.dark !== undefined)
+        rule.when.dark = bool(w.dark, `${at} → when → dark`);
     }
     if (o.set !== undefined) rule.set = verdict(o.set, `${at} → set`);
     if (o.yesBecomes !== undefined)

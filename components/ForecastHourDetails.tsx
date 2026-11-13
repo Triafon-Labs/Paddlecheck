@@ -20,8 +20,14 @@ import {
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { ForecastGraphDataPoint, ForecastSource, PaddlerType } from "@/types";
-import { statusUi, statusLabel } from "@/lib/rag";
+import {
+  calculateInitialRagStatus,
+  STEP_NAMES,
+  statusUi,
+  statusLabel,
+} from "@/lib/rag";
 import { getPaddlingMatrix } from "@/lib/paddlingMatrix";
+import { isDarkSlot } from "@/lib/forecast";
 import { usePaddlerLevel } from "@/lib/usePaddlerLevel";
 import { m3Duration, m3Easing } from "@/lib/m3-palette";
 import {
@@ -82,7 +88,11 @@ const YourVerdict: React.FC<{
       <PaddlerLevelRow
         paddler={you.level}
         statusInfo={
-          getPaddlingMatrix(point.status, point.forecastLevel)[you.level]
+          getPaddlingMatrix(
+            point.status,
+            point.forecastLevel,
+            isDarkSlot(point)
+          )[you.level]
         }
         open={you.open}
         onToggle={you.onToggle}
@@ -141,8 +151,15 @@ const HourBody: React.FC<{
       {point.reasons.length > 0 && (
         <ContributingFactors
           reasons={point.reasons}
+          reasonChanges={point.reasonChanges}
+          // The step the hour's level gives alone - not stored with the
+          // hour, but the same calculation its status started from.
+          initialStatus={
+            STEP_NAMES[calculateInitialRagStatus(point.forecastLevel)]
+          }
           temperature={point.temperature}
           windSpeed={point.windSpeed}
+          weatherDescription={point.weatherDescription}
           compact
         />
       )}

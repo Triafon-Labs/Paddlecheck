@@ -39,8 +39,19 @@ export interface KayakConditions {
   weatherDescription?: string;
   overallStatus: Status;
   reasons?: string[];
+  // The status each reason moved conditions from and to
+  // (calculateFinalRagStatus). Missing from conditions cached by older
+  // versions.
+  reasonChanges?: Record<string, ReasonChange>;
   warnings?: WeatherWarning[];
   lastUpdated?: string;
+}
+
+// What one contributing factor did: "Light Green" to "Amber", say. The same
+// status both sides means another factor already accounts for it.
+export interface ReasonChange {
+  from: Status;
+  to: Status;
 }
 
 export type WarningSeverity = "Yellow" | "Amber" | "Red";
@@ -148,6 +159,8 @@ export interface ForecastGraphDataPoint {
   time: string;
   status: Status;
   reasons: string[];
+  // As KayakConditions.reasonChanges.
+  reasonChanges?: Record<string, ReasonChange>;
   value: number;
   forecastLevel: number;
   forecastSource: ForecastSource;
@@ -188,6 +201,10 @@ export interface PaddlingExtraRule {
     status?: Status[];
     notStatus?: Status[];
     riverLevelAtLeast?: number;
+    // true: only after dark (the same test as the darkness factor, whether
+    // or not RULES.DARKNESS counts it against the status); false: only in
+    // daylight.
+    dark?: boolean;
   };
   levels: PaddlerType[];
   // Replace the verdict outright - the only change made to a "No".

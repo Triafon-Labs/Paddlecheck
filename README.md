@@ -9,7 +9,7 @@ A kayaking conditions dashboard providing real-time river levels, weather, and a
 ## Features
 
 - **RAG status** – a five-step rating (Light Green, Dark Green, Amber, Red, No Paddling) from river level, temperature, wind, rain, visibility, thunderstorms and daylight
-- **Who can paddle** – what each paddler level (Beginner, Improver, Intermediate, Independent) may do under the current status
+- **Who can paddle** – what each paddler level (Worcester: Junior, Advanced Junior, Beginner, Improver, Intermediate, Independent) may do under the current status
 - **River level graph** – the last five days of readings, plus a short forecast from an upstream gauge
 - **5-day forecast** – hourly RAG status for the coming days; tap an hour for its details
 - **Landmarks** – the current reading placed between the club's own recorded landmarks ("water over the landing stage")
@@ -217,7 +217,7 @@ Adding a colour or icon is a code change: `lib/statusColors.ts` or `ICONS` in `l
 
 #### Who can paddle (`paddlerLevels`, `whoCanPaddle`, `whoCanPaddleExtras`)
 
-`whoCanPaddle` gives each step either one verdict for everyone or one per paddler level. `whoCanPaddleExtras` covers what a table can't – rules that depend on the river level rather than the step, or that add the same line to several levels. Worcester's three show the patterns: no intermediates above the 10th step even when the weather made it Red, PFDs above the concrete step, and luminous bibs.
+`whoCanPaddle` gives each step either one verdict for everyone or one per paddler level. `whoCanPaddleExtras` covers what a table can't – rules that depend on the river level or on darkness rather than the step, or that add the same line to several levels. Worcester's show the patterns: no intermediates above the 10th step even when the weather made it Red, PFDs above the concrete step, luminous bibs, and lights after dark (`when: { dark: true }`).
 
 #### Landmarks (`landmarks`)
 

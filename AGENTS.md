@@ -112,7 +112,7 @@ app/
 components/
   StatusCard.tsx         Current RAG status with its "Updated" line, river level landmarks, contributing factors, warnings, conditions report
   PaddlingStatusHero.tsx The status panel and five-step scale strip at the top of StatusCard
-  PaddlingMatrixCard.tsx Skill-level guidance table (Beginner/Improver/Intermediate/Independent)
+  PaddlingMatrixCard.tsx Skill-level guidance table (paddlerLevels – Worcester: Junior/Advanced Junior/Beginner/Improver/Intermediate/Independent)
   PaddlerLevelRow.tsx    One level's verdict as an expandable row – Who Can Paddle and the forecast hour's "You"
   StatusFace.tsx         The verdict faces (a face on a status-colour disc) and their labels
   StatsCard.tsx          Weather panel (sky, temp, feels-like) + tiles – wind, gusts, visibility, daylight
@@ -127,7 +127,7 @@ components/
   DisclaimerDialog.tsx   First-run disclaimer pop-up that must be accepted before using the app (DISCLAIMER, lib/config.ts)
   InfoPanel.tsx          Shared tonal "icon + text" panel, optionally a button
   StatTile.tsx           Labelled-figure tile (icon + label, value, detail) – weather, factors, river changes
-  ConditionFactors.tsx   "Contributing Factors" section, shared by StatusCard and the forecast panel
+  ConditionFactors.tsx   "Contributing Factors" section, shared by StatusCard and the forecast panel – a chain from the river level's own step through each factor's reasonChanges to the status
   SlidingToggleButtonGroup.tsx  Segmented control with a sliding pill
   ThemeRegistry.tsx      Emotion cache + AppThemeProvider for SSR
   ServiceWorkerRegistration.tsx  Registers public/sw.js in production
@@ -234,11 +234,16 @@ weather table. Never hard-code a step name in code.
 in `reasons`.
 
 1. **Temperature** – at or below 5°C raises status significantly (cold water shock); 5–13°C raises status moderately and enables rain as a factor
-2. **Wind** – above 15 mph raises status at any temperature
+2. **Wind** – 15 mph or more raises status at any temperature
 3. **Rain** – a factor whenever temp is below 13°C
 4. **Darkness** – raises the status one step. A forecast hour is dark when more than a quarter of it (`DARK_HOUR_FRACTION`, i.e. over 15 minutes) is before sunrise or after sunset (`isDarkHour`, `lib/time.ts`); the Weather card's Daylight tile counts down to sunset
 5. **Poor visibility** – below 1 000 m raises the status one step
 6. **Thunderstorms** – overrides everything → the top step (No Paddling)
+
+`calculateFinalRagStatus` also returns `reasonChanges` – the status each reason moved
+conditions from and to – which the Contributing Factors chain shows. The weather table gives
+one combined result, so temperature takes its band's calm row and wind/rain the rest; a
+factor that changed nothing has the same status both sides ("No extra effect").
 
 Weather, darkness and fog cap one step below the top step; only the river level's own
 `fromLevel` or a thunderstorm reaches it.
@@ -481,7 +486,7 @@ Worcester's values, set in `clubs/wcc.yaml` except where noted.
 | `STATUS_STEPS[].fromLevel`                     | `0, 1.0, 1.48, 2.75, 5.0`        | Where each step starts (metres)               |
 | `THRESHOLDS.TEMP_HIGH`                         | `13°C`                           | At or above: no temperature penalty           |
 | `THRESHOLDS.TEMP_MODERATE`                     | `5°C`                            | At or below: cold water shock risk            |
-| `THRESHOLDS.WIND_HIGH`                         | `15` mph                         | Above this: wind penalty applied              |
+| `THRESHOLDS.WIND_HIGH`                         | `15` mph                         | At or above: wind penalty applied             |
 | `THRESHOLDS.VISIBILITY_POOR`                   | `1000` m                         | Below this: fog penalty applied               |
 | `MET_OFFICE_WARNINGS_RSS_URL` / `WARNING_AREA` | `…/Region/wm` / `Worcestershire` | Warnings feed and the area filter             |
 | Coordinates                                    | `52.2, -2.2`                     | Open-Meteo weather location                   |

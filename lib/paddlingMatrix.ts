@@ -12,9 +12,9 @@ import {
   WHO_CAN_PADDLE_EXTRAS,
 } from "./config";
 
-// What each paddler level may do for a given status and river level, read
-// from WHO_CAN_PADDLE and WHO_CAN_PADDLE_EXTRAS in lib/config.ts. Used for
-// the current conditions (Who Can Paddle) and for each forecast hour.
+// What each paddler level may do for a given status, river level and time of
+// day, read from WHO_CAN_PADDLE and WHO_CAN_PADDLE_EXTRAS in lib/config.ts.
+// Used for the current conditions (Who Can Paddle) and for each forecast hour.
 
 // Whether a verdict has anything to show beyond its headline. Neither card
 // offers to expand one that doesn't.
@@ -45,7 +45,8 @@ const toStatus = (v: PaddlingVerdict): PaddlingStatus => ({
 const ruleApplies = (
   { when }: PaddlingExtraRule,
   status: Status,
-  riverLevel: number | undefined
+  riverLevel: number | undefined,
+  dark: boolean | undefined
 ): boolean => {
   if (!when) return true;
   if (when.status && !when.status.includes(status)) return false;
@@ -55,6 +56,8 @@ const ruleApplies = (
     !(riverLevel !== undefined && riverLevel >= when.riverLevelAtLeast)
   )
     return false;
+  // Unknown darkness (data cached before it was recorded) matches neither.
+  if (when.dark !== undefined && dark !== when.dark) return false;
   return true;
 };
 
@@ -81,7 +84,8 @@ const applyRule = (rule: PaddlingExtraRule, paddler: PaddlingStatus) => {
 
 export const getPaddlingMatrix = (
   overallStatus: Status,
-  riverLevel?: number
+  riverLevel?: number,
+  dark?: boolean
 ): PaddlingMatrix => {
   const entry = WHO_CAN_PADDLE[overallStatus] ?? WHO_CAN_PADDLE.Unknown;
   const matrix = Object.fromEntries(
@@ -92,7 +96,7 @@ export const getPaddlingMatrix = (
   ) as PaddlingMatrix;
 
   for (const rule of WHO_CAN_PADDLE_EXTRAS) {
-    if (!ruleApplies(rule, overallStatus, riverLevel)) continue;
+    if (!ruleApplies(rule, overallStatus, riverLevel, dark)) continue;
     for (const level of rule.levels) applyRule(rule, matrix[level]);
   }
 

@@ -146,6 +146,8 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
             >
               <ContributingFactors
                 reasons={conditions.reasons ?? []}
+                reasonChanges={conditions.reasonChanges}
+                initialStatus={conditions.initialStatus}
                 temperature={conditions.temperature}
                 windSpeed={conditions.windSpeed}
                 weatherDescription={conditions.weatherDescription}

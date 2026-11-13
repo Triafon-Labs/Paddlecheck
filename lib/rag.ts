@@ -1,4 +1,4 @@
-import { KayakConditions, Status, StatusStep } from "@/types";
+import { KayakConditions, ReasonChange, Status, StatusStep } from "@/types";
 import {
   CRITERIA_TABLE,
   LEVEL_DESCRIPTIONS,
@@ -133,29 +133,48 @@ const adjustRagForFactors = (
   isDark: boolean,
   visibility: number,
   weatherCode: number
-): { ragNumber: number; reasons: string[] } => {
+): {
+  ragNumber: number;
+  reasons: string[];
+  changes: Record<string, [number, number]>;
+} => {
   let ragNumber = baseRag;
   const reasons: string[] = [];
-  if (isDark && RULES.DARKNESS) {
-    reasons.push("Dark");
-    ragNumber += 1;
-  }
+  const changes: Record<string, [number, number]> = {};
+  // Each raises one step, but never to the top step - so a factor that hits
+  // that cap is recorded as changing nothing.
+  const raise = (reason: string) => {
+    const next = Math.min(ragNumber + 1, Math.max(TOP_INDEX - 1, ragNumber));
+    reasons.push(reason);
+    changes[reason] = [ragNumber, next];
+    ragNumber = next;
+  };
+  if (isDark && RULES.DARKNESS) raise("Dark");
   const isFoggy =
     RULES.FOG &&
     (visibility < THRESHOLDS.VISIBILITY_POOR ||
       THRESHOLDS.FOG_CODES.includes(weatherCode));
-  if (isFoggy) {
-    reasons.push("Foggy");
-    ragNumber += 1;
-  }
-  return { ragNumber: Math.min(ragNumber, TOP_INDEX - 1), reasons };
+  if (isFoggy) raise("Foggy");
+  return { ragNumber, reasons, changes };
 };
 
 // --- Main RAG Calculation Function ---
 
+// The status and the reasons for it. `reasonChanges` says which status each
+// reason moved conditions from and to, so the Contributing Factors read as a
+// chain ending on the status shown: the river level counts from the first
+// step; temperature is its band's calm row against the river level's own
+// step; wind or rain is the difference between its row and the calm one (the
+// weather table gives one combined result, so this is how it's split);
+// darkness and fog one step each, less where the cap below the top step
+// stops them.
 export const calculateFinalRagStatus = (
   conditions: Partial<KayakConditions>
-): { status: Status; reasons: string[] } => {
+): {
+  status: Status;
+  reasons: string[];
+  reasonChanges?: Record<string, ReasonChange>;
+} => {
   const {
     riverLevel,
     temperature,
@@ -198,6 +217,9 @@ export const calculateFinalRagStatus = (
   // temperature, wind and rain aren't given as reasons.
   let finalRag: number | undefined = initialRag;
   const weatherReasons: (string | undefined)[] = [];
+  const changes: Record<string, [number, number]> = {};
+  const riverReason = riverLevelReason(initialRag);
+  if (riverReason) changes[riverReason] = [0, initialRag];
   if (RULES.WEATHER_TABLE) {
     // Judged on the whole numbers the app displays, so a reading shown as
     // "15 mph" or "5°C" always gets the status that figure implies.
@@ -209,8 +231,17 @@ export const calculateFinalRagStatus = (
       rain!,
       tempCondition
     );
-    finalRag = CRITERIA_TABLE[tempCondition]?.[weatherCondition]?.[initialRag];
+    const row = CRITERIA_TABLE[tempCondition];
+    finalRag = row?.[weatherCondition]?.[initialRag];
     weatherReasons.push(tempReason, weatherReason);
+    // With no temperature reason (warm), wind takes the whole change from
+    // the river level's step, so the chain never skips a step no reason
+    // explains - even for a club whose warm calm row isn't the river's own.
+    const calmRag = tempReason ? row?.calm?.[initialRag] : initialRag;
+    if (calmRag !== undefined && finalRag !== undefined) {
+      if (tempReason) changes[tempReason] = [initialRag, calmRag];
+      if (weatherReason) changes[weatherReason] = [calmRag, finalRag];
+    }
   }
   if (finalRag === undefined) {
     return {
@@ -221,7 +252,11 @@ export const calculateFinalRagStatus = (
 
   // Readings a switched-off rule doesn't need may be missing; these stand-ins
   // are never looked at, since adjustRagForFactors checks RULES first.
-  const { ragNumber, reasons: adjustmentReasons } = adjustRagForFactors(
+  const {
+    ragNumber,
+    reasons: adjustmentReasons,
+    changes: adjustmentChanges,
+  } = adjustRagForFactors(
     finalRag,
     dark === true,
     visibility ?? Infinity,
@@ -229,7 +264,7 @@ export const calculateFinalRagStatus = (
   );
 
   const allReasons = [
-    riverLevelReason(initialRag),
+    riverReason,
     ...weatherReasons,
     ...adjustmentReasons,
   ].filter(Boolean) as string[];
@@ -237,6 +272,14 @@ export const calculateFinalRagStatus = (
   return {
     status: STEP_NAMES[ragNumber] ?? "Unknown",
     reasons: allReasons,
+    reasonChanges: Object.fromEntries(
+      Object.entries({ ...changes, ...adjustmentChanges }).map(
+        ([reason, [from, to]]) => [
+          reason,
+          { from: STEP_NAMES[from], to: STEP_NAMES[to] },
+        ]
+      )
+    ),
   };
 };
 

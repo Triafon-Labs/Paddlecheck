@@ -22,17 +22,20 @@ import { springTransition } from "@/lib/m3-palette";
 interface PaddlingMatrixCardProps {
   overallStatus?: Status;
   riverLevel?: number;
+  // Whether it's dark now, for the club's after-dark rules.
+  dark?: boolean;
   loading?: boolean;
 }
 
 const PaddlingMatrixCard: React.FC<PaddlingMatrixCardProps> = ({
   overallStatus,
   riverLevel,
+  dark,
   loading,
 }) => {
   const paddlingMatrix: Partial<PaddlingMatrix> =
     !loading && overallStatus
-      ? getPaddlingMatrix(overallStatus, riverLevel)
+      ? getPaddlingMatrix(overallStatus, riverLevel, dark)
       : {};
 
   const [open, setOpen] = useState<Record<PaddlerType, boolean>>(

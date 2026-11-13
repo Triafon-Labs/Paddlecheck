@@ -76,7 +76,8 @@ rules:
 thresholds:
   tempHigh: 13 # °C – at or above this, temperature isn't a factor
   tempModerate: 5 # °C – above this is "cool", at or below is "cold"
-  windHigh: 15 # mph – sustained wind above this counts as windy
+  # The rules say both "15mph+" and ">15 mph"; the app takes the stricter.
+  windHigh: 15 # mph – sustained wind at or above this counts as windy
   visibilityPoor: 1000 # metres – below this counts as fog
   # Also darkHourFraction: a forecast hour counts as dark when more than this
   # fraction of it is before sunrise or after sunset (0.25 = over 15 minutes).
@@ -185,7 +186,13 @@ weatherTable:
 
 # The levels offered in Settings and shown under "Who Can Paddle", least
 # experienced first. Use as many as your club has.
+#
+# Juniors come first, as in the club's rules ("All Juniors", and Advanced
+# Junior from its annex) – an age group with its own rules rather than a
+# step below Beginner.
 paddlerLevels:
+  - Junior
+  - Advanced Junior
   - Beginner
   - Improver
   - Intermediate
@@ -199,6 +206,19 @@ paddlerLevels:
 # without one, every level gets "No" and "Ask a coach before paddling".
 whoCanPaddle:
   Light Green:
+    # Page 2 of the rules; page 1 says a club coach only. Page 2 is the
+    # later junior update, so it wins here.
+    Junior:
+      verdict: Warning
+      details:
+        - Supervised by a club coach, or an independent paddler with a parent's permission
+        - PFD required
+    Advanced Junior:
+      verdict: Warning
+      details:
+        - Coach supervision
+        - May paddle out of the coach's sight in a group of 2 or more advanced juniors, if the coach agrees
+        - PFD at the coach's discretion
     Beginner:
       verdict: Warning
       details:
@@ -223,6 +243,16 @@ whoCanPaddle:
       verdict: "Yes"
 
   Dark Green:
+    Junior:
+      verdict: Warning
+      details:
+        - Supervised by a club coach, or an independent paddler with a parent's permission
+        - PFD required
+    Advanced Junior:
+      verdict: Warning
+      details:
+        - Coach supervision
+        - PFD at the coach's discretion
     Beginner:
       verdict: Warning
       details:
@@ -244,6 +274,15 @@ whoCanPaddle:
       verdict: "Yes"
 
   Amber:
+    Junior:
+      verdict: Discretion
+      details:
+        - PFD required
+    Advanced Junior:
+      verdict: Discretion
+      details:
+        - May join adult club sessions at the group leader's discretion
+        - PFD required
     Beginner:
       verdict: Discretion
       details:
@@ -264,9 +303,12 @@ whoCanPaddle:
       verdict: "Yes"
       details:
         - May supervise intermediates
-        - PFD required above the concrete step
 
   Red:
+    Junior:
+      verdict: "No"
+    Advanced Junior:
+      verdict: "No"
     Beginner:
       verdict: "No"
     Improver:
@@ -289,7 +331,8 @@ whoCanPaddle:
 # (optional) Rules applied on top of whoCanPaddle, in order – for anything that depends
 # on the river level rather than the step, or adds the same line to several
 # levels. Each has:
-#   when    (optional) status: [steps], notStatus: [steps], riverLevelAtLeast: metres
+#   when    (optional) status: [steps], notStatus: [steps], riverLevelAtLeast: metres,
+#           dark: true (after dark only) or false (daylight only)
 #   levels  the paddler levels it applies to
 #   then one or more of:
 #     set         replace the verdict outright – the only change made to a "No"
@@ -309,7 +352,8 @@ whoCanPaddleExtras:
         - No paddling above 10 steps from the car park
 
   # PFDs above the concrete step, even when the weather keeps the status below
-  # Red (whose own lines already require one).
+  # Red (whose own lines already require one). An Independent's Amber verdict
+  # leaves PFDs to this rule, so it reads once, and only when it applies.
   - when:
       notStatus: [Red]
       riverLevelAtLeast: 1.48
@@ -322,8 +366,16 @@ whoCanPaddleExtras:
   # Junior Beginners and Intermediate paddlers will wear luminous bibs."
   # Improvers and non-coaching groups are included too – deliberately wider
   # than the email, since a bib costs nothing.
-  - levels: [Beginner, Improver, Intermediate]
+  - levels: [Junior, Advanced Junior, Beginner, Improver, Intermediate]
     addDetail: Wear a luminous bib
+
+  # "If paddling at night, make sure you have lights so you can be seen."
+  # Everyone, independents included; skipped wherever the verdict is "No".
+  - when:
+      dark: true
+    levels:
+      [Junior, Advanced Junior, Beginner, Improver, Intermediate, Independent]
+    addDetail: Carry lights so you can be seen
 
 # What the river looks like at particular gauge readings, shown either side
 # of the current level. Build it up by noting the gauge reading each time you

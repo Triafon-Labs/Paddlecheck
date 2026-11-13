@@ -109,7 +109,8 @@ export const buildKayakData = (
     currentConditions.riverLevel ?? 0
   );
   const initialStatus = STEP_NAMES[initialRagNumber];
-  const { status, reasons } = calculateFinalRagStatus(currentConditions);
+  const { status, reasons, reasonChanges } =
+    calculateFinalRagStatus(currentConditions);
   const rainWhileWarm = isRainWhileWarm(currentConditions);
   const visibilityDescription = getVisibilityDescription(
     currentConditions.visibility ?? 0
@@ -123,6 +124,7 @@ export const buildKayakData = (
     initialStatus,
     overallStatus: status,
     reasons: reasons,
+    reasonChanges,
     rainWhileWarm,
     warnings: warningsData,
     levelChange: {
@@ -247,14 +249,18 @@ export const buildKayakData = (
         weatherCode: futureWeatherData.hourly.weather_code[index],
       };
 
-      const { status: forecastStatus, reasons: forecastReasons } =
-        calculateFinalRagStatus(forecastConditions);
+      const {
+        status: forecastStatus,
+        reasons: forecastReasons,
+        reasonChanges: forecastReasonChanges,
+      } = calculateFinalRagStatus(forecastConditions);
       const forecastRainWhileWarm = isRainWhileWarm(forecastConditions);
 
       graphData.push({
         time: `${h}:00`,
         status: forecastStatus,
         reasons: forecastReasons,
+        reasonChanges: forecastReasonChanges,
         value: ragHeight(forecastStatus),
         forecastLevel: forecastRiverLevel,
         forecastSource,

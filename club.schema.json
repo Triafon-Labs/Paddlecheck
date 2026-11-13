@@ -376,6 +376,10 @@
               },
               "riverLevelAtLeast": {
                 "type": "number"
+              },
+              "dark": {
+                "type": "boolean",
+                "description": "true: only after dark (before sunrise or after sunset); false: only in daylight."
               }
             }
           },

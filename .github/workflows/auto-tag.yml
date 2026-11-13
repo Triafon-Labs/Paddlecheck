@@ -21,7 +21,7 @@ jobs:
     # and every later sync with this repository would conflict on them.
     # Also skip the release commit's own push so it can't trigger itself again.
     if: >-
-      github.repository == 'dylanr97/Paddlecheck' &&
+      github.repository == 'Triafon-Labs/Paddlecheck' &&
       !startsWith(github.event.head_commit.message, 'chore(release):')
     runs-on: ubuntu-latest
     steps:

@@ -402,7 +402,7 @@ rejecting commits whose first line isn't a valid Conventional Commit
   get a patch bump with a changelog entry, and a `BREAKING CHANGE:` footer bumps
   major. The job skips itself when the triggering commit is its own
   `chore(release): ...` commit, to avoid a loop, and everywhere except
-  `dylanr97/Paddlecheck` – a fork's own release commits would rewrite `CHANGELOG.md` and
+  `Triafon-Labs/Paddlecheck` – a fork's own release commits would rewrite `CHANGELOG.md` and
   `package.json` and conflict on every sync.
 
 Both workflows install through `.github/actions/npm-install` rather than calling

@@ -360,9 +360,7 @@ const chainRungs = (
     Icon: (riverReason && reasonIcons[riverReason]) || Water,
     // No figure: the River Level section just above already gives it.
     title: "River level",
-    caption: riverReason
-      ? reasonTile(riverReason, values).value
-      : "Starting point",
+    caption: riverReason ? reasonTile(riverReason, values).value : "Normal",
     status: values.initialStatus,
   };
 

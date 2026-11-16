@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.2.4](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.2.3...paddlecheck-v2.2.4) (2026-11-16)
+
+### Bug Fixes
+
+* make the share text's best-time line make sense and match the card ([#4](https://github.com/Triafon-Labs/Paddlecheck/issues/4)) ([6d8fc88](https://github.com/Triafon-Labs/Paddlecheck/commit/6d8fc880e9b30191cc9072faa2a626436cd78a24))
+
 ## [2.2.3](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.2.2...paddlecheck-v2.2.3) (2026-11-13)
 
 ### Bug Fixes

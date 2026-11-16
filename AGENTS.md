@@ -143,6 +143,7 @@ lib/
   metOfficeWarnings.ts   Met Office warnings RSS fetch and parsing
   warnings.ts            Warning display and per-day helpers
   forecast.ts            Best-paddling-time windows and forecast summaries
+  shareText.ts           What the share button sends – status, factors, river, weather, warnings, best time
   chartMotion.ts         Chart entrances in CSS (bars grow, lines/areas wipe in) instead of recharts' JS animation
   paddlingMatrix.ts      Applies WHO_CAN_PADDLE + WHO_CAN_PADDLE_EXTRAS (config) for a status and river level
   usePaddlerLevel.ts     The paddler level from Settings, kept in step across components and tabs

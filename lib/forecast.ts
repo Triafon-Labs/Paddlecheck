@@ -139,7 +139,11 @@ function formatWindow(
 // "09:00–17:00", or "09:00 until sunset at 18:12" when the window runs out
 // because it gets dark - a bare end time would read as conditions changing.
 const joinWindow = (start: string, end: string, endsAtSunset: boolean) =>
-  endsAtSunset ? `${start} until sunset at ${end}` : `${start}–${end}`;
+  endsAtSunset
+    ? `${start} until sunset at ${end}`
+    : start === "now"
+      ? `now until ${end}`
+      : `${start}–${end}`;
 
 // Describes the block(s) of worse-status conditions that separate best-status
 // windows, e.g. "17:00–18:00 dark green due to High winds". Gaps are always
@@ -164,7 +168,7 @@ function formatGaps(
 }
 
 export interface BestPaddlingTimes {
-  text: string; // "Best conditions today: 09:00–17:00 (light green)"
+  text: string; // "Best today: light green, 09:00–17:00" / "…, now until 16:00 (40 min left)"
   gapsText: string | null; // "17:00–18:00 dark green due to High winds"
 }
 
@@ -276,7 +280,7 @@ export function buildBestPaddlingTimes(
         const [endH, endM] = end.split(":").map(Number);
         const remaining = endH * 60 + endM - (nowH * 60 + nowM);
         if (remaining > 0 && remaining < 60) {
-          note = ` – only ~${remaining} min left`;
+          note = ` (${remaining} min left)`;
         }
       }
       return `${joinWindow(start, end, endsAtSunset)}${note}`;
@@ -284,7 +288,7 @@ export function buildBestPaddlingTimes(
     .join(", ");
 
   return {
-    text: `Best conditions today: ${ranges} (${label})`,
+    text: `Best today: ${label}, ${ranges}`,
     gapsText: formatGaps(todayForecast.graphData, gaps),
   };
 }
@@ -353,7 +357,7 @@ export const relativeDayLabel = (dayIndex: number): string =>
 
 export interface DaytimeOutlook {
   dayLabel: string; // "later today" | "tomorrow"
-  bestTimes: string | null; // "09:00–17:00 (light green)" or null
+  bestTimes: string | null; // "light green, 09:00–17:00" or null
   rangesText: string; // "river level between 0.55 m and 0.62 m, air temperature between 11°C and 18°C, wind up to 14 mph"
   gapsText: string | null; // "17:00–18:00 dark green due to High winds"
 }
@@ -445,7 +449,7 @@ export function buildNextDaytimeOutlook(
         return joinWindow(start, end, endsAtSunset);
       })
       .join(", ");
-    bestTimes = `${ranges} (${label})`;
+    bestTimes = `${label}, ${ranges}`;
     gapsText = formatGaps(day.graphData, gaps);
   }
 
@@ -470,6 +474,6 @@ export function buildBestConditionsLine(
   }
   const outlook = buildNextDaytimeOutlook(forecastDays);
   return outlook?.bestTimes
-    ? `Best conditions ${outlook.dayLabel}: ${outlook.bestTimes}`
+    ? `Best ${outlook.dayLabel}: ${outlook.bestTimes}`
     : null;
 }

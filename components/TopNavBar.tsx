@@ -18,15 +18,8 @@ import ShareIcon from "@mui/icons-material/Share";
 import SettingsModal from "./SettingsModal";
 import { useKayakContext } from "@/lib/KayakDataContext";
 import { OFFLINE_NO_CACHE_ERROR } from "@/lib/hooks";
-import { degreesToCompass } from "@/lib/weather";
-import { statusUi, statusLabel, FIRST_ELEVATED_LEVEL } from "@/lib/rag";
-import { THRESHOLDS, CLUB_SHORT_NAME, APP_NAME } from "@/lib/config";
-import {
-  formatRiverLevel,
-  formatTemperature,
-  formatWindSpeed,
-} from "@/lib/units";
-import { buildBestConditionsLine } from "@/lib/forecast";
+import { CLUB_SHORT_NAME, APP_NAME } from "@/lib/config";
+import { buildShareText } from "@/lib/shareText";
 import { useFreshness } from "@/lib/useFreshness";
 import { collapseMotion } from "@/lib/m3-palette";
 
@@ -55,82 +48,6 @@ const StatusBanner: React.FC<{
     {children}
   </Box>
 );
-
-const buildShareText = (
-  conditions: ReturnType<typeof useKayakContext>["conditions"],
-  forecastDays: ReturnType<typeof useKayakContext>["forecastDays"]
-): string => {
-  if (!conditions) return `Check current paddling conditions at ${APP_NAME}.`;
-
-  const lines: string[] = [];
-
-  const emoji = statusUi(conditions.overallStatus).emoji;
-  lines.push(
-    `🚦 *Overall Status:* ${statusLabel(conditions.overallStatus)} ${emoji}`
-  );
-  lines.push("");
-
-  if (conditions.riverLevel !== undefined) {
-    let riverLine = `🛶 *River Level:* ${formatRiverLevel(conditions.riverLevel)}`;
-    if (conditions.levelChange !== undefined) {
-      const { value, period } = conditions.levelChange;
-      const arrow =
-        value > THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
-          ? "⬆️"
-          : value < -THRESHOLDS.RIVER_LEVEL_TREND_THRESHOLD
-            ? "⬇️"
-            : "➡️";
-      riverLine += ` _(${arrow} ${formatRiverLevel(Math.abs(value))} in ${period})_`;
-    }
-    lines.push(riverLine);
-  }
-
-  if (
-    conditions.launchMessage &&
-    conditions.riverLevel !== undefined &&
-    conditions.riverLevel >= FIRST_ELEVATED_LEVEL
-  ) {
-    lines.push("");
-    lines.push(conditions.launchMessage);
-    lines.push("");
-  }
-
-  if (conditions.warnings && conditions.warnings.length > 0) {
-    lines.push("⚠️ *Weather Warnings:*");
-    const uniqueWarnings = Array.from(
-      new Set(
-        conditions.warnings.map((w) => `${w.severity} Warning: ${w.headline}`)
-      )
-    );
-    uniqueWarnings.forEach((w) => {
-      lines.push(`• ${w}`);
-    });
-    lines.push("");
-  }
-
-  const tempStr =
-    conditions.temperature !== undefined
-      ? `🌡️ *Temperature:* ${formatTemperature(conditions.temperature)}`
-      : null;
-  const windStr =
-    conditions.windSpeed !== undefined
-      ? `💨 *Wind:* ${formatWindSpeed(conditions.windSpeed)}${conditions.windDirection !== undefined ? ` ${degreesToCompass(conditions.windDirection)}` : ""}`
-      : null;
-  const weatherLine = [tempStr, windStr].filter(Boolean).join(" | ");
-  if (weatherLine) lines.push(weatherLine);
-
-  const bestConditions = buildBestConditionsLine(
-    forecastDays,
-    conditions.overallStatus,
-    conditions.reasons
-  );
-  if (bestConditions) {
-    lines.push("");
-    lines.push(`🟢 *${bestConditions}*`);
-  }
-
-  return lines.join("\n");
-};
 
 const TopNavBar = () => {
   const scrolled = useScrollTrigger({ disableHysteresis: true, threshold: 8 });

@@ -162,13 +162,16 @@ const reasonChip = (
 // One rung of the chain: a disc in the status colour holding the factor's
 // icon, what it is, and the status it leaves conditions on. A factor that
 // changed nothing (the weather table can give the same step either way, or
-// the cap below the top step stops it) is an empty ring with no status.
+// the cap below the top step stops it) keeps the colour of the status it
+// found conditions at, but names no status of its own - its caption says
+// "No extra effect" instead.
 interface Rung {
   key: string;
   Icon: React.ElementType;
   title: string;
   caption?: string;
   status?: Status;
+  noEffect?: boolean;
 }
 
 // The disc and the gap between rungs; the track runs disc centre to centre.
@@ -190,8 +193,8 @@ const FactorChain: React.FC<{ rungs: Rung[]; compact?: boolean }> = ({
     mt,
     track,
   } = chainSizes(compact);
-  // The colour conditions are at after each rung: its own status, or the one
-  // before it for a factor that changed nothing. The track between two rungs
+  // The colour conditions are at after each rung (for a factor that changed
+  // nothing, the status it found them at). The track between two rungs
   // blends from one to the next, so the chain reads as one status moving
   // down it rather than a list with tags.
   const colours: string[] = [];
@@ -224,7 +227,7 @@ const FactorChain: React.FC<{ rungs: Rung[]; compact?: boolean }> = ({
         gap: `${RUNG_GAP}px`,
       }}
     >
-      {rungs.map(({ key, Icon, title, caption, status }, i) => {
+      {rungs.map(({ key, Icon, title, caption, status, noEffect }, i) => {
         const ui = status ? statusUi(status) : undefined;
         // After the starting point each status is where that factor takes
         // conditions to - "→ Amber", not a label saying the factor is amber.
@@ -301,7 +304,7 @@ const FactorChain: React.FC<{ rungs: Rung[]; compact?: boolean }> = ({
                 </Typography>
               )}
             </Box>
-            {ui && (
+            {ui && !noEffect && (
               <Box
                 sx={{
                   display: "flex",
@@ -387,7 +390,10 @@ const chainRungs = (
         Icon: reasonIcons[reason] ?? HelpOutlined,
         title,
         caption: changed ? detail : joinDetail(detail, changeText(change)),
-        status: changed ? change.to : undefined,
+        // Unchanged: the status it found conditions at, for the disc's
+        // colour only.
+        status: changed ? change.to : change.from,
+        noEffect: !changed,
       };
     });
   return [start, ...rungs];

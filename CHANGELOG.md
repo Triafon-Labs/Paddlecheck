@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.3.0](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.2.4...paddlecheck-v2.3.0) (2026-11-17)
+
+### Features
+
+* colour no-effect factor discs with the status they found ([#5](https://github.com/Triafon-Labs/Paddlecheck/issues/5)) ([2148c01](https://github.com/Triafon-Labs/Paddlecheck/commit/2148c012ff585d92c3df6ff445e63c1c1c363e33))
+
 ## [2.2.4](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.2.3...paddlecheck-v2.2.4) (2026-11-16)
 
 ### Bug Fixes

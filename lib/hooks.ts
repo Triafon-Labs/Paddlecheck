@@ -11,6 +11,7 @@ import {
 import { LIVE_REFETCH_AFTER_MS } from "@/lib/config";
 import { buildKayakData } from "@/lib/buildKayakData";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
+import { CONDITIONS_PATH, fetchPreferringEarly } from "@/lib/earlyFetch";
 
 // Exported so the UI (offline banner, error alert) can recognise this exact
 // failure mode instead of string-matching a copy of the message.
@@ -204,8 +205,11 @@ export const useKayakData = () => {
       // APIs. If the request to our own API fails outright, each source
       // falls back independently to its own last-known cached value rather
       // than the whole update failing.
+      // The first attempt on load picks up the request the inline <head>
+      // script already started (lib/earlyFetch.ts); retries and every later
+      // fetch make their own.
       let apiResponse = await withRetry(async () => {
-        const res = await fetch("/api/conditions");
+        const res = await fetchPreferringEarly(CONDITIONS_PATH);
         if (!res.ok)
           throw new Error(`Conditions API fetch failed: ${res.status}`);
         return (await res.json()) as ConditionsApiResponse;

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.3.1](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.3.0...paddlecheck-v2.3.1) (2026-11-18)
+
+### Performance Improvements
+
+* smaller font file and an earlier conditions request ([#6](https://github.com/Triafon-Labs/Paddlecheck/issues/6)) ([caca768](https://github.com/Triafon-Labs/Paddlecheck/commit/caca7680984cdb1c5d9228434c1748f02ca2d425))
+
 ## [2.3.0](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.2.4...paddlecheck-v2.3.0) (2026-11-17)
 
 ### Features

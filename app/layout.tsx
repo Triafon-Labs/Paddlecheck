@@ -9,6 +9,7 @@ import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import { KayakDataProvider } from "@/lib/KayakDataContext";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import { STORAGE_KEYS, DISCLAIMER_PENDING_ATTR } from "@/lib/storageKeys";
+import { EARLY_FETCH_SCRIPT } from "@/lib/earlyFetch";
 import { APP_NAME, CLUB_NAME, DISCLAIMER_VERSION } from "@/lib/config";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -59,6 +60,9 @@ export default function RootLayout({
     // hydrates, which would otherwise be reported as a hydration mismatch.
     <html lang="en" className={robotoFlex.variable} suppressHydrationWarning>
       <head>
+        {/* Starts the conditions request while the JavaScript is still
+            downloading; the data hook picks it up (lib/earlyFetch.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: EARLY_FETCH_SCRIPT }} />
         {/* Applies the saved colour scheme to <html> before the body is even
             parsed, so there's no window in which a flash of the wrong theme
             could paint. `attribute` and the storage key must match the

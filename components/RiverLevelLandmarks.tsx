@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Box, Skeleton, Typography } from "@mui/material";
-import Water from "@mui/icons-material/Water";
 import { LEVEL_DESCRIPTIONS } from "@/lib/rag";
 import { formatRiverLevel } from "@/lib/units";
 
@@ -11,9 +10,8 @@ interface RiverLevelLandmarksProps {
   // Shown under the reading's own row: how old it is, or where a forecast
   // level comes from.
   readingNote: string | null;
-  // The forecast panel's size: the reading's row (CompactReadingRow) with
-  // the landmarks either side listed inside it, so a forecast hour reads as
-  // secondary to the current status.
+  // The forecast panel's size: the same scale a size down (COMPACT_SIZE),
+  // so a forecast hour reads as secondary to the current status.
   compact?: boolean;
   // What the reading's own row is called - "Forecast level" for an hour
   // ahead.
@@ -27,18 +25,53 @@ interface ScaleRow {
   onLandmark?: boolean; // the reading row is a landmark the river is sitting on
 }
 
-// Vertical center of the tick dot within its row: the row's 8px top padding,
-// then 7px + half of the dot's 8px height. The padding lives on the text
-// columns rather than the row, so the dot column runs the row's full height
-// and the line joins up from one row to the next. Segments anchor here rather
-// than at 50% of the row's height, since rows vary in height (multi-line
-// descriptions) but the dot's own offset from the row top never changes.
-const TICK_DOT_CENTER = 19;
+// The scale's measurements, in px. The status card uses FULL_SIZE and a
+// forecast hour COMPACT_SIZE - the same look, a size down, like the rest of
+// the forecast panel.
+interface ScaleSize {
+  // Width of the level figures' column.
+  levelWidth: number;
+  // Padding above and below each row's text. It lives on the text columns
+  // rather than the row, so the dot column runs the row's full height and
+  // the line joins up from one row to the next.
+  rowPad: number;
+  // Vertical center of the tick dot within its row: the row's top padding,
+  // then half of the first line of text. Segments anchor here rather than at
+  // 50% of the row's height, since rows vary in height (multi-line
+  // descriptions) but the dot's own offset from the row top never changes.
+  dotCenter: number;
+  // The line is drawn like an M3 linear progress indicator stood on end: a
+  // rounded track, filled in primary from the bottom up to the reading, so
+  // the landmarks below it read as under water.
+  track: number;
+  dot: number;
+  readingDot: number;
+  // The reading dot's halo.
+  halo: number;
+  levelFontSize: string;
+}
 
-// The line is drawn like an M3 linear progress indicator stood on end: a 4dp
-// rounded track, filled in primary from the bottom up to the reading, so the
-// landmarks below it read as under water.
-const TRACK_WIDTH = 4;
+const FULL_SIZE: ScaleSize = {
+  levelWidth: 56,
+  rowPad: 8,
+  dotCenter: 19,
+  track: 4,
+  dot: 10,
+  readingDot: 12,
+  halo: 3,
+  levelFontSize: "0.875rem",
+};
+
+const COMPACT_SIZE: ScaleSize = {
+  levelWidth: 48,
+  rowPad: 4,
+  dotCenter: 15,
+  track: 3,
+  dot: 8,
+  readingDot: 10,
+  halo: 2,
+  levelFontSize: "0.8125rem",
+};
 
 // How far a landmark is from the reading, in metres like the levels beside it.
 const formatDistance = (metres: number): string =>
@@ -53,9 +86,7 @@ export const CompactReadingRow: React.FC<{
   icon: React.ReactNode;
   label: string;
   note?: string | null;
-  // Anything further, under the note - the river level's nearest landmark.
-  children?: React.ReactNode;
-}> = ({ icon, label, note, children }) => (
+}> = ({ icon, label, note }) => (
   <Box
     sx={{
       mt: 0.5,
@@ -88,7 +119,6 @@ export const CompactReadingRow: React.FC<{
           {note}
         </Typography>
       )}
-      {children}
     </Box>
   </Box>
 );
@@ -118,58 +148,7 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
   const reading: ScaleRow = onLandmark
     ? { ...onLandmark, isReading: true, onLandmark: true }
     : { level: riverLevel, desc: readingLabel, isReading: true };
-  // Compact is the reading's row with the landmarks either side inside it,
-  // one line each - a distance and its text, without the status card's
-  // track. Only naming a landmark the level sat exactly on left most hours
-  // with none at all.
-  if (compact) {
-    const neighbours = [
-      ...above.map((l) => ({ ...l, arrow: "↑" })),
-      ...below.map((l) => ({ ...l, arrow: "↓" })),
-    ];
-    return (
-      <CompactReadingRow
-        icon={<Water />}
-        label={
-          onLandmark
-            ? `${formatRiverLevel(riverLevel)} – ${onLandmark.desc}`
-            : formatRiverLevel(riverLevel)
-        }
-        note={readingNote}
-      >
-        {neighbours.length > 0 && (
-          <Box
-            sx={{
-              mt: 0.75,
-              display: "grid",
-              gridTemplateColumns: "auto 1fr",
-              columnGap: 1,
-              rowGap: 0.5,
-            }}
-          >
-            {neighbours.map((l) => (
-              <React.Fragment key={l.level}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  aria-label={formatDistance(l.level - riverLevel)}
-                  sx={{
-                    whiteSpace: "nowrap",
-                    fontVariantNumeric: "tabular-nums",
-                    // Sits on the first line of the body2 text beside it.
-                    lineHeight: "1.43rem",
-                  }}
-                >
-                  {`${l.arrow} ${formatRiverLevel(Math.abs(l.level - riverLevel))}`}
-                </Typography>
-                <Typography variant="body2">{l.desc}</Typography>
-              </React.Fragment>
-            ))}
-          </Box>
-        )}
-      </CompactReadingRow>
-    );
-  }
+  const size = compact ? COMPACT_SIZE : FULL_SIZE;
 
   const rows: ScaleRow[] = [
     ...above.map((l) => ({ ...l, isReading: false })),
@@ -181,12 +160,12 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
   const segment = (filled: boolean) =>
     ({
       position: "absolute",
-      width: `${TRACK_WIDTH}px`,
+      width: `${size.track}px`,
       backgroundColor: filled ? "primary.main" : "divider",
     }) as const;
 
   return (
-    <Box sx={{ mt: 1 }}>
+    <Box sx={{ mt: compact ? 0.5 : 1 }}>
       {rows.map((row, i) => (
         <Box
           key={`${row.level}-${i}`}
@@ -202,13 +181,13 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
         >
           <Box
             sx={{
-              width: 56,
+              width: size.levelWidth,
               flexShrink: 0,
               textAlign: "right",
-              pr: 1.5,
-              pt: "9px",
-              pb: 1,
-              fontSize: "0.875rem",
+              pr: compact ? 1 : 1.5,
+              pt: `${size.rowPad + 1}px`,
+              pb: `${size.rowPad}px`,
+              fontSize: size.levelFontSize,
             }}
           >
             {formatRiverLevel(row.level)}
@@ -228,7 +207,7 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
                 sx={{
                   ...segment(i > readingIndex),
                   top: 0,
-                  height: `${TICK_DOT_CENTER}px`,
+                  height: `${size.dotCenter}px`,
                 }}
               />
             ) : (
@@ -236,9 +215,9 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
               <Box
                 sx={{
                   ...segment(i > readingIndex),
-                  top: `${TICK_DOT_CENTER - TRACK_WIDTH}px`,
-                  height: `${TRACK_WIDTH}px`,
-                  borderRadius: `${TRACK_WIDTH}px ${TRACK_WIDTH}px 0 0`,
+                  top: `${size.dotCenter - size.track}px`,
+                  height: `${size.track}px`,
+                  borderRadius: `${size.track}px ${size.track}px 0 0`,
                 }}
               />
             )}
@@ -248,7 +227,7 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
               <Box
                 sx={{
                   ...segment(i >= readingIndex),
-                  top: `${TICK_DOT_CENTER}px`,
+                  top: `${size.dotCenter}px`,
                   bottom: 0,
                 }}
               />
@@ -256,9 +235,9 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
             <Box
               sx={{
                 position: "absolute",
-                top: `${TICK_DOT_CENTER - (row.isReading ? 6 : 5)}px`,
-                width: row.isReading ? 12 : 10,
-                height: row.isReading ? 12 : 10,
+                top: `${size.dotCenter - (row.isReading ? size.readingDot : size.dot) / 2}px`,
+                width: row.isReading ? size.readingDot : size.dot,
+                height: row.isReading ? size.readingDot : size.dot,
                 boxSizing: "border-box",
                 borderRadius: "50%",
                 // Primary rather than a status colour: the status pill above
@@ -276,13 +255,13 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
                   : { backgroundColor: "primary.main" }),
                 boxShadow: (theme) =>
                   row.isReading
-                    ? `0 0 0 3px rgba(${(theme.vars ?? theme).palette.primary.mainChannel} / 0.2)`
+                    ? `0 0 0 ${size.halo}px rgba(${(theme.vars ?? theme).palette.primary.mainChannel} / 0.2)`
                     : "none",
                 zIndex: 1,
               }}
             />
           </Box>
-          <Box sx={{ flex: 1, pl: 1.5, py: 1 }}>
+          <Box sx={{ flex: 1, pl: compact ? 1 : 1.5, py: `${size.rowPad}px` }}>
             <Typography
               variant="body2"
               sx={{

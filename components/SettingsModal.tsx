@@ -760,7 +760,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                           icon={<WaterDrop fontSize="small" />}
                           label={`Rain at ${THRESHOLDS.TEMP_MODERATE}°C and below`}
                           description={CONDITIONS_KEY_WEATHER.rainCold}
-                          chipLabel="Stricter Than Rules"
+                          chipLabel="Not In Rules"
                           chipColor="default"
                         />
                       </>

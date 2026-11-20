@@ -291,17 +291,29 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
                   !size.text && { mt: "1px" }),
               }}
             >
-              {row.desc}
+              {/* Compact, a forecast hour's reading row is a single line: where
+                  the level comes from says it's a forecast, without a
+                  "Forecast level" line above it. */}
+              {compact && row.isReading && !row.onLandmark && readingNote
+                ? readingNote
+                : row.desc}
             </Typography>
             {/* The secondary line under each row: a landmark's distance, or
                 the reading's age or source - on a line of its own rather than
                 bracketed onto the end of the text above it. */}
             {(() => {
+              // Compact leaves out each landmark's distance - the level
+              // column beside it already gives it - to keep a forecast hour
+              // short enough to fit on a phone screen.
               const note = !row.isReading
-                ? formatDistance(row.level - riverLevel)
+                ? compact
+                  ? null
+                  : formatDistance(row.level - riverLevel)
                 : row.onLandmark
                   ? [readingLabel, readingNote].filter(Boolean).join(" – ")
-                  : readingNote;
+                  : compact
+                    ? null
+                    : readingNote;
               return note ? (
                 <Typography
                   variant="caption"

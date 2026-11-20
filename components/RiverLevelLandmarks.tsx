@@ -119,8 +119,8 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
     ? { ...onLandmark, isReading: true, onLandmark: true }
     : { level: riverLevel, desc: readingLabel, isReading: true };
   // Compact is the reading's row with the landmarks either side inside it,
-  // one line each - a distance and its text, without the status card's
-  // track. Only naming a landmark the level sat exactly on left most hours
+  // one line each - its level and distance, then its text, without the
+  // status card's track. Only naming a landmark the level sat exactly on left most hours
   // with none at all.
   if (compact) {
     const neighbours = [
@@ -149,19 +149,35 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
           >
             {neighbours.map((l) => (
               <React.Fragment key={l.level}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  aria-label={formatDistance(l.level - riverLevel)}
+                {/* The landmark's own level, with how far the river has to
+                    rise or fall to reach it beneath. */}
+                <Box
+                  aria-label={`${formatRiverLevel(l.level)}, ${formatDistance(l.level - riverLevel)}`}
                   sx={{
+                    textAlign: "right",
                     whiteSpace: "nowrap",
                     fontVariantNumeric: "tabular-nums",
-                    // Sits on the first line of the body2 text beside it.
-                    lineHeight: "1.43rem",
                   }}
                 >
-                  {`${l.arrow} ${formatRiverLevel(Math.abs(l.level - riverLevel))}`}
-                </Typography>
+                  <Typography
+                    variant="caption"
+                    component="div"
+                    sx={{
+                      // Sits on the first line of the body2 text beside it.
+                      lineHeight: "1.43rem",
+                    }}
+                  >
+                    {formatRiverLevel(l.level)}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    component="div"
+                    sx={{ lineHeight: 1.2 }}
+                  >
+                    {`${l.arrow} ${formatRiverLevel(Math.abs(l.level - riverLevel))}`}
+                  </Typography>
+                </Box>
                 <Typography variant="body2">{l.desc}</Typography>
               </React.Fragment>
             ))}

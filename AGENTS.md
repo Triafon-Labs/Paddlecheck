@@ -116,7 +116,7 @@ components/
   PaddlerLevelRow.tsx    One level's verdict as an expandable row – Who Can Paddle and the forecast hour's "You"
   StatusFace.tsx         The verdict faces (a face on a status-colour disc) and their labels
   StatsCard.tsx          Weather panel (sky, temp, feels-like) + tiles – wind, gusts, visibility, daylight
-  RiverLevelLandmarks.tsx The reading between its nearest club landmarks, with distances (StatusCard); compact: the reading row with the landmarks either side as lines beneath it (forecast hour)
+  RiverLevelLandmarks.tsx The reading between its nearest club landmarks, with distances (StatusCard); compact: the same scale a size down (forecast hour)
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
   ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below, opening with the verdict for your level

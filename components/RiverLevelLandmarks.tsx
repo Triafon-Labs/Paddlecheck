@@ -3,6 +3,8 @@
 import React from "react";
 import { Box, Skeleton, Typography } from "@mui/material";
 import Water from "@mui/icons-material/Water";
+import NorthRounded from "@mui/icons-material/NorthRounded";
+import SouthRounded from "@mui/icons-material/SouthRounded";
 import { LEVEL_DESCRIPTIONS } from "@/lib/rag";
 import { formatRiverLevel } from "@/lib/units";
 
@@ -53,34 +55,57 @@ export const CompactReadingRow: React.FC<{
   icon: React.ReactNode;
   label: string;
   note?: string | null;
-  // Anything further, under the note - the river level's nearest landmark.
+  // Further lines in the same row, under this one - the river level's
+  // landmarks either side.
   children?: React.ReactNode;
 }> = ({ icon, label, note, children }) => (
   <Box
     sx={{
       mt: 0.5,
       display: "flex",
-      alignItems: "flex-start",
-      gap: 1,
+      flexDirection: "column",
+      gap: 0.75,
       px: 1.5,
       py: 0.5,
       backgroundColor: "surfaces.containerHigh",
       borderRadius: "16px",
     }}
   >
+    <ReadingLine icon={icon} label={label} note={note} strong />
+    {children}
+  </Box>
+);
+
+// One line of a CompactReadingRow: an icon, then a label and a note beneath
+// it. The row's own reading is the strong one; the lines under it are
+// regular weight with a quieter icon.
+const ReadingLine: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  note?: string | null;
+  strong?: boolean;
+}> = ({ icon, label, note, strong }) => (
+  <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
     <Box
       sx={{
         display: "flex",
         flexShrink: 0,
         // Centres the 16px icon on the label's first line of body text.
         pt: "2px",
-        "& svg": { fontSize: 16, color: "primary.main" },
+        "& svg": {
+          fontSize: 16,
+          color: strong ? "primary.main" : "text.secondary",
+        },
       }}
     >
       {icon}
     </Box>
     <Box sx={{ flex: 1, minWidth: 0 }}>
-      <Typography variant="body2" component="div" sx={{ fontWeight: 500 }}>
+      <Typography
+        variant="body2"
+        component="div"
+        sx={{ fontWeight: strong ? 500 : 400 }}
+      >
         {label}
       </Typography>
       {note && (
@@ -88,7 +113,6 @@ export const CompactReadingRow: React.FC<{
           {note}
         </Typography>
       )}
-      {children}
     </Box>
   </Box>
 );
@@ -118,14 +142,15 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
   const reading: ScaleRow = onLandmark
     ? { ...onLandmark, isReading: true, onLandmark: true }
     : { level: riverLevel, desc: readingLabel, isReading: true };
-  // Compact is the reading's row with the landmarks either side inside it,
-  // one line each - its level and distance, then its text, without the
-  // status card's track. Only naming a landmark the level sat exactly on left most hours
-  // with none at all.
+  // Compact is the reading's row with the landmarks either side as lines
+  // of their own beneath it - an arrow, the landmark, and its level and
+  // distance - in the same icon-and-text shape as the rest of the forecast
+  // panel, without the status card's track. Only naming a landmark the level
+  // sat exactly on left most hours with none at all.
   if (compact) {
     const neighbours = [
-      ...above.map((l) => ({ ...l, arrow: "↑" })),
-      ...below.map((l) => ({ ...l, arrow: "↓" })),
+      ...above.map((l) => ({ ...l, icon: <NorthRounded /> })),
+      ...below.map((l) => ({ ...l, icon: <SouthRounded /> })),
     ];
     return (
       <CompactReadingRow
@@ -137,52 +162,14 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
         }
         note={readingNote}
       >
-        {neighbours.length > 0 && (
-          <Box
-            sx={{
-              mt: 0.75,
-              display: "grid",
-              gridTemplateColumns: "auto 1fr",
-              columnGap: 1,
-              rowGap: 0.5,
-            }}
-          >
-            {neighbours.map((l) => (
-              <React.Fragment key={l.level}>
-                {/* The landmark's own level, with how far the river has to
-                    rise or fall to reach it beneath. */}
-                <Box
-                  aria-label={`${formatRiverLevel(l.level)}, ${formatDistance(l.level - riverLevel)}`}
-                  sx={{
-                    textAlign: "right",
-                    whiteSpace: "nowrap",
-                    fontVariantNumeric: "tabular-nums",
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    component="div"
-                    sx={{
-                      // Sits on the first line of the body2 text beside it.
-                      lineHeight: "1.43rem",
-                    }}
-                  >
-                    {formatRiverLevel(l.level)}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    component="div"
-                    sx={{ lineHeight: 1.2 }}
-                  >
-                    {`${l.arrow} ${formatRiverLevel(Math.abs(l.level - riverLevel))}`}
-                  </Typography>
-                </Box>
-                <Typography variant="body2">{l.desc}</Typography>
-              </React.Fragment>
-            ))}
-          </Box>
-        )}
+        {neighbours.map((l) => (
+          <ReadingLine
+            key={l.level}
+            icon={l.icon}
+            label={l.desc}
+            note={`${formatRiverLevel(l.level)} · ${formatDistance(l.level - riverLevel)}`}
+          />
+        ))}
       </CompactReadingRow>
     );
   }

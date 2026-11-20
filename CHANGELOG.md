@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.3.3](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.3.2...paddlecheck-v2.3.3) (2026-11-20)
+
+### Bug Fixes
+
+* show the landmarks either side in a forecast hour's river level ([#8](https://github.com/Triafon-Labs/Paddlecheck/issues/8)) ([ecd572f](https://github.com/Triafon-Labs/Paddlecheck/commit/ecd572f5236badfde5fab55caaa485985d420899))
+
 ## [2.3.2](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.3.1...paddlecheck-v2.3.2) (2026-11-20)
 
 ### Bug Fixes

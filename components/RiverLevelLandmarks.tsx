@@ -26,8 +26,9 @@ interface ScaleRow {
 }
 
 // The scale's measurements, in px. The status card uses FULL_SIZE and a
-// forecast hour COMPACT_SIZE - the same look, smaller and tighter, so a
-// forecast hour reads as a mini version of the current status.
+// forecast hour COMPACT_SIZE - the same look with smaller elements and
+// tighter rows, so a forecast hour reads as a mini version of the current
+// status. Its text stays the size of the rest of the app's.
 interface ScaleSize {
   // Width of the level figures' column.
   levelWidth: number;
@@ -49,9 +50,9 @@ interface ScaleSize {
   // The reading dot's halo.
   halo: number;
   levelFontSize: string;
-  // Type a size down from the theme's body2 and caption, for the compact
-  // scale only: the line height (px) the level figures share with the text
-  // beside them so they sit on its first line, and the two font sizes.
+  // Type for the compact scale only: the line height (px) the level figures
+  // share with the text beside them so they sit on its first line, and the
+  // text and note font sizes.
   text?: { line: number; desc: string; note: string };
 }
 
@@ -67,16 +68,17 @@ const FULL_SIZE: ScaleSize = {
 };
 
 const COMPACT_SIZE: ScaleSize = {
-  levelWidth: 44,
+  levelWidth: 48,
   rowPad: 3,
   // rowPad, then half of text.line.
-  dotCenter: 12,
+  dotCenter: 13,
   track: 3,
   dot: 8,
   readingDot: 10,
   halo: 2,
-  levelFontSize: "0.75rem",
-  text: { line: 18, desc: "0.8125rem", note: "0.6875rem" },
+  levelFontSize: "0.8125rem",
+  // The theme's body2 and caption sizes, with tighter line spacing.
+  text: { line: 19, desc: "0.875rem", note: "0.75rem" },
 };
 
 // How far a landmark is from the reading, in metres like the levels beside it.
@@ -306,7 +308,7 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
                   color="text.secondary"
                   component={size.text ? "div" : "span"}
                   sx={
-                    size.text && { fontSize: size.text.note, lineHeight: 1.35 }
+                    size.text && { fontSize: size.text.note, lineHeight: 1.3 }
                   }
                 >
                   {note}

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.3.2](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.3.1...paddlecheck-v2.3.2) (2026-11-20)
+
+### Bug Fixes
+
+* label the cold-rain Conditions Key row "Not In Rules" ([#7](https://github.com/Triafon-Labs/Paddlecheck/issues/7)) ([9780030](https://github.com/Triafon-Labs/Paddlecheck/commit/9780030381d619d576e240b8b2f1555fc4b58d29))
+
 ## [2.3.1](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.3.0...paddlecheck-v2.3.1) (2026-11-18)
 
 ### Performance Improvements

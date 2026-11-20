@@ -11,8 +11,9 @@ interface RiverLevelLandmarksProps {
   // Shown under the reading's own row: how old it is, or where a forecast
   // level comes from.
   readingNote: string | null;
-  // The forecast panel's size: the reading's row alone (CompactReadingRow),
-  // so a forecast hour reads as secondary to the current status.
+  // The forecast panel's size: the reading's row (CompactReadingRow) with
+  // the landmarks either side listed inside it, so a forecast hour reads as
+  // secondary to the current status.
   compact?: boolean;
   // What the reading's own row is called - "Forecast level" for an hour
   // ahead.
@@ -52,7 +53,9 @@ export const CompactReadingRow: React.FC<{
   icon: React.ReactNode;
   label: string;
   note?: string | null;
-}> = ({ icon, label, note }) => (
+  // Anything further, under the note - the river level's nearest landmark.
+  children?: React.ReactNode;
+}> = ({ icon, label, note, children }) => (
   <Box
     sx={{
       mt: 0.5,
@@ -85,6 +88,7 @@ export const CompactReadingRow: React.FC<{
           {note}
         </Typography>
       )}
+      {children}
     </Box>
   </Box>
 );
@@ -114,9 +118,15 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
   const reading: ScaleRow = onLandmark
     ? { ...onLandmark, isReading: true, onLandmark: true }
     : { level: riverLevel, desc: readingLabel, isReading: true };
-  // Compact is the reading's row alone - the landmarks either side are the
-  // status card's job, and in a forecast hour they made a long panel longer.
+  // Compact is the reading's row with the landmarks either side inside it,
+  // one line each - a distance and its text, without the status card's
+  // track. Only naming a landmark the level sat exactly on left most hours
+  // with none at all.
   if (compact) {
+    const neighbours = [
+      ...above.map((l) => ({ ...l, arrow: "↑" })),
+      ...below.map((l) => ({ ...l, arrow: "↓" })),
+    ];
     return (
       <CompactReadingRow
         icon={<Water />}
@@ -126,7 +136,38 @@ const RiverLevelLandmarks: React.FC<RiverLevelLandmarksProps> = ({
             : formatRiverLevel(riverLevel)
         }
         note={readingNote}
-      />
+      >
+        {neighbours.length > 0 && (
+          <Box
+            sx={{
+              mt: 0.75,
+              display: "grid",
+              gridTemplateColumns: "auto 1fr",
+              columnGap: 1,
+              rowGap: 0.5,
+            }}
+          >
+            {neighbours.map((l) => (
+              <React.Fragment key={l.level}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  aria-label={formatDistance(l.level - riverLevel)}
+                  sx={{
+                    whiteSpace: "nowrap",
+                    fontVariantNumeric: "tabular-nums",
+                    // Sits on the first line of the body2 text beside it.
+                    lineHeight: "1.43rem",
+                  }}
+                >
+                  {`${l.arrow} ${formatRiverLevel(Math.abs(l.level - riverLevel))}`}
+                </Typography>
+                <Typography variant="body2">{l.desc}</Typography>
+              </React.Fragment>
+            ))}
+          </Box>
+        )}
+      </CompactReadingRow>
     );
   }
 

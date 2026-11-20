@@ -114,7 +114,7 @@ const HourBody: React.FC<{
     <>
       {you && <YourVerdict point={point} you={you} />}
       {/* The status card's reading row, a size down, with where the level
-          comes from beneath it. */}
+          comes from and the landmarks either side beneath it. */}
       <Box sx={compactSize.sectionSx}>
         <FactorHeading compact>River Level</FactorHeading>
         <RiverLevelLandmarks

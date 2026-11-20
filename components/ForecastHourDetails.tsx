@@ -113,13 +113,14 @@ const HourBody: React.FC<{
   return (
     <>
       {you && <YourVerdict point={point} you={you} />}
-      {/* The status card's reading row, a size down, with where the level
-          comes from beneath it. */}
+      {/* The status card's landmark scale, a size down, with where the
+          level comes from on the reading's row. */}
       <Box sx={compactSize.sectionSx}>
         <FactorHeading compact>River Level</FactorHeading>
         <RiverLevelLandmarks
           riverLevel={point.forecastLevel}
           readingNote={FORECAST_SOURCE_LABELS[point.forecastSource]}
+          readingLabel="Forecast level"
           compact
         />
       </Box>

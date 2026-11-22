@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -14,10 +14,7 @@ import { KayakConditions } from "@/types";
 import PaddlingStatusHero from "./PaddlingStatusHero";
 import { STEP_NAMES } from "@/lib/rag";
 import { ContributingFactors, FactorHeading } from "./ConditionFactors";
-import { useKayakContext } from "@/lib/KayakDataContext";
-import { formatDataAge } from "@/lib/time";
-import { useNowTicking } from "@/lib/useNowTicking";
-import { useFreshness } from "@/lib/useFreshness";
+import { SourceAlerts } from "./DataSources";
 import { THRESHOLDS, CONDITIONS_REPORT_ENABLED } from "@/lib/config";
 import { collapseMotion, springTransition } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
@@ -36,17 +33,6 @@ interface StatusCardProps {
 const SCALE_SEGMENT_COUNT = STEP_NAMES.length;
 
 const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
-  const { riverGraphData, isRefreshing } = useKayakContext();
-  const { freshnessText } = useFreshness(conditions?.lastUpdated);
-  // Ticks so the reading's age stays right while the page is left open.
-  const now = useNowTicking();
-  const dataAgeLabel = useMemo(() => {
-    if (!riverGraphData || riverGraphData.length === 0) return null;
-    return formatDataAge(
-      new Date(riverGraphData[riverGraphData.length - 1].dateTime).getTime(),
-      now
-    );
-  }, [riverGraphData, now]);
   const renderContent = () => {
     if (loading) {
       return (
@@ -134,7 +120,7 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
                 </FactorHeading>
                 <RiverLevelLandmarks
                   riverLevel={conditions.riverLevel}
-                  readingNote={dataAgeLabel && `Gauge read ${dataAgeLabel}`}
+                  readingNote={null}
                 />
               </Box>
             )}
@@ -181,19 +167,11 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
         <Typography variant="h5" component="div">
           Paddling Status
         </Typography>
-        {/* When the data was fetched. The banners above the top bar take
-            over once it's stale or an update has failed. */}
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ mt: 0.25, mb: 1.5, minHeight: "1.43em" }}
-        >
-          {isRefreshing
-            ? "Updating…"
-            : freshnessText
-              ? `Updated ${freshnessText}`
-              : null}
-        </Typography>
+        {/* A source with a problem nothing else on the page reports - the
+            gauge gone quiet, no upstream forecast, a warnings feed that
+            failed. Nothing when all is well; every source's state is in
+            Settings → Info (DataSources.tsx). */}
+        <SourceAlerts />
         {renderContent()}
       </CardContent>
     </Card>

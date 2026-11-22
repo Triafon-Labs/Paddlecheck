@@ -64,6 +64,7 @@ import {
 } from "@/lib/storageKeys";
 import { m3Duration, m3Easing, m3Spring, spring } from "@/lib/m3-palette";
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
+import { DataSourcesList } from "./DataSources";
 
 interface SettingsModalProps {
   open: boolean;
@@ -540,7 +541,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
           }}
         >
           <Box>
+            {/* Whether each feed is live. The home page only flags one when
+                something is wrong that nothing else there says. */}
             <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+              Data Sources
+            </Typography>
+            <DataSourcesList />
+
+            <Divider sx={{ my: 2 }} />
+
+            <Typography variant="h6" gutterBottom>
               Useful Links
             </Typography>
             <List disablePadding>

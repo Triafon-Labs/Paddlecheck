@@ -14,7 +14,7 @@ import { KayakConditions } from "@/types";
 import PaddlingStatusHero from "./PaddlingStatusHero";
 import { STEP_NAMES } from "@/lib/rag";
 import { ContributingFactors, FactorHeading } from "./ConditionFactors";
-import SourceLiveness from "./SourceLiveness";
+import { SourceAlerts } from "./DataSources";
 import { THRESHOLDS, CONDITIONS_REPORT_ENABLED } from "@/lib/config";
 import { collapseMotion, springTransition } from "@/lib/m3-palette";
 import ConditionsBriefing from "./ConditionsBriefing";
@@ -167,12 +167,11 @@ const StatusCard: React.FC<StatusCardProps> = ({ conditions, loading }) => {
         <Typography variant="h5" component="div">
           Paddling Status
         </Typography>
-        {/* A dot per source and when the data was fetched
-            (SourceLiveness). The banners above the top bar still take over
-            once it's stale or an update has failed. */}
-        <Box sx={{ mt: 0.25, mb: 1 }}>
-          <SourceLiveness />
-        </Box>
+        {/* A source with a problem nothing else on the page reports - the
+            gauge gone quiet, no upstream forecast, a warnings feed that
+            failed. Nothing when all is well; every source's state is in
+            Settings → Info (DataSources.tsx). */}
+        <SourceAlerts />
         {renderContent()}
       </CardContent>
     </Card>

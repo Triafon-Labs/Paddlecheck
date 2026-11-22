@@ -110,8 +110,8 @@ app/
   manifest.ts           PWA web manifest
 
 components/
-  StatusCard.tsx         Current RAG status with its liveness row, river level landmarks, contributing factors, warnings, conditions report
-  SourceLiveness.tsx     A dot per source (River, Weather, Warnings) – live, behind, failed or updating – and the fetch time; tap for details
+  StatusCard.tsx         Current RAG status with any source alerts, river level landmarks, contributing factors, warnings, conditions report
+  DataSources.tsx        How live each source is: SourceAlerts (home, problems only) + DataSourcesList (Settings → Info)
   PaddlingStatusHero.tsx The status panel and five-step scale strip at the top of StatusCard
   PaddlingMatrixCard.tsx Skill-level guidance table (paddlerLevels – Worcester: Junior/Advanced Junior/Beginner/Improver/Intermediate/Independent)
   PaddlerLevelRow.tsx    One level's verdict as an expandable row – Who Can Paddle and the forecast hour's "You"
@@ -295,7 +295,7 @@ Upstream data failure (or `UPSTREAM_CSV_URL = null`) is non-fatal – the app fa
   isOffline: boolean
   lastFetchStale: boolean   // the data was already stale when the last fetch finished
   isRefreshing: boolean     // mirrors loading; true for the full duration of any online fetch
-  sourceHealth: SourceHealth | null  // per source: live / saved copy / missing – the liveness row
+  sourceHealth: SourceHealth | null  // per source: live / saved copy / missing – DataSources.tsx
   refetch: () => void
 }
 ```
@@ -341,14 +341,19 @@ refetches past `LIVE_REFETCH_AFTER_MS`, before the banner is due. `useFreshness`
 out staleness during render from a ticking clock rather than holding it in state, so the
 render where a refresh lands never pairs the new data with the old "stale" flag.
 
-Under the Paddling Status title, `SourceLiveness` shows a dot per source and the time the
-data was fetched, in place of the old "Updated" line and the "Gauge read …" / "As of …"
-captions that repeated the river's age. Green is live, amber behind, red failed, grey
-pulsing while a fetch runs; a tap lists the times. The River dot goes by the gauge's newest
-reading (amber past 2 hours) and turns amber when the upstream forecast is missing, since
-the forecast then runs on the trend alone. Upstream and warnings come back empty rather
-than null when they fail, so `/api/conditions` lists failed sources in `failed`, which the
-hook turns into `sourceHealth`. Severnwatch has the same row.
+Each source's state – green live, amber behind, red failed, grey pulsing while a fetch
+runs – is listed under Data Sources in Settings → Info (`components/DataSources.tsx`),
+with the time the data was fetched. It replaced the "Updated" line under the Paddling
+Status title and the "Gauge read …" / "As of …" captions that repeated the river's age.
+The River state goes by the gauge's newest reading (amber past 2 hours) and is amber when
+the upstream forecast is missing, since the forecast then runs on the trend alone. The
+home page shows a source under the Paddling Status title only when it has a problem
+nothing else there reports – the gauge behind, no upstream forecast, the warnings feed
+failing, one source on its saved copy inside an otherwise fresh response – and nothing
+at all otherwise. Offline, a failed update and aged data are the banners'. Upstream and
+warnings come back empty rather than null when they fail, so `/api/conditions` lists
+failed sources in `failed`, which the hook turns into `sourceHealth`. Severnwatch has the
+same split.
 
 `KayakDataContext.tsx` wraps this hook in React Context so all components can access it without prop drilling.
 

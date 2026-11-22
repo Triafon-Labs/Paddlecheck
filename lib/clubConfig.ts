@@ -110,16 +110,14 @@ const DEFAULTS = {
   conditionsKey: {
     tempWarm: "Warm. No temperature penalty applied.",
     tempCool: "Cool. Raises the base risk rating. Rain also becomes a factor.",
-    tempCold:
-      "Cold air, and likely cold water too - capsizing is far more dangerous with nowhere warm to recover. Significant increase in risk rating.",
+    tempCold: "Risk of cold water shock. Significant increase in risk rating.",
     windCalm: "Calm. No wind penalty applied.",
     windHigh: "Windy. Raises the risk rating at all temperatures.",
-    rainCool:
-      "Rain raises the risk rating whenever it isn't warm, by the same step as windy conditions.",
+    rainCool: "Raises the risk rating by the same step as wind.",
     // An extra row explaining how the club treats cold rain; hidden when empty.
     rainCold: "",
     rainWarm: "Rain doesn't count against the rating once it's this warm.",
-    dark: "Counts a forecast hour as dark when over {darkMinutes} minutes of it is before sunrise or after sunset. Raises the rating one step.",
+    dark: "An hour counts as dark when over {darkMinutes} minutes of it is before sunrise or after sunset. Raises the rating one step.",
     fog: "Raises the rating one step.",
     thunderstorm:
       "No paddling when thunder is near – overrides all other conditions.",

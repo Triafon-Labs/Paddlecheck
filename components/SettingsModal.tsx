@@ -501,8 +501,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
                   color="text.secondary"
                   sx={{ display: "block", mt: 0.5 }}
                 >
-                  When off, tap &ldquo;Show Conditions Report&rdquo; inside the
-                  status card to get one on demand.
+                  When off, tap &ldquo;Show Conditions Report&rdquo; in the
+                  status card.
                 </Typography>
               </>
             )}
@@ -521,13 +521,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
               }
               label="Show night hours"
             />
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: "block", mt: 0.5 }}
-            >
-              When off, the forecast chart shows daylight hours only.
-            </Typography>
           </Box>
         </Box>
 

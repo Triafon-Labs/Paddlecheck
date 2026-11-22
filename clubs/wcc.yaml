@@ -411,7 +411,7 @@ landmarks:
 conditionsKey:
   # An extra row only Worcester needs: its printed table doesn't cover cold
   # rain. Leave rainCold out and the row isn't shown.
-  rainCold: The club's printed table sets out rain only for the cool band, listing just calm and windy at {tempModerate}°C and below. {appName} treats cold rain like cold wind rather than ignoring it, so it is stricter than the printed rules here.
+  rainCold: Treated like cold wind. The club's printed table doesn't cover cold rain, so {appName} is stricter here.
   # The club's rules define dark as streetlights lit; the app can't see
   # streetlights, so it uses sunrise and sunset.
-  dark: Streetlights lit, in the club's rules. {appName} uses sunrise and sunset in its place, and counts a forecast hour as dark when over {darkMinutes} minutes of it is. Raises the rating one step.
+  dark: The club's rule is streetlights lit; {appName} uses sunset to sunrise (an hour counts if over {darkMinutes} minutes of it is dark). Raises the rating one step.

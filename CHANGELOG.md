@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.3.4](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.3.3...paddlecheck-v2.3.4) (2026-11-22)
+
+### Documentation
+
+* prepare the repository for public release ([3e8ffde](https://github.com/Triafon-Labs/Paddlecheck/commit/3e8ffde037509afb54e7109544a286a002c243e2))
+
 ## [2.3.3](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.3.2...paddlecheck-v2.3.3) (2026-11-20)
 
 ### Bug Fixes

@@ -77,7 +77,7 @@ export default function ConditionsBriefing({
         <NotesIcon fontSize="small" sx={{ color: "primary.main" }} />
         <Typography variant="body2" color="text.secondary">
           {failed === BRIEFING_UNAVAILABLE.DATA
-            ? "Conditions report unavailable while live data can't be fetched. Try again?"
+            ? "Conditions report needs live data. Try again?"
             : "Conditions report unavailable. Try again?"}
         </Typography>
       </InfoPanel>

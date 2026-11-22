@@ -406,7 +406,12 @@ rejecting commits whose first line isn't a valid Conventional Commit
   `Triafon-Labs/Paddlecheck` – a fork's own release commits would rewrite `CHANGELOG.md` and
   `package.json` and conflict on every sync.
 
-Both workflows install through `.github/actions/npm-install` rather than calling
+- **keep-alive.yml** – every 5 minutes, loads the deployed site
+  (`https://paddlecheck.vercel.app`, overridden by a `SITE_URL` repository
+  variable) and `/api/conditions`, and fails if any data source is missing.
+  A fork skips it until it sets `SITE_URL`. It only curls the public site.
+
+`ci.yml` and `auto-tag.yml` install through `.github/actions/npm-install` rather than calling
 `npm ci` directly. See below for why.
 
 The Node version is pinned to 22 in both workflows and declared as

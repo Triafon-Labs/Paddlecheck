@@ -110,7 +110,7 @@ const DEFAULTS = {
   conditionsKey: {
     tempWarm: "Warm. No temperature penalty applied.",
     tempCool: "Cool. Raises the base risk rating. Rain also becomes a factor.",
-    tempCold: "Risk of cold water shock. Significant increase in risk rating.",
+    tempCold: "Cold. Significantly raises the risk rating.",
     windCalm: "Calm. No wind penalty applied.",
     windHigh: "Windy. Raises the risk rating at all temperatures.",
     rainCool: "Raises the risk rating by the same step as wind.",

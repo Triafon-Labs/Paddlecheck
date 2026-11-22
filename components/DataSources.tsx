@@ -102,14 +102,14 @@ const useSourceViews = () => {
     const readingMs = last ? new Date(last.dateTime).getTime() : null;
     const details = [
       readingMs !== null
-        ? `EA gauge reading ${getLondonHHMM(new Date(readingMs))} (${formatDataAge(readingMs, now)})`
+        ? `Last reading ${getLondonHHMM(new Date(readingMs))}, ${formatDataAge(readingMs, now)}`
         : "EA river gauge",
     ];
     if (UPSTREAM_CSV_URL && sourceHealth) {
       details.push(
         sourceHealth.upstream
-          ? "Upstream forecast in"
-          : "No upstream forecast – the forecast follows the trend"
+          ? "Upstream forecast received"
+          : "No upstream forecast, using trend"
       );
     }
     const base = { key: "river", label: "River", details };
@@ -149,13 +149,9 @@ const useSourceViews = () => {
       key: "warnings",
       label: "Warnings",
       details: [
-        "Met Office warnings feed",
+        `Met Office, ${WARNING_AREA}`,
         ...(sourceHealth?.warnings
-          ? [
-              count === 0
-                ? `None in force for ${WARNING_AREA}`
-                : `${count} in force for ${WARNING_AREA}`,
-            ]
+          ? [count === 0 ? "None in force" : `${count} in force`]
           : []),
       ],
     };
@@ -246,8 +242,8 @@ export const DataSourcesList: React.FC = () => {
     <Stack spacing={1.5}>
       {fetchedMs !== null && (
         <Typography variant="body2" color="text.secondary">
-          Updated {getLondonHHMM(new Date(fetchedMs))} (
-          {formatDataAge(fetchedMs, now)})
+          Updated {getLondonHHMM(new Date(fetchedMs))},{" "}
+          {formatDataAge(fetchedMs, now)}
         </Typography>
       )}
       {views.map((v) => (

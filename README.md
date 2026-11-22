@@ -2,6 +2,8 @@
 
 A kayaking conditions dashboard providing real-time river levels, weather, and a RAG (Red-Amber-Green) paddling safety status. Built for Worcester Canoe Club on the River Severn, but designed to be adapted for any club in England on a river with an [Environment Agency](https://environment.data.gov.uk/flood-monitoring/doc/api-reference.html) monitoring station.
 
+Sibling project to [Severnwatch](https://github.com/Triafon-Labs/Severnwatch), which shows sewage spills and water quality on the same stretch of river.
+
 > **Note:** This is primarily a hobby project, vibe coded for fun. Expect rough edges, and feel free to use it as inspiration for your own projects.
 
 > **Safety:** Paddlecheck is a guide, not a substitute for judgement. Its status comes from automated feeds that can be late, wrong or missing, and from rules that were written for one stretch of one river. Always check conditions on the bank, and follow your own club's rules and coaches.
@@ -30,7 +32,7 @@ The browser only talks to the app's own API routes. `/api/conditions` fetches ev
 | Weather warnings                 | [Met Office regional warnings RSS](https://www.metoffice.gov.uk/weather/guides/rss)                                | No                   |
 | AI summary                       | [Groq](https://console.groq.com/)                                                                                  | Yes (`GROQ_API_KEY`) |
 
-The river level sets a base status. Temperature, wind and (in cool weather) rain then adjust it through a lookup table, and darkness and fog each push Green to Amber and Amber to Red. Thunderstorms or a river above the top threshold mean No Paddling regardless.
+The river level sets a base status. Temperature, wind and (in cool weather) rain then adjust it through a lookup table, and darkness and fog each raise it one step. None of these can reach No Paddling on their own; only a thunderstorm or a river above the top threshold can.
 
 The level forecast works in three stages: an upstream gauge's published forecast, shifted forward by the time water takes to travel down to your gauge; then a continuation of the recent trend for up to 18 hours; then the level held flat, so the furthest-out hours are driven by the weather alone.
 

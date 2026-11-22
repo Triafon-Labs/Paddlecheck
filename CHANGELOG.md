@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.4.0](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.3.4...paddlecheck-v2.4.0) (2026-11-22)
+
+### Features
+
+* liveness row for each data source under Paddling Status ([0c79c9c](https://github.com/Triafon-Labs/Paddlecheck/commit/0c79c9caf035177da491d38efa5e8c0f6ea0007b))
+* move data source status to Info, flag only problems on the home page ([53d50ba](https://github.com/Triafon-Labs/Paddlecheck/commit/53d50baa69098957a97466ba9a8f500f5e568de2))
+
 ## [2.3.4](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.3.3...paddlecheck-v2.3.4) (2026-11-22)
 
 ### Documentation

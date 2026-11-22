@@ -45,8 +45,6 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import { ChartDataPoint } from "@/types";
-import { formatDataAge } from "@/lib/time";
-import { useNowTicking } from "@/lib/useNowTicking";
 import { FORECAST_LINE_DASH, TIME_PERIODS } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
@@ -190,16 +188,6 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.RIVER_GRAPH_TIME_RANGE, selectedRange);
   }, [selectedRange]);
-
-  const now = useNowTicking();
-
-  const dataAgeLabel = useMemo(() => {
-    if (!data || data.length === 0) return null;
-    return formatDataAge(
-      new Date(data[data.length - 1].dateTime).getTime(),
-      now
-    );
-  }, [data, now]);
 
   const filteredData = useMemo(() => {
     if (!data || data.length === 0 || timeRange === "forecast") return null;
@@ -553,18 +541,6 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
           </Box>
         ) : (
           <>
-            {dataAgeLabel && (
-              <Typography
-                variant="caption"
-                color="text.disabled"
-                // No fontSize override: 0.7rem sat between M3's Body Small and
-                // Label Small, so the label was the one piece of text on the
-                // card that belonged to no step of the type scale.
-                sx={{ display: "block", textAlign: "right", mt: 1 }}
-              >
-                As of {dataAgeLabel}
-              </Typography>
-            )}
             <SlidingToggleButtonGroup
               value={selectedRange}
               exclusive
@@ -574,7 +550,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
                 }
               }}
               aria-label="time range"
-              sx={{ mt: 0.5, mb: 2, width: "100%" }}
+              sx={{ mt: 1, mb: 2, width: "100%" }}
             >
               {/* Ordered as a timeline: furthest back on the left through to
                   the forecast on the right, so moving right always means

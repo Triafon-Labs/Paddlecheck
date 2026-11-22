@@ -148,7 +148,26 @@ export interface ConditionsApiResponse {
   futureWeather: FutureWeatherData | null;
   upstream: UpstreamData;
   warnings: WeatherWarning[];
+  // The sources that failed server-side. Upstream and warnings come back
+  // empty rather than null on failure, so this is the only way to tell a
+  // failed feed from one with nothing in it (the liveness row).
+  failed?: ConditionsSource[];
   fetchedAt: string;
+}
+
+export type ConditionsSource =
+  "river" | "weather" | "futureWeather" | "upstream" | "warnings";
+
+// Where the data behind each liveness dot came from on the last fetch.
+// "saved" is the browser's own last-known copy, used when the server
+// couldn't get that source; "missing" is neither.
+export type SourceOrigin = "live" | "saved" | "missing";
+
+export interface SourceHealth {
+  river: SourceOrigin;
+  weather: SourceOrigin; // current and future weather together
+  upstream: boolean; // the upstream forecast arrived (always false if none configured)
+  warnings: boolean; // the warnings feed was read (an empty list counts)
 }
 
 // "held" means no forecast covers the hour: the level is the last linear

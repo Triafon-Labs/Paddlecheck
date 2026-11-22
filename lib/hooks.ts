@@ -7,6 +7,8 @@ import {
   FutureWeatherData,
   RiverDataResult,
   ConditionsApiResponse,
+  SourceHealth,
+  SourceOrigin,
 } from "@/types";
 import { LIVE_REFETCH_AFTER_MS } from "@/lib/config";
 import { buildKayakData } from "@/lib/buildKayakData";
@@ -75,6 +77,9 @@ export const useKayakData = () => {
   // since (there is no background poll), leaves this false. The nav bar
   // needs the difference: only the first is a failed update.
   const [lastFetchStale, setLastFetchStale] = useState(false);
+  // Where each source's data came from on the last fetch - the liveness row
+  // under the status title. Null until a fetch has finished.
+  const [sourceHealth, setSourceHealth] = useState<SourceHealth | null>(null);
   const isOfflineRef = useRef(false);
   // Tracks whether conditions/forecast data has ever been populated, so that
   // *while offline* a fetch attempt (which can't succeed anyway) doesn't
@@ -247,6 +252,8 @@ export const useKayakData = () => {
       const riverData =
         apiResponse?.river ??
         readRawCache<RiverDataResult>(STORAGE_KEYS.RIVER_DATA_RAW);
+      const originOf = (fromApi: unknown, used: unknown): SourceOrigin =>
+        fromApi ? "live" : used ? "saved" : "missing";
       const weatherData =
         apiResponse?.weather ??
         readRawCache<WeatherData>(STORAGE_KEYS.WEATHER_DATA_RAW);
@@ -259,6 +266,22 @@ export const useKayakData = () => {
         currentLevel: null,
       };
       const warningsData = apiResponse?.warnings ?? [];
+      const failed = apiResponse?.failed ?? [];
+      setSourceHealth({
+        river: originOf(apiResponse?.river, riverData),
+        // Current and future weather together: the status needs both.
+        weather:
+          apiResponse?.weather && apiResponse?.futureWeather
+            ? "live"
+            : weatherData && futureWeatherData
+              ? "saved"
+              : "missing",
+        upstream:
+          !!apiResponse &&
+          !failed.includes("upstream") &&
+          upstream.forecasts.length > 0,
+        warnings: !!apiResponse && !failed.includes("warnings"),
+      });
       // Reflects when the data was actually fetched from upstream (so a
       // 15-minute-old cache hit still reports its true age), falling back to
       // the previous cached conditions' timestamp if this request failed
@@ -432,6 +455,7 @@ export const useKayakData = () => {
     isOffline,
     isRefreshing,
     lastFetchStale,
+    sourceHealth,
     refetch: fetchData,
   };
 };

@@ -8,7 +8,7 @@ import {
   LONGITUDE,
   HISTORICAL_DAYS,
 } from "@/lib/config";
-import { UpstreamData, ConditionsApiResponse } from "@/types";
+import { UpstreamData, ConditionsApiResponse, ConditionsSource } from "@/types";
 
 // Shared by /api/conditions (cached, revalidate: 900) and
 // /api/conditions/live (liveness.live: true, bypasses the cache) so both
@@ -21,28 +21,34 @@ import { UpstreamData, ConditionsApiResponse } from "@/types";
 export const getConditionsPayload = async (
   liveness: FetchLiveness = {}
 ): Promise<ConditionsApiResponse> => {
+  const failed: ConditionsSource[] = [];
   const [river, weather, futureWeather, upstream, warnings] = await Promise.all(
     [
       fetchRiverData(RIVER_STATION_ID, HISTORICAL_DAYS, liveness).catch(
         (err) => {
           console.error("Failed to fetch river data:", err);
+          failed.push("river");
           return null;
         }
       ),
       fetchWeatherData(LATITUDE, LONGITUDE, liveness).catch((err) => {
         console.error("Failed to fetch weather data:", err);
+        failed.push("weather");
         return null;
       }),
       fetchFutureWeatherData(LATITUDE, LONGITUDE, liveness).catch((err) => {
         console.error("Failed to fetch future weather data:", err);
+        failed.push("futureWeather");
         return null;
       }),
       fetchUpstreamForecast(liveness).catch((err) => {
         console.error("Failed to fetch upstream forecast:", err);
+        failed.push("upstream");
         return { forecasts: [], observations: [], currentLevel: null };
       }),
       fetchWeatherWarnings(liveness).catch((err) => {
         console.error("Failed to fetch weather warnings:", err);
+        failed.push("warnings");
         return [];
       }),
     ]
@@ -70,6 +76,7 @@ export const getConditionsPayload = async (
     futureWeather,
     upstream: upstreamDTO,
     warnings,
+    failed,
     fetchedAt: new Date().toISOString(),
   };
 };

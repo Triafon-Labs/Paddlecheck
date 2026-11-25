@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.4.1](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.4.0...paddlecheck-v2.4.1) (2026-11-25)
+
+### Bug Fixes
+
+* align WCC club rules wording with Key Safety Rules v3.0 ([#12](https://github.com/Triafon-Labs/Paddlecheck/issues/12)) ([c050f5b](https://github.com/Triafon-Labs/Paddlecheck/commit/c050f5b0978880bf324466f981e5ffff9ae6c3ea))
+
 ## [2.4.0](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.3.4...paddlecheck-v2.4.0) (2026-11-22)
 
 ### Features

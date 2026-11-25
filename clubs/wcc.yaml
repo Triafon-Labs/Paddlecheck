@@ -6,7 +6,8 @@
 # Your Club" in README.md).
 #
 # Comments that quote "the rules" or "the printed table" mean Worcester
-# Canoe Club's own written paddling rules, which aren't published here.
+# Canoe Club's Key Safety Rules (v3.0 junior update, linked under
+# usefulLinks), last checked against this file in November 2026.
 #
 # A few YAML basics:
 #   - Indentation matters: use spaces (two per level), never tabs.
@@ -45,6 +46,8 @@ club:
       url: https://check-for-flooding.service.gov.uk/station/2001
     - name: Worcester Canoe Club
       url: https://worcestercanoeclub.org/
+    - name: Worcester Canoe Club Key Safety Rules
+      url: https://worcestercanoeclub.org/wp-content/uploads/2026/01/Worcester-Canoe-Club-Key-Safety-Rules-v3.0-junior-update.pdf
 
 # Your launch point, for weather, sunrise and sunset.
 location:
@@ -71,6 +74,9 @@ warnings:
 # on if left out)
 rules:
   weatherTable: true # temperature, wind and rain adjust the status (weatherTable below)
+  # The rules: "Darkness (i.e., streetlights lit) or fog increases the level
+  # i.e., Green → Amber and Amber → Red". "Green" there is coloured as Dark
+  # Green, so it's one step (Light Green → Dark Green → Amber → Red).
   darkness: true # darkness raises the status one step
   fog: true # fog or poor visibility raises the status one step
   thunderstorms: true # a thunderstorm jumps straight to the last step
@@ -209,8 +215,9 @@ paddlerLevels:
 # without one, every level gets "No" and "Ask a coach before paddling".
 whoCanPaddle:
   Light Green:
-    # Page 2 of the rules; page 1 says a club coach only. Page 2 is the
-    # later junior update, so it wins here.
+    # Page 2 of the rules: a club coach or an independent paddler with a
+    # parent's permission. Page 1 says a club coach, with exceptions approved
+    # on the day by the coach or group leader and the junior's parents.
     Junior:
       verdict: Warning
       details:
@@ -219,7 +226,8 @@ whoCanPaddle:
     Advanced Junior:
       verdict: Warning
       details:
-        - Coach supervision
+        - Supervised by a club coach, or an independent paddler with a parent's permission
+        - May join adult club sessions at the group leader's discretion
         - May paddle out of the coach's sight in a group of 2 or more advanced juniors, if the coach agrees
         - PFD at the coach's discretion
     Beginner:
@@ -254,7 +262,8 @@ whoCanPaddle:
     Advanced Junior:
       verdict: Warning
       details:
-        - Coach supervision
+        - Supervised by a club coach, or an independent paddler with a parent's permission
+        - May join adult club sessions at the group leader's discretion
         - PFD at the coach's discretion
     Beginner:
       verdict: Warning
@@ -269,7 +278,7 @@ whoCanPaddle:
       details:
         - Pair up with another intermediate, no coach needed
         - Solo K2 crews must be able to self-rescue
-        - Carry a mobile phone
+        - Someone in the group carries a mobile phone
         - Familiar boat only
         - Stay between Sabrina Bridge and the Slip
         - PFD required

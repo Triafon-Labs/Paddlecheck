@@ -470,7 +470,6 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               type="monotone"
               dataKey="actual"
               stroke={theme.palette.primary.main}
-              strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorActual)"
               connectNulls={false}
@@ -483,7 +482,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               dataKey="forecasted"
               stroke={theme.palette.primary.main}
               strokeDasharray={FORECAST_LINE_DASH.upstream}
-              strokeWidth={2.5}
+              strokeOpacity={0.7}
               dot={false}
               connectNulls={false}
             />
@@ -543,7 +542,6 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               type="monotone"
               dataKey="level"
               stroke={theme.palette.primary.main}
-              strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorLevel)"
             />

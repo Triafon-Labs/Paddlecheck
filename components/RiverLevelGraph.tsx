@@ -132,9 +132,11 @@ const ChangeIndicator: React.FC<{
                       ? "translateY(-1px)"
                       : `translateY(-1px) rotate(${rounded > 0 ? -45 : 45}deg) scale(1.15)`,
                   },
+                  // The figure's colour, not the heading icon's blue, so it
+                  // reads as part of the number rather than another label.
                   rounded > 0 && intoStep
                     ? intoStepSx
-                    : { color: "primary.main" },
+                    : { color: "text.primary" },
                 ]}
               />
             )}

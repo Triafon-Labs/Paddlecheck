@@ -114,29 +114,33 @@ const ChangeIndicator: React.FC<{
         {loading ? (
           <Skeleton variant="text" width={70} animation="wave" />
         ) : (
-          <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
+          <Box
+            component="span"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              // 18px puts the arrow's 12px glyph at the digits' height; at
+              // the 20px "small" size it overhung them. Flex centres it on
+              // the line box, whose middle sits below the digits' (they have
+              // no descenders), so it's lifted 1px onto theirs.
+              "& > svg": { fontSize: 18, transform: "translateY(-1px)" },
+            }}
+          >
             {rounded !== null ? (
               isFlat ? (
-                <ArrowForward
-                  fontSize="small"
-                  sx={{ color: "primary.main", mr: 0.5 }}
-                />
+                <ArrowForward sx={{ color: "primary.main", mr: 0.5 }} />
               ) : rounded > 0 ? (
                 // Direction only: a rise at a low level isn't bad news, so
                 // the arrows stay neutral unless the forecast reaches the
                 // next step.
                 <ArrowUpward
-                  fontSize="small"
                   sx={[
                     { mr: 0.5 },
                     intoStep ? intoStepSx : { color: "primary.main" },
                   ]}
                 />
               ) : (
-                <ArrowDownward
-                  fontSize="small"
-                  sx={{ color: "primary.main", mr: 0.5 }}
-                />
+                <ArrowDownward sx={{ color: "primary.main", mr: 0.5 }} />
               )
             ) : null}
             {changeStr !== null ? changeStr : "N/A"}

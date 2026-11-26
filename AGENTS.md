@@ -116,9 +116,9 @@ components/
   PaddlingMatrixCard.tsx Skill-level guidance table (paddlerLevels – Worcester: Junior/Advanced Junior/Beginner/Improver/Intermediate/Independent)
   PaddlerLevelRow.tsx    One level's verdict as an expandable row – Who Can Paddle and the forecast hour's "You"
   StatusFace.tsx         The verdict faces (a face on a status-colour disc) and their labels
-  StatsCard.tsx          Weather panel (sky, temp, feels-like) + tiles – wind, gusts, visibility, daylight
+  StatsCard.tsx          Weather panel (full-colour sky icon, temp, feels-like) + flat-icon tiles – wind, gusts, visibility, daylight
   RiverLevelLandmarks.tsx The reading between its nearest club landmarks, with distances (StatusCard); compact: the same scale a size down (forecast hour)
-  RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
+  RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (neutral arrows; the forecast tile turns amber, "Into <step>", when it reaches a higher step) (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
   ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below, opening with the verdict for your level
   TopNavBar.tsx          Header – club name (CLUB_SHORT_NAME) above APP_NAME, share, settings, refresh, stale/offline banners
@@ -161,6 +161,7 @@ lib/
   storageKeys.ts         Canonical localStorage key names
   useTooltipDismiss.ts   Closes a recharts tooltip on an outside press
   statusColors.ts        The status colour vocabulary
+  skyIcons.ts            Full-colour Meteocons sky icons (MIT) for the Weather card – cloud colours set per scheme in StatsCard
   ThemeContext.tsx       Wraps MUI's colour-scheme provider/hook (light/dark/system)
   m3-palette.ts          Material Design 3 colour palettes + motion tokens
   themes.ts              One MUI theme carrying both schemes as CSS variables
@@ -265,7 +266,7 @@ is dark is the forecast point's own `dark` flag (`isDarkSlot`, `lib/forecast.ts`
 
 Two sources are combined transparently:
 
-- **Upstream delta transfer** (primary, as far as the published forecast reaches plus the 6 h travel time – about 42 h for a 36 h feed): Upstream (Bewdley) readings are shifted 6 h forward and applied as a delta to the latest Barbourne reading, measured from the upstream gauge 6 h before that reading was taken so the forecast starts exactly on it. The upstream gauge's published forecast is shifted to start on its latest observation, and levels are interpolated between points. Displayed as tightly dashed lines in both graphs; the river level graph only draws the first `RIVER_GRAPH_FORECAST_HOURS` (24 h).
+- **Upstream delta transfer** (primary, as far as the published forecast reaches plus the 6 h travel time – about 42 h for a 36 h feed): Upstream (Bewdley) readings are shifted 6 h forward and applied as a delta to the latest Barbourne reading, measured from the upstream gauge 6 h before that reading was taken so the forecast starts exactly on it. The upstream gauge's published forecast is shifted to start on its latest observation, and levels are interpolated between points. Displayed as short dashed lines in both graphs; the river level graph only draws the first `RIVER_GRAPH_FORECAST_HOURS` (24 h).
 - **Linear trend** (fallback, beyond the upstream horizon): Continues the upstream trend over the last `UPSTREAM_TREND_HOURS` (6 h) of its series from where the upstream forecast ends, for at most `LINEAR_FORECAST_HOURS` (18 h). With no upstream data it uses a regression over the last 8 h of Barbourne readings instead – Barbourne lags the upstream gauge by the travel time, so on a rise its own trend is still flat when the upstream data runs out. Displayed as medium dashed lines.
 - **Held** (everything after that): The level is held flat at the last linear estimate, so the RAG status for those hours is driven by the weather. No line is drawn for these hours, and the tooltip reads "Assumed Level" / "Source: None – level held".
 

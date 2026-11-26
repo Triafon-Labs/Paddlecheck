@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useId } from "react";
 import {
   Card,
   CardContent,
@@ -9,20 +9,10 @@ import {
   Skeleton,
   Grow,
   Paper,
-  SvgIconProps,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import Air from "@mui/icons-material/Air";
 import Navigation from "@mui/icons-material/Navigation";
-import WbSunny from "@mui/icons-material/WbSunny";
-import Bedtime from "@mui/icons-material/Bedtime";
-import FilterDrama from "@mui/icons-material/FilterDrama";
-import Cloud from "@mui/icons-material/Cloud";
-import Foggy from "@mui/icons-material/Foggy";
-import Grain from "@mui/icons-material/Grain";
-import WaterDrop from "@mui/icons-material/WaterDrop";
-import AcUnit from "@mui/icons-material/AcUnit";
-import Thunderstorm from "@mui/icons-material/Thunderstorm";
 import WbTwilight from "@mui/icons-material/WbTwilight";
 import { KayakConditions } from "@/types";
 import { degreesToCompassName } from "@/lib/weather";
@@ -40,6 +30,7 @@ import {
   minutesOfISO,
 } from "@/lib/time";
 import { useNowTicking } from "@/lib/useNowTicking";
+import { SKY_ICONS, SkyIconName } from "@/lib/skyIcons";
 import StatTile, { TileHeading, TileValue, tileSx } from "./StatTile";
 
 interface StatsCardProps {
@@ -49,23 +40,61 @@ interface StatsCardProps {
 
 const MINUTES_PER_DAY = 24 * 60;
 
-// The sky icon for a WMO code. Clear skies after dark show the moon, so the
-// panel doesn't put a sun up at 9pm.
-const SkyIcon: React.FC<{ code?: number; dark?: boolean } & SvgIconProps> = ({
+// The Meteocons sky icon for a WMO code. Clear and partly cloudy skies after
+// dark show the moon, so the panel doesn't put a sun up at 9pm.
+const skyIconName = (code: number | undefined, dark?: boolean): SkyIconName => {
+  if (code === undefined) return "overcast";
+  if (code >= 95) return "thunderstorms-rain";
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return "snow";
+  if (code >= 61) return "rain";
+  if (code >= 51) return "drizzle";
+  if (code === 45 || code === 48) return "fog";
+  if (code === 3) return "overcast";
+  if (code === 2) return dark ? "partly-cloudy-night" : "partly-cloudy-day";
+  return dark ? "clear-night" : "clear-day";
+};
+
+// The one full-colour icon in the app: the rest of the card keeps the flat
+// theme icons, so the sky reads at a glance without the tiles looking like a
+// second icon set. Inlined rather than an <img> so it's in the offline shell
+// and its cloud colours can follow the scheme.
+const SkyIcon: React.FC<{ code?: number; dark?: boolean; size: number }> = ({
   code,
   dark,
-  ...props
+  size,
 }) => {
-  if (code === undefined) return <Cloud {...props} />;
-  if (code >= 95) return <Thunderstorm {...props} />;
-  if ((code >= 71 && code <= 77) || code === 85 || code === 86)
-    return <AcUnit {...props} />;
-  if (code >= 61) return <WaterDrop {...props} />;
-  if (code >= 51) return <Grain {...props} />;
-  if (code === 45 || code === 48) return <Foggy {...props} />;
-  if (code === 3) return <Cloud {...props} />;
-  if (code === 2) return <FilterDrama {...props} />;
-  return dark ? <Bedtime {...props} /> : <WbSunny {...props} />;
+  // Gradient ids are document-wide; useId keeps two icons from sharing one.
+  const id = `sky${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  return (
+    <Box
+      component="svg"
+      viewBox="0 0 64 64"
+      aria-hidden
+      sx={(theme) => ({
+        width: size,
+        height: size,
+        flexShrink: 0,
+        // Meteocons' clouds are near-white with a hairline edge, which all but
+        // vanishes on the light scheme's grey panel. Light gets a firmer
+        // edge and greyer underside; dark keeps the originals.
+        "--sky-cloud-top": "#ffffff",
+        "--sky-cloud-bottom": "#d9e0eb",
+        "--sky-fog-top": "#9aa1ad",
+        "--sky-fog-bottom": "#7d8594",
+        "& .sky-cloud-edge": { stroke: "#8d97a8", strokeWidth: 1 },
+        ...theme.applyStyles("dark", {
+          "--sky-cloud-top": "#f3f7fe",
+          "--sky-cloud-bottom": "#deeafb",
+          "--sky-fog-top": "#d4d7dd",
+          "--sky-fog-bottom": "#bec1c6",
+          "& .sky-cloud-edge": { stroke: "#e6effc", strokeWidth: 0.5 },
+        }),
+      })}
+      dangerouslySetInnerHTML={{
+        __html: SKY_ICONS[skyIconName(code, dark)].replaceAll("__ID__", id),
+      }}
+    />
+  );
 };
 
 // The day as a 24-hour track: daylight is the lit stretch, the dot is now.
@@ -230,11 +259,15 @@ const StatsCard: React.FC<StatsCardProps> = ({ conditions, loading }) => {
                 backgroundColor: "surfaces.containerHigh",
               }}
             >
-              <SkyIcon
-                code={conditions.weatherCode}
-                dark={conditions.dark}
-                sx={{ fontSize: 32, color: "primary.main", flexShrink: 0 }}
-              />
+              {/* Meteocons draw inside a lot of padding; the negative
+                  margin keeps the panel the height the 32px icon gave it. */}
+              <Box sx={{ display: "flex", m: "-12px -8px" }}>
+                <SkyIcon
+                  code={conditions.weatherCode}
+                  dark={conditions.dark}
+                  size={64}
+                />
+              </Box>
               <Box sx={{ minWidth: 0 }}>
                 <Typography
                   component="div"

@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.5.0](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.4.1...paddlecheck-v2.5.0) (2026-11-26)
+
+### Features
+
+* full-colour sky icon on the Weather card ([29cb1ab](https://github.com/Triafon-Labs/Paddlecheck/commit/29cb1ab97861bbca07e57f1d96d478ee52ec36eb))
+* fuller river fill and a forecast tile that flags the next step ([749453d](https://github.com/Triafon-Labs/Paddlecheck/commit/749453da2867f75816b58113f6464f66714d4064))
+
+### Bug Fixes
+
+* flag the forecast tile with amber text instead of a tinted tile ([8b8e642](https://github.com/Triafon-Labs/Paddlecheck/commit/8b8e6428a622903f5c71bd776b281e90095d10c4))
+
 ## [2.4.1](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.4.0...paddlecheck-v2.4.1) (2026-11-25)
 
 ### Bug Fixes

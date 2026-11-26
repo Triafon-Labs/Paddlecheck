@@ -116,7 +116,7 @@ components/
   PaddlingMatrixCard.tsx Skill-level guidance table (paddlerLevels – Worcester: Junior/Advanced Junior/Beginner/Improver/Intermediate/Independent)
   PaddlerLevelRow.tsx    One level's verdict as an expandable row – Who Can Paddle and the forecast hour's "You"
   StatusFace.tsx         The verdict faces (a face on a status-colour disc) and their labels
-  StatsCard.tsx          Weather panel (sky, temp, feels-like) + tiles – wind, gusts, visibility, daylight
+  StatsCard.tsx          Weather panel (full-colour sky icon, temp, feels-like) + flat-icon tiles – wind, gusts, visibility, daylight
   RiverLevelLandmarks.tsx The reading between its nearest club landmarks, with distances (StatusCard); compact: the same scale a size down (forecast hour)
   RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
@@ -161,6 +161,7 @@ lib/
   storageKeys.ts         Canonical localStorage key names
   useTooltipDismiss.ts   Closes a recharts tooltip on an outside press
   statusColors.ts        The status colour vocabulary
+  skyIcons.ts            Full-colour Meteocons sky icons (MIT) for the Weather card – cloud colours set per scheme in StatsCard
   ThemeContext.tsx       Wraps MUI's colour-scheme provider/hook (light/dark/system)
   m3-palette.ts          Material Design 3 colour palettes + motion tokens
   themes.ts              One MUI theme carrying both schemes as CSS variables

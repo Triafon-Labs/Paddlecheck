@@ -82,6 +82,15 @@ interface RiverLevelGraphProps {
   change5d: number | null;
 }
 
+// The status amber (warning.main) is about 2:1 as a bare glyph on a tile
+// (lib/m3-palette.ts), so the "into the next step" arrow and line use a
+// deeper amber in light (4.8:1 on surfaces.containerHigh) and a paler one in
+// dark (6.1:1).
+const intoStepSx = (theme: Theme) => ({
+  color: "#9A5200",
+  ...theme.applyStyles("dark", { color: "#FFB95C" }),
+});
+
 const ChangeIndicator: React.FC<{
   period: string;
   change: number | null;
@@ -99,20 +108,7 @@ const ChangeIndicator: React.FC<{
   const isFlat = rounded !== null && rounded === 0;
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        ...tileSx,
-        height: "100%",
-        // Amber is too faint as a bare arrow (lib/m3-palette.ts), so a
-        // forecast into the next step tints the whole tile instead.
-        ...(intoStep && {
-          backgroundColor: "warning.container",
-          color: "warning.onContainer",
-          "& .MuiTypography-root, & svg": { color: "inherit" },
-        }),
-      }}
-    >
+    <Paper elevation={0} sx={{ ...tileSx, height: "100%" }}>
       <TileHeading icon={icon} label={period} />
       <TileValue>
         {loading ? (
@@ -127,11 +123,14 @@ const ChangeIndicator: React.FC<{
                 />
               ) : rounded > 0 ? (
                 // Direction only: a rise at a low level isn't bad news, so
-                // the arrows stay neutral and the forecast tile's tint is
-                // what flags a rise into the next step.
+                // the arrows stay neutral unless the forecast reaches the
+                // next step.
                 <TrendingUp
                   fontSize="small"
-                  sx={{ color: "primary.main", mr: 0.5 }}
+                  sx={[
+                    { mr: 0.5 },
+                    intoStep ? intoStepSx : { color: "primary.main" },
+                  ]}
                 />
               ) : (
                 <TrendingDown
@@ -145,7 +144,9 @@ const ChangeIndicator: React.FC<{
         )}
       </TileValue>
       {intoStep && !loading && (
-        <Typography variant="body2">Into {intoStep}</Typography>
+        <Typography variant="body2" sx={intoStepSx}>
+          Into {intoStep}
+        </Typography>
       )}
     </Paper>
   );

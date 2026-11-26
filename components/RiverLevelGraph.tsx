@@ -119,7 +119,7 @@ const ChangeIndicator: React.FC<{
               isFlat ? (
                 <TrendingFlat
                   fontSize="small"
-                  sx={{ color: "text.secondary", mr: 0.5 }}
+                  sx={{ color: "primary.main", mr: 0.5 }}
                 />
               ) : rounded > 0 ? (
                 // Direction only: a rise at a low level isn't bad news, so

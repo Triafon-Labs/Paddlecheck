@@ -1,9 +1,7 @@
 "use client";
 
 import {
-  TrendingUp,
-  TrendingDown,
-  TrendingFlat,
+  ArrowForward,
   History,
   CalendarToday,
   Update,
@@ -115,30 +113,33 @@ const ChangeIndicator: React.FC<{
           <Skeleton variant="text" width={70} animation="wave" />
         ) : (
           <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
-            {rounded !== null ? (
-              isFlat ? (
-                <TrendingFlat
-                  fontSize="small"
-                  sx={{ color: "primary.main", mr: 0.5 }}
-                />
-              ) : rounded > 0 ? (
-                // Direction only: a rise at a low level isn't bad news, so
-                // the arrows stay neutral unless the forecast reaches the
-                // next step.
-                <TrendingUp
-                  fontSize="small"
-                  sx={[
-                    { mr: 0.5 },
-                    intoStep ? intoStepSx : { color: "primary.main" },
-                  ]}
-                />
-              ) : (
-                <TrendingDown
-                  fontSize="small"
-                  sx={{ color: "primary.main", mr: 0.5 }}
-                />
-              )
-            ) : null}
+            {rounded !== null && (
+              // One arrow for all three, tilted 45 degrees for a rise or a
+              // fall, so they share a head shape. Direction only: a rise
+              // at a low level isn't bad news, so it stays neutral unless the
+              // forecast reaches the next step. 18px puts the glyph at the
+              // digits' height; flex centres it on the line box, whose middle
+              // sits below the digits' (no descenders), so it's lifted 1px.
+              <ArrowForward
+                sx={[
+                  {
+                    fontSize: 18,
+                    mr: 0.5,
+                    // Tilted, the same arrow fills a smaller box (8px against
+                    // 11px), so it's scaled up - short of the full 1.4, which
+                    // thickens its line past the flat arrow's.
+                    transform: isFlat
+                      ? "translateY(-1px)"
+                      : `translateY(-1px) rotate(${rounded > 0 ? -45 : 45}deg) scale(1.15)`,
+                  },
+                  // The figure's colour, not the heading icon's blue, so it
+                  // reads as part of the number rather than another label.
+                  rounded > 0 && intoStep
+                    ? intoStepSx
+                    : { color: "text.primary" },
+                ]}
+              />
+            )}
             {changeStr !== null ? changeStr : "N/A"}
           </Box>
         )}

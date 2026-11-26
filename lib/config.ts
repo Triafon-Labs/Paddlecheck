@@ -71,13 +71,13 @@ export const LINEAR_FORECAST_HOURS = 18;
 export const RIVER_GRAPH_FORECAST_HOURS = 24;
 
 // Dash pattern for each forecast source's level line, shared by the river
-// level graph and the forecast chart: upstream tight, the linear trend wider.
+// level graph and the forecast chart: upstream short, the linear trend longer.
 // Held hours get no line (see ForecastRagGraph).
 export const FORECAST_LINE_DASH: Record<
   Exclude<ForecastSource, "held">,
   string
 > = {
-  upstream: "2 3",
+  upstream: "4 3",
   linear: "6 4",
 };
 

@@ -26,6 +26,7 @@ import {
   ToggleButton,
   Divider,
   Grow,
+  Theme,
 } from "@mui/material";
 import {
   ComposedChart,
@@ -45,7 +46,7 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import { ChartDataPoint } from "@/types";
-import { FORECAST_LINE_DASH, TIME_PERIODS } from "@/lib/config";
+import { FORECAST_LINE_DASH, STATUS_STEPS, TIME_PERIODS } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { springTransition } from "@/lib/m3-palette";
@@ -56,6 +57,18 @@ import { revealSx } from "@/lib/chartMotion";
 // rather than through recharts (lib/chartMotion.ts) - recharts' default
 // duration and easing, which this used before.
 const chartRevealSx = revealSx(".recharts-area, .recharts-line", 1500, "ease");
+
+// The level's fill keeps its colour down to the axis, like a body of water,
+// rather than fading out. Dark's primary is a pale blue that turns grey at a
+// low opacity, so it needs a little more there.
+const levelFillSx = (theme: Theme) => ({
+  "& .level-fill-top": { stopOpacity: 0.45 },
+  "& .level-fill-bottom": { stopOpacity: 0.16 },
+  ...theme.applyStyles("dark", {
+    "& .level-fill-top": { stopOpacity: 0.5 },
+    "& .level-fill-bottom": { stopOpacity: 0.18 },
+  }),
+});
 import SlidingToggleButtonGroup from "./SlidingToggleButtonGroup";
 import { TileHeading, TileValue, tileSx } from "./StatTile";
 
@@ -74,7 +87,10 @@ const ChangeIndicator: React.FC<{
   change: number | null;
   icon: React.ReactNode;
   loading?: boolean;
-}> = ({ period, change, icon, loading }) => {
+  // The status step this change takes the river into, if any. Only the
+  // forecast passes one: the other tiles describe what already happened.
+  intoStep?: string | null;
+}> = ({ period, change, icon, loading, intoStep }) => {
   // Round first so the displayed value and the arrow direction always agree,
   // and so a value that rounds to zero (e.g. -0.001) never renders as "-0.00".
   const rounded = change !== null ? Number(change.toFixed(2)) : null;
@@ -83,7 +99,20 @@ const ChangeIndicator: React.FC<{
   const isFlat = rounded !== null && rounded === 0;
 
   return (
-    <Paper elevation={0} sx={{ ...tileSx, height: "100%" }}>
+    <Paper
+      elevation={0}
+      sx={{
+        ...tileSx,
+        height: "100%",
+        // Amber is too faint as a bare arrow (lib/m3-palette.ts), so a
+        // forecast into the next step tints the whole tile instead.
+        ...(intoStep && {
+          backgroundColor: "warning.container",
+          color: "warning.onContainer",
+          "& .MuiTypography-root, & svg": { color: "inherit" },
+        }),
+      }}
+    >
       <TileHeading icon={icon} label={period} />
       <TileValue>
         {loading ? (
@@ -97,14 +126,17 @@ const ChangeIndicator: React.FC<{
                   sx={{ color: "text.secondary", mr: 0.5 }}
                 />
               ) : rounded > 0 ? (
+                // Direction only: a rise at a low level isn't bad news, so
+                // the arrows stay neutral and the forecast tile's tint is
+                // what flags a rise into the next step.
                 <TrendingUp
                   fontSize="small"
-                  sx={{ color: "error.main", mr: 0.5 }}
+                  sx={{ color: "primary.main", mr: 0.5 }}
                 />
               ) : (
                 <TrendingDown
                   fontSize="small"
-                  sx={{ color: "success.main", mr: 0.5 }}
+                  sx={{ color: "primary.main", mr: 0.5 }}
                 />
               )
             ) : null}
@@ -112,6 +144,9 @@ const ChangeIndicator: React.FC<{
           </Box>
         )}
       </TileValue>
+      {intoStep && !loading && (
+        <Typography variant="body2">Into {intoStep}</Typography>
+      )}
     </Paper>
   );
 };
@@ -345,6 +380,25 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     return closest.level - currentLevel;
   }, [forecastData, data]);
 
+  // The highest step the forecast reaches in the next 24 hours that the
+  // river isn't already at - the peak, not the 24h point, so a rise that
+  // tops out and falls back inside the day still counts.
+  const forecastIntoStep = useMemo(() => {
+    if (!forecastData || !data || data.length === 0) return null;
+    const currentLevel = data[data.length - 1].level;
+    const latestTs = new Date(data[data.length - 1].dateTime).getTime();
+    const horizon = latestTs + TIME_PERIODS.TWENTY_FOUR_HOURS;
+    const peak = Math.max(
+      ...forecastData
+        .filter((pt) => new Date(pt.dateTime).getTime() <= horizon)
+        .map((pt) => pt.level)
+    );
+    const reached = STATUS_STEPS.filter(
+      (step) => step.fromLevel > currentLevel && peak >= step.fromLevel
+    );
+    return reached.length > 0 ? reached[reached.length - 1].name : null;
+  }, [forecastData, data]);
+
   const formatXAxis = (tickItem: number) => {
     const date = new Date(tickItem);
     if (timeRange === "5d") {
@@ -371,14 +425,14 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             <defs>
               <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
                 <stop
+                  className="level-fill-top"
                   offset="5%"
                   stopColor={theme.palette.primary.main}
-                  stopOpacity={0.8}
                 />
                 <stop
+                  className="level-fill-bottom"
                   offset="95%"
                   stopColor={theme.palette.primary.main}
-                  stopOpacity={0}
                 />
               </linearGradient>
             </defs>
@@ -415,6 +469,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               type="monotone"
               dataKey="actual"
               stroke={theme.palette.primary.main}
+              strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorActual)"
               connectNulls={false}
@@ -427,7 +482,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               dataKey="forecasted"
               stroke={theme.palette.primary.main}
               strokeDasharray={FORECAST_LINE_DASH.upstream}
-              strokeOpacity={0.7}
+              strokeWidth={2.5}
               dot={false}
               connectNulls={false}
             />
@@ -448,14 +503,14 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             <defs>
               <linearGradient id="colorLevel" x1="0" y1="0" x2="0" y2="1">
                 <stop
+                  className="level-fill-top"
                   offset="5%"
                   stopColor={theme.palette.primary.main}
-                  stopOpacity={0.8}
                 />
                 <stop
+                  className="level-fill-bottom"
                   offset="95%"
                   stopColor={theme.palette.primary.main}
-                  stopOpacity={0}
                 />
               </linearGradient>
             </defs>
@@ -487,6 +542,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
               type="monotone"
               dataKey="level"
               stroke={theme.palette.primary.main}
+              strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorLevel)"
             />
@@ -514,7 +570,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     }
     return (
       <Grow in appear {...springTransition()}>
-        <Box ref={chartRef} sx={chartRevealSx}>
+        <Box ref={chartRef} sx={[chartRevealSx, levelFillSx]}>
           {renderChartBody()}
         </Box>
       </Grow>
@@ -618,6 +674,7 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             change={forecastedChange24h}
             icon={<Update />}
             loading={loading}
+            intoStep={forecastIntoStep}
           />
         </Box>
       </CardContent>

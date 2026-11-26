@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  TrendingUp,
-  TrendingDown,
-  TrendingFlat,
+  ArrowUpward,
+  ArrowDownward,
+  ArrowForward,
   History,
   CalendarToday,
   Update,
@@ -117,7 +117,7 @@ const ChangeIndicator: React.FC<{
           <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
             {rounded !== null ? (
               isFlat ? (
-                <TrendingFlat
+                <ArrowForward
                   fontSize="small"
                   sx={{ color: "primary.main", mr: 0.5 }}
                 />
@@ -125,7 +125,7 @@ const ChangeIndicator: React.FC<{
                 // Direction only: a rise at a low level isn't bad news, so
                 // the arrows stay neutral unless the forecast reaches the
                 // next step.
-                <TrendingUp
+                <ArrowUpward
                   fontSize="small"
                   sx={[
                     { mr: 0.5 },
@@ -133,7 +133,7 @@ const ChangeIndicator: React.FC<{
                   ]}
                 />
               ) : (
-                <TrendingDown
+                <ArrowDownward
                   fontSize="small"
                   sx={{ color: "primary.main", mr: 0.5 }}
                 />

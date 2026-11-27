@@ -95,6 +95,16 @@ The service worker only registers in a production build, so use `npm run build &
 
 ## Adapting for Your Club
 
+### The quickest route
+
+You don't need to be a developer. Most clubs can get their own copy running with three free tools:
+
+1. **GitHub** holds your copy. Fork this repository into your own account or club organisation (see [Fork or clone?](#fork-or-clone)).
+2. **An AI assistant in Visual Studio Code** writes your settings. [GitHub Copilot](https://code.visualstudio.com/docs/copilot/overview) is built into [VS Code](https://code.visualstudio.com/) and has a free tier. Open your copy in VS Code, give it your club's rules and gauge, and it fills in your club file and checks it runs (see [Using an AI assistant](#using-an-ai-assistant)). You'll need [Node.js](https://nodejs.org/) 22 or later and Git installed first.
+3. **Vercel** hosts it. Import your fork, set `CLUB` to your club file's name and deploy (see [Vercel](#vercel-recommended)).
+
+Whichever way you do it, read through what's been written before anyone relies on it, and get your rules agreed by whoever is responsible for safety in your club. The sections below cover each step in detail.
+
 ### Before you start: will it work for your river?
 
 - **England only, as it stands.** River levels come from the Environment Agency, which covers England. Wales (Natural Resources Wales), Scotland (SEPA) and Northern Ireland have separate services with different APIs, so a club there would need to rewrite `fetchRiverData` in `lib/river.ts`. The weather and Met Office warnings cover the whole UK; Open-Meteo works worldwide.

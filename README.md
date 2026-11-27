@@ -100,7 +100,7 @@ The service worker only registers in a production build, so use `npm run build &
 - **England only, as it stands.** River levels come from the Environment Agency, which covers England. Wales (Natural Resources Wales), Scotland (SEPA) and Northern Ireland have separate services with different APIs, so a club there would need to rewrite `fetchRiverData` in `lib/river.ts`. The weather and Met Office warnings cover the whole UK; Open-Meteo works worldwide.
 - **You need a level gauge** near your launch point. Check that it reports a level in metres (some stations only report flow) and that it updates regularly – most report every 15 minutes.
 - **UK time is assumed.** Times are handled in `Europe/London` throughout (`lib/time.ts`, `lib/warnings.ts`, `lib/weather.ts`).
-- **The rules are Worcester's.** The thresholds, the weather table, which factors count and the "who can paddle" guidance all encode Worcester Canoe Club's rules. Don't deploy for your club until you've replaced them with your own, agreed by whoever is responsible for safety in your club.
+- **The rules have to be your own.** The thresholds, the weather table, which factors count and the "who can paddle" guidance all come from your club file. `clubs/example.yaml` starts you off with made-up values to replace, and `clubs/wcc.yaml` shows how Worcester's rules are set out if you want to borrow from them. Don't deploy for your club until the rules in your file are agreed by whoever is responsible for safety in your club.
 
 ### Fork or clone?
 

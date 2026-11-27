@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  ArrowForward,
-  History,
-  CalendarToday,
-  Update,
-} from "@mui/icons-material";
+import { History, CalendarToday, Update } from "@mui/icons-material";
 import React, {
   useState,
   useEffect,
@@ -81,7 +76,7 @@ interface RiverLevelGraphProps {
 }
 
 // The status amber (warning.main) is about 2:1 as a bare glyph on a tile
-// (lib/m3-palette.ts), so the "into the next step" arrow and line use a
+// (lib/m3-palette.ts), so the "into the next step" figure and line use a
 // deeper amber in light (4.8:1 on surfaces.containerHigh) and a paler one in
 // dark (6.1:1).
 const intoStepSx = (theme: Theme) => ({
@@ -98,12 +93,18 @@ const ChangeIndicator: React.FC<{
   // forecast passes one: the other tiles describe what already happened.
   intoStep?: string | null;
 }> = ({ period, change, icon, loading, intoStep }) => {
-  // Round first so the displayed value and the arrow direction always agree,
-  // and so a value that rounds to zero (e.g. -0.001) never renders as "-0.00".
+  // Round first so the word and the figure always agree, and so a value that
+  // rounds to zero (e.g. -0.001) reads "Steady" rather than "Down 0.00 m".
   const rounded = change !== null ? Number(change.toFixed(2)) : null;
-  const changeStr =
-    rounded !== null ? formatRiverLevel(Math.abs(rounded)) : null;
-  const isFlat = rounded !== null && rounded === 0;
+  // Words rather than an arrow, in the figure's own type: direction only, as
+  // a rise at a low level isn't bad news. The whole line turns amber only
+  // when the forecast reaches the next step.
+  const text =
+    rounded === null
+      ? "N/A"
+      : rounded === 0
+        ? "Steady"
+        : `${rounded > 0 ? "Up" : "Down"} ${formatRiverLevel(Math.abs(rounded))}`;
 
   return (
     <Paper elevation={0} sx={{ ...tileSx, height: "100%" }}>
@@ -112,35 +113,11 @@ const ChangeIndicator: React.FC<{
         {loading ? (
           <Skeleton variant="text" width={70} animation="wave" />
         ) : (
-          <Box component="span" sx={{ display: "flex", alignItems: "center" }}>
-            {rounded !== null && (
-              // One arrow for all three, tilted 45 degrees for a rise or a
-              // fall, so they share a head shape. Direction only: a rise
-              // at a low level isn't bad news, so it stays neutral unless the
-              // forecast reaches the next step. 18px puts the glyph at the
-              // digits' height; flex centres it on the line box, whose middle
-              // sits below the digits' (no descenders), so it's lifted 1px.
-              <ArrowForward
-                sx={[
-                  {
-                    fontSize: 18,
-                    mr: 0.5,
-                    // Tilted, the same arrow fills a smaller box (8px against
-                    // 11px), so it's scaled up - short of the full 1.4, which
-                    // thickens its line past the flat arrow's.
-                    transform: isFlat
-                      ? "translateY(-1px)"
-                      : `translateY(-1px) rotate(${rounded > 0 ? -45 : 45}deg) scale(1.15)`,
-                  },
-                  // The figure's colour, not the heading icon's blue, so it
-                  // reads as part of the number rather than another label.
-                  rounded > 0 && intoStep
-                    ? intoStepSx
-                    : { color: "text.primary" },
-                ]}
-              />
-            )}
-            {changeStr !== null ? changeStr : "N/A"}
+          <Box
+            component="span"
+            sx={rounded !== null && rounded > 0 && intoStep ? intoStepSx : {}}
+          >
+            {text}
           </Box>
         )}
       </TileValue>

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.5.3](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.5.2...paddlecheck-v2.5.3) (2026-11-27)
+
+### Documentation
+
+* clarify that club rules come from the club's own file ([e3ddcf4](https://github.com/Triafon-Labs/Paddlecheck/commit/e3ddcf460e66c106d84272e045ec49115e0d7097))
+
 ## [2.5.2](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.5.1...paddlecheck-v2.5.2) (2026-11-27)
 
 ## [2.5.1](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.5.0...paddlecheck-v2.5.1) (2026-11-26)

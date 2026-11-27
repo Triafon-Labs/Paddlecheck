@@ -103,7 +103,7 @@ You don't need to be a developer. Most clubs can get their own copy running with
 2. **An AI assistant in Visual Studio Code** writes your settings. [GitHub Copilot](https://code.visualstudio.com/docs/copilot/overview) is built into [VS Code](https://code.visualstudio.com/) and has a free tier. Open your copy in VS Code, give it your club's rules and gauge, and it fills in your club file and checks it runs (see [Using an AI assistant](#using-an-ai-assistant)). You'll need [Node.js](https://nodejs.org/) 22 or later and Git installed first.
 3. **Vercel** hosts it. Import your fork, set `CLUB` to your club file's name and deploy (see [Vercel](#vercel-recommended)).
 
-Whichever way you do it, read through what's been written before anyone relies on it, and get your rules agreed by whoever is responsible for safety in your club. The sections below cover each step in detail.
+The assistant can do most of the work, or walk you through any of these steps if you get stuck, so you don't have to follow this exactly. Whichever way you do it, read through what's been written before anyone relies on it, and get your rules agreed by whoever is responsible for safety in your club. The sections below cover each step in detail.
 
 ### Before you start: will it work for your river?
 

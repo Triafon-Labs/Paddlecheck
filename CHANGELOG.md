@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.5.4](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.5.3...paddlecheck-v2.5.4) (2026-11-27)
+
+### Documentation
+
+* add a quickest route section for clubs adapting the app ([9703f8a](https://github.com/Triafon-Labs/Paddlecheck/commit/9703f8ad72759a3c6fded5b0dfb5df9be3d41348))
+* note the assistant can help with every step ([55bc0ca](https://github.com/Triafon-Labs/Paddlecheck/commit/55bc0caebdb900ea295c82efe60453c8a052e8b4))
+* tidy the adapting section after review ([26a0068](https://github.com/Triafon-Labs/Paddlecheck/commit/26a0068f8cf9ffe531225f7aa359219dfa3a64e4))
+
 ## [2.5.3](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.5.2...paddlecheck-v2.5.3) (2026-11-27)
 
 ### Documentation

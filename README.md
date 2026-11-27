@@ -10,7 +10,7 @@ Sibling project to [Severnwatch](https://github.com/Triafon-Labs/Severnwatch), w
 
 ## Features
 
-- **RAG status** – a five-step rating (Light Green, Dark Green, Amber, Red, No Paddling) from river level, temperature, wind, rain, visibility, thunderstorms and daylight
+- **RAG status** – a rating on the club's own scale (Worcester: Light Green, Dark Green, Amber, Red, No Paddling) from river level, temperature, wind, rain, visibility, thunderstorms and daylight
 - **Who can paddle** – what each paddler level (Worcester: Junior, Advanced Junior, Beginner, Improver, Intermediate, Independent) may do under the current status
 - **River level graph** – the last five days of readings, plus a short forecast from an upstream gauge
 - **5-day forecast** – hourly RAG status for the coming days; tap an hour for its details
@@ -72,7 +72,7 @@ With nothing else set, that runs the starter settings in `clubs/example.yaml` an
 
 ### AI summary (optional)
 
-The summary needs a [Groq API key](https://console.groq.com/keys) (Groq has a free tier). Create a file called `.env.local` in the project root:
+The summary needs a [Groq API key](https://console.groq.com/keys) (Groq has a free tier). Add it to `.env.local` in the project root, creating the file if it isn't there yet:
 
 ```bash
 GROQ_API_KEY=your-key-here
@@ -101,6 +101,16 @@ The service worker only registers in a production build, so use `npm run build &
 - **You need a level gauge** near your launch point. Check that it reports a level in metres (some stations only report flow) and that it updates regularly – most report every 15 minutes.
 - **UK time is assumed.** Times are handled in `Europe/London` throughout (`lib/time.ts`, `lib/warnings.ts`, `lib/weather.ts`).
 - **The rules have to be your own.** The thresholds, the weather table, which factors count and the "who can paddle" guidance all come from your club file. `clubs/example.yaml` starts you off with made-up values to replace, and `clubs/wcc.yaml` shows how Worcester's rules are set out if you want to borrow from them. Don't deploy for your club until the rules in your file are agreed by whoever is responsible for safety in your club.
+
+### The quickest route
+
+You don't need to be a developer. Most clubs can get their own copy running with three tools:
+
+1. **GitHub** holds your copy. Fork this repository into your own account or club organisation (see [Fork or clone?](#fork-or-clone)).
+2. **An AI assistant in Visual Studio Code** writes your settings. [GitHub Copilot](https://code.visualstudio.com/docs/copilot/overview) is built into [VS Code](https://code.visualstudio.com/) and has a free tier. Open your copy in VS Code, give it your club's rules and gauge, and it fills in your club file and checks it runs (see [Using an AI assistant](#using-an-ai-assistant)). You'll need [Node.js](https://nodejs.org/) 22 or later and Git installed first.
+3. **Vercel** hosts it. Import your fork, set `CLUB` to your club file's name and deploy (see [Vercel](#vercel-recommended)).
+
+The assistant can do most of the work, or walk you through any of these steps if you get stuck, so you don't have to follow this exactly. Whichever way you do it, read through what's been written before anyone relies on it. The sections below cover each step in detail.
 
 ### Fork or clone?
 

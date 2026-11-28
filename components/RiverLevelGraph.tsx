@@ -1,6 +1,12 @@
 "use client";
 
-import { History, CalendarToday, Update } from "@mui/icons-material";
+import {
+  ArrowDownward,
+  ArrowUpward,
+  History,
+  CalendarToday,
+  Update,
+} from "@mui/icons-material";
 import React, {
   useState,
   useEffect,
@@ -12,7 +18,6 @@ import {
   Card,
   CardContent,
   Typography,
-  Chip,
   Box,
   Skeleton,
   useTheme,
@@ -76,6 +81,19 @@ interface RiverLevelGraphProps {
   change5d: number | null;
 }
 
+// The status red and green are only about 2:1 as bare text on a dark tile
+// (lib/m3-palette.ts), so dark takes paler shades of each, the way a share
+// price ticker does: 5.9:1 and 7.9:1 on surfaces.containerHigh. Light keeps
+// the status red (5.4:1) and a slightly deeper green (5.3:1).
+const riseSx = (theme: Theme) => ({
+  color: "#B71C1C",
+  ...theme.applyStyles("dark", { color: "#FF8A80" }),
+});
+const fallSx = (theme: Theme) => ({
+  color: "#006E1C",
+  ...theme.applyStyles("dark", { color: "#7BDA86" }),
+});
+
 const ChangeIndicator: React.FC<{
   period: string;
   change: number | null;
@@ -85,10 +103,9 @@ const ChangeIndicator: React.FC<{
   // Round first so the word and the figure always agree, and so a value that
   // rounds to zero (e.g. -0.001) reads "Steady" rather than "Down 0.00 m".
   const rounded = change !== null ? Number(change.toFixed(2)) : null;
-  // A filled chip rather than an arrow: "Up" on red, "Down" on green, with
-  // the figure beside it in the plain text colour, so the direction reads at
-  // a glance. The status red and green are too faint as bare text on a dark
-  // tile, but carry well as fills. "Steady" stays plain.
+  // Like a share price ticker: an arrow and the figure, both red for a rise
+  // and green for a fall, so the direction reads at a glance. "Steady" stays
+  // plain.
 
   return (
     <Paper elevation={0} sx={{ ...tileSx, height: "100%" }}>
@@ -103,13 +120,16 @@ const ChangeIndicator: React.FC<{
         ) : (
           <Box
             component="span"
-            sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}
+            sx={[
+              { display: "inline-flex", alignItems: "center", gap: 0.25 },
+              rounded > 0 ? riseSx : fallSx,
+            ]}
           >
-            <Chip
-              label={rounded > 0 ? "Up" : "Down"}
-              color={rounded > 0 ? "error" : "success"}
-              size="small"
-            />
+            {rounded > 0 ? (
+              <ArrowUpward sx={{ fontSize: "1.1em" }} />
+            ) : (
+              <ArrowDownward sx={{ fontSize: "1.1em" }} />
+            )}
             {formatRiverLevel(Math.abs(rounded))}
           </Box>
         )}

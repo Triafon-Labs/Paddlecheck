@@ -75,20 +75,6 @@ interface RiverLevelGraphProps {
   change5d: number | null;
 }
 
-// A rise reads red and a fall green. The status red and green (error.main,
-// success.main) are only about 2:1 as bare text on a dark tile
-// (lib/m3-palette.ts), so dark takes paler shades of each: 5.9:1 and 7.9:1 on
-// surfaces.containerHigh. Light keeps the status red (5.4:1) and a slightly
-// deeper green (5.3:1).
-const riseSx = (theme: Theme) => ({
-  color: "#B71C1C",
-  ...theme.applyStyles("dark", { color: "#FF8A80" }),
-});
-const fallSx = (theme: Theme) => ({
-  color: "#006E1C",
-  ...theme.applyStyles("dark", { color: "#7BDA86" }),
-});
-
 const ChangeIndicator: React.FC<{
   period: string;
   change: number | null;
@@ -114,7 +100,10 @@ const ChangeIndicator: React.FC<{
           "Steady"
         ) : (
           <>
-            <Box component="span" sx={rounded > 0 ? riseSx : fallSx}>
+            <Box
+              component="span"
+              sx={{ color: rounded > 0 ? "error.main" : "success.main" }}
+            >
               {rounded > 0 ? "Up" : "Down"}
             </Box>{" "}
             {formatRiverLevel(Math.abs(rounded))}

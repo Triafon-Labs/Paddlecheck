@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.5.6](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.5.5...paddlecheck-v2.5.6) (2026-11-28)
+
+### Documentation
+
+* tell agents to squash merge pull requests into main ([#19](https://github.com/Triafon-Labs/Paddlecheck/issues/19)) ([6ae3dbc](https://github.com/Triafon-Labs/Paddlecheck/commit/6ae3dbc56c5cc0ab42a5f6eded2db6cd5fcda7f0))
+
 ## [2.5.5](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.5.4...paddlecheck-v2.5.5) (2026-11-28)
 
 ## [2.5.4](https://github.com/Triafon-Labs/Paddlecheck/compare/paddlecheck-v2.5.3...paddlecheck-v2.5.4) (2026-11-27)

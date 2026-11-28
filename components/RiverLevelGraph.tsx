@@ -39,7 +39,7 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import { ChartDataPoint } from "@/types";
-import { FORECAST_LINE_DASH, STATUS_STEPS, TIME_PERIODS } from "@/lib/config";
+import { FORECAST_LINE_DASH, TIME_PERIODS } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { springTransition } from "@/lib/m3-palette";
@@ -94,21 +94,13 @@ const ChangeIndicator: React.FC<{
   change: number | null;
   icon: React.ReactNode;
   loading?: boolean;
-  // The status step this change takes the river into, if any. Only the
-  // forecast passes one: the other tiles describe what already happened.
-  intoStep?: string | null;
-}> = ({ period, change, icon, loading, intoStep }) => {
+}> = ({ period, change, icon, loading }) => {
   // Round first so the word and the figure always agree, and so a value that
   // rounds to zero (e.g. -0.001) reads "Steady" rather than "Down 0.00 m".
   const rounded = change !== null ? Number(change.toFixed(2)) : null;
-  // Words rather than an arrow, in the figure's own type: up in red, down in
-  // green, steady in the plain text colour.
-  const text =
-    rounded === null
-      ? "N/A"
-      : rounded === 0
-        ? "Steady"
-        : `${rounded > 0 ? "Up" : "Down"} ${formatRiverLevel(Math.abs(rounded))}`;
+  // A word rather than an arrow: "Up" in red and "Down" in green, the
+  // figure after it in the plain text colour, so the direction reads at a
+  // glance. "Steady" stays plain.
 
   return (
     <Paper elevation={0} sx={{ ...tileSx, height: "100%" }}>
@@ -116,26 +108,19 @@ const ChangeIndicator: React.FC<{
       <TileValue>
         {loading ? (
           <Skeleton variant="text" width={70} animation="wave" />
+        ) : rounded === null ? (
+          "N/A"
+        ) : rounded === 0 ? (
+          "Steady"
         ) : (
-          <Box
-            component="span"
-            sx={
-              rounded === null || rounded === 0
-                ? {}
-                : rounded > 0
-                  ? riseSx
-                  : fallSx
-            }
-          >
-            {text}
-          </Box>
+          <>
+            <Box component="span" sx={rounded > 0 ? riseSx : fallSx}>
+              {rounded > 0 ? "Up" : "Down"}
+            </Box>{" "}
+            {formatRiverLevel(Math.abs(rounded))}
+          </>
         )}
       </TileValue>
-      {intoStep && !loading && (
-        <Typography variant="body2" color="text.secondary">
-          Into {intoStep}
-        </Typography>
-      )}
     </Paper>
   );
 };
@@ -163,8 +148,7 @@ const CustomTooltip = ({
     // The forecast view charts two series ("actual" and "forecasted") where
     // one is always null, so take the first entry that actually has a value.
     const value = payload.find((p) => typeof p.value === "number")?.value as
-      | number
-      | undefined;
+      number | undefined;
     if (value === undefined) return null;
     // label is either an ISO string (historical views) or a numeric timestamp (forecast view)
     const date = new Date(typeof label === "number" ? label : label);
@@ -368,25 +352,6 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     }
     if (!closest) return null;
     return closest.level - currentLevel;
-  }, [forecastData, data]);
-
-  // The highest step the forecast reaches in the next 24 hours that the
-  // river isn't already at - the peak, not the 24h point, so a rise that
-  // tops out and falls back inside the day still counts.
-  const forecastIntoStep = useMemo(() => {
-    if (!forecastData || !data || data.length === 0) return null;
-    const currentLevel = data[data.length - 1].level;
-    const latestTs = new Date(data[data.length - 1].dateTime).getTime();
-    const horizon = latestTs + TIME_PERIODS.TWENTY_FOUR_HOURS;
-    const peak = Math.max(
-      ...forecastData
-        .filter((pt) => new Date(pt.dateTime).getTime() <= horizon)
-        .map((pt) => pt.level)
-    );
-    const reached = STATUS_STEPS.filter(
-      (step) => step.fromLevel > currentLevel && peak >= step.fromLevel
-    );
-    return reached.length > 0 ? reached[reached.length - 1].name : null;
   }, [forecastData, data]);
 
   const formatXAxis = (tickItem: number) => {
@@ -665,7 +630,6 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             change={forecastedChange24h}
             icon={<Update />}
             loading={loading}
-            intoStep={forecastIntoStep}
           />
         </Box>
       </CardContent>

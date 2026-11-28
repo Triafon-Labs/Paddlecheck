@@ -12,6 +12,7 @@ import {
   Card,
   CardContent,
   Typography,
+  Chip,
   Box,
   Skeleton,
   useTheme,
@@ -84,9 +85,10 @@ const ChangeIndicator: React.FC<{
   // Round first so the word and the figure always agree, and so a value that
   // rounds to zero (e.g. -0.001) reads "Steady" rather than "Down 0.00 m".
   const rounded = change !== null ? Number(change.toFixed(2)) : null;
-  // A word rather than an arrow: "Up" in red and "Down" in green, the
-  // figure after it in the plain text colour, so the direction reads at a
-  // glance. "Steady" stays plain.
+  // A filled chip rather than an arrow: "Up" on red, "Down" on green, with
+  // the figure beside it in the plain text colour, so the direction reads at
+  // a glance. The status red and green are too faint as bare text on a dark
+  // tile, but carry well as fills. "Steady" stays plain.
 
   return (
     <Paper elevation={0} sx={{ ...tileSx, height: "100%" }}>
@@ -99,15 +101,17 @@ const ChangeIndicator: React.FC<{
         ) : rounded === 0 ? (
           "Steady"
         ) : (
-          <>
-            <Box
-              component="span"
-              sx={{ color: rounded > 0 ? "error.main" : "success.main" }}
-            >
-              {rounded > 0 ? "Up" : "Down"}
-            </Box>{" "}
+          <Box
+            component="span"
+            sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}
+          >
+            <Chip
+              label={rounded > 0 ? "Up" : "Down"}
+              color={rounded > 0 ? "error" : "success"}
+              size="small"
+            />
             {formatRiverLevel(Math.abs(rounded))}
-          </>
+          </Box>
         )}
       </TileValue>
     </Paper>

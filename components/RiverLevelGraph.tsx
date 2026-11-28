@@ -75,13 +75,18 @@ interface RiverLevelGraphProps {
   change5d: number | null;
 }
 
-// The status amber (warning.main) is about 2:1 as a bare glyph on a tile
-// (lib/m3-palette.ts), so the "into the next step" figure and line use a
-// deeper amber in light (4.8:1 on surfaces.containerHigh) and a paler one in
-// dark (6.1:1).
-const intoStepSx = (theme: Theme) => ({
-  color: "#9A5200",
-  ...theme.applyStyles("dark", { color: "#FFB95C" }),
+// A rise reads red and a fall green. The status red and green (error.main,
+// success.main) are only about 2:1 as bare text on a dark tile
+// (lib/m3-palette.ts), so dark takes paler shades of each: 5.9:1 and 7.9:1 on
+// surfaces.containerHigh. Light keeps the status red (5.4:1) and a slightly
+// deeper green (5.3:1).
+const riseSx = (theme: Theme) => ({
+  color: "#B71C1C",
+  ...theme.applyStyles("dark", { color: "#FF8A80" }),
+});
+const fallSx = (theme: Theme) => ({
+  color: "#006E1C",
+  ...theme.applyStyles("dark", { color: "#7BDA86" }),
 });
 
 const ChangeIndicator: React.FC<{
@@ -96,9 +101,8 @@ const ChangeIndicator: React.FC<{
   // Round first so the word and the figure always agree, and so a value that
   // rounds to zero (e.g. -0.001) reads "Steady" rather than "Down 0.00 m".
   const rounded = change !== null ? Number(change.toFixed(2)) : null;
-  // Words rather than an arrow, in the figure's own type: direction only, as
-  // a rise at a low level isn't bad news. The whole line turns amber only
-  // when the forecast reaches the next step.
+  // Words rather than an arrow, in the figure's own type: up in red, down in
+  // green, steady in the plain text colour.
   const text =
     rounded === null
       ? "N/A"
@@ -115,14 +119,20 @@ const ChangeIndicator: React.FC<{
         ) : (
           <Box
             component="span"
-            sx={rounded !== null && rounded > 0 && intoStep ? intoStepSx : {}}
+            sx={
+              rounded === null || rounded === 0
+                ? {}
+                : rounded > 0
+                  ? riseSx
+                  : fallSx
+            }
           >
             {text}
           </Box>
         )}
       </TileValue>
       {intoStep && !loading && (
-        <Typography variant="body2" sx={intoStepSx}>
+        <Typography variant="body2" color="text.secondary">
           Into {intoStep}
         </Typography>
       )}
@@ -153,7 +163,8 @@ const CustomTooltip = ({
     // The forecast view charts two series ("actual" and "forecasted") where
     // one is always null, so take the first entry that actually has a value.
     const value = payload.find((p) => typeof p.value === "number")?.value as
-      number | undefined;
+      | number
+      | undefined;
     if (value === undefined) return null;
     // label is either an ISO string (historical views) or a numeric timestamp (forecast view)
     const date = new Date(typeof label === "number" ? label : label);

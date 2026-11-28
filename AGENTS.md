@@ -118,7 +118,7 @@ components/
   StatusFace.tsx         The verdict faces (a face on a status-colour disc) and their labels
   StatsCard.tsx          Weather panel (full-colour sky icon, temp, feels-like) + flat-icon tiles – wind, gusts, visibility, daylight
   RiverLevelLandmarks.tsx The reading between its nearest club landmarks, with distances (StatusCard); compact: the same scale a size down (forecast hour)
-  RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles ("Up 0.04 m" / "Down 0.03 m" / "Steady"; the forecast tile turns amber, "Into <step>", when it reaches a higher step) (Recharts)
+  RiverLevelGraph.tsx    Historical + forecasted river levels, change tiles ("↑ 0.04 m" / "↓ 0.03 m" / "Steady"; an arrow and the figure, red for a rise, green for a fall) (Recharts)
   ForecastRagGraph.tsx   5-day hourly RAG forecast (Recharts bar chart) – tap/drag picks an hour
   ForecastHourDetails.tsx The picked forecast hour: header with prev/next stepping, and a details card flush below, opening with the verdict for your level
   TopNavBar.tsx          Header – club name (CLUB_SHORT_NAME) above APP_NAME, share, settings, refresh, stale/offline banners

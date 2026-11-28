@@ -1,6 +1,12 @@
 "use client";
 
-import { History, CalendarToday, Update } from "@mui/icons-material";
+import {
+  ArrowDownward,
+  ArrowUpward,
+  History,
+  CalendarToday,
+  Update,
+} from "@mui/icons-material";
 import React, {
   useState,
   useEffect,
@@ -39,7 +45,7 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import { ChartDataPoint } from "@/types";
-import { FORECAST_LINE_DASH, STATUS_STEPS, TIME_PERIODS } from "@/lib/config";
+import { FORECAST_LINE_DASH, TIME_PERIODS } from "@/lib/config";
 import { formatRiverLevel } from "@/lib/units";
 import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { springTransition } from "@/lib/m3-palette";
@@ -75,13 +81,17 @@ interface RiverLevelGraphProps {
   change5d: number | null;
 }
 
-// The status amber (warning.main) is about 2:1 as a bare glyph on a tile
-// (lib/m3-palette.ts), so the "into the next step" figure and line use a
-// deeper amber in light (4.8:1 on surfaces.containerHigh) and a paler one in
-// dark (6.1:1).
-const intoStepSx = (theme: Theme) => ({
-  color: "#9A5200",
-  ...theme.applyStyles("dark", { color: "#FFB95C" }),
+// The status red and green are only about 2:1 as bare text on a dark tile
+// (lib/m3-palette.ts), so dark takes paler shades of each, the way a share
+// price ticker does: 5.9:1 and 7.9:1 on surfaces.containerHigh. Light keeps
+// the status red (5.4:1) and a slightly deeper green (5.3:1).
+const riseSx = (theme: Theme) => ({
+  color: "#B71C1C",
+  ...theme.applyStyles("dark", { color: "#FF8A80" }),
+});
+const fallSx = (theme: Theme) => ({
+  color: "#006E1C",
+  ...theme.applyStyles("dark", { color: "#7BDA86" }),
 });
 
 const ChangeIndicator: React.FC<{
@@ -89,22 +99,13 @@ const ChangeIndicator: React.FC<{
   change: number | null;
   icon: React.ReactNode;
   loading?: boolean;
-  // The status step this change takes the river into, if any. Only the
-  // forecast passes one: the other tiles describe what already happened.
-  intoStep?: string | null;
-}> = ({ period, change, icon, loading, intoStep }) => {
+}> = ({ period, change, icon, loading }) => {
   // Round first so the word and the figure always agree, and so a value that
   // rounds to zero (e.g. -0.001) reads "Steady" rather than "Down 0.00 m".
   const rounded = change !== null ? Number(change.toFixed(2)) : null;
-  // Words rather than an arrow, in the figure's own type: direction only, as
-  // a rise at a low level isn't bad news. The whole line turns amber only
-  // when the forecast reaches the next step.
-  const text =
-    rounded === null
-      ? "N/A"
-      : rounded === 0
-        ? "Steady"
-        : `${rounded > 0 ? "Up" : "Down"} ${formatRiverLevel(Math.abs(rounded))}`;
+  // Like a share price ticker: an arrow and the figure, both red for a rise
+  // and green for a fall, so the direction reads at a glance. "Steady" stays
+  // plain.
 
   return (
     <Paper elevation={0} sx={{ ...tileSx, height: "100%" }}>
@@ -112,20 +113,27 @@ const ChangeIndicator: React.FC<{
       <TileValue>
         {loading ? (
           <Skeleton variant="text" width={70} animation="wave" />
+        ) : rounded === null ? (
+          "N/A"
+        ) : rounded === 0 ? (
+          "Steady"
         ) : (
           <Box
             component="span"
-            sx={rounded !== null && rounded > 0 && intoStep ? intoStepSx : {}}
+            sx={[
+              { display: "inline-flex", alignItems: "center", gap: 0.25 },
+              rounded > 0 ? riseSx : fallSx,
+            ]}
           >
-            {text}
+            {rounded > 0 ? (
+              <ArrowUpward sx={{ fontSize: "1.1em" }} />
+            ) : (
+              <ArrowDownward sx={{ fontSize: "1.1em" }} />
+            )}
+            {formatRiverLevel(Math.abs(rounded))}
           </Box>
         )}
       </TileValue>
-      {intoStep && !loading && (
-        <Typography variant="body2" sx={intoStepSx}>
-          Into {intoStep}
-        </Typography>
-      )}
     </Paper>
   );
 };
@@ -357,25 +365,6 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
     }
     if (!closest) return null;
     return closest.level - currentLevel;
-  }, [forecastData, data]);
-
-  // The highest step the forecast reaches in the next 24 hours that the
-  // river isn't already at - the peak, not the 24h point, so a rise that
-  // tops out and falls back inside the day still counts.
-  const forecastIntoStep = useMemo(() => {
-    if (!forecastData || !data || data.length === 0) return null;
-    const currentLevel = data[data.length - 1].level;
-    const latestTs = new Date(data[data.length - 1].dateTime).getTime();
-    const horizon = latestTs + TIME_PERIODS.TWENTY_FOUR_HOURS;
-    const peak = Math.max(
-      ...forecastData
-        .filter((pt) => new Date(pt.dateTime).getTime() <= horizon)
-        .map((pt) => pt.level)
-    );
-    const reached = STATUS_STEPS.filter(
-      (step) => step.fromLevel > currentLevel && peak >= step.fromLevel
-    );
-    return reached.length > 0 ? reached[reached.length - 1].name : null;
   }, [forecastData, data]);
 
   const formatXAxis = (tickItem: number) => {
@@ -654,7 +643,6 @@ const RiverLevelGraph: React.FC<RiverLevelGraphProps> = ({
             change={forecastedChange24h}
             icon={<Update />}
             loading={loading}
-            intoStep={forecastIntoStep}
           />
         </Box>
       </CardContent>
